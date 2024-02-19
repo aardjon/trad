@@ -67,6 +67,14 @@ licensed as FLOSS (free, libre and open source software).
 
 # 3. Context and scope
 
+## 3.1 Business context
+
+![Business context diagram, showing external data flows](contextview_business.png)
+
+## 3.2 Technical context
+
+![Technical context diagram, showing external dependencies](contextview_technical.png)
+
 
 # 9. Architecture Decisions
 
