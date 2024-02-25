@@ -41,7 +41,7 @@ release date.
 
 ## Learning and fun as decision criteria
 
-Some decicions may not be purely based on technical needs or requirements but also on the
+Some decisions may not be purely based on technical needs or requirements but also on the
 opportunity to learn something new or to have fun using a certain software. So these are valid
 decision criteria for this project.
 
@@ -80,6 +80,21 @@ licensed as FLOSS (free, libre and open source software).
 
 
 # 10. Quality Requirements
+
+Quality Properties | Requirement
+-------------------|-------------------------
+Transferability | It shall be easily possible to add a new destination platform.
+Maintainability | It shall be possible to upgrade external dependencies with as less effort as possible.
+Adaptability | It shall be possible to adopt to changes of external interfaces with as less effort as possible.
+Flexibility, Maintainability | It shall be easy to implement new/changed use cases/features without interfering with exiting code more than necessary.
+Maintainability, Testability | The necessity for manual testing (e.g. regressions tests) must be kept as low as possible.
+Compliance | It must comply with all (german) laws (esp. copyright and privacy).
+Reliability, Usability | All "in the mountains" use cases must be fully functional without any network connection.
+Security | The app shall only request the permissions that are really needed by the use cases.
+Usability | Device permissions shall only be requested when they are needed (first time).
+Security, Usability | A denied permission must not prevent use cases that do not depend on it.
+Compliance, Performance | Data from external interfaces must only be requested if really necessary (to keep their traffic as low as possible).
+Compliance, Performance | The traffic on external interfaces shall not increase with the number of app users.
 
 
 # 12. Glossary
