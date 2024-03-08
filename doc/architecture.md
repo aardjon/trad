@@ -32,12 +32,17 @@ To be defined!
 
 # 2. Architecture Constraints
 
-## Financial and time budget
+## Financial budget
 
 As we are doing this in our free time and without anyone paying for the app, we do not want to
-spent valuable amounts of money for development and/or operation. On the other hand, there is
-no strict time schedule to provide certain features and no pressure to maintain a certain
-release date.
+spent valuable amounts of money for development and/or operation.
+
+## Time budget
+
+Because this is a hobby project, there is no strict time schedule to provide certain features 
+and no pressure to maintain a certain release date. On the other hand, we want to keep time
+overhead for things like consultations or software maintenance as low as possible to concentrate
+on feature development.
 
 ## Learning and fun as decision criteria
 
