@@ -81,20 +81,27 @@ licensed as FLOSS (free, libre and open source software).
 
 # 10. Quality Requirements
 
-Quality Properties | Requirement
--------------------|-------------------------
-Transferability | It shall be easily possible to add a new destination platform.
-Maintainability | It shall be possible to upgrade external dependencies with as less effort as possible.
-Adaptability | It shall be possible to adopt to changes of external interfaces with as less effort as possible.
-Flexibility, Maintainability | It shall be easy to implement new/changed use cases/features without interfering with exiting code more than necessary.
-Maintainability, Testability | The necessity for manual testing (e.g. regressions tests) must be kept as low as possible.
-Compliance | It must comply with all (german) laws (esp. copyright and privacy).
-Reliability, Usability | All "in the mountains" use cases must be fully functional without any network connection.
-Security | The app shall only request the permissions that are really needed by the use cases.
-Usability | Device permissions shall only be requested when they are needed (first time).
-Security, Usability | A denied permission must not prevent use cases that do not depend on it.
-Compliance, Performance | Data from external interfaces must only be requested if really necessary (to keep their traffic as low as possible).
-Compliance, Performance | The traffic on external interfaces shall not increase with the number of app users.
+These are the quality requirements we explicitly want to fulfil as good as possible, ordered by
+priority ("1" being "most important"):
+
+
+ Prio | Quality Properties | Requirement
+------|--------------------|-------------------------
+1 | Flexibility, Maintainability | It shall be easy to implement new/changed use cases/features without interfering with exiting code more than necessary.
+1 | Maintainability, Testability | The necessity for manual testing (e.g. regressions tests) must be kept as low as possible.
+1 | Reliability, Usability | All "in the mountains" use cases must be fully functional without any network connection.
+1 | Reliability, Durability | (Exported) journal data shall be importable by any future application version.
+1 | Compliance | It must comply with all (german) laws (esp. copyright and privacy).
+2 | Maintainability | It shall be possible to upgrade external dependencies with as less effort as possible.
+2 | Adaptability | It shall be possible to adopt to changes of external interfaces with as less effort as possible.
+2 | Compliance, Performance | Data from external interfaces must only be requested if really necessary (to keep their traffic as low as possible).
+2 | Compliance, Performance | The traffic on external interfaces shall not increase with the number of app users.
+2 | Compliance, Security | Personal data must always be saved locally and only exported/uploaded with explicit agreement.
+2 | Security | Journal data must be handled very sensitively and it must be prevented at all costs that it is accidentally deleted.
+3 | Security | The app shall only request the permissions that are really needed by the use cases.
+3 | Usability | Device permissions shall only be requested when they are needed (first time).
+4 | Security, Usability | A denied permission must not prevent use cases that do not depend on it.
+4 | Transferability | It shall be easily possible to add a new destination platform.
 
 
 # 12. Glossary
@@ -104,6 +111,7 @@ Compliance, Performance | The traffic on external interfaces shall not increase 
 - Grade: Difficulty of a climbing route, measured e.g. with UIAA or Saxon scale.
 - Knowledgebase: Encyclopaedia with climbing related information, e.g. regulations or knots.
 - Route: The path by which a climber reaches the top of a mountain.
+- Summit: The destination of a climbing route, usually the highest point of a single rock or mountain.
 
 ## 12.2 Translations
 
@@ -113,3 +121,4 @@ Compliance, Performance | The traffic on external interfaces shall not increase 
 | Journal              | Logbuch             |
 | Climbing regulations | Kletterregeln       |
 | (Climbing) Route     | Kletterweg          |
+| Summit               | Gipfel              |
