@@ -78,9 +78,14 @@ licensed as FLOSS (free, libre and open source software).
 
 ## 3.1 Business context
 
+The following diagram shows the system context and the data flows to and from external entities.
+
 ![Business context diagram, showing external data flows](contextview_business.png)
 
 ## 3.2 Technical context
+
+The following diagram shows the dependencies between *trad* and external systems, along with the
+interfaces we plan or expect to use.
 
 ![Technical context diagram, showing external dependencies](contextview_technical.png)
 

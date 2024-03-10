@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-02-20T14:36:20.094Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="kUKkAG-aAouvyDuBpUeX" version="23.1.5" type="device">
+<mxfile host="Electron" modified="2024-03-10T12:32:34.647Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="O94uivMjwoDBVcG_sxot" version="24.0.4" type="device">
   <diagram name="Seite-1" id="L9_oqWWRdi-ubRm_y3WR">
     <mxGraphModel dx="1114" dy="842" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -16,8 +16,8 @@
             <mxPoint x="394" y="240" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="nY1FNTpjZKswNwmVj_yR-23" value="Exported File" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.document" parent="1" vertex="1">
-          <mxGeometry x="294" y="310" width="60" height="80" as="geometry" />
+        <mxCell id="nY1FNTpjZKswNwmVj_yR-23" value="Exported File/Backup" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.document" parent="1" vertex="1">
+          <mxGeometry x="322" y="310" width="76" height="80" as="geometry" />
         </mxCell>
         <mxCell id="nY1FNTpjZKswNwmVj_yR-24" value="Route Data&lt;br&gt;Knowledgebase Data" style="endArrow=none;html=1;endSize=12;startArrow=open;startSize=12;startFill=0;rounded=0;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="nY1FNTpjZKswNwmVj_yR-1" target="A486awzudz9E2-oE2qIE-4" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -35,7 +35,7 @@
             <mxPoint x="-220" y="25" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="nY1FNTpjZKswNwmVj_yR-27" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;startArrow=open;startFill=0;startSize=12;" parent="1" source="nY1FNTpjZKswNwmVj_yR-1" target="nY1FNTpjZKswNwmVj_yR-23" edge="1">
+        <mxCell id="nY1FNTpjZKswNwmVj_yR-27" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=open;startFill=0;startSize=12;" parent="1" source="nY1FNTpjZKswNwmVj_yR-1" target="nY1FNTpjZKswNwmVj_yR-23" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="234" y="180" as="sourcePoint" />
             <mxPoint x="394" y="180" as="targetPoint" />
@@ -44,20 +44,6 @@
         <mxCell id="nY1FNTpjZKswNwmVj_yR-28" value="Journal" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="nY1FNTpjZKswNwmVj_yR-27" vertex="1" connectable="0">
           <mxGeometry x="-0.2669" relative="1" as="geometry">
             <mxPoint x="2" y="17" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="nY1FNTpjZKswNwmVj_yR-29" value="Database Backup" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.document" parent="1" vertex="1">
-          <mxGeometry x="394" y="310" width="60" height="80" as="geometry" />
-        </mxCell>
-        <mxCell id="nY1FNTpjZKswNwmVj_yR-30" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;startArrow=open;startFill=0;startSize=12;" parent="1" source="nY1FNTpjZKswNwmVj_yR-1" target="nY1FNTpjZKswNwmVj_yR-29" edge="1">
-          <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="234" y="180" as="sourcePoint" />
-            <mxPoint x="394" y="180" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="nY1FNTpjZKswNwmVj_yR-31" value="Route Data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="nY1FNTpjZKswNwmVj_yR-30" vertex="1" connectable="0">
-          <mxGeometry x="-0.1235" y="1" relative="1" as="geometry">
-            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="A486awzudz9E2-oE2qIE-1" value="GNSS" style="html=1;dashed=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;align=center;shape=mxgraph.gmdl.gps;strokeColor=#737373;fillColor=#737373;shadow=0;strokeWidth=2;sketch=0;" parent="1" vertex="1">
@@ -76,9 +62,6 @@
         </mxCell>
         <mxCell id="A486awzudz9E2-oE2qIE-4" value="External Data Provider" style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;shadow=0;dashed=0;spacingTop=3;image=img/lib/active_directory/web_server.svg;" parent="1" vertex="1">
           <mxGeometry x="654" y="120" width="40" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="bStOgXv8Hfe8ezazkCcz-1" value="" style="sketch=0;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.question;" parent="1" vertex="1">
-          <mxGeometry x="454" y="310" width="41" height="78" as="geometry" />
         </mxCell>
         <mxCell id="fhuCMpVsUvjk9g0zX7cp-5" value="" style="group" parent="1" vertex="1" connectable="0">
           <mxGeometry x="610" y="350" width="120" height="40" as="geometry" />
