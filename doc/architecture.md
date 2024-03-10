@@ -39,7 +39,7 @@ spent valuable amounts of money for development and/or operation.
 
 ## Time budget
 
-Because this is a hobby project, there is no strict time schedule to provide certain features 
+Because this is a hobby project, there is no strict time schedule to provide certain features
 and no pressure to maintain a certain release date. On the other hand, we want to keep time
 overhead for things like consultations or software maintenance as low as possible to concentrate
 on feature development.
@@ -65,6 +65,10 @@ data must be kept locally.
 Mirroring data from external sites may touch copyright regulations that need to be respected.
 
 ## Licenses
+
+We have to decide for a licence before publishing anything. The first open question is whether
+to publish as FLOSS or not. The chosen licence also influences technologies and third-party
+libraries we can use.
 
 To keep the door open for publishing on F-Droid later on, trad and all its dependencies must be
 licensed as FLOSS (free, libre and open source software).
