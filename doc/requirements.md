@@ -11,17 +11,23 @@ Requirements & Goals
    - Team
    - (Personal) Safety Rating
    - Notes
- - Anzeigen der letzten eigenen Sicherungsbewertung
- - Sicherung kann sich über die Zeit vllt sogar mal ändern. Standardmäßig wird die letzte Angabe übernommen
- - Bilder hinzufügen? Mit Wegen verknüpfen? Oder andersrum? 
+ - Show all logs
+ - Show last personal safety rating
+ - On logging:
+    - Possibility to search summit and route from the route database
+    - All fiedls (esp. route) must be changeable (sometimes one doesn't climb an exact route)
+    - For personal safety rating, use the last rating as default
+ - Add/reference photos
+    - Shall photos be connected to routes or the other way around? Maybe connect to log entries instead?
  - Import and Export from/to CSV file
+ - Automatic backup of the journal database
+    - Online/Cloud destinations
+    - Local storage
+    - Backward compatible import of old backups!
+    - Maybe CSV export already satisfies this, needs to be checked!
 
-# 2. Backup-Funktion
- - Benutzer-SQLite-Datenbank exportieren und importieren
- - Auf Versionierung der Datenbank achten!
-
-# 3. Route Database
-## 3.1 List of all climbing routes in the Saxon Switzerland area
+# 2. Route Database
+## 2.1 List of climbing routes in the Saxon Switzerland area
  - List of all summits
  - For each summit, show the following information:
     - Name
@@ -42,13 +48,20 @@ Requirements & Goals
     - ...?
  - Do not allow editing route data
 
-## 3.2 Misc
- - Mergetool erstellen
- - Wege in eigener SQLite-Datenbank speichern
- 
-# 4. Knowledgebase
-## 4.1 Information about Knots
+## 2.2 Updating
+ - A process for getting new/updated route data into the app has still to be defined
+ - For the beginning, go with an example snapshot included directly into the app
+ - May it'd be enough to simply import a manually downloaded SQLite file?
+
+# 3. Knowledgebase
+## 3.1 Information about Knots
  - Important knots and their usage for climbing in the Saxon Switzerland
  - Including a sketch
 
-## 4.2 Saxon Switzerland Climbing Regulations
+## 3.2 Saxon Switzerland Climbing Regulations
+ - Source: SBB
+ - Changes very rarely only (some like "once in ten years")
+
+# 4 General/Misc
+ - User interface language: German
+ - Keep the doors open for adding multi-language (Czech?) support later
