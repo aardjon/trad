@@ -38,9 +38,10 @@ Please refer to [section 10](10-quality-requirements) for further information ab
 
 | Stakeholder       | Contact    | Expectations
 |-------------------|------------|-------------
-| Developer         | Headbucket |
-| Developer         | Aardjon    | Create a full software architecture (+documentation) "the right way" to get some experience.
-| External Operator | ???        |
+| Developer, Project Owner | Headbucket | Get an overview of the large/basic structures and parts of the system
+| Developer, Architect | Aardjon | Create a full software architecture (+documentation) "the right way" to get some experience.
+| User | ??? |
+| External Operator | ??? |
 
 
 # 2. Architecture Constraints
