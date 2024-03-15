@@ -19,7 +19,20 @@ requirements.
 
 ## 1.2 Quality goals
 
-To be defined!
+The most important quality properties are from
+the maintainability/flexibility and reliability areas: In the long run, the developers prefer to
+spend the majority of the project time on feature development, not on maintaining tasks. Users
+want to rely on our app functionality under different circumstances and over a long time.
+
+The top three quality goals:
+
+| No. | Quality Goal | Scenario |
+|-----|--------------|----------|
+| 1 | Maintainability | It must be possible to implement new/changed features without interfering with exiting code more than necessary and with a minimum amount of necessary manual testing. |
+| 2 | Reliability | All use cases that do not directly depend on some external connection, must work completely without any network connectivity. |
+| 3 | Reliability | Each future version must support the import of journal data exported from a previous version. |
+
+Please refer to [section 10](10-quality-requirements) for further information about quality requirements.
 
 ## 1.3 Stakeholders
 
