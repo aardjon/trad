@@ -32,13 +32,13 @@ The top three quality goals:
 | 2 | Reliability | All use cases that do not directly depend on some external connection, must work completely without any network connectivity. |
 | 3 | Reliability | Each future version must support the import of journal data exported from a previous version. |
 
-Please refer to [section 10](10-quality-requirements) for further information about quality requirements.
+Please refer to [section 10](#10-quality-requirements) for further information about quality requirements.
 
 ## 1.3 Stakeholders
 
 | Stakeholder       | Contact    | Expectations
 |-------------------|------------|-------------
-| Developer, Project Owner | Headbucket | Get an overview of the large/basic structures and parts of the system
+| Developer, Project Owner | Headbucket | Get an overview of the large/basic structures and parts of the system.
 | Developer, Architect | Aardjon | Create a full software architecture (+documentation) "the right way" to get some experience.
 | User | ??? |
 | External Operator | ??? |
@@ -104,6 +104,91 @@ interfaces we plan or expect to use.
 ![Technical context diagram, showing external dependencies](contextview_technical.png)
 
 
+# 4. Solution Strategy
+
+This section described our solution strategies for the quality goals. Please refer to
+[section 10](10-quality-requirements) for their descriptions.
+
+The mobile app will be written in [Dart 3](https://dart.dev/), mainly because we want to learn
+this language. We are using [Git](https://github.com/Headbucket/trad) for version control.
+
+## 4.1 Flexibility, Maintainability, Testability (QREQ-1, QREQ-2, QREQ-3, QREQ-6)
+
+To support these most important quality properties, the Clean Architecture pattern published by
+Robert C. Martin is used because it focuses on them and is said to fit well with agile
+development. However, we omit the innermost ring (`entities`) because there is no company domain
+in this project. The entities can be put into a separate component within the `core` ring
+instead (which also allows to easily move them if we decide to add the ring in the future).
+
+During implementation it is generally encouraged to apply good design
+principles like SOLID and make use of common design patterns where applicable. It may also be a
+good idea to follow the Clean Code principles and guidelines. In general, it is recommended to
+use OOP as many of the former principles and patterns are probably easier to use then.
+
+To minimize manual testing effort we aim for a high unit test coverage. Test Driven Development
+can be a way to achieve this.
+
+Resources:
+ - [The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+ - [A primer on the clean architecture pattern and its principles](https://www.techtarget.com/searchapparchitecture/tip/A-primer-on-the-clean-architecture-pattern-and-its-principles)
+ - [Clean Code Developers](https://clean-code-developer.com/)
+ - [Test-driven development](https://en.wikipedia.org/wiki/Test-driven_development)
+
+## 4.2 Reliability, Usability (QREQ-3)
+
+To ensure no critical use cases depend on any network connection, all necessary data (e.g.
+route data, journal) is replicated to/stored within the local device. The business core works on
+this local copy only.
+
+## 4.3 Reliability, Durability (QREQ-4)
+
+For ensuring future compatibility of exported journal data, the `data import` component is
+highly decoupled from the business core so that it is possible to provide several different
+importer implementations and choose between them on runtime. This can be implemented e.g. with
+the Strategy design pattern. On every incompatible export format change we then have the option
+to simply create a new importer component and keep the previous one as-is. Furthermore, we
+create automatic tests for importing data of old formats.
+
+Of course, the export format must still be very stable and flexible, to reduce the amount of
+incompatible format changes to a minimum.
+
+## 4.4 Compliance, Security (QREQ-5, QREQ-10, QREQ-12)
+
+In general, compliance with laws has to be considered by the (functional) requirements
+already: Just don't implement components that send any data to external sites without explict
+user confirmation, and collect only the minimal data needed by the use cases. Copyright mainly
+regards external site data (e.g. route or regulation data). In case the license for using this
+data is unclear, we will request the external provider for explicit permission and/or license
+clarification.
+
+At some point we have to decide for a software license. This decision may influence which
+third-party libraries can be used. If we decide for some FLOSS license, we automatically provide
+transparency about collected data and data flows.
+
+## 4.5 Adaptability, Transferability (QREQ-7, QREQ-15)
+
+The usage of the [Clean Architecture](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6)
+pattern and consistent decoupling and encapsulating details also supports us in adapting to
+external changes or different platforms. Additionally, we use the [Flutter 3](https://flutter.dev/)
+framework for GUI and hardware abstraction because it allows to easily transfer the app to
+different platforms. However, Flutter itself shall be kept an implementation detail and
+therefore only be used within the `infrastructure` ring.
+
+## 4.6 Security (QREQ-11)
+
+To prevent against data loss or corruption in case of errors or power-loss, some
+transaction-based system shall be used for storing the journal data. The UI must make it very
+clear to the user before deleting any data from the journal (e.g. by an explicit confirmation).
+To prevent against data loss when uninstalling the app or removing the app data, it is also
+possible to export the journal data for a backup. But the data must not be exported
+automatically without the users knowledge (see [4.4 Compliance, Security](#44-compliance-security-qreq-5-qreq-10-qreq-12)).
+
+
+# 8. Crosscutting Concepts
+
+- (Central) Dependency Injection
+- Logging?
+
 # 9. Architecture Decisions
 
 
@@ -119,7 +204,7 @@ QREQ-1  | 1 | Flexibility, Maintainability | It shall be easy to implement new/c
 QREQ-2  | 1 | Maintainability, Testability | The necessity for manual testing (e.g. regressions tests) must be kept as low as possible.
 QREQ-3  | 1 | Reliability, Usability | All "in the mountains" use cases must be fully functional without any network connection.
 QREQ-4  | 1 | Reliability, Durability | (Exported) journal data shall be importable by any future application version.
-QREQ-5  | 1 | Compliance | It must comply with all (german) laws (esp. copyright and privacy).
+QREQ-5  | 1 | Compliance | It must comply with all (german) laws (esp. copyright and privacy). [Exodus Privacy](https://exodus-privacy.eu.org/en/) shall not report any findings.
 QREQ-6  | 2 | Maintainability | It shall be possible to upgrade external dependencies with as less effort as possible.
 QREQ-7  | 2 | Adaptability | It shall be possible to adopt to changes of external interfaces with as less effort as possible.
 QREQ-8  | 2 | Compliance, Performance | Data from external interfaces must only be requested if really necessary (to keep their traffic as low as possible).
