@@ -184,6 +184,106 @@ possible to export the journal data for a backup. But the data must not be expor
 automatically without the users knowledge (see [4.4 Compliance, Security](#44-compliance-security-qreq-5-qreq-10-qreq-12)).
 
 
+# 5. Building Block View
+
+## 5.1 Overview
+
+The following diagram provides an overview of the mobile app architecture, which is refined more
+detailled in the following sections.
+
+![Architectural overview](sysarc-overview.png)
+
+As described in [section 4.1](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6),
+the mobile app implementation utilizes the *Clean Architecture* pattern with only three rings
+(software parts) as described in [section 5.2](#52-level-1). Crosscutting concepts as described
+in [section 8](#8-crosscutting-concepts) are provided as a separate part touching all rings.
+
+The rules for source code dependencies are:
+ - The most important and most abstract code is inner most
+ - All details are on the outside
+ - Inter-ring dependencies are only allowed from the outer to inner rings
+ - All rings may depend on the `crosscutting` part
+ - Each ring declares the interfaces it needs to be implemented by the next outer ring (dependency inversion)
+ - In general, each ring shall depend on the next inner ring (e.g. `infrastructure` shall not depend on `core` components) only
+ - In general, top-level components within a single ring shall not depend on each other in most cases (there may be exceptions for `common`/`util` components)
+ - Each call/event/"input" starts at the `infrastructure` ring (e.g. UI) and has to go down to a `core` usecase (no shortcuts are allowed)
+
+Some but not all components of the `infrastructure` ring use the Flutter framework, that's why
+the outermost ring is split into a *flutter* and a *vanilla* variant, containing all flutter and
+all non-flutter dependent `infrastructure` components, respectively. The two of them do not
+depend on each other. Please refer to [section 9.1 TODO](#) for more information about the
+Flutter integration.
+
+## 5.2 Level 1
+
+![Refinement of the first level](bbview_level1.png)
+
+### 5.2.1 `core`
+
+The `core` ring contains all business entities and implements all business logic (use cases)
+on an abstract level. It also declares the interface to the `adapters` ring.
+
+Implementation Rules:
+ - Contains all domain specific data types the system works with
+ - Contains all use case implementations
+ - No technical details (independent from specific hardware or certain implementation details)
+ - No dependencies to external interfaces of any kind (IO, UI)
+ - If possible, only pure dart language features (some std libs may be allowed, though)
+
+### 5.2.2 `adapters`
+
+The `adapters` ring provides adapter implementations for connecting the `core` with
+`infrastructure` interfaces. It basically converts the data structures coming from one ring into
+the data structures needed by the other. It also declares the interface to the `infrastructure`
+ring.
+
+Implementation Rules:
+ - If possible, only pure dart language features (some std libs may be allowed)
+ - No technical details (independent from specific hardware or certain implementation details)
+ - No dependencies to external interfaces of any kind (IO, UI)
+ - In some cases, adapters will simply forward to the corresponding infrastructure interface
+
+Examples:
+ - A string being displayed to the user is defined and formatted (maybe translated) here
+ - Formatting dates or numbers into the users preferred string representation goes here
+ - Adapters may choose between different `infrastructure` implementations at runtime
+
+### 5.2.3 `infrastructure`
+
+The `infrastructure` ring contains all concrete implementations of the interfaces defined by the
+`adapters` ring, and contains all technical/implementation details.
+
+Implementation rules:
+ - Contains the concrete implementations
+ - In general: As less code and as less condition checks as possible
+ - No business logic!
+ - All third party/external libs are allowed as needed
+
+Examples:
+ - Everything that requires *Flutter* goes here
+ - A package requiring `dart:io` imports goes here
+ - A SQLite based storage implementation goes here
+ - Hardware specific code or hardware abstraction goes here
+ - Display strings (maybe i18n relevant?) do not belong here
+ - The decision whether a certain button must be disabled doesn't go here (it's business logic)
+ - The special `main` and `test` components are also considered a part of this ring
+
+
+## 5.3 Level 2
+
+
+# 6. Runtime View
+
+## 6.1 Control flow between rings
+
+Control flow usually starts at the `adapters` or `infrastructure` ring and has to go down all
+the way to a `core` use case. Shortcuts are not allowed.
+
+The following diagram shows an example control flow for adding a new journal entry.
+
+![Control Flow: Adding new journal entry](rtview_level1_newjournal.png)
+
+
 # 8. Crosscutting Concepts
 
 - (Central) Dependency Injection
