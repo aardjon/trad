@@ -279,6 +279,11 @@ Examples:
 
 ![Refinement of the `adapters`](bbview_level2_adapters.png)
 
+### 5.3.3 `infrastructure`
+
+![Refinement of the `infrastructure`](bbview_level2_infrastructure.png)
+
+
 
 # 6. Runtime View
 
