@@ -275,6 +275,10 @@ Examples:
 
 ![Refinement of the `core`](bbview_level2_core.png)
 
+### 5.3.2 `adapters`
+
+![Refinement of the `adapters`](bbview_level2_adapters.png)
+
 
 # 6. Runtime View
 
