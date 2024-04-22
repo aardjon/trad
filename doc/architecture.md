@@ -271,6 +271,10 @@ Examples:
 
 ## 5.3 Level 2
 
+### 5.3.1 `core`
+
+![Refinement of the `core`](bbview_level2_core.png)
+
 
 # 6. Runtime View
 
