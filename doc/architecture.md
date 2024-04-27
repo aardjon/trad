@@ -193,35 +193,38 @@ detailled in the following sections.
 
 ![Architectural overview](sysarc-overview.png)
 
-As described in [section 4.1](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6),
-the mobile app implementation utilizes the *Clean Architecture* pattern with only three rings
-(software parts) as described in [section 5.2](#52-level-1). Crosscutting concepts as described
-in [section 8](#8-crosscutting-concepts) are provided as a separate part touching all rings.
-
-The rules for source code dependencies are:
+The general rules for source code dependencies are:
  - The most important and most abstract code is inner most
  - All details are on the outside
- - Inter-ring dependencies are only allowed from the outer to inner rings
+ - Inter-ring (source) dependencies are only allowed from the outer to inner rings
  - All rings may depend on the `crosscutting` part
- - Each ring declares the interfaces it needs to be implemented by the next outer ring (dependency inversion)
+ - Each ring declares the interfaces it needs to interact with the next outer ring (dependency inversion)
  - In general, each ring shall depend on the next inner ring (e.g. `infrastructure` shall not depend on `core` components) only
  - In general, top-level components within a single ring shall not depend on each other in most cases (there may be exceptions for `common`/`util` components)
  - Each call/event/"input" starts at the `infrastructure` ring (e.g. UI) and has to go down to a `core` usecase (no shortcuts are allowed)
-
-Some but not all components of the `infrastructure` ring use the Flutter framework, that's why
-the outermost ring is split into a *flutter* and a *vanilla* variant, containing all flutter and
-all non-flutter dependent `infrastructure` components, respectively. The two of them do not
-depend on each other. Please refer to [section 9.1 TODO](#) for more information about the
-Flutter integration.
 
 ## 5.2 Level 1
 
 ![Refinement of the first level](bbview_level1.png)
 
-### 5.2.1 `core`
+### 5.2.1 Motivation
 
-The `core` ring contains all business entities and implements all business logic (use cases)
-on an abstract level. It also declares the interface to the `adapters` ring.
+The mobile app implementation utilizes the *Clean Architecture* pattern,
+[section 4.1](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6)
+(software parts) as described in [section 5.2](#52-level-1). Additionally, the `infrastructure`
+ring is split into a *flutter* and a *vanilla* part, containing all flutter and all non-flutter
+dependent `infrastructure` components, respectively - see also [section 9.1 TODO](#). A separate
+part touching all rings contains crosscutting concepts as described in
+[section 8](#8-crosscutting-concepts).
+
+### 5.2.2 System parts
+
+#### `core`
+
+This part contains all business entities and implements all business logic (use cases) on an
+abstract level. It also defines the interface to the `adapters` ring.
+
+Source location: [TODO]
 
 Implementation Rules:
  - Contains all domain specific data types the system works with
@@ -230,44 +233,56 @@ Implementation Rules:
  - No dependencies to external interfaces of any kind (IO, UI)
  - If possible, only pure dart language features (some std libs may be allowed, though)
 
-### 5.2.2 `adapters`
+#### `adapters`
 
-The `adapters` ring provides adapter implementations for connecting the `core` with
-`infrastructure` interfaces. It basically converts the data structures coming from one ring into
-the data structures needed by the other. It also declares the interface to the `infrastructure`
-ring.
+This part provides adapter implementations for connecting the `core` with `infrastructure`
+interfaces, converting the data structures coming from one part into the data structures needed
+by the other. It also defines the interface to the `infrastructure`.
+
+Source location: [TODO]
+
+Examples for adapter responsibilities:
+ - Defining or translating a string being displayed to the user
+ - Formatting dates or numbers into the users preferred string representation
+ - Choosing between different `infrastructure` implementations at runtime
 
 Implementation Rules:
  - If possible, only pure dart language features (some std libs may be allowed)
  - No technical details (independent from specific hardware or certain implementation details)
  - No dependencies to external interfaces of any kind (IO, UI)
- - In some cases, adapters will simply forward to the corresponding infrastructure interface
+
+#### `infrastructure`
+
+This part contains all concrete implementations and all technical details. The special `main`
+and `test` components are considered a part of the infrastructure, too.
+
+Source location: [TODO]
 
 Examples:
- - A string being displayed to the user is defined and formatted (maybe translated) here
- - Formatting dates or numbers into the users preferred string representation goes here
- - Adapters may choose between different `infrastructure` implementations at runtime
 
-### 5.2.3 `infrastructure`
-
-The `infrastructure` ring contains all concrete implementations of the interfaces defined by the
-`adapters` ring, and contains all technical/implementation details.
+ Responsible? | Example
+----------|--------------------------------
+  ✔️ | Everything that requires *Flutter*
+  ✔️ | A package requiring `dart:io` imports
+  ✔️ | A SQLite based storage implementation
+  ✔️ | Hardware specific code or hardware abstraction
+  ✖️ (`adapters`) | Display strings/i18n
+  ✖️ (`core`) | The decision whether a certain button must be disabled
 
 Implementation rules:
- - Contains the concrete implementations
+ - No business logic
  - In general: As less code and as less condition checks as possible
- - No business logic!
  - All third party/external libs are allowed as needed
 
-Examples:
- - Everything that requires *Flutter* goes here
- - A package requiring `dart:io` imports goes here
- - A SQLite based storage implementation goes here
- - Hardware specific code or hardware abstraction goes here
- - Display strings (maybe i18n relevant?) do not belong here
- - The decision whether a certain button must be disabled doesn't go here (it's business logic)
- - The special `main` and `test` components are also considered a part of this ring
+### 5.2.2 Interface documentation
 
+Interface name | Source location
+------------|--------------------------------------------------------
+boundaries.presentation | TODO
+boundaries.data_exchange | TODO
+boundaries.storage | TODO
+boundaries.positioning | TODO
+boundaries.presentation | TODO
 
 ## 5.3 Level 2
 
@@ -282,7 +297,6 @@ Examples:
 ### 5.3.3 `infrastructure`
 
 ![Refinement of the `infrastructure`](bbview_level2_infrastructure.png)
-
 
 
 # 6. Runtime View
