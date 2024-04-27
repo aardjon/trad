@@ -46,39 +46,39 @@ Please refer to [section 10](#10-quality-requirements) for further information a
 
 # 2. Architecture Constraints
 
-## Financial budget
+## 2.1 Financial budget
 
 As we are doing this in our free time and without anyone paying for the app, we do not want to
 spent valuable amounts of money for development and/or operation.
 
-## Time budget
+## 2.2 Time budget
 
 Because this is a hobby project, there is no strict time schedule to provide certain features
 and no pressure to maintain a certain release date. On the other hand, we want to keep time
 overhead for things like consultations or software maintenance as low as possible to concentrate
 on feature development.
 
-## Learning and fun as decision criteria
+## 2.3 Learning and fun as decision criteria
 
 Some decisions may not be purely based on technical needs or requirements but also on the
 opportunity to learn something new or to have fun using a certain software. So these are valid
 decision criteria for this project.
 
-## Limited network access
+## 2.4 Limited network access
 
 In the mountains there often is no or very low internet access. That's why the mobile app must
 not depend on a working internet connection for regular operation.
 
-## Privacy protection
+## 2.5 Privacy protection
 
 When handling personal data (if any) we have to conform to the german/EU privacy laws. Journal
 data must be kept locally.
 
-## Copyright concerns
+## 2.6 Copyright concerns
 
 Mirroring data from external sites may touch copyright regulations that need to be respected.
 
-## Licenses
+## 2.7 Licenses
 
 We have to decide for a licence before publishing anything. The first open question is whether
 to publish as FLOSS or not. The chosen licence also influences technologies and third-party
