@@ -1,0 +1,15 @@
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+**/*.iml
+**/pubspec_overrides.yaml
+*/build/

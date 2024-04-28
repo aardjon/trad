@@ -1,2 +1,10 @@
-.project
 doc/*.bkp
+
+# Eclipse related
+.project
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/

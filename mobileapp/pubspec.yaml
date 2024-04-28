@@ -1,0 +1,10 @@
+name: trad
+description: The ultimative app for climbing in Saxony
+version: 0.0.1
+repository: https://github.com/Headbucket/trad
+
+environment:
+  sdk: ^3.3.4
+
+dev_dependencies:
+  melos: ^6.0.0
