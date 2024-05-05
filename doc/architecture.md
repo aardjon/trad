@@ -348,6 +348,7 @@ QREQ-15 | 4 | Transferability | It shall be easily possible to add a new destina
 
 ## 12.1 Important terms
 
+- Ban: Legal prohibition to climb on a certain summit (or route), usually temporarily due to nature protection
 - Grade: Difficulty of a climbing route, measured e.g. with UIAA or Saxon scale.
 - Knowledgebase: Encyclopaedia with climbing related information, e.g. regulations or knots.
 - Route: The path by which a climber reaches the top of a mountain.
@@ -359,6 +360,7 @@ QREQ-15 | 4 | Transferability | It shall be easily possible to add a new destina
 |----------------------|---------------------|
 | Grade                | Schwierigskeitsgrad |
 | Journal              | Logbuch             |
+| Climbing ban         | Gipfelsperrung      |
 | Climbing regulations | Kletterregeln       |
 | (Climbing) Route     | Kletterweg          |
 | Summit               | Gipfel              |
