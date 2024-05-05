@@ -28,11 +28,19 @@ Requirements & Goals
 
 # 2. Route Database
 ## 2.1 List of climbing routes in the Saxon Switzerland area
- - List of all summits
+ - List of all summits:
+    - Summit name
+    - Area
+    - Stop sign, if currently banned from climbing
  - For each summit, show the following information:
     - Name
-    - All routes
+    - All routes:
+        - Name
+        - Grade
+        - Rating
+        - Stop sign, if currently banned from climbing
     - Geographical position (coordinates)
+    - Date of climbing bans, if any (list at https://bergsteigerbund.de/bergsport/aktuelle-informationen-zum-klettern-und-wandern/)
  - Filter/sort by name
  - Filter/sort by grade
  - Filter/sort by distance to current position (if available)
