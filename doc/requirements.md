@@ -73,3 +73,11 @@ Requirements & Goals
 # 4 General/Misc
  - User interface language: German
  - Keep the doors open for adding multi-language (Czech?) support later
+
+
+# 5 User Stories
+## 5.1 Information about climbing bans
+In the summit and in the route lists, I want to see some kind of stop sign (maybe 🚫?) if this summti/route is currently banned from climbing (based on the current system date). Furthermore, on the details page of this summit/route I want to see the exact dates this ban is active (e.g. 02/01-07/31).
+
+## 5.2 Location-based summit search
+I want to be able to sort the summit list by distance to my current location, to easily find the closest summits (start with the closest). Also, I want to be able to filter for summits within a certain distance (e.g. "1 km").
