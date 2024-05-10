@@ -1,0 +1,8 @@
+name: trad
+
+packages:
+  - ./**
+
+scripts:
+  test:
+    exec: dart test .

@@ -1,0 +1,19 @@
+name: infrastructure_vanilla
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+publish_to: none
+
+environment:
+  sdk: ^3.3.4
+
+# Add regular dependencies here.
+dependencies:
+  crosscuttings:
+    path: ../crosscuttings
+  adapters:
+    path: ../adapters
+
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.24.0
