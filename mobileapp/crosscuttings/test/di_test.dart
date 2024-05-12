@@ -1,22 +1,15 @@
-// Unit tests for the crosscuttings.di library
+///
+/// Unit tests for the crosscuttings.di library
+///
 
 import 'package:crosscuttings/di.dart';
 import 'package:test/test.dart';
 
-abstract interface class ExampleInterface1 {
-  bool isSomething();
-}
+abstract interface class ExampleInterface1 {}
 
-abstract interface class ExampleInterface2 {
-  bool isSomethingElse();
-}
+abstract interface class ExampleInterface2 {}
 
-class ExampleImpl extends ExampleInterface1 {
-  @override
-  bool isSomething() {
-    return true;
-  }
-}
+class ExampleImpl extends ExampleInterface1 {}
 
 /// Unit tests for the crosscuttings.di.DependencyProvider class.
 void main() {
