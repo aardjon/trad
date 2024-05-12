@@ -105,7 +105,8 @@ class LogConfiguration {
   LogDestination get destination => _destination;
 
   /// Changes the currently configured log destination.
-  /// The change will be respected for all future messages from all [Logger]s.
+  /// The change will be respected for all future messages from all [Logger]s. Throws
+  /// an `ArgumentError` if the provided [LogDestination] is unknown.
   set destination(LogDestination destination) {
     _destination = destination;
     _wrapper.updateDestination(_destination);

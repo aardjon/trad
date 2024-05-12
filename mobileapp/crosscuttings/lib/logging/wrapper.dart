@@ -66,8 +66,12 @@ class LogConfigWrapper {
   LogHandler _createLogHandler(LogDestination destination) {
     if (destination is FileLogDestination) {
       return FileLogHandler(destination.logFilePath);
+    } else if (destination is ConsoleLogDestination) {
+      return ConsoleLogHandler();
     } else if (destination is BlackholeLogDestination) {
       return BlackholeLogHandler();
+    } else if (destination is MemoryLogDestination) {
+      return MemoryLogHandler(destination.loggedMessages);
     }
     throw ArgumentError(
         "Unable to create log handler for unexpected destination of type "

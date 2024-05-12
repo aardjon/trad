@@ -44,15 +44,23 @@ enum LogLevel {
 /// actually handle any output.
 abstract class LogDestination {}
 
-/// A (noop) destination that absorbs all messages and never logs anything.
-/// Can be used as default handler or to definitely disable all logging. However, to disable
-/// logging it is usually better to set the log level to `LogLevel.off` because this will avoid
-/// some overhead like message string creation and propagation and therefore improve
-/// performance.
+/// A (noop) destination for absorbing all messages and never logging anything.
+/// Can be used as default or to definitely disable all logging. However, to disable logging it
+/// is usually better to set the log level to `LogLevel.off` because this will avoid some
+/// overhead like message string creation and propagation and therefore improve performance.
 class BlackholeLogDestination extends LogDestination {}
 
-/// A destination that writes all messages to a single, endlessly growing file.
-/// The file must be writable and is created if it does nto exist yet.
+/// A destination for keeping all logged messaged in memory. They will be gone after the
+/// application shutdown.
+class MemoryLogDestination extends LogDestination {
+  List<String> loggedMessages = [];
+}
+
+/// A destination for sending all messages to stdout.
+class ConsoleLogDestination extends LogDestination {}
+
+/// A destination for writing all messages to a single, endlessly growing file.
+/// The file must be writable and is created if it does not exist yet.
 class FileLogDestination extends LogDestination {
   /// Full path to the log file.
   String logFilePath;

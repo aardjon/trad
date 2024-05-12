@@ -25,6 +25,14 @@ abstract class LogHandler {
   void _writeMessage(String message);
 }
 
+/// A log handler printing all messages to stdout.
+class ConsoleLogHandler extends LogHandler {
+  @override
+  void _writeMessage(String message) {
+    print(message);
+  }
+}
+
 /// A log handler writing all messages into a single file.
 class FileLogHandler extends LogHandler {
   final File _logFile;
@@ -35,6 +43,19 @@ class FileLogHandler extends LogHandler {
   void _writeMessage(String message) {
     _logFile.writeAsStringSync(message + Platform.lineTerminator,
         mode: FileMode.append, encoding: utf8, flush: true);
+  }
+}
+
+/// A log handler that stores all messages in memory. Useful to not lose messages when no other
+/// destination is available (yet). Use with caution, though.
+class MemoryLogHandler extends LogHandler {
+  final List<String> _loggedMessages;
+
+  MemoryLogHandler(this._loggedMessages);
+
+  @override
+  void _writeMessage(String message) {
+    _loggedMessages.add(message);
   }
 }
 
