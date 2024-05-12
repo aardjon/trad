@@ -1,6 +1,7 @@
 ///
-/// Unit tests for the crosscuttings.di library
+/// Unit tests for the crosscuttings.di library.
 ///
+library;
 
 import 'package:crosscuttings/di.dart';
 import 'package:test/test.dart';

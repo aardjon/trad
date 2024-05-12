@@ -1,6 +1,7 @@
 ///
-/// Unit tests for the crosscuttings.logging library
+/// Unit tests for the crosscuttings.logging library.
 ///
+library;
 
 import 'dart:io';
 
