@@ -8,8 +8,8 @@ library;
 
 import 'package:logging/logging.dart' as loglib;
 
-import 'package:crosscuttings/logging/config.dart';
-import 'package:crosscuttings/logging/handlers.dart';
+import '../../logging/config.dart';
+import './handlers.dart';
 
 class LoggerWrapper {
   /// The real (`logging``) logger this instance delegates to

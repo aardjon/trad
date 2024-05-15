@@ -4,10 +4,10 @@
 ///
 library;
 
-export 'logging/config.dart';
+import 'config.dart';
+import '../src/logging/wrapper.dart';
 
-import 'package:crosscuttings/logging/config.dart';
-import 'package:crosscuttings/logging/wrapper.dart';
+export 'config.dart';
 
 /// Logger for writing messages to a certain channel.
 /// Each instance of this class writes to the channel identified by the name given on creation.
