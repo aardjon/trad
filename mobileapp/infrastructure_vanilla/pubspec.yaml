@@ -1,5 +1,5 @@
 name: infrastructure_vanilla
-description: A starting point for Dart libraries or applications.
+description: The Dart only part of the 'infrastructure' ring of the trad mobile application.
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 publish_to: none
