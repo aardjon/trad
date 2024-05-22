@@ -32,8 +32,9 @@ to `/example` folder.
 const like = 'sample';
 ```
 
-## Additional information
+## Use Cases
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+### General Application Use Cases
+
+- Initialize/Start Application
+- Switch to certain domain (i.e. journal, knowledgebase, route db, about, settings)
