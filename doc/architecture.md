@@ -268,10 +268,12 @@ Examples:
   ✔️ | Hardware specific code or hardware abstraction
   ✖️ (`adapters`) | Display strings/i18n
   ✖️ (`core`) | The decision whether a certain button must be disabled
+  ✖️ (`core`) | Trigger a switch to another UI screen/page after a user action
 
 Implementation rules:
  - No business logic
  - In general: As less code and as less condition checks as possible
+ - In general: "This ring shall be as dumb as possible"
  - All third party/external libs are allowed as needed
 
 ### 5.2.2 Interface documentation
