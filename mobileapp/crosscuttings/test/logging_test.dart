@@ -5,10 +5,9 @@ library;
 
 import 'dart:io';
 
-import 'package:crosscuttings/logging/config.dart';
 import 'package:test/test.dart';
 
-import 'package:crosscuttings/logging.dart';
+import 'package:crosscuttings/logging/logger.dart';
 
 /// Unit tests for the crosscuttings.logging component.
 void main() {

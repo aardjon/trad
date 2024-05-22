@@ -3,8 +3,9 @@
 ///
 library;
 
-import 'package:crosscuttings/di.dart';
 import 'package:test/test.dart';
+
+import 'package:crosscuttings/di.dart';
 
 abstract interface class ExampleInterface1 {}
 
