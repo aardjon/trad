@@ -8,3 +8,6 @@ doc/*.bkp
 *.ipr
 *.iws
 .idea/
+
+# Coverage analysis output
+**/coverage
