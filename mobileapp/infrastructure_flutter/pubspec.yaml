@@ -1,5 +1,5 @@
 name: infrastructure_flutter
-description: "A new Flutter package project."
+description: The Flutter part of the 'infrastructure' ring of the trad mobile application.
 version: 0.0.1
 homepage:
 publish_to: none
