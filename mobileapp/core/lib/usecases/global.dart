@@ -35,11 +35,6 @@ class ApplicationWideUseCases {
     _presentationBoundary.switchToJournal();
   }
 
-  /// Change the active domain to the "Knowledgebase" domain.
-  void switchToKnowledgebase() {
-    _presentationBoundary.switchToKnowledgebase();
-  }
-
   /// Change the active domain to the "About" domain.
   void switchToAbout() {
     _presentationBoundary.switchToAbout();
