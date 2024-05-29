@@ -1,5 +1,6 @@
 ///
-/// Definition of the boundary between UI adapters and a concrete UI implementation.
+/// Definition of the boundary between UI adapters (`adapters` ring) and a concrete UI
+/// implementation (`infrastructure` ring).
 ///
 library;
 
@@ -28,6 +29,17 @@ class DomainLabelDefinition {
   );
 }
 
+/// Model that provides all data needed to display a single knowledge base document to the UI.
+class KnowledgebaseModel {
+  /// Title of the document being displayed.
+  final String documentTitle;
+
+  /// Markdown content of the document being displayed.
+  final String documentContent;
+
+  KnowledgebaseModel(this.documentTitle, this.documentContent);
+}
+
 /// Boundary interface to the concrete, domain-independent part of the UI implementation.
 ///
 /// This interface provides general, application-wide UI operations. Domain specific concerns are
@@ -50,8 +62,8 @@ abstract interface class ApplicationUiBoundary {
   /// Request the UI to display the *Journal* screen.
   void switchToJournal();
 
-  /// Request the UI to display the *Knowledgebase* screen.
-  void switchToKnowledgebase();
+  /// Request the UI to display the provided [document] on the  *Knowledge Base* screen.
+  void showKnowledgebase(KnowledgebaseModel document);
 
   /// Request the UI to display the *About* screen.
   void switchToAbout();
