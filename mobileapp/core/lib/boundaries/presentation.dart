@@ -3,10 +3,11 @@
 ///
 library;
 
+import '../entities/knowledgebase.dart';
+
 /// Interface providing user interactions to the core.
 ///
-/// This is the general, application-wide access point for user interactions. Domain specific
-/// operations are separated into more specialized sub-interfaces.
+/// This is the application-wide access point for user interactions.
 abstract interface class PresentationBoundary {
   /// Initializes the user interface.
   ///
@@ -19,8 +20,8 @@ abstract interface class PresentationBoundary {
   /// Change the active domain to the *Journal* domain.
   void switchToJournal();
 
-  /// Change the active domain to the *Knowledgebase* domain.
-  void switchToKnowledgebase();
+  /// Let the UI display the provided [document] in the *Knowledgebase* domain.
+  void showKnowledgebaseDocument(KnowledgebaseDocument document);
 
   /// Change the active domain to the *About* domain.
   void switchToAbout();
