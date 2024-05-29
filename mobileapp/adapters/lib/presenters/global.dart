@@ -9,6 +9,7 @@
 library;
 
 import 'package:core/boundaries/presentation.dart';
+import 'package:core/entities/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 
 import '../boundaries/ui.dart';
@@ -49,10 +50,10 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void switchToKnowledgebase() {
-    ApplicationUiBoundary ui =
-        _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.switchToKnowledgebase();
+  void showKnowledgebaseDocument(KnowledgebaseDocument document) {
+    KnowledgebaseModel kbPageModel = KnowledgebaseModel(document.title, document.content);
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.showKnowledgebase(kbPageModel);
   }
 
   @override
