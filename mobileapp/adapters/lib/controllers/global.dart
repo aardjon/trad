@@ -9,6 +9,7 @@
 library;
 
 import 'package:core/usecases/global.dart';
+import 'package:core/usecases/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 
 /// Controller for transmitting UI messages to the core.
@@ -17,26 +18,28 @@ import 'package:crosscuttings/di.dart';
 /// more specialized classes.
 class ApplicationWideController {
   /// The use case object from the `core` ring.
-  final ApplicationWideUseCases _usecases =
-      ApplicationWideUseCases(DependencyProvider());
+  final ApplicationWideUseCases _globalUsecases =
+  ApplicationWideUseCases(DependencyProvider());
+
+  final KnowledgebaseUseCases _knowledgebaseUsecases = KnowledgebaseUseCases(DependencyProvider());
 
   /// The user requested a switch to the Journal domain.
   void requestSwitchToJournal() {
-    _usecases.switchToJournal();
+    _globalUsecases.switchToJournal();
   }
 
-  /// The user requested a switch to the Knowledgebase domain.
+  /// The user requested a switch to the knowledge base domain.
   void requestSwitchToKnowledgebase() {
-    _usecases.switchToKnowledgebase();
+    _knowledgebaseUsecases.showHomePage();
   }
 
   /// The user requested a switch to the Route DB domain.
   void requestSwitchToRouteDb() {
-    _usecases.switchToRouteDb();
+    _globalUsecases.switchToRouteDb();
   }
 
   /// The user requested a switch to the About domain.
   void requestSwitchToAbout() {
-    _usecases.switchToAbout();
+    _globalUsecases.switchToAbout();
   }
 }
