@@ -21,8 +21,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void initUserInterface() {
-    ApplicationUiBoundary ui =
-        _dependencyProvider.provide<ApplicationUiBoundary>();
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.initializeUserInterface(
       'trad - Climbing in Saxony',
       'Initializing...',
@@ -37,15 +36,13 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void switchToRouteDb() {
-    ApplicationUiBoundary ui =
-        _dependencyProvider.provide<ApplicationUiBoundary>();
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.switchToRouteDb();
   }
 
   @override
   void switchToJournal() {
-    ApplicationUiBoundary ui =
-        _dependencyProvider.provide<ApplicationUiBoundary>();
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.switchToJournal();
   }
 
@@ -58,8 +55,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void switchToAbout() {
-    ApplicationUiBoundary ui =
-        _dependencyProvider.provide<ApplicationUiBoundary>();
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.switchToAbout();
   }
 }

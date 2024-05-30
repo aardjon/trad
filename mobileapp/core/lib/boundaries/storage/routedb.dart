@@ -6,6 +6,4 @@ library;
 /// Interface providing climbing route data to the core.
 ///
 /// The route databse is a read only data storage.
-abstract interface class RouteDbStorageBoundary {
-  
-}
+abstract interface class RouteDbStorageBoundary {}

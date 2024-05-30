@@ -1,5 +1,6 @@
 ///
 /// Wrappers for the `logging` package used internally.
+///
 /// This library delegates API requests to the library, mapping/converting data structures as
 /// necessary. It is not part of the public logging API and is thus meant to be used within
 /// `trad.crossuttings.logging` only.
@@ -12,7 +13,7 @@ import '../../logging/config.dart';
 import './handlers.dart';
 
 class LoggerWrapper {
-  /// The real (`logging``) logger this instance delegates to
+  /// The real (`logging`) logger this instance delegates to
   final loglib.Logger _realLogger;
 
   /// Creates a new Logger instance for the provided channel name.
@@ -73,8 +74,7 @@ class LogConfigWrapper {
     } else if (destination is MemoryLogDestination) {
       return MemoryLogHandler(destination.loggedMessages);
     }
-    throw ArgumentError(
-        "Unable to create log handler for unexpected destination of type "
+    throw ArgumentError("Unable to create log handler for unexpected destination of type "
         "'${(destination.runtimeType).toString()}'");
   }
 

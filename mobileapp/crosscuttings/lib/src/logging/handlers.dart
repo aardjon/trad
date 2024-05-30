@@ -1,5 +1,6 @@
 ///
 /// Implementations of the different log handlers.
+///
 /// This library is not part of the public logging API and is thus meant to be used within
 /// `trad.crossuttings.logging` only.
 ///
@@ -11,8 +12,9 @@ import 'dart:convert';
 import 'package:logging/logging.dart' as loglib;
 
 /// Base class for handling log records appropriately.
-/// This uses the `template method` design pattern to create the message string but delegating
-/// the actual message writing to specialized derived classes (which must implement the
+///
+/// This uses the `template method` design pattern to create the message string but delegating the
+/// actual message writing to specialized derived classes (which must implement the
 /// [_writeMessage()] method).
 abstract class LogHandler {
   final _LogFormatter _formatter = _LogFormatter();
@@ -46,8 +48,10 @@ class FileLogHandler extends LogHandler {
   }
 }
 
-/// A log handler that stores all messages in memory. Useful to not lose messages when no other
-/// destination is available (yet). Use with caution, though.
+/// A log handler that stores all messages in memory.
+///
+/// Useful to not lose messages when no other destination is available (yet). Use with caution,
+/// though.
 class MemoryLogHandler extends LogHandler {
   final List<String> _loggedMessages;
 
@@ -60,6 +64,7 @@ class MemoryLogHandler extends LogHandler {
 }
 
 /// Special handler (null object) that absorbs all log records but never logs anything.
+///
 /// Used as default handler and in case logging shall be disabled completely.
 class BlackholeLogHandler extends LogHandler {
   @override

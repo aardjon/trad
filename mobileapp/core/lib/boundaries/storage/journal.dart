@@ -4,6 +4,4 @@
 library;
 
 /// Interface for enabling the core to access and manipulate journal data.
-abstract interface class JournalStorageBoundary {
-  
-}
+abstract interface class JournalStorageBoundary {}

@@ -45,8 +45,7 @@ void main() {
       logger.trace("Message 12");
 
       // Check whether the log output is as expected
-      List<String> fileContent =
-          (logConfig.destination as MemoryLogDestination).loggedMessages;
+      List<String> fileContent = (logConfig.destination as MemoryLogDestination).loggedMessages;
 
       // Ensure the message count is as expected
       expect(fileContent.length, equals(expectedMessageCount));
@@ -140,8 +139,7 @@ void main() {
       // Create a log file directory
       final String logFileName = "testexample.log";
       Directory tempDir = Directory.systemTemp.createTempSync('trad_test_');
-      File logFile =
-          File('${tempDir.path}${Platform.pathSeparator}$logFileName');
+      File logFile = File('${tempDir.path}${Platform.pathSeparator}$logFileName');
 
       // Log a single message
       Logger logger = configureLogging(FileLogDestination(logFile.path));

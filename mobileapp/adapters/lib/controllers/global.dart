@@ -18,8 +18,7 @@ import 'package:crosscuttings/di.dart';
 /// more specialized classes.
 class ApplicationWideController {
   /// The use case object from the `core` ring.
-  final ApplicationWideUseCases _globalUsecases =
-  ApplicationWideUseCases(DependencyProvider());
+  final ApplicationWideUseCases _globalUsecases = ApplicationWideUseCases(DependencyProvider());
 
   final KnowledgebaseUseCases _knowledgebaseUsecases = KnowledgebaseUseCases(DependencyProvider());
 
