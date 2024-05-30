@@ -18,7 +18,7 @@ import 'src/ui/routes.dart';
 /// Implementation of the boundary interface used by the `adapter` to communicate with the concrete
 /// UI.
 ///
-/// This is basically an adapter which delagates all call to the corresponding Flutter or widget
+/// This is basically an adapter which delegates all calls to the corresponding Flutter/widget
 /// operation.
 class ApplicationUI implements ApplicationUiBoundary {
   @override
@@ -50,10 +50,10 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void switchToKnowledgebase() {
+  void showKnowledgebase(KnowledgebaseModel document) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       navigatorKey.currentState!
-          .pushNamed(UiRoute.knowledgebase.toRouteString());
+          .pushNamed(UiRoute.knowledgebase.toRouteString(), arguments: document);
     });
   }
 

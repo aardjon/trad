@@ -24,7 +24,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// This is the root widget of the whole GUI, all domain pages are mounted somewhere within its
 /// child hierarchy.
 class MainWidget extends StatelessWidget {
-  /// The application's display name
+  /// The application's display name.
   final String _appName;
 
   /// The splash massage to display during initialization.
@@ -73,7 +73,7 @@ class MainWidget extends StatelessWidget {
           );
         },
         UiRoute.knowledgebase.toRouteString(): (context) {
-          return KnowledgebasePage(
+          return KnowledgebaseView(
             _appDrawerFactory.create(context),
             _domainLabels.knowledgebaseLabel,
           );

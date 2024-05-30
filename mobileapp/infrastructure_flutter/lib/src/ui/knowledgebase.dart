@@ -1,38 +1,36 @@
 ///
-/// Provides the *Knowledgebase* page widget.
+/// Provides the *knowledge base* page widget.
 ///
 library;
 
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/material.dart';
 
-/// Widget representing the *Knowledgebase* page.
+import 'package:adapters/boundaries/ui.dart';
+
+/// View representing the *knowledge base* page.
 ///
-/// TODO: This is only a stub for now.
-class KnowledgebasePage extends StatelessWidget {
+/// This widget displays the Markdown document provided by the route. For rendering Markdown text,
+/// the `Markdown` widget from the `flutter_markdown` library is used.
+class KnowledgebaseView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final NavigationDrawer _appDrawer;
 
   /// The page title
   final String _title;
 
-  const KnowledgebasePage(this._appDrawer, this._title, {super.key});
+  const KnowledgebaseView(this._appDrawer, this._title, {super.key});
 
   @override
   Widget build(BuildContext context) {
+    final model = ModalRoute.of(context)!.settings.arguments as KnowledgebaseModel;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(_title),
+        title: Text(model.documentTitle),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'This is the Knowledgebase Page',
-            ),
-          ],
-        ),
+      body: Center(
+        child: Markdown(data: model.documentContent),
       ),
       drawer: _appDrawer,
     );
