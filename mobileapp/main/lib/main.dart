@@ -4,12 +4,16 @@
 ///
 library;
 
-import 'package:adapters/presenters/global.dart';
+import 'package:adapters/boundaries/repositories.dart';
 import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/presenters/global.dart';
+import 'package:adapters/storage/knowledgebase.dart';
 import 'package:core/boundaries/presentation.dart';
+import 'package:core/boundaries/storage/knowledgebase.dart';
 import 'package:core/usecases/global.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
+import 'package:infrastructure_flutter/repository/knowledgebase.dart';
 import 'package:infrastructure_flutter/ui.dart';
 
 /// The global main entry point - The one and only :)
@@ -47,8 +51,7 @@ class ApplicationBootstrap {
   /// Starts the trad application.
   void _startApp() {
     _logger.info("Starting trad application");
-    ApplicationWideUseCases appUseCases =
-        ApplicationWideUseCases(_dependencyProvider);
+    ApplicationWideUseCases appUseCases = ApplicationWideUseCases(_dependencyProvider);
     appUseCases.startApplication();
   }
 
@@ -65,8 +68,10 @@ class ApplicationBootstrap {
   void _setupDependencies() {
     _logger.info("Initializing dependencies");
 
-    _dependencyProvider
-        .register<PresentationBoundary>(() => ApplicationWidePresenter());
+    _dependencyProvider.register<PresentationBoundary>(() => ApplicationWidePresenter());
     _dependencyProvider.register<ApplicationUiBoundary>(() => ApplicationUI());
+    _dependencyProvider
+        .register<KnowledgebaseStorageBoundary>(() => KnowledgebaseStorage(_dependencyProvider));
+    _dependencyProvider.register<KnowledgebaseRepository>(() => KnowledgebaseAssetRepository());
   }
 }
