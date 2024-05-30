@@ -14,7 +14,7 @@ import 'package:crosscuttings/di.dart';
 
 import '../boundaries/ui.dart';
 
-/// Implementation of the presentation boundary used by the core to interact with the user.
+/// Implementation of the presenter used by the core to interact with the user.
 class ApplicationWidePresenter implements PresentationBoundary {
   /// DI instance for obtaining dependencies from other rings.
   final DependencyProvider _dependencyProvider = DependencyProvider();
