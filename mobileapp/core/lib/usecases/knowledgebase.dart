@@ -28,4 +28,10 @@ class KnowledgebaseUseCases {
     KnowledgebaseDocument homeData = _storageBoundary.loadDocument(homeId);
     _presentationBoundary.showKnowledgebaseDocument(homeData);
   }
+
+  /// Use Case: Show the requested knowledge base document.
+  void showDocumentPage(KnowledgebaseDocumentId documentId) {
+    KnowledgebaseDocument document = _storageBoundary.loadDocument(documentId);
+    _presentationBoundary.showKnowledgebaseDocument(document);
+  }
 }

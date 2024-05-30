@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/controllers/knowledgebase.dart';
 
 /// View representing the *knowledge base* page.
 ///
@@ -19,7 +20,11 @@ class KnowledgebaseView extends StatelessWidget {
   /// The page title
   final String _title;
 
-  const KnowledgebaseView(this._appDrawer, this._title, {super.key});
+  /// Controller to notify about user actions.
+  final KnowledgebaseController _controller;
+
+  KnowledgebaseView(this._appDrawer, this._title, {super.key})
+      : _controller = KnowledgebaseController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,12 @@ class KnowledgebaseView extends StatelessWidget {
         title: Text(model.documentTitle),
       ),
       body: Center(
-        child: Markdown(data: model.documentContent),
+        child: Markdown(
+          data: model.documentContent,
+          onTapLink: (String text, String? href, String title) {
+            _controller.requestShowDocument(href!);
+          },
+        ),
       ),
       drawer: _appDrawer,
     );
