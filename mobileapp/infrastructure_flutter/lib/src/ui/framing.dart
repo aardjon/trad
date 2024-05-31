@@ -7,7 +7,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:adapters/boundaries/ui.dart';
-import 'package:adapters/controllers/global.dart';
+import 'package:adapters/controllers.dart';
 
 import 'about.dart';
 import 'drawer.dart';

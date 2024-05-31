@@ -1,5 +1,5 @@
 ///
-/// Library providing data types used by the knowledge base domain.
+/// Library providing data types used by the application core.
 ///
 library;
 

@@ -1,5 +1,5 @@
 ///
-/// Definition of application-wide presenters that are not bound to a certain domain.
+/// Provides presenter implementations.
 ///
 /// Presenters connect the `core` to the concrete UI implementation (in this direction) and are
 /// responsible for providing displayable data (i.e. "everything the user can see").
@@ -9,12 +9,12 @@
 library;
 
 import 'package:core/boundaries/presentation.dart';
-import 'package:core/entities/knowledgebase.dart';
+import 'package:core/entities.dart';
 import 'package:crosscuttings/di.dart';
 
-import '../boundaries/ui.dart';
+import 'boundaries/ui.dart';
 
-/// Implementation of the presenter used by the core to interact with the user.
+/// Implementation of the application-wide presenter used by the core to interact with the user.
 class ApplicationWidePresenter implements PresentationBoundary {
   /// DI instance for obtaining dependencies from other rings.
   final DependencyProvider _dependencyProvider = DependencyProvider();

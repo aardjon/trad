@@ -1,5 +1,5 @@
 ///
-/// Definition of application-wide controllers that are not bound to a certain domain.
+/// Provides controller implementations.
 ///
 /// Controllers connect the concrete UI implementation to the `core` (in this direction) and are
 /// basically responsible for mapping UI messages to use cases, converting data as necessary.
@@ -8,7 +8,8 @@
 ///
 library;
 
-import 'package:core/usecases/global.dart';
+import 'package:adapters/boundaries/repositories.dart';
+import 'package:core/usecases/appwide.dart';
 import 'package:core/usecases/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 
@@ -40,5 +41,16 @@ class ApplicationWideController {
   /// The user requested a switch to the About domain.
   void requestSwitchToAbout() {
     _globalUsecases.switchToAbout();
+  }
+}
+
+/// Controller for transmitting knowledge base UI messages to the core.
+class KnowledgebaseController {
+  /// The use case object from the `core` ring.
+  final KnowledgebaseUseCases _knowledgebaseUsecases = KnowledgebaseUseCases(DependencyProvider());
+
+  /// The user requested to display the document wit ID [documentId].
+  void requestShowDocument(KbRepoDocumentId documentId) {
+    _knowledgebaseUsecases.showDocumentPage(documentId);
   }
 }

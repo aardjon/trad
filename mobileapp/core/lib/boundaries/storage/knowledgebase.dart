@@ -3,7 +3,7 @@
 ///
 library;
 
-import '../../entities/knowledgebase.dart';
+import '../../entities.dart';
 
 /// Interface providing knowledge base data to the core.
 ///

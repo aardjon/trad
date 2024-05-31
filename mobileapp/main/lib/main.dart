@@ -6,11 +6,11 @@ library;
 
 import 'package:adapters/boundaries/repositories.dart';
 import 'package:adapters/boundaries/ui.dart';
-import 'package:adapters/presenters/global.dart';
+import 'package:adapters/presenters.dart';
 import 'package:adapters/storage/knowledgebase.dart';
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/boundaries/storage/knowledgebase.dart';
-import 'package:core/usecases/global.dart';
+import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:infrastructure_flutter/repository/knowledgebase.dart';

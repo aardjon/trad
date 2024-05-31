@@ -4,7 +4,7 @@
 library;
 
 import 'package:core/boundaries/storage/knowledgebase.dart';
-import 'package:core/entities/knowledgebase.dart';
+import 'package:core/entities.dart';
 import 'package:crosscuttings/di.dart';
 
 import '../boundaries/repositories.dart';

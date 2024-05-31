@@ -10,12 +10,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'package:adapters/boundaries/ui.dart';
-import 'package:adapters/controllers/global.dart';
+import 'package:adapters/controllers.dart';
 
 import 'src/ui/framing.dart';
 import 'src/ui/routes.dart';
 
-/// Implementation of the boundary interface used by the `adapter` to communicate with the concrete
+/// Implementation of the boundary interface used by the `adapters` to communicate with the concrete
 /// UI.
 ///
 /// This is basically an adapter which delegates all calls to the corresponding Flutter/widget

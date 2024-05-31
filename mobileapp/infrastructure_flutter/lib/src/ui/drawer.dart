@@ -1,6 +1,7 @@
-import 'package:adapters/controllers/global.dart';
-import 'package:adapters/boundaries/ui.dart';
 import 'package:flutter/material.dart';
+
+import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/controllers.dart';
 
 class TradDrawerFactory {
   final String _appName;

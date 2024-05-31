@@ -7,7 +7,7 @@ import 'package:crosscuttings/di.dart';
 
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/knowledgebase.dart';
-import '../entities/knowledgebase.dart';
+import '../entities.dart';
 
 /// Use cases of the knowledge base domain.
 class KnowledgebaseUseCases {
