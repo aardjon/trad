@@ -4,5 +4,6 @@ packages:
   - ./**
 
 scripts:
-  test:
-    exec: dart test .
+  format:
+    exec: dart format --line-length=100 .
+
