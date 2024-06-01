@@ -13,7 +13,7 @@ import 'package:core/boundaries/storage/knowledgebase.dart';
 import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
-import 'package:infrastructure_flutter/repository/knowledgebase.dart';
+import 'package:infrastructure_flutter/repository/blobs.dart';
 import 'package:infrastructure_flutter/ui.dart';
 
 /// The global main entry point - The one and only :)
@@ -72,6 +72,6 @@ class ApplicationBootstrap {
     _dependencyProvider.register<ApplicationUiBoundary>(() => ApplicationUI());
     _dependencyProvider
         .register<KnowledgebaseStorageBoundary>(() => KnowledgebaseStorage(_dependencyProvider));
-    _dependencyProvider.register<KnowledgebaseRepository>(() => KnowledgebaseAssetRepository());
+    _dependencyProvider.register<BlobRepositoryBoundary>(() => AssetRepository());
   }
 }

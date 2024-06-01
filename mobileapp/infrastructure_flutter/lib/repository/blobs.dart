@@ -1,5 +1,5 @@
 ///
-/// Flutter based implementation of the knowledge base data repository.
+/// Flutter based implementations of BLOB repositories.
 ///
 /// This library is responsible for providing data, but must not contain any business logic. Keep it
 /// as dumb as possible!
@@ -8,7 +8,7 @@ library;
 
 import 'package:adapters/boundaries/repositories.dart';
 
-/// Knowledge base repository implementation that retrieves data stored as application assets.
+/// BLOB repository implementation that retrieves data stored as (Flutter) application assets.
 ///
 /// Each knowledge base document is a single markdown asset. Furthermore, a special asset contains
 /// document metadata (e.g. their titles).
@@ -16,20 +16,17 @@ import 'package:adapters/boundaries/repositories.dart';
 /// Please see https://github.github.com/gfm/ for Markdown specification.
 ///
 /// TODO: For now, this is still a stub returning hard coded data.
-class KnowledgebaseAssetRepository implements KnowledgebaseRepository {
+class AssetRepository implements BlobRepositoryBoundary {
   @override
-  KbRepoDocumentId getHomePageIdentifier() {
+  BlobId getIndexId() {
     return "/home";
   }
 
   @override
-  String loadDocumentTitle(KbRepoDocumentId identifier) {
-    return "Lorem Ipsum";
-  }
-
-  @override
-  String loadDocumentContent(KbRepoDocumentId identifier) {
+  List<String> loadStringContent(BlobId id) {
     return """
+# Lorem ipsum
+
 # Text block
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
 labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores
@@ -48,6 +45,8 @@ amet.
 
 # Link test
  [Link Text](/kb/regulations)
-    """;
+    """
+        .trim()
+        .split("\n");
   }
 }

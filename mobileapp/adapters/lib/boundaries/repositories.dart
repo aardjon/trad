@@ -4,19 +4,17 @@
 ///
 library;
 
-/// Boundary interface to the concrete implementation of the knowledge base data repository.
+/// Boundary interface to a repository storing BLOB data.
 ///
-/// This read-only repository stores all knowledge base data (documents).
-abstract interface class KnowledgebaseRepository {
-  /// Returns the ID of the "home" document.
-  KbRepoDocumentId getHomePageIdentifier();
-
-  /// Retrieves and returns the title of the document identified by [identifier].
-  String loadDocumentTitle(KbRepoDocumentId identifier);
-
-  /// Retrieves and returns the (markdown) content of the document identified by [identifier].
-  String loadDocumentContent(KbRepoDocumentId identifier);
+/// *BLOB data* means larger data like text documents or images, for example. This is a read-only
+/// repository.
+abstract interface class BlobRepositoryBoundary {
+  /// Retrieves and returns the content of the BLOB identified by [id] as a list of strings.
+  ///
+  /// Each list item represents a single line of the BLOB content (in case of a multi line string).
+  /// The first and the last line are never empty.
+  List<String> loadStringContent(BlobId id);
 }
 
-/// Unique identifier of a knowledge base document within the the knowledge base repository.
-typedef KbRepoDocumentId = String;
+/// Unique identifier of a single BLOB.
+typedef BlobId = String;

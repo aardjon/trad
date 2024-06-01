@@ -50,7 +50,7 @@ class KnowledgebaseController {
   final KnowledgebaseUseCases _knowledgebaseUsecases = KnowledgebaseUseCases(DependencyProvider());
 
   /// The user requested to display the document wit ID [documentId].
-  void requestShowDocument(KbRepoDocumentId documentId) {
+  void requestShowDocument(BlobId documentId) {
     _knowledgebaseUsecases.showDocumentPage(documentId);
   }
 }
