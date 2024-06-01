@@ -5,5 +5,4 @@ packages:
 
 scripts:
   format:
-    exec: dart format --line-length=100 .
-
+    exec: dart format --line-length=100 --set-exit-if-changed .
