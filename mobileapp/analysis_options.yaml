@@ -1,0 +1,121 @@
+# This file configures the static analysis results for the the trad project (errors, warnings, and
+# lints). All sub project configurations refer to this one. Please keep all rule lists sorted
+# alphabetically.
+# For additional information about configuring this file, see
+# https://dart.dev/guides/language/analysis-options
+
+# The following include enables "Very Good Analysis" which contains many additional linting rules
+# besides the ones recommended by Dart and Flutter. For an overview and comparison about the
+# different linter rule sets, see https://rydmike.com/blog_flutter_linting.html and
+# https://docs.google.com/spreadsheets/d/1Nc1gFjmCOMubWZD7f2E4fLhWN7LYaOE__tsA7bf2NjA, for some
+# rationales why other projects may (not) use certain rules have a look at
+# https://gist.github.com/rydmike/fdb53ddd933c37d20e6f3188a936cd4c
+# A list of all available rules (and their descriptions including examples) can be found at
+# https://dart.dev/tools/linter-rules
+include: package:very_good_analysis/analysis_options.yaml
+
+# In addition to the VGA values, we change
+# (1) checks that are part of the default Dart/Flutter recommendation
+# (2) checks that are used/recommended by RydMike (see link above)
+# (3) some checks we don't want purposely
+# (4) some opinionated checks we just have to decide
+# Further reasoning for changes against VGA can be found at the end of this file.
+linter:
+  rules:
+    always_specify_types: true
+    always_use_package_imports: false
+    avoid_classes_with_only_static_members: true
+    avoid_implementing_value_types: true
+    avoid_redundant_argument_values: false
+    cascade_invocations: false
+    deprecated_member_use_from_same_package: true
+    diagnostic_describe_all_properties: true
+    directives_ordering: false
+    discarded_futures: true
+    lines_longer_than_80_chars: false
+    no_literal_bool_comparisons: true
+    no_self_assignments: true
+    no_wildcard_variable_uses: true
+    omit_local_variable_types: false
+    one_member_abstracts: false
+    prefer_final_locals: false
+    prefer_foreach: true
+    prefer_double_quotes: false
+    prefer_relative_imports: true
+    prefer_single_quotes: false
+    sort_constructors_first: false
+    type_literal_in_constant_pattern: true
+    unreachable_from_main: true
+    unnecessary_null_aware_operator_on_extension_on_nullable: true
+    unsafe_html: true
+
+# Change the severity of some rules (e.g. from "hint" to "error") because we consider them more
+# important.
+analyzer:
+  errors:
+    avoid_print: error # Always use the logging framework (i.e. crosscuttings.logging) instead!
+
+
+####################################################################################################
+# Reasoning and rationales for some of the differences against the VGA rule set
+####################################################################################################
+
+# always_use_package_imports: Disabled because we enabled prefer_relative_imports (see there).
+
+# avoid_redundant_argument_values: Disabled because explicitly providing the default value again
+#   - makes it clear that we want this behaviour on purpose
+#   - makes the call more robust against future changes (esp. when using some external API)
+#   - doesn't have any negative side effects
+
+# cascade_invocations: Disabled because there is no advantage in enforcing them (it's still okay to
+#   use them!). Also, this rule even enforces the cascading style for a single invocation which
+#   basically just adds an unnecessary indentation level.
+
+# directives_ordering: Even though this is a very handy rule that we should use if possible, it is
+#   too limited for our project structure (and therefore disabled): It enforces to sort all
+#   'package' imports alphabetically which leads to mix up "our" (i.e. project/local) packages with
+#   external ones (e.g. Flutter). It'd actually be nicer to have two groups of package imports
+#   (separated by an empty line) and order the imports within each group only. Maybe we'll find a
+#   solution for this in the future.
+
+# lines_longer_than_80_chars: Disabled because we are using a line length of 100 characters.
+
+# omit_local_variable_types: Disabled because we prefer explicit, strong type information to improve
+#   maintainability.
+
+# one_member_abstracts: Disabled because a class (even with only one member) is often more flexible
+#   for future extension (i.e., if a second method is needed, the class can simply be extended while
+#   a function needs to be refactored). But of course it's also not forbidden to simply use a
+#   function if that's really all we want in a certain situation.
+
+# prefer_final_locals: Disabled for now because it's benefit it unclear. See "conflicting rules"
+#   section below for further information.
+
+# prefer_relative_imports: We use relative imports within `lib` because this is the Dart Style
+#   recommendation for packages (see
+#   https://dart.dev/guides/libraries/create-packages#importing-library-files). Conflicts with
+#   always_use_package_imports (which is therefore disabled).
+
+# sort_constructors_first: Disabled because we want to be able to put class members first (so that
+#   they are easy to find).
+
+# type_literal_in_constant_pattern: We keep this activated because it is enabled by the default
+#   rule sets 'lints' and 'flutter_lints'.
+
+
+####################################################################################################
+# Conflicting rules that are currently completely disabled but may be useful (TODO: please decide!)
+####################################################################################################
+
+# prefer_double_quotes (VS. prefer_single_quote): Whether "string" or 'string' should be enforced,
+#  just a matter of personal preference. Both turned off for now, but having a consistent style is
+#  probably a good idea.
+
+# prefer_final_locals VS. unnecessary_final: Default is prefer_final_locals which allows the
+#   compiler to do some optimization and also gives some additional safety for larger functions
+#   (which we currently do not have and also try to avoid). Not sure if the extra boilerplate
+#   becomes annoying over time, though. Both turned off for now.
+
+# prefer_final_parameters VS. unnecessary_final: Both turned off by default. Final parameters give
+#   some extra safety and may allow compiler optimizations, but the extra boilerplate may become
+#   annoying over time.
