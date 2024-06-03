@@ -5,17 +5,20 @@ on: [push, pull_request]
 jobs:
   check-style:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./mobileapp
 
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
 
       - name: Install dependencies
-        run: cd mobileapp && dart pub global activate melos
+        run: dart pub global activate melos
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
       - name: Check code style
-        run: cd mobileapp && melos run format
+        run: melos run format
 
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       #- name: Analyze project source
