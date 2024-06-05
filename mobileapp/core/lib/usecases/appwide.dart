@@ -12,6 +12,9 @@ class ApplicationWideUseCases {
   /// Interface to the presentation boundary component, used for displaying things.
   final PresentationBoundary _presentationBoundary;
 
+  /// Constructor.
+  ///
+  /// Expects a reference to the (fully conifgured) [DependencyProvider] to initialize all members.
   ApplicationWideUseCases(DependencyProvider di)
       : _presentationBoundary = di.provide<PresentationBoundary>();
 

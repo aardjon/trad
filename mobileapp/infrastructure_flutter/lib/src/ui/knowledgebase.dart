@@ -23,6 +23,7 @@ class KnowledgebaseView extends StatelessWidget {
   /// Controller to notify about user actions.
   final KnowledgebaseController _controller;
 
+  /// Constructor for directly initializing all members.
   KnowledgebaseView(this._appDrawer, this._title, {super.key})
       : _controller = KnowledgebaseController();
 

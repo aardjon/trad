@@ -21,6 +21,7 @@ class DomainLabelDefinition {
   /// Label for the about domain.
   final String aboutLabel;
 
+  /// Constructor for directly initializing all members.
   const DomainLabelDefinition(
     this.journalLabel,
     this.routedbLabel,
@@ -37,6 +38,7 @@ class KnowledgebaseModel {
   /// Markdown content of the document being displayed.
   final String documentContent;
 
+  /// Constructor for directly initializing all members.
   KnowledgebaseModel(this.documentTitle, this.documentContent);
 }
 

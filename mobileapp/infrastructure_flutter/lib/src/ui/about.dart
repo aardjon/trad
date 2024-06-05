@@ -15,6 +15,7 @@ class AboutPage extends StatelessWidget {
   /// The page title
   final String _title;
 
+  /// Constructor for directly initializing all members.
   const AboutPage(this._appDrawer, this._title, {super.key});
 
   @override

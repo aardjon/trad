@@ -15,15 +15,21 @@ import 'package:logging/logging.dart' as loglib;
 ///
 /// This uses the `template method` design pattern to create the message string but delegating the
 /// actual message writing to specialized derived classes (which must implement the
-/// [_writeMessage()] method).
+/// [_writeMessage()] method). Each derived class defines a single log destination.
 abstract class LogHandler {
+  /// Formatter which creates the final message string from a [loglib.LogRecord].
   final _LogFormatter _formatter = _LogFormatter();
 
+  /// Processes a single log record (i.e. a single message).
+  ///
+  /// This is the template method which is called once for every [record] to log. It is registered
+  /// as listener to the underlying logging library.
   void handleRecord(loglib.LogRecord record) {
     String message = _formatter.format(record);
     _writeMessage(message);
   }
 
+  /// Abstract method that writes the given [message] to the concrete log destination.
   void _writeMessage(String message);
 }
 
@@ -35,10 +41,16 @@ class ConsoleLogHandler extends LogHandler {
   }
 }
 
-/// A log handler writing all messages into a single file.
+/// A log handler writing all messages into a single text file.
+///
+/// All messages are written synchronously, each time opening and closing the destination file.
+/// While this is can slow down the application, it has the advantage of writing as soon as possible
+/// and provides a high probability for having helpful log in case of an application crash.
 class FileLogHandler extends LogHandler {
+  /// The (text) file to write all log messages into.
   final File _logFile;
 
+  /// Constructor for directly initializing all members.
   FileLogHandler(String logFilePath) : _logFile = File(logFilePath);
 
   @override
@@ -53,8 +65,12 @@ class FileLogHandler extends LogHandler {
 /// Useful to not lose messages when no other destination is available (yet). Use with caution,
 /// though.
 class MemoryLogHandler extends LogHandler {
+  /// Reference to the list to write all log messages into.
   final List<String> _loggedMessages;
 
+  /// Constructor for directly initializing all members.
+  ///
+  /// All log messages will be appended to the provided list.
   MemoryLogHandler(this._loggedMessages);
 
   @override
@@ -71,7 +87,15 @@ class BlackholeLogHandler extends LogHandler {
   void _writeMessage(String message) {}
 }
 
+
+/// Formatter that creates string representations of log records.
+///
+/// This class is responsible for generating the actual, formatted string messages that will be
+/// written. Even though there is only this one implementation (yet), it's a class already to make
+/// future extensions easier.
 class _LogFormatter {
+
+  /// Create the final string representation for the given log {record].
   String format(loglib.LogRecord record) {
     final String levelName = record.level.name.toUpperCase();
     return '[${record.time}][$levelName][${record.loggerName}] ${record.message}';

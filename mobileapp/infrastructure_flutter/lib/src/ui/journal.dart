@@ -15,6 +15,7 @@ class JournalPage extends StatelessWidget {
   /// The page title
   final String _title;
 
+  /// Constructor for directly initializing all members.
   const JournalPage(this._appDrawer, this._title, {super.key});
 
   @override

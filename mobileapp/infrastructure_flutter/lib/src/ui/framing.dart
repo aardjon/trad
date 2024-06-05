@@ -36,6 +36,7 @@ class MainWidget extends StatelessWidget {
   /// Factory for creating drawer (=navigaiton menu) instances as needed.
   final TradDrawerFactory _appDrawerFactory;
 
+  /// Constructor for directly initializing all members.
   MainWidget(
     String appName,
     String splashMessage,
