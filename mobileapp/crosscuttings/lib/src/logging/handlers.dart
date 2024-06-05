@@ -87,14 +87,12 @@ class BlackholeLogHandler extends LogHandler {
   void _writeMessage(String message) {}
 }
 
-
 /// Formatter that creates string representations of log records.
 ///
 /// This class is responsible for generating the actual, formatted string messages that will be
 /// written. Even though there is only this one implementation (yet), it's a class already to make
 /// future extensions easier.
 class _LogFormatter {
-
   /// Create the final string representation for the given log {record].
   String format(loglib.LogRecord record) {
     final String levelName = record.level.name.toUpperCase();

@@ -16,7 +16,7 @@ class ExampleImpl extends ExampleInterface1 {}
 /// Unit tests for the crosscuttings.di.DependencyProvider class.
 void main() {
   group('crosscuttings.di', () {
-    final di = DependencyProvider();
+    final DependencyProvider di = DependencyProvider();
 
     setUp(() {
       di.register<ExampleInterface1>(() {

@@ -7,8 +7,10 @@ import 'package:adapters/controllers.dart';
 class TradDrawerFactory {
   /// The application name (displayed in the drawer header).
   final String _appName;
+
   /// Display labels of the application domain, used as menu item.
   final DomainLabelDefinition _domainLabels;
+
   /// Controller instance to notify for any user interaction.
   final ApplicationWideController _controller;
 
@@ -17,7 +19,7 @@ class TradDrawerFactory {
 
   /// Creates and returns a new instance of the application drawer for the given build [context].
   NavigationDrawer create(BuildContext context) {
-    List<Widget> itemList = [
+    List<Widget> itemList = <Widget>[
       DrawerHeader(
         decoration: const BoxDecoration(
           color: Colors.lightGreen,

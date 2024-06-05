@@ -18,7 +18,7 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
   final BlobRepositoryBoundary _repository;
 
   /// The ID of the knowledge base "home" document.
-  static const _knowledgebaseHomeId = "/knowledgebase/index";
+  static const String _knowledgebaseHomeId = "/knowledgebase/index";
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
   KnowledgebaseStorage(DependencyProvider dependencyProvider)

@@ -29,7 +29,8 @@ class KnowledgebaseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = ModalRoute.of(context)!.settings.arguments as KnowledgebaseModel;
+    final KnowledgebaseModel model =
+        ModalRoute.of(context)!.settings.arguments as KnowledgebaseModel;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

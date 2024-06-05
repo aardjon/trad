@@ -58,7 +58,7 @@ class BlackholeLogDestination extends LogDestination {}
 /// All messages will be gone after the application shutdown.
 class MemoryLogDestination extends LogDestination {
   /// List of all messages that have been logged so far.
-  List<String> loggedMessages = [];
+  List<String> loggedMessages = <String>[];
 }
 
 /// A destination for sending all messages to stdout.

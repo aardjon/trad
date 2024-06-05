@@ -55,13 +55,11 @@ class LoggerWrapper {
   }
 }
 
-
 /// Adapter connecting the package interface to the actual implementation.
 ///
 /// This class maps package log channels to corresponding logging lib channels. This mapping must be
 /// the same as [LoggerWrapper] does.
 class LogConfigWrapper {
-
   /// Set the global log [destination] to the provided one.
   ///
   /// Any previously set destination is replaced, all future messages are sent the new destination.
