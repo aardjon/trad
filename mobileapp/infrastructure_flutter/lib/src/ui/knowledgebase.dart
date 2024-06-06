@@ -3,8 +3,8 @@
 ///
 library;
 
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
