@@ -137,7 +137,7 @@ void main() {
     /// Ensures that a log file is written and contains the sent log message
     void testFileHandler() {
       // Create a log file directory
-      final String logFileName = "testexample.log";
+      const String logFileName = "testexample.log";
       Directory tempDir = Directory.systemTemp.createTempSync('trad_test_');
       File logFile = File('${tempDir.path}${Platform.pathSeparator}$logFileName');
 

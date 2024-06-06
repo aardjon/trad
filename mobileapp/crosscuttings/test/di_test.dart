@@ -32,7 +32,7 @@ void main() {
     ///  - Return the registered implementation, if any
     ///  - Throw if the requested interface has not been registered
     test('testProvide', () {
-      expect(di.provide<ExampleInterface1>(), TypeMatcher<ExampleImpl>());
+      expect(di.provide<ExampleInterface1>(), const TypeMatcher<ExampleImpl>());
       expect(di.provide<ExampleInterface2>, throwsStateError);
       // Syntax for custom exceptions:
       // expect(di.provide<ExampleInterface2>, throwsA(isA<StateError>()));
