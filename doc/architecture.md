@@ -128,6 +128,11 @@ use OOP as many of the former principles and patterns are probably easier to use
 To minimize manual testing effort we aim for a high unit test coverage. Test Driven Development
 can be a way to achieve this.
 
+We are using static analysis tools to get maximum of automated support. We start with a very
+pedantic configuration and always document the reason for disabling single checks. This
+documentation is embedded into the [linter configuration](../mobileapp/analysis_options.yaml)
+to make it easy to update in case of changes.
+
 Resources:
  - [The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
  - [A primer on the clean architecture pattern and its principles](https://www.techtarget.com/searchapparchitecture/tip/A-primer-on-the-clean-architecture-pattern-and-its-principles)
