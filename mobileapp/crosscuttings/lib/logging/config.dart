@@ -41,7 +41,7 @@ enum LogLevel {
 
 /// Base class for defining where logs shall finally go to.
 ///
-/// A [LogDestination] configures the final sink all messages (from all [Logger]s) are finally
+/// A [LogDestination] configures the final sink all messages (from all `Logger`s) are finally
 /// written into (e.g. a file or console). This is only about the configuration, it does not
 /// actually handle any output.
 abstract class LogDestination {}
@@ -57,7 +57,8 @@ class BlackholeLogDestination extends LogDestination {}
 ///
 /// All messages will be gone after the application shutdown.
 class MemoryLogDestination extends LogDestination {
-  List<String> loggedMessages = [];
+  /// List of all messages that have been logged so far.
+  List<String> loggedMessages = <String>[];
 }
 
 /// A destination for sending all messages to stdout.

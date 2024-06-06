@@ -6,6 +6,8 @@
 ///
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -27,40 +29,44 @@ class ApplicationUI implements ApplicationUiBoundary {
     String splashString,
     DomainLabelDefinition routeLabels,
   ) {
-    runApp(MainWidget(
-      appName,
-      splashString,
-      routeLabels,
-      ApplicationWideController(),
-    ));
+    runApp(
+      MainWidget(
+        appName,
+        splashString,
+        routeLabels,
+        ApplicationWideController(),
+      ),
+    );
   }
 
   @override
   void switchToRouteDb() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      navigatorKey.currentState!.pushNamed(UiRoute.routedb.toRouteString());
+      unawaited(navigatorKey.currentState!.pushNamed(UiRoute.routedb.toRouteString()));
     });
   }
 
   @override
   void switchToJournal() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      navigatorKey.currentState!.pushNamed(UiRoute.journal.toRouteString());
+      unawaited(navigatorKey.currentState!.pushNamed(UiRoute.journal.toRouteString()));
     });
   }
 
   @override
   void showKnowledgebase(KnowledgebaseModel document) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      navigatorKey.currentState!
-          .pushNamed(UiRoute.knowledgebase.toRouteString(), arguments: document);
+      unawaited(
+        navigatorKey.currentState!
+            .pushNamed(UiRoute.knowledgebase.toRouteString(), arguments: document),
+      );
     });
   }
 
   @override
   void switchToAbout() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      navigatorKey.currentState!.pushNamed(UiRoute.about.toRouteString());
+      unawaited(navigatorKey.currentState!.pushNamed(UiRoute.about.toRouteString()));
     });
   }
 }

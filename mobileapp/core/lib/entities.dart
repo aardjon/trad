@@ -24,5 +24,6 @@ class KnowledgebaseDocument {
   /// The content is formatted using Markdown, see https://github.github.com/gfm/ for specification.
   final String content;
 
+  /// Constructor for directly initializing all members.
   KnowledgebaseDocument(this.identifier, this.title, this.content);
 }

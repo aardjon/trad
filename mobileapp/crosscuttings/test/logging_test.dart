@@ -15,7 +15,7 @@ void main() {
   group('crosscuttings.logging.loglevels', () {
     setUp(() {
       // Configure logging to write to a file
-      final logConfig = LogConfiguration();
+      final LogConfiguration logConfig = LogConfiguration();
       logConfig.destination = MemoryLogDestination();
     });
 
@@ -26,7 +26,7 @@ void main() {
     /// the log file. If not messages are written, the file must not be created at all.
     void runTestCase(LogLevel level, int expectedMessageCount) {
       // Configure the log level
-      final logConfig = LogConfiguration();
+      final LogConfiguration logConfig = LogConfiguration();
       logConfig.globalLevel = level;
 
       // Run the actual test case
@@ -119,7 +119,7 @@ void main() {
     const String exampleChannel = "test.channel";
 
     Logger configureLogging(LogDestination destination) {
-      final logConfig = LogConfiguration();
+      final LogConfiguration logConfig = LogConfiguration();
       logConfig.globalLevel = LogLevel.debug;
       logConfig.destination = destination;
 
@@ -137,7 +137,7 @@ void main() {
     /// Ensures that a log file is written and contains the sent log message
     void testFileHandler() {
       // Create a log file directory
-      final String logFileName = "testexample.log";
+      const String logFileName = "testexample.log";
       Directory tempDir = Directory.systemTemp.createTempSync('trad_test_');
       File logFile = File('${tempDir.path}${Platform.pathSeparator}$logFileName');
 
@@ -195,10 +195,13 @@ void main() {
     /// used. If this tets fails, you probably added a new [LogDestination] class without
     /// providing a corresponding [LogHandler] implementation.
     test('UnknownLogDestination', () {
-      final logConfig = LogConfiguration();
-      expect(() {
-        logConfig.destination = _UnknownLogDestination();
-      }, throwsArgumentError);
+      final LogConfiguration logConfig = LogConfiguration();
+      expect(
+        () {
+          logConfig.destination = _UnknownLogDestination();
+        },
+        throwsArgumentError,
+      );
     });
   });
 }

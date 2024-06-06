@@ -9,12 +9,12 @@ environment:
   flutter: ^3.22.0
 
 dependencies:
-  flutter:
-    sdk: flutter
-  crosscuttings:
-    path: ../crosscuttings
   adapters:
     path: ../adapters
+  crosscuttings:
+    path: ../crosscuttings
+  flutter:
+    sdk: flutter
   flutter_markdown: ^0.7.1
 
 dev_dependencies:

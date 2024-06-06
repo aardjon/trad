@@ -16,13 +16,14 @@ import 'package:get_it/get_it.dart';
 /// This class is not a singleton but all instances share the same DI configuration, so they can be
 /// created on demand as needed. Most system parts will only ever need the [provide()] method.
 class DependencyProvider {
-  GetIt getIt = GetIt.instance;
+  /// Global GetIt instance to delegate calls to.
+  final GetIt _getIt = GetIt.instance;
 
   /// Returns the concrete implementation for the interface requested by [T].
   ///
   /// Throws [StateError] if the requested interface has not been [register()]ed before.
   T provide<T extends Object>() {
-    return getIt.get<T>();
+    return _getIt.get<T>();
   }
 
   /// Registers a new implementation for the interface [T].
@@ -33,13 +34,13 @@ class DependencyProvider {
   ///
   /// Registration should be done only once during start up from within `trad.main`.
   void register<T extends Object>(T Function() instanceFactory) {
-    getIt.registerFactory<T>(instanceFactory);
+    _getIt.registerFactory<T>(instanceFactory);
   }
 
   /// Cleans up the DI registry by removing all registrations at once.
   ///
   /// This should only be called during shutdown from within `trad.main`.
   Future<void> shutdown() {
-    return getIt.reset(dispose: true);
+    return _getIt.reset(dispose: true);
   }
 }

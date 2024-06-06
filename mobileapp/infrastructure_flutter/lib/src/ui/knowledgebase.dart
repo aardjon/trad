@@ -3,8 +3,8 @@
 ///
 library;
 
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
@@ -23,12 +23,14 @@ class KnowledgebaseView extends StatelessWidget {
   /// Controller to notify about user actions.
   final KnowledgebaseController _controller;
 
+  /// Constructor for directly initializing all members.
   KnowledgebaseView(this._appDrawer, this._title, {super.key})
       : _controller = KnowledgebaseController();
 
   @override
   Widget build(BuildContext context) {
-    final model = ModalRoute.of(context)!.settings.arguments as KnowledgebaseModel;
+    final KnowledgebaseModel model =
+        ModalRoute.of(context)!.settings.arguments! as KnowledgebaseModel;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

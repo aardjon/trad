@@ -36,6 +36,7 @@ class MainWidget extends StatelessWidget {
   /// Factory for creating drawer (=navigaiton menu) instances as needed.
   final TradDrawerFactory _appDrawerFactory;
 
+  /// Constructor for directly initializing all members.
   MainWidget(
     String appName,
     String splashMessage,
@@ -59,32 +60,32 @@ class MainWidget extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
         useMaterial3: true,
       ),
-      routes: {
-        UiRoute.journal.toRouteString(): (context) {
+      routes: <String, WidgetBuilder>{
+        UiRoute.journal.toRouteString(): (BuildContext context) {
           return JournalPage(
             _appDrawerFactory.create(context),
             _domainLabels.journalLabel,
           );
         },
-        UiRoute.routedb.toRouteString(): (context) {
+        UiRoute.routedb.toRouteString(): (BuildContext context) {
           return RouteDbPage(
             _appDrawerFactory.create(context),
             _domainLabels.routedbLabel,
           );
         },
-        UiRoute.knowledgebase.toRouteString(): (context) {
+        UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
           return KnowledgebaseView(
             _appDrawerFactory.create(context),
             _domainLabels.knowledgebaseLabel,
           );
         },
-        UiRoute.about.toRouteString(): (context) {
+        UiRoute.about.toRouteString(): (BuildContext context) {
           return AboutPage(
             _appDrawerFactory.create(context),
             _domainLabels.aboutLabel,
           );
         },
-        UiRoute.splash.toRouteString(): (context) {
+        UiRoute.splash.toRouteString(): (BuildContext context) {
           return _SplashPage(_splashMessage);
         },
       },

@@ -8,10 +8,11 @@
 ///
 library;
 
-import 'package:adapters/boundaries/repositories.dart';
 import 'package:core/usecases/appwide.dart';
 import 'package:core/usecases/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
+
+import 'boundaries/repositories.dart';
 
 /// Controller for transmitting UI messages to the core.
 ///

@@ -5,8 +5,8 @@
 ///
 library;
 
-import 'config.dart';
 import '../src/logging/wrapper.dart';
+import 'config.dart';
 
 export 'config.dart';
 

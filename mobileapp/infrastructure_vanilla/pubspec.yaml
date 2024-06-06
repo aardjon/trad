@@ -9,10 +9,10 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
-  crosscuttings:
-    path: ../crosscuttings
   adapters:
     path: ../adapters
+  crosscuttings:
+    path: ../crosscuttings
 
 dev_dependencies:
   lints: ^4.0.0

@@ -28,23 +28,21 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter:
-    sdk: flutter
-  crosscuttings:
-    path: ../crosscuttings
-  core:
-    path: ../core
   adapters:
     path: ../adapters
-  infrastructure_vanilla:
-    path: ../infrastructure_vanilla
-  infrastructure_flutter:
-    path: ../infrastructure_flutter
-
-
+  core:
+    path: ../core
+  crosscuttings:
+    path: ../crosscuttings
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
+  flutter:
+    sdk: flutter
+  infrastructure_flutter:
+    path: ../infrastructure_flutter
+  infrastructure_vanilla:
+    path: ../infrastructure_vanilla
 
 dev_dependencies:
   flutter_test:

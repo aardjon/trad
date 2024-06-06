@@ -12,6 +12,11 @@ import 'package:logging/logging.dart' as loglib;
 import '../../logging/config.dart';
 import './handlers.dart';
 
+/// Adapter connecting the package interface (Logger) to the actual implementation (the `logging`
+/// library).
+///
+/// This class maps package log channels to corresponding logging lib channels. This mapping must be
+/// the same as [LogConfigWrapper] does.
 class LoggerWrapper {
   /// The real (`logging`) logger this instance delegates to
   final loglib.Logger _realLogger;
@@ -50,7 +55,14 @@ class LoggerWrapper {
   }
 }
 
+/// Adapter connecting the package interface to the actual implementation.
+///
+/// This class maps package log channels to corresponding logging lib channels. This mapping must be
+/// the same as [LoggerWrapper] does.
 class LogConfigWrapper {
+  /// Set the global log [destination] to the provided one.
+  ///
+  /// Any previously set destination is replaced, all future messages are sent the new destination.
   void updateDestination(LogDestination destination) {
     LogHandler logHandler = _createLogHandler(destination);
     loglib.Logger rootLogger = loglib.Logger.root;
@@ -60,10 +72,17 @@ class LogConfigWrapper {
     });
   }
 
+  /// Set the global log [level] to the requested one.
+  ///
+  /// This change is applied to all future messages.
   void updateGlobalLevel(LogLevel level) {
     loglib.Logger.root.level = _mapToLibLevel(level);
   }
 
+  /// Factory for creating a [LogHandler] that corresponds to the given [destination].
+  ///
+  /// Throws an [ArgumentError] in case the destination cannot be mapped (did you forget to
+  /// implement a [LogHandler] for a newly created [LogDestination]?).
   LogHandler _createLogHandler(LogDestination destination) {
     if (destination is FileLogDestination) {
       return FileLogHandler(destination.logFilePath);
@@ -75,7 +94,7 @@ class LogConfigWrapper {
       return MemoryLogHandler(destination.loggedMessages);
     }
     throw ArgumentError("Unable to create log handler for unexpected destination of type "
-        "'${(destination.runtimeType).toString()}'");
+        "'${destination.runtimeType}'");
   }
 
   /// Returns the internal (logging lib) value representing the requested API log level.
