@@ -28,27 +28,19 @@ class TradDrawerFactory {
       ),
       ListTile(
         title: Text(_domainLabels.journalLabel),
-        onTap: () {
-          _controller.requestSwitchToJournal();
-        },
+        onTap: _controller.requestSwitchToJournal,
       ),
       ListTile(
         title: Text(_domainLabels.routedbLabel),
-        onTap: () {
-          _controller.requestSwitchToRouteDb();
-        },
+        onTap: _controller.requestSwitchToRouteDb,
       ),
       ListTile(
         title: Text(_domainLabels.knowledgebaseLabel),
-        onTap: () {
-          _controller.requestSwitchToKnowledgebase();
-        },
+        onTap: _controller.requestSwitchToKnowledgebase,
       ),
       ListTile(
         title: Text(_domainLabels.aboutLabel),
-        onTap: () {
-          _controller.requestSwitchToAbout();
-        },
+        onTap: _controller.requestSwitchToAbout,
       ),
     ];
     return NavigationDrawer(children: itemList);

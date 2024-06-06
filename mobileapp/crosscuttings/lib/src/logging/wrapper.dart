@@ -94,7 +94,7 @@ class LogConfigWrapper {
       return MemoryLogHandler(destination.loggedMessages);
     }
     throw ArgumentError("Unable to create log handler for unexpected destination of type "
-        "'${(destination.runtimeType).toString()}'");
+        "'${destination.runtimeType}'");
   }
 
   /// Returns the internal (logging lib) value representing the requested API log level.
