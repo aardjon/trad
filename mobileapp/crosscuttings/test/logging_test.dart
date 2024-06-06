@@ -196,9 +196,12 @@ void main() {
     /// providing a corresponding [LogHandler] implementation.
     test('UnknownLogDestination', () {
       final LogConfiguration logConfig = LogConfiguration();
-      expect(() {
-        logConfig.destination = _UnknownLogDestination();
-      }, throwsArgumentError);
+      expect(
+        () {
+          logConfig.destination = _UnknownLogDestination();
+        },
+        throwsArgumentError,
+      );
     });
   });
 }

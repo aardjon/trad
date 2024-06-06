@@ -55,8 +55,12 @@ class FileLogHandler extends LogHandler {
 
   @override
   void _writeMessage(String message) {
-    _logFile.writeAsStringSync(message + Platform.lineTerminator,
-        mode: FileMode.append, encoding: utf8, flush: true);
+    _logFile.writeAsStringSync(
+      message + Platform.lineTerminator,
+      mode: FileMode.append,
+      encoding: utf8,
+      flush: true,
+    );
   }
 }
 

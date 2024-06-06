@@ -27,12 +27,14 @@ class ApplicationUI implements ApplicationUiBoundary {
     String splashString,
     DomainLabelDefinition routeLabels,
   ) {
-    runApp(MainWidget(
-      appName,
-      splashString,
-      routeLabels,
-      ApplicationWideController(),
-    ));
+    runApp(
+      MainWidget(
+        appName,
+        splashString,
+        routeLabels,
+        ApplicationWideController(),
+      ),
+    );
   }
 
   @override
