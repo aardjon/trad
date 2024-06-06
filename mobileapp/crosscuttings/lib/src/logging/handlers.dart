@@ -37,6 +37,10 @@ abstract class LogHandler {
 class ConsoleLogHandler extends LogHandler {
   @override
   void _writeMessage(String message) {
+    // We usually want to use the logging framework instead of print(). However, as this *is* the
+    // logging framework implementation that prints a logged message to stdout, this is literally
+    // the only place where using print() is accepted. That's why we ignore the linter error here.
+    // ignore: avoid_print
     print(message);
   }
 }
