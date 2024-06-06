@@ -15,7 +15,7 @@ import 'package:adapters/boundaries/repositories.dart';
 ///
 /// Please see https://github.github.com/gfm/ for Markdown specification.
 ///
-/// TODO: For now, this is still a stub returning hard coded data.
+// TODO(aardjon): For now, this is still a stub returning hard coded data.
 class AssetRepository implements BlobRepositoryBoundary {
   @override
   BlobId getIndexId() {

@@ -60,7 +60,7 @@ class ApplicationBootstrap {
     LogConfiguration logConfig = LogConfiguration();
     logConfig.globalLevel = LogLevel.info;
     logConfig.destination = ConsoleLogDestination();
-    // TODO: For logging to a file, use
+    // TODO(aardjon): For logging to a file, use
     //  logConfig.destination = FileLogDestination("/path/to/file.log");
   }
 

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 /// Widget representing the *Route DB* page.
 ///
-/// TODO: This is only a stub for now.
+// TODO(aardjon): This is only a stub for now.
 class RouteDbPage extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final NavigationDrawer _appDrawer;
