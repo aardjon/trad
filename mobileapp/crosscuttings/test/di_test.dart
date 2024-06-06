@@ -11,7 +11,7 @@ abstract interface class ExampleInterface1 {}
 
 abstract interface class ExampleInterface2 {}
 
-class ExampleImpl extends ExampleInterface1 {}
+class ExampleImpl implements ExampleInterface1 {}
 
 /// Unit tests for the crosscuttings.di.DependencyProvider class.
 void main() {
