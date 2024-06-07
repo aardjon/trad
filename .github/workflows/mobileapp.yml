@@ -20,12 +20,27 @@ jobs:
       - name: Check code style
         run: melos run format
 
+        
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./mobileapp
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.22.x
+
+      - name: Install dependencies
+        run: dart pub global activate melos
+
+      - name: Run all tests
+        run: melos run test
+
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       #- name: Analyze project source
       #  run: dart analyze
-
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      #- name: Run tests
-      #  run: dart test

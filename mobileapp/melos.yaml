@@ -6,3 +6,9 @@ packages:
 scripts:
   format:
     exec: dart format --line-length=100 --set-exit-if-changed .
+
+  test:
+    steps:
+      - melos exec --no-flutter --dir-exists=test dart test
+      - melos exec --flutter --dir-exists=test flutter test
+
