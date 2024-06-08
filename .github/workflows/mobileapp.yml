@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
 
-      - name: Install dependencies
+      - name: Install Melos
         run: dart pub global activate melos
 
       - name: Check code style
@@ -74,8 +74,13 @@ jobs:
           channel: stable
           flutter-version: 3.22.x
 
-      - name: Install dependencies
-        run: dart pub global activate melos
+      - name: Setup environment
+        run: |
+             echo "--- Configure Flutter"
+             flutter config --no-analytics
+             flutter config --no-cli-animations
+             echo "--- Install Melos"
+             dart pub global activate melos
 
       - name: Run all tests
         run: melos run test
