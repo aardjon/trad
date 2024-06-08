@@ -4,6 +4,20 @@ packages:
   - ./**
 
 scripts:
+  build.linux:
+    help: Does a Linux build in release mode.
+    steps:
+      - cd main && flutter build linux --release
+      - mkdir -p artifacts
+      - mv main/build/linux/x64/release/bundle/main artifacts/
+      
+  build.android:
+    help: Does an Android build in release mode.
+    steps:
+      - cd main && flutter build apk --release
+      - mkdir -p artifacts
+      - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/
+
   format:
     exec: dart format --line-length=100 --set-exit-if-changed .
 
@@ -11,4 +25,3 @@ scripts:
     steps:
       - melos exec --no-flutter --dir-exists=test dart test
       - melos exec --flutter --dir-exists=test flutter test
-
