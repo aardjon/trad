@@ -17,15 +17,11 @@ class KnowledgebaseView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final NavigationDrawer _appDrawer;
 
-  /// The page title
-  final String _title;
-
   /// Controller to notify about user actions.
   final KnowledgebaseController _controller;
 
   /// Constructor for directly initializing all members.
-  KnowledgebaseView(this._appDrawer, this._title, {super.key})
-      : _controller = KnowledgebaseController();
+  KnowledgebaseView(this._appDrawer, {super.key}) : _controller = KnowledgebaseController();
 
   @override
   Widget build(BuildContext context) {

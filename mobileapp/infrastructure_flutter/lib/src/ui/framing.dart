@@ -33,7 +33,7 @@ class MainWidget extends StatelessWidget {
   /// Mapping of display labels to the various domains pages.
   final DomainLabelDefinition _domainLabels;
 
-  /// Factory for creating drawer (=navigaiton menu) instances as needed.
+  /// Factory for creating drawer (=navigation menu) instances as needed.
   final TradDrawerFactory _appDrawerFactory;
 
   /// Constructor for directly initializing all members.
@@ -74,10 +74,7 @@ class MainWidget extends StatelessWidget {
           );
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
-          return KnowledgebaseView(
-            _appDrawerFactory.create(context),
-            _domainLabels.knowledgebaseLabel,
-          );
+          return KnowledgebaseView(_appDrawerFactory.create(context));
         },
         UiRoute.about.toRouteString(): (BuildContext context) {
           return AboutPage(
