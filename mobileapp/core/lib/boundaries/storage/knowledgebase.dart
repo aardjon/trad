@@ -18,6 +18,8 @@ abstract interface class KnowledgebaseStorageBoundary {
   ///
   /// The home document is meant to be used be used as a starting point to the knowledge base,
   /// containing e.g. a table of contents.
+  ///
+  /// Raises a StateError if there is no suitable index document.
   KnowledgebaseDocumentId getHomeIdentifier();
 
   /// Loads and returns the document with the given [documentId].

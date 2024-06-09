@@ -9,17 +9,16 @@ library;
 import 'package:adapters/boundaries/repositories.dart';
 
 /// BLOB repository implementation that retrieves data stored as (Flutter) application assets.
-///
-/// Each knowledge base document is a single markdown asset. Furthermore, a special asset contains
-/// document metadata (e.g. their titles).
-///
-/// Please see https://github.github.com/gfm/ for Markdown specification.
-///
-// TODO(aardjon): For now, this is still a stub returning hard coded data.
+// TODO(aardjon): For now, this is just a stub returning hard coded data.
 class AssetRepository implements BlobRepositoryBoundary {
   @override
-  BlobId getIndexId() {
-    return "/home";
+  List<BlobNamespace> getAllNamespaces() {
+    return <BlobNamespace>["/knowledgebase"];
+  }
+
+  @override
+  BlobId getIndexBlobId(BlobNamespace namespace) {
+    return "$namespace/index";
   }
 
   @override

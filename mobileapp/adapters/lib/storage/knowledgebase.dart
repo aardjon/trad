@@ -17,16 +17,16 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
   /// The knowledge base data repository.
   final BlobRepositoryBoundary _repository;
 
-  /// The ID of the knowledge base "home" document.
-  static const String _knowledgebaseHomeId = "/knowledgebase/index";
-
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
   KnowledgebaseStorage(DependencyProvider dependencyProvider)
       : _repository = dependencyProvider.provide<BlobRepositoryBoundary>();
 
   @override
   KnowledgebaseDocumentId getHomeIdentifier() {
-    return _knowledgebaseHomeId;
+    BlobNamespace knowledgebaseNamespace = _repository.getAllNamespaces().firstWhere(
+          (BlobNamespace element) => element.contains("knowledgebase"),
+        );
+    return _repository.getIndexBlobId(knowledgebaseNamespace);
   }
 
   @override
@@ -39,7 +39,7 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
 
   /// Extracts the document title from the given [blobData].
   ///
-  /// [blobData] is a multiline Markdown string (one line per list item) containing the document
+  /// [blobData] is a multiline Markdown string (each list item is one line) containing the document
   /// title as the very first line. Any prepending Markdown annotation (e.g. '#') is removed.
   String _extractDocumentTitle(List<String> blobData) {
     String titleLine = blobData[0].trim();
@@ -51,9 +51,9 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
 
   /// Extracts the document body from the given [blobData].
   ///
-  /// [blobData] is a multiline Markdown string (one line per list item). This method simply omits
-  /// the first line (i.e. the document title) and joins all other lines into a single string, using
-  /// the platform specific newline character.
+  /// [blobData] is a multiline Markdown string (each list item is one line). This method simply
+  /// omits the first line (i.e. the document title) and joins all other lines into a single string,
+  /// using the platform specific newline character.
   String _extractDocumentBody(List<String> blobData) {
     return blobData.sublist(1).join(Platform.lineTerminator).trimLeft();
   }
