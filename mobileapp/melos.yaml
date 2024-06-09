@@ -4,6 +4,9 @@ packages:
   - ./**
 
 scripts:
+  analyze:
+    run: melos analyze
+
   build.linux:
     help: Does a Linux build in release mode.
     steps:
