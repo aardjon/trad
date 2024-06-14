@@ -23,5 +23,5 @@ abstract interface class KnowledgebaseStorageBoundary {
   KnowledgebaseDocumentId getHomeIdentifier();
 
   /// Loads and returns the document with the given [documentId].
-  KnowledgebaseDocument loadDocument(KnowledgebaseDocumentId documentId);
+  Future<KnowledgebaseDocument> loadDocument(KnowledgebaseDocumentId documentId);
 }

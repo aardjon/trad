@@ -6,46 +6,29 @@
 ///
 library;
 
+import 'package:flutter/services.dart' show rootBundle;
+
 import 'package:adapters/boundaries/repositories.dart';
 
 /// BLOB repository implementation that retrieves data stored as (Flutter) application assets.
 // TODO(aardjon): For now, this is just a stub returning hard coded data.
 class AssetRepository implements BlobRepositoryBoundary {
+  // Prefix for all BlobIds referring to assets of the [infrastructure_flutter] package.
+  static const String _assetPrefix = "packages/infrastructure_flutter/assets";
+
   @override
   List<BlobNamespace> getAllNamespaces() {
-    return <BlobNamespace>["/knowledgebase"];
+    return <BlobNamespace>["knowledgebase"];
   }
 
   @override
   BlobId getIndexBlobId(BlobNamespace namespace) {
-    return "$namespace/index";
+    return "$_assetPrefix/$namespace/index.md";
   }
 
   @override
-  List<String> loadStringContent(BlobId id) {
-    return """
-# Lorem ipsum
-
-# Text block
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
-labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores
-et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
-labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo
-dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
-amet.
-
-# Bullet list
- - List item 1
- - List item 2
-   - List item 2.1
-   - List item 2.2
- - List item 3
-
-# Link test
- [Link Text](/kb/regulations)
-    """
-        .trim()
-        .split("\n");
+  Future<List<String>> loadStringContent(BlobId id) async {
+    String blobContent = await rootBundle.loadString(id);
+    return blobContent.trim().split("\n");
   }
 }

@@ -24,7 +24,7 @@ abstract interface class BlobRepositoryBoundary {
   ///
   /// Each list item represents a single line of the BLOB content (in case of a multi line string).
   /// The first and the last line are never empty.
-  List<String> loadStringContent(BlobId id);
+  Future<List<String>> loadStringContent(BlobId id);
 }
 
 /// Unique name of a namespace. Each BLOB is assigned to exactly one namespace.

@@ -3,6 +3,8 @@
 ///
 library;
 
+import 'dart:async';
+
 import 'package:crosscuttings/di.dart';
 
 import '../boundaries/presentation.dart';
@@ -25,13 +27,17 @@ class KnowledgebaseUseCases {
   /// Use Case: Switching to the home document of the knowledge base domain.
   void showHomePage() {
     KnowledgebaseDocumentId homeId = _storageBoundary.getHomeIdentifier();
-    KnowledgebaseDocument homeData = _storageBoundary.loadDocument(homeId);
-    _presentationBoundary.showKnowledgebaseDocument(homeData);
+    unawaited(
+      _storageBoundary.loadDocument(homeId).then(_presentationBoundary.showKnowledgebaseDocument),
+    );
   }
 
   /// Use Case: Show the requested knowledge base document.
   void showDocumentPage(KnowledgebaseDocumentId documentId) {
-    KnowledgebaseDocument document = _storageBoundary.loadDocument(documentId);
-    _presentationBoundary.showKnowledgebaseDocument(document);
+    unawaited(
+      _storageBoundary
+          .loadDocument(documentId)
+          .then(_presentationBoundary.showKnowledgebaseDocument),
+    );
   }
 }

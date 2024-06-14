@@ -30,8 +30,8 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
   }
 
   @override
-  KnowledgebaseDocument loadDocument(KnowledgebaseDocumentId identifier) {
-    List<String> blob = _repository.loadStringContent(identifier);
+  Future<KnowledgebaseDocument> loadDocument(KnowledgebaseDocumentId identifier) async {
+    List<String> blob = await _repository.loadStringContent(identifier);
     String title = _extractDocumentTitle(blob);
     String content = _extractDocumentBody(blob);
     return KnowledgebaseDocument(identifier, title, content);
