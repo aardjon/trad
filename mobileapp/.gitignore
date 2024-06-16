@@ -13,3 +13,5 @@
 **/*.iml
 **/pubspec_overrides.yaml
 */build/
+
+artifacts
