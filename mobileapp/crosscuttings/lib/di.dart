@@ -29,8 +29,8 @@ class DependencyProvider {
   /// Registers a new implementation for the interface [T].
   ///
   /// The [instanceFactory] is a functor that must return a new instance of [T]. It will be called
-  /// at any time, at the latest when the instance requested via [provide()]. Any previously
-  /// registered implementation is discarded.
+  /// at any time, at the latest when the instance requested via [provide()]. Any previous
+  /// implementation registration is discarded.
   ///
   /// Registration should be done only once during start up from within `trad.main`.
   void register<T extends Object>(T Function() instanceFactory) {
