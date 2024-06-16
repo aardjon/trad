@@ -8,8 +8,12 @@ import 'dart:io';
 import 'package:core/boundaries/storage/knowledgebase.dart';
 import 'package:core/entities.dart';
 import 'package:crosscuttings/di.dart';
+import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/repositories.dart';
+
+/// Logger to be used in this library file.
+final Logger _logger = Logger("trad.adapters.storage.knowledgebase");
 
 /// Implementation of the storage adapter used by the core to interact with the knowledge base
 /// repository.
@@ -23,6 +27,7 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
 
   @override
   KnowledgebaseDocumentId getHomeIdentifier() {
+    _logger.debug("Retrieving home document ID");
     BlobNamespace knowledgebaseNamespace = _repository.getAllNamespaces().firstWhere(
           (BlobNamespace element) => element.contains("knowledgebase"),
         );
@@ -31,9 +36,12 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
 
   @override
   Future<KnowledgebaseDocument> loadDocument(KnowledgebaseDocumentId identifier) async {
+    _logger.debug("Loading document $identifier");
     List<String> blob = await _repository.loadStringContent(identifier);
+    _logger.debug("Document $identifier loaded, processing");
     String title = _extractDocumentTitle(blob);
     String content = _extractDocumentBody(blob);
+    _logger.debug("Processed document $identifier");
     return KnowledgebaseDocument(identifier, title, content);
   }
 

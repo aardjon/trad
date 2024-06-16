@@ -13,9 +13,13 @@ import 'package:flutter/scheduler.dart';
 
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
+import 'package:crosscuttings/logging/logger.dart';
 
 import 'src/ui/framing.dart';
 import 'src/ui/routes.dart';
+
+/// Logger to be used in this library file.
+final Logger _logger = Logger("trad.infrastructure_flutter.ui");
 
 /// Implementation of the boundary interface used by the `adapters` to communicate with the concrete
 /// UI.
@@ -55,6 +59,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void showKnowledgebase(KnowledgebaseModel document) {
+    _logger.debug("Displaying knowledgebase page with title '${document.documentTitle}'");
     SchedulerBinding.instance.addPostFrameCallback((_) {
       unawaited(
         navigatorKey.currentState!

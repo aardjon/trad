@@ -6,10 +6,14 @@ library;
 import 'dart:async';
 
 import 'package:crosscuttings/di.dart';
+import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/knowledgebase.dart';
 import '../entities.dart';
+
+/// Logger to be used in this library file.
+final Logger _logger = Logger("trad.core.usecases.knowledgebase");
 
 /// Use cases of the knowledge base domain.
 class KnowledgebaseUseCases {
@@ -26,6 +30,7 @@ class KnowledgebaseUseCases {
 
   /// Use Case: Switching to the home document of the knowledge base domain.
   void showHomePage() {
+    _logger.info("Running use case showHomePage()");
     KnowledgebaseDocumentId homeId = _storageBoundary.getHomeIdentifier();
     unawaited(
       _storageBoundary.loadDocument(homeId).then(_presentationBoundary.showKnowledgebaseDocument),
@@ -34,6 +39,7 @@ class KnowledgebaseUseCases {
 
   /// Use Case: Show the requested knowledge base document.
   void showDocumentPage(KnowledgebaseDocumentId documentId) {
+    _logger.info("Running use case showDocumentPage($documentId)");
     unawaited(
       _storageBoundary
           .loadDocument(documentId)
