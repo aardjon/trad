@@ -5,6 +5,7 @@ packages:
 
 scripts:
   analyze:
+    help: Run the Dart linter on all source files.
     run: melos analyze
 
   build.linux:
@@ -21,10 +22,16 @@ scripts:
       - mkdir -p artifacts
       - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/
 
+  deploy.android:
+    help: Install the build APK on the connected Android device (via ADB).
+    run: adb install artifacts/*.apk
+
   format:
+    help: Auto-format all source files according to our formatting rules.
     exec: dart format --line-length=100 --set-exit-if-changed .
 
   test:
+    help: Run all unit tests for the mobile application.
     steps:
       - melos exec --no-flutter --dir-exists=test dart test
       - melos exec --flutter --dir-exists=test flutter test
