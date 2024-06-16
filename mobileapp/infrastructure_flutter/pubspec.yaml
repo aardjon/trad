@@ -1,7 +1,6 @@
 name: infrastructure_flutter
 description: The Flutter part of the 'infrastructure' ring of the trad mobile application.
 version: 0.0.1
-homepage:
 publish_to: none
 
 environment:
@@ -33,8 +32,7 @@ flutter:
     - assets/knowledgebase/barbarine-wp.jpg
     - assets/knowledgebase/index.md
     - assets/knowledgebase/example.md
-  #   - images/a_dot_ham.jpeg
-  #
+
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages
   #

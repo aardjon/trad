@@ -7,7 +7,7 @@ packages:
       path: "../adapters"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "0.0.1"
   args:
     dependency: transitive
     description:
@@ -62,14 +62,14 @@ packages:
       path: "../core"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "0.0.1"
   crosscuttings:
     dependency: "direct main"
     description:
       path: "../crosscuttings"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "0.0.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -125,7 +125,7 @@ packages:
       path: "../infrastructure_vanilla"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "0.0.1"
   leak_tracker:
     dependency: transitive
     description:

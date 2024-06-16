@@ -1,7 +1,6 @@
 name: adapters
 description: The 'adapters' ring of the trad mobile application.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+version: 0.0.1
 publish_to: none
 
 environment:
