@@ -231,7 +231,7 @@ part touching all rings contains crosscutting concepts as described in
 This part contains all business entities and implements all business logic (use cases) on an
 abstract level. It also defines the interface to the `adapters` ring.
 
-Source location: [TODO]
+Source location: [mobileapp/core](../mobileapp/core)
 
 Implementation Rules:
  - Contains all domain specific data types the system works with
@@ -246,7 +246,7 @@ This part provides adapter implementations for connecting the `core` with `infra
 interfaces, converting the data structures coming from one part into the data structures needed
 by the other. It also defines the interface to the `infrastructure`.
 
-Source location: [TODO]
+Source location: [mobileapp/adapters](../mobileapp/adapters)
 
 Examples for adapter responsibilities:
  - Defining or translating a string being displayed to the user
@@ -263,7 +263,9 @@ Implementation Rules:
 This part contains all concrete implementations and all technical details. The special `main`
 and `test` components are considered a part of the infrastructure, too.
 
-Source location: [TODO]
+Source locations:
+ - [mobileapp/infrastructure_vanilla](../mobileapp/infrastructure_vanilla)
+ - [mobileapp/infrastructure_flutter](../mobileapp/infrastructure_flutter)
 
 Examples:
 
@@ -287,11 +289,10 @@ Implementation rules:
 
 Interface name | Source location
 ------------|--------------------------------------------------------
-boundaries.presentation | TODO
+boundaries.presentation | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/presentation.dart)
 boundaries.data_exchange | TODO
-boundaries.storage | TODO
+boundaries.storage | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/storage)
 boundaries.positioning | TODO
-boundaries.presentation | TODO
 
 ## 5.3 Level 2
 
@@ -330,14 +331,15 @@ Crosscutting components may use external libraries but not the **Flutter** frame
 dependencies must be completely encapsuled to make it easy to update/replace them in the future,
 if necessary.
 
-The API documentation of this system part is located at TODO.
+The API documentation of this system part is located as part of the source code within
+[mobileapp/crosscuttings](../mobileapp/crosscuttings)
 
 ## 8.1 Dependency Injection
 
 Provides the central mechanism for mapping interfaces (e.g. boundaries) to their concrete
 implementations.
 
-The source code is located at TODO.
+The source code is located at [crosscuttings/lib/di.dart](../mobileapp/crosscuttings/lib/di.dart).
 
 ### 8.1.1 Use Cases
 
@@ -366,7 +368,8 @@ more frequent updates, more fixed bugs).
 Provides a unified mechanism to record log messages to configured destinations (e.g. a log
 file).
 
-The source code is located at TODO.
+The public interface is located at [crosscuttings/lib/logging](../mobileapp/crosscuttings/lib/logging),
+the internal implementation at [crosscuttings/lib/src/logging](../mobileapp/crosscuttings/lib/src/logging).
 
 ### 8.1.1 Use Cases
 
