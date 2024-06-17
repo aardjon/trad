@@ -106,7 +106,7 @@ interfaces we plan or expect to use.
 
 # 4. Solution Strategy
 
-This section described our solution strategies for the quality goals. Please refer to
+This section describes our solution strategies for the quality goals. Please refer to
 [section 10](10-quality-requirements) for their descriptions.
 
 The mobile app will be written in [Dart 3](https://dart.dev/), mainly because we want to learn
@@ -128,7 +128,7 @@ use OOP as many of the former principles and patterns are probably easier to use
 To minimize manual testing effort we aim for a high unit test coverage. Test Driven Development
 can be a way to achieve this.
 
-We are using static analysis tools to get maximum of automated support. We start with a very
+We are using static analysis tools to maximize automated support. We start with a very
 pedantic configuration and always document the reason for disabling single checks. This
 documentation is embedded into the [linter configuration](../mobileapp/analysis_options.yaml)
 to make it easy to update in case of changes.
