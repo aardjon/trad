@@ -128,10 +128,10 @@ use OOP as many of the former principles and patterns are probably easier to use
 To minimize manual testing effort we aim for a high unit test coverage. Test Driven Development
 can be a way to achieve this.
 
-We are using static analysis tools to maximize automated support. We start with a very
-pedantic configuration and always document the reason for disabling single checks. This
-documentation is embedded into the [linter configuration](../mobileapp/analysis_options.yaml)
-to make it easy to update in case of changes.
+We are using static analysis tools to maximize automated support. We start with a very pedantic
+configuration and always document the reason for disabling single checks. This documentation is
+embedded into the [linter configuration](../mobileapp/analysis_options.yaml) to make it easy to
+update in case of changes.
 
 Resources:
  - [The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
@@ -161,14 +161,16 @@ incompatible format changes to a minimum.
 
 In general, compliance with laws has to be considered by the (functional) requirements
 already: Just don't implement components that send any data to external sites without explict
-user confirmation, and collect only the minimal data needed by the use cases. Copyright mainly
-regards external site data (e.g. route or regulation data). In case the license for using this
-data is unclear, we will request the external provider for explicit permission and/or license
-clarification.
+user confirmation, and collect only the minimal data needed by the use cases. Of course we don't
+use any possibly unwanted tracker tools, which may be proven by integrating tools like
+[Exodus Privacy](https://exodus-privacy.eu.org/) into the release process. At some point we have
+to decide for a software license which may influence which third-party libraries can be used. If
+we decide for some FLOSS license, we automatically provide transparency about collected data and
+data flows.
 
-At some point we have to decide for a software license. This decision may influence which
-third-party libraries can be used. If we decide for some FLOSS license, we automatically provide
-transparency about collected data and data flows.
+Copyright mainly regards external site data (e.g. route or regulation data). In case the license
+for using this data is unclear, we will request the external provider for explicit permission
+and/or license clarification.
 
 ## 4.5 Adaptability, Transferability (QREQ-7, QREQ-15)
 
