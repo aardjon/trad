@@ -1,0 +1,33 @@
+Table technical_grade {
+  technical_grade_id integer [primary key]
+  grade text [not null]
+  order integer [not null]
+}
+
+Table adjectival_grade {
+  adjectival_grade_id integer [primary key]
+  grade text [not null]
+  order integer [not null]
+}
+
+Table journal {
+  journal_id integer [primary key]
+  date date [not null]
+  area text [not null]
+  summit text [not null]
+  route text [not null]
+  technical_grade_id integer [not null]
+  adjectival_grade_id integer [null]
+  note text [null]  
+}
+
+Table team {
+  team_id integer [primary key]
+  journal_id integer [not null]
+  name text [not null]
+  order integer [not null]
+}
+
+Ref: team.journal_id > journal.journal_id
+Ref: journal.technical_grade_id > technical_grade.technical_grade_id
+Ref: journal.adjectival_grade_id > adjectival_grade.adjectival_grade_id
