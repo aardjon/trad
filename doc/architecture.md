@@ -334,7 +334,7 @@ if necessary.
 The API documentation of this system part is located as part of the source code within
 [mobileapp/crosscuttings](../mobileapp/crosscuttings)
 
-## 8.1 Dependency Injection
+## 8.1 Dependency Injection (DI)
 
 Provides the central mechanism for mapping interfaces (e.g. boundaries) to their concrete
 implementations.
