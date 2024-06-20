@@ -1,13 +1,13 @@
 Table technical_grade {
   technical_grade_id integer [primary key]
   grade text [not null]
-  order integer [not null]
+  position integer [not null]
 }
 
 Table adjectival_grade {
   adjectival_grade_id integer [primary key]
   grade text [not null]
-  order integer [not null]
+  position integer [not null]
 }
 
 Table journal {
@@ -25,7 +25,7 @@ Table team {
   team_id integer [primary key]
   journal_id integer [not null]
   name text [not null]
-  order integer [not null]
+  position integer [not null]
 }
 
 Ref: team.journal_id > journal.journal_id
