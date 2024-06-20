@@ -13,14 +13,14 @@ scripts:
     steps:
       - cd main && flutter build linux --release
       - mkdir -p artifacts
-      - mv main/build/linux/x64/release/bundle/main artifacts/
+      - mv main/build/linux/x64/release/bundle/trad artifacts/trad_linux
       
   build.android:
     help: Does an Android build in release mode.
     steps:
       - cd main && flutter build apk --release
       - mkdir -p artifacts
-      - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/
+      - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/trad_android.apk
 
   deploy.android:
     help: Install the build APK on the connected Android device (via ADB).
