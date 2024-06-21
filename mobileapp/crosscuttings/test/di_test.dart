@@ -37,5 +37,13 @@ void main() {
       // Syntax for custom exceptions:
       // expect(di.provide<ExampleInterface2>, throwsA(isA<StateError>()));
     });
+
+    /// Ensure that all instances share the same DI configuration
+    ///  - Return the registered implementation, if any    
+    test('testSharedConfiguration', () {
+      DependencyProvider localDependencyProvider = DependencyProvider();
+      expect(localDependencyProvider.provide<ExampleInterface1>(),
+             const TypeMatcher<ExampleImpl>());      
+    });
   });
 }
