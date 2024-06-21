@@ -1,3 +1,5 @@
+-- Insert three new logs
+
 INSERT INTO journal (date, area, summit, route, technical_grade_id)
 VALUES (
         "2024-06-14",
@@ -47,3 +49,10 @@ VALUES (
         ),
         "Man kann nicht wirklich rausfallen"
     );
+
+-- Insert team for first log entry
+
+INSERT INTO team (journal_id, name, position)
+VALUES (1, "John Doe", 0),
+    (1, "Jane Smith", 1),
+    (1, "Alice Johnson", 2);

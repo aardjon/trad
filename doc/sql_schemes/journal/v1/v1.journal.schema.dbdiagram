@@ -28,6 +28,11 @@ Table team {
   position integer [not null]
 }
 
+Table version_info {
+  version_info_id integer [primary key]
+  version integer [not null]
+}
+
 Ref: team.journal_id > journal.journal_id
 Ref: journal.technical_grade_id > technical_grade.technical_grade_id
 Ref: journal.adjectival_grade_id > adjectival_grade.adjectival_grade_id

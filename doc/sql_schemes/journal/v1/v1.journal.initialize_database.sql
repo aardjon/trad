@@ -1,3 +1,13 @@
+-- Create table for version info and insert current version
+
+CREATE TABLE version_info (
+    version_info_id INTEGER PRIMARY KEY CHECK (version_info_id = 1),
+    version INTEGER NOT NULL CHECK (version > 0)
+);
+
+INSERT INTO version_info (version_info_id, version)
+VALUES (1, 1);
+
 -- Create table for technical grades and insert data
 
 CREATE TABLE IF NOT EXISTS technical_grade (
