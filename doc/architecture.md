@@ -206,7 +206,7 @@ The general rules for source code dependencies are:
  - Inter-ring (source) dependencies are only allowed from the outer to inner rings
  - All rings may depend on the `crosscutting` part
  - Each ring declares the interfaces it needs to interact with the next outer ring (dependency inversion)
- - In general, each ring shall depend on the next inner ring (e.g. `infrastructure` shall not depend on `core` components) only
+ - In general, each ring shall depend on the next inner ring only (e.g. `infrastructure` shall not depend on `core` components)
  - In general, top-level components within a single ring shall not depend on each other in most cases (there may be exceptions for `common`/`util` components)
  - Each call/event/"input" starts at the `infrastructure` ring (e.g. UI) and has to go down to a `core` usecase (no shortcuts are allowed)
 
@@ -285,7 +285,7 @@ Implementation rules:
  - In general: "This ring shall be as dumb as possible"
  - All third party/external libs are allowed as needed
 
-### 5.2.2 Interface documentation
+### 5.2.3 Interface documentation
 
 Interface name | Source location
 ------------|--------------------------------------------------------
