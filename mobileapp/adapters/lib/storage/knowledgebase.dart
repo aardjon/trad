@@ -13,7 +13,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import '../boundaries/repositories.dart';
 
 /// Logger to be used in this library file.
-final Logger _logger = Logger("trad.adapters.storage.knowledgebase");
+final Logger _logger = Logger('trad.adapters.storage.knowledgebase');
 
 /// Implementation of the storage adapter used by the core to interact with the knowledge base
 /// repository.
@@ -27,21 +27,21 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
 
   @override
   KnowledgebaseDocumentId getHomeIdentifier() {
-    _logger.debug("Retrieving home document ID");
+    _logger.debug('Retrieving home document ID');
     BlobNamespace knowledgebaseNamespace = _repository.getAllNamespaces().firstWhere(
-          (BlobNamespace element) => element.contains("knowledgebase"),
+          (BlobNamespace element) => element.contains('knowledgebase'),
         );
     return _repository.getIndexBlobId(knowledgebaseNamespace);
   }
 
   @override
   Future<KnowledgebaseDocument> loadDocument(KnowledgebaseDocumentId identifier) async {
-    _logger.debug("Loading document $identifier");
+    _logger.debug('Loading document $identifier');
     List<String> blob = await _repository.loadStringContent(identifier);
-    _logger.debug("Document $identifier loaded, processing");
+    _logger.debug('Document $identifier loaded, processing');
     String title = _extractDocumentTitle(blob);
     String content = _extractDocumentBody(blob);
-    _logger.debug("Processed document $identifier");
+    _logger.debug('Processed document $identifier');
     return KnowledgebaseDocument(identifier, title, content);
   }
 
@@ -51,7 +51,7 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
   /// title as the very first line. Any prepending Markdown annotation (e.g. '#') is removed.
   String _extractDocumentTitle(List<String> blobData) {
     String titleLine = blobData[0].trim();
-    while (titleLine.startsWith("#")) {
+    while (titleLine.startsWith('#')) {
       titleLine = titleLine.substring(1);
     }
     return titleLine.trim();

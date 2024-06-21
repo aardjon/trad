@@ -19,7 +19,7 @@ import 'src/ui/framing.dart';
 import 'src/ui/routes.dart';
 
 /// Logger to be used in this library file.
-final Logger _logger = Logger("trad.infrastructure_flutter.ui");
+final Logger _logger = Logger('trad.infrastructure_flutter.ui');
 
 /// Implementation of the boundary interface used by the `adapters` to communicate with the concrete
 /// UI.

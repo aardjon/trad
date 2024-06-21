@@ -26,10 +26,10 @@ class ApplicationWidePresenter implements PresentationBoundary {
       'trad - Climbing in Saxony',
       'Initializing...',
       const DomainLabelDefinition(
-        "Journal",
-        "Climbing Routes",
-        "Knowledgebase",
-        "About",
+        'Journal',
+        'Climbing Routes',
+        'Knowledgebase',
+        'About',
       ),
     );
   }

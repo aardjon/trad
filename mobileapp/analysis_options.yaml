@@ -98,8 +98,8 @@ analyzer:
 #   https://dart.dev/guides/libraries/create-packages#importing-library-files). Conflicts with
 #   always_use_package_imports (which is therefore disabled).
 
-# prefer_single_quote: Enabled because this is the way want to do it consistently (it's just a
-#   matter of personal preference).
+# prefer_single_quote: Enabled because this is the way we want to do it consistently (it's just
+#   a matter of personal preference).
 
 # sort_constructors_first: Disabled because we want to be able to put class members first (so that
 #   they are easy to find).

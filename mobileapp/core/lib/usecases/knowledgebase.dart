@@ -13,7 +13,7 @@ import '../boundaries/storage/knowledgebase.dart';
 import '../entities.dart';
 
 /// Logger to be used in this library file.
-final Logger _logger = Logger("trad.core.usecases.knowledgebase");
+final Logger _logger = Logger('trad.core.usecases.knowledgebase');
 
 /// Use cases of the knowledge base domain.
 class KnowledgebaseUseCases {
@@ -30,7 +30,7 @@ class KnowledgebaseUseCases {
 
   /// Use Case: Switching to the home document of the knowledge base domain.
   void showHomePage() {
-    _logger.info("Running use case showHomePage()");
+    _logger.info('Running use case showHomePage()');
     KnowledgebaseDocumentId homeId = _storageBoundary.getHomeIdentifier();
     unawaited(
       _storageBoundary.loadDocument(homeId).then(_presentationBoundary.showKnowledgebaseDocument),
@@ -39,7 +39,7 @@ class KnowledgebaseUseCases {
 
   /// Use Case: Show the requested knowledge base document.
   void showDocumentPage(KnowledgebaseDocumentId documentId) {
-    _logger.info("Running use case showDocumentPage($documentId)");
+    _logger.info('Running use case showDocumentPage($documentId)');
     unawaited(
       _storageBoundary
           .loadDocument(documentId)

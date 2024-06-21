@@ -30,19 +30,19 @@ void main() {
       logConfig.globalLevel = level;
 
       // Run the actual test case
-      final Logger logger = Logger("test.channel");
-      logger.fatal("Message 1");
-      logger.fatal("Message 2");
-      logger.error("Message 3");
-      logger.error("Message 4");
-      logger.warning("Message 5");
-      logger.warning("Message 6");
-      logger.info("Message 7");
-      logger.info("Message 8");
-      logger.debug("Message 9");
-      logger.debug("Message 10");
-      logger.trace("Message 11");
-      logger.trace("Message 12");
+      final Logger logger = Logger('test.channel');
+      logger.fatal('Message 1');
+      logger.fatal('Message 2');
+      logger.error('Message 3');
+      logger.error('Message 4');
+      logger.warning('Message 5');
+      logger.warning('Message 6');
+      logger.info('Message 7');
+      logger.info('Message 8');
+      logger.debug('Message 9');
+      logger.debug('Message 10');
+      logger.trace('Message 11');
+      logger.trace('Message 12');
 
       // Check whether the log output is as expected
       List<String> fileContent = (logConfig.destination as MemoryLogDestination).loggedMessages;
@@ -52,7 +52,7 @@ void main() {
 
       // Ensure that all messages of the activated levels have been written in the correct order
       for (int i = 1; i < expectedMessageCount; i++) {
-        expect(fileContent[i - 1], contains("Message $i"));
+        expect(fileContent[i - 1], contains('Message $i'));
       }
     }
 
@@ -115,8 +115,8 @@ void main() {
 
   /// Special test cases to ensure that logging works correctly with all handler implementations
   group('crosscuttings.logging.handlers', () {
-    const String exampleMessage = "Example Message";
-    const String exampleChannel = "test.channel";
+    const String exampleMessage = 'Example Message';
+    const String exampleChannel = 'test.channel';
 
     Logger configureLogging(LogDestination destination) {
       final LogConfiguration logConfig = LogConfiguration();
@@ -137,7 +137,7 @@ void main() {
     /// Ensures that a log file is written and contains the sent log message
     void testFileHandler() {
       // Create a log file directory
-      const String logFileName = "testexample.log";
+      const String logFileName = 'testexample.log';
       Directory tempDir = Directory.systemTemp.createTempSync('trad_test_');
       File logFile = File('${tempDir.path}${Platform.pathSeparator}$logFileName');
 

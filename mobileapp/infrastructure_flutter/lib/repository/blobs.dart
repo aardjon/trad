@@ -14,21 +14,21 @@ import 'package:adapters/boundaries/repositories.dart';
 // TODO(aardjon): For now, this is just a stub returning hard coded data.
 class AssetRepository implements BlobRepositoryBoundary {
   // Prefix for all BlobIds referring to assets of the [infrastructure_flutter] package.
-  static const String _assetPrefix = "packages/infrastructure_flutter/assets";
+  static const String _assetPrefix = 'packages/infrastructure_flutter/assets';
 
   @override
   List<BlobNamespace> getAllNamespaces() {
-    return <BlobNamespace>["knowledgebase"];
+    return <BlobNamespace>['knowledgebase'];
   }
 
   @override
   BlobId getIndexBlobId(BlobNamespace namespace) {
-    return "$_assetPrefix/$namespace/index.md";
+    return '$_assetPrefix/$namespace/index.md';
   }
 
   @override
   Future<List<String>> loadStringContent(BlobId id) async {
     String blobContent = await rootBundle.loadString(id);
-    return blobContent.trim().split("\n");
+    return blobContent.trim().split('\n');
   }
 }

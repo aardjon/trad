@@ -29,7 +29,7 @@ void main() {
 /// successful initialization, it starts the main use case.
 class ApplicationBootstrap {
   /// Logger for the bootstrap process.
-  final Logger _logger = Logger("trad.main");
+  final Logger _logger = Logger('trad.main');
 
   /// DI instance for configuring all the system parts.
   final DependencyProvider _dependencyProvider = DependencyProvider();
@@ -38,19 +38,19 @@ class ApplicationBootstrap {
   void boot() {
     _initApp();
     _startApp();
-    _logger.info("Application started successfully");
+    _logger.info('Application started successfully');
   }
 
   /// Initializes the trad application.
   void _initApp() {
     _setupLogging(); // Setup logging before anything else to allow logging as soon as possible
-    _logger.info("Bootstrapping trad application");
+    _logger.info('Bootstrapping trad application');
     _setupDependencies();
   }
 
   /// Starts the trad application.
   void _startApp() {
-    _logger.info("Starting trad application");
+    _logger.info('Starting trad application');
     ApplicationWideUseCases appUseCases = ApplicationWideUseCases(_dependencyProvider);
     appUseCases.startApplication();
   }
@@ -66,7 +66,7 @@ class ApplicationBootstrap {
 
   /// Initializes the dependency injection framework.
   void _setupDependencies() {
-    _logger.info("Initializing dependencies");
+    _logger.info('Initializing dependencies');
 
     _dependencyProvider.register<PresentationBoundary>(ApplicationWidePresenter.new);
     _dependencyProvider.register<ApplicationUiBoundary>(ApplicationUI.new);

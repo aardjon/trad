@@ -30,15 +30,15 @@ enum UiRoute {
   String toRouteString() {
     switch (this) {
       case splash:
-        return "/splash";
+        return '/splash';
       case journal:
-        return "/journal";
+        return '/journal';
       case routedb:
-        return "/routedb";
+        return '/routedb';
       case knowledgebase:
-        return "/knowledgebase";
+        return '/knowledgebase';
       case about:
-        return "/about";
+        return '/about';
     }
   }
 }

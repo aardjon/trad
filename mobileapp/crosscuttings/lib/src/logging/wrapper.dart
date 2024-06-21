@@ -93,7 +93,7 @@ class LogConfigWrapper {
     } else if (destination is MemoryLogDestination) {
       return MemoryLogHandler(destination.loggedMessages);
     }
-    throw ArgumentError("Unable to create log handler for unexpected destination of type "
+    throw ArgumentError('Unable to create log handler for unexpected destination of type '
         "'${destination.runtimeType}'");
   }
 

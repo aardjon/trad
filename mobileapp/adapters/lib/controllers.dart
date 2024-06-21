@@ -16,7 +16,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import 'boundaries/repositories.dart';
 
 /// Logger to be used in this library file.
-final Logger _logger = Logger("trad.adapters.controllers");
+final Logger _logger = Logger('trad.adapters.controllers');
 
 /// Controller for transmitting UI messages to the core.
 ///
@@ -56,7 +56,7 @@ class KnowledgebaseController {
 
   /// The user requested to display the document wit ID [documentId].
   void requestShowDocument(BlobId documentId) {
-    _logger.debug("UI request: Show knowledgebase document $documentId");
+    _logger.debug('UI request: Show knowledgebase document $documentId');
     _knowledgebaseUsecases.showDocumentPage(documentId);
   }
 }
