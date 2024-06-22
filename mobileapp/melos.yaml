@@ -6,7 +6,7 @@ packages:
 scripts:
   analyze:
     help: Run the Dart linter on all source files.
-    run: melos analyze
+    run: melos analyze --fatal-infos
 
   build.linux:
     help: Does a Linux build in release mode.

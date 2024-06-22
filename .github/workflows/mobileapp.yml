@@ -59,6 +59,32 @@ jobs:
       - name: Check code style
         run: melos run format
 
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./mobileapp
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.22.x
+
+      - name: Setup environment
+        run: |
+             echo "--- Configure Flutter"
+             flutter config --no-analytics
+             flutter config --no-cli-animations
+             echo "--- Install Melos"
+             dart pub global activate melos
+             echo "--- Install requirements"
+             melos bootstrap
+
+      - name: Run the Dart linter
+        run: melos run analyze
         
   test:
     runs-on: ubuntu-latest
@@ -84,7 +110,3 @@ jobs:
 
       - name: Run all tests
         run: melos run test
-
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      #- name: Analyze project source
-      #  run: dart analyze
