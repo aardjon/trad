@@ -10,7 +10,7 @@ import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/knowledgebase.dart';
-import '../entities.dart';
+import '../entities/knowledgebase.dart';
 
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.core.usecases.knowledgebase');

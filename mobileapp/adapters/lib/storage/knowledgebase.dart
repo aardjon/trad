@@ -6,7 +6,7 @@ library;
 import 'dart:io';
 
 import 'package:core/boundaries/storage/knowledgebase.dart';
-import 'package:core/entities.dart';
+import 'package:core/entities/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 

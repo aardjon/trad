@@ -11,3 +11,6 @@ doc/*.bkp
 
 # Coverage analysis output
 **/coverage
+
+# Visual Studio Code
+.vscode/

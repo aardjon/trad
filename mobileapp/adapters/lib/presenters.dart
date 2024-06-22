@@ -9,7 +9,7 @@
 library;
 
 import 'package:core/boundaries/presentation.dart';
-import 'package:core/entities.dart';
+import 'package:core/entities/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 
 import 'boundaries/ui.dart';
