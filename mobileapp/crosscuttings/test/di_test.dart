@@ -38,12 +38,14 @@ void main() {
       // expect(di.provide<ExampleInterface2>, throwsA(isA<StateError>()));
     });
 
-    /// Ensure that all instances share the same DI configuration
-    ///  - Return the registered implementation, if any    
+    /// Ensure that all instances share the same DI configuration: A different instance must return
+    /// the registered implementation, too.
     test('testSharedConfiguration', () {
       DependencyProvider localDependencyProvider = DependencyProvider();
-      expect(localDependencyProvider.provide<ExampleInterface1>(),
-             const TypeMatcher<ExampleImpl>());      
+      expect(
+        localDependencyProvider.provide<ExampleInterface1>(),
+        const TypeMatcher<ExampleImpl>(),
+      );
     });
   });
 }
