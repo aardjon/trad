@@ -30,6 +30,8 @@ jobs:
              flutter config --no-cli-animations
              echo "--- Install Melos"
              dart pub global activate melos
+             echo "--- Install requirements"
+             melos bootstrap
 
       - name: Build app in release mode
         run: melos run build.${{ matrix.platform }}
@@ -107,6 +109,8 @@ jobs:
              flutter config --no-cli-animations
              echo "--- Install Melos"
              dart pub global activate melos
+             echo "--- Install requirements"
+             melos bootstrap
 
       - name: Run all tests
         run: melos run test
