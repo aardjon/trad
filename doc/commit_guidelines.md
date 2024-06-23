@@ -1,13 +1,15 @@
-# Commit Message Guidelines
+# Commit Guideline
 
-These guidelines help ensure consistent and understandable commit messages, making the project easier to maintain.
+## Commit Messages
 
-## General Rules
+These guidelines help to ensure consistent and understandable commit messages, making the project easier to maintain.
+
+### General Rules
 
 - Use the imperative form in the present tense.
 - Add an empty line between the summary and the description.
 
-## Structure of a Commit Message
+### Structure of a Commit Message
 
 1. **Summary**
     - Briefly and concisely describe what the change does.
@@ -20,7 +22,7 @@ These guidelines help ensure consistent and understandable commit messages, maki
       This commit fixes that typo to improve clarity.
       ```
 
-## Recommended Prefixes for Commit Messages
+### Recommended Prefixes for Commit Messages
 
 - **feat:** Commits, that adds or remove a new feature
 - **fix:** Commits, that fixes a bug
@@ -33,7 +35,7 @@ These guidelines help ensure consistent and understandable commit messages, maki
 - **ci:** Commits, that affect CI configuration
 - **clean**: Commits, that removes unnecessary code or files
 
-## Examples
+### Examples
 
 - `feat: add user login functionality`
 - `fix: resolve issue with user profile update`
@@ -46,8 +48,11 @@ These guidelines help ensure consistent and understandable commit messages, maki
 - `ci: update CI configuration for new environment`
 - `clean: remove unused imports and variables`
 
+
 ## Best Practices
 
 - Commits should be small and focused.
-- Use branches for developing new features or bug fixes.
 - Avoid unclear commit messages like `fix bug` or `update`.
+- The `main` branch shall always be sane, i.e. the CI pipeline shall succeed for all commits.
+- Use branches for developing new features or bug fixes.
+- Do not *fast forward* merge branches with more than a single commit (create a dedicated merge commit instead).
