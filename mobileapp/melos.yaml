@@ -35,3 +35,11 @@ scripts:
     steps:
       - melos exec --no-flutter --dir-exists=test dart test
       - melos exec --flutter --dir-exists=test flutter test
+
+  upgrade:
+    help: Upgrades all dependencies to their current versions.
+    steps:
+      - melos exec rm -f pubspec_overrides.yaml
+      - melos exec rm -f pubspec.lock
+      - rm pubspec.lock
+      - melos bootstrap
