@@ -17,7 +17,7 @@ export 'config.dart';
 /// create one [Logger] per source file.
 ///
 /// Usage example:
-/// ```
+/// ```dart
 /// Logger logger = Logger('trad.core.example');
 /// logger.info('Created the first logger');
 /// ```

@@ -8,7 +8,7 @@ import 'package:get_it/get_it.dart';
 /// Central entry point for registering or retrieving the concrete boundary implementations.
 ///
 /// Usage example:
-/// ```
+/// ```dart
 /// DependencyProvider di = DependencyProvider();
 /// JournalStorageBoundary journalStorage = di.provide<JournalStorageBoundary>();
 /// ```
