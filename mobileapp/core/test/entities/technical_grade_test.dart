@@ -10,9 +10,8 @@ import 'package:core/entities/technical_grade.dart';
 /// Unit tests for the technical grade enum.
 void main() {
   group('technicalGrade', () {
-    
     test('toString returns correct caption', () {
-      Map<TechnicalGrade, String> expected = <TechnicalGrade, String> {
+      Map<TechnicalGrade, String> expected = <TechnicalGrade, String>{
         TechnicalGrade.i: 'I',
         TechnicalGrade.ii: 'II',
         TechnicalGrade.iii: 'III',
@@ -52,7 +51,7 @@ void main() {
       expected.forEach((TechnicalGrade technicalGrade, String exectedString) {
         String actualString = technicalGrade.toString();
         expect(actualString, exectedString);
-      });      
+      });
     });
 
     test('greater than operator', () {
@@ -60,9 +59,9 @@ void main() {
       expect(TechnicalGrade.vi > TechnicalGrade.v, isTrue);
       expect(TechnicalGrade.jump3 > TechnicalGrade.jump1, isTrue);
       expect(TechnicalGrade.vi > TechnicalGrade.vi, isFalse);
-      expect(TechnicalGrade.v > TechnicalGrade.vi, isFalse);                     
-    });      
-    
+      expect(TechnicalGrade.v > TechnicalGrade.vi, isFalse);
+    });
+
     test('less than operator', () {
       expect(TechnicalGrade.jump2 < TechnicalGrade.jump4, isTrue);
       expect(TechnicalGrade.xia < TechnicalGrade.xic, isTrue);
@@ -82,5 +81,5 @@ void main() {
       expect(TechnicalGrade.vi <= TechnicalGrade.vi, isTrue);
       expect(TechnicalGrade.vi <= TechnicalGrade.v, isFalse);
     });
-  });    
+  });
 }

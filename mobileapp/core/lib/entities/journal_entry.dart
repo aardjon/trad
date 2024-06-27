@@ -44,10 +44,18 @@ class JournalEntry {
   final String? note;
 
   /// Constructor for directly initializing all members.
-  const JournalEntry(this.identifier, this.date, this.area, this.summit, this.route,
-                     this.technicalGrade, this.adjectivalGrade, this.note,);
+  const JournalEntry(
+    this.identifier,
+    this.date,
+    this.area,
+    this.summit,
+    this.route,
+    this.technicalGrade,
+    this.adjectivalGrade,
+    this.note,
+  );
 
-  @override  
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
@@ -61,8 +69,8 @@ class JournalEntry {
         other.adjectivalGrade == adjectivalGrade &&
         other.note == note;
   }
-  
-  @override  
+
+  @override
   int get hashCode {
     return identifier.hashCode ^
         date.hashCode ^
@@ -72,5 +80,5 @@ class JournalEntry {
         technicalGrade.hashCode ^
         adjectivalGrade.hashCode ^
         note.hashCode;
-  }              
+  }
 }
