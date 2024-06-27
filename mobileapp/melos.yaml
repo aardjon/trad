@@ -22,6 +22,14 @@ scripts:
       - mkdir -p artifacts
       - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/trad_android.apk
 
+  coverage:
+    help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
+    steps:
+      - melos exec dart pub global run coverage:format_coverage --packages=.dart_tool/package_config.json --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
+      - dart pub global run combine_coverage --repo-path=.
+      - genhtml -o ./coverage/report ./coverage/lcov.info
+      #dart pub global activate combine_coverage
+      
   deploy.android:
     help: Install the build APK on the connected Android device (via ADB).
     run: adb install artifacts/*.apk
@@ -33,11 +41,11 @@ scripts:
   test:
     help: Run all unit tests for the mobile application.
     steps:
-      - melos exec --no-flutter --dir-exists=test dart test
-      - melos exec --flutter --dir-exists=test flutter test
+      - melos exec --no-flutter --dir-exists=test dart test --coverage=./coverage
+      - melos exec --flutter --dir-exists=test flutter test --coverage
 
   upgrade:
-    help: Upgrades all dependencies to their current versions.
+    help: Upgrades all dependencies to their most current (allowed) versions.
     steps:
       - melos exec rm -f pubspec_overrides.yaml
       - melos exec rm -f pubspec.lock

@@ -67,6 +67,10 @@ The `format` script auto-formats the sources according to our coding style guide
 
 The `test` script runs all unit tests (i.e. `dart test` or `flutter test`) for all sub projects and gathers code coverage information.
 
+### upgrade: Upgrade all dependencies
+
+The `upgrade` script upgrades all dependencies to the most current versions that are allowed by the constraints in the `pubspec.yaml` files. All affected `pubspec_overrides.yaml` and `pubspec.lock` files are regenerated.
+
 
 ## CI workflows
 
