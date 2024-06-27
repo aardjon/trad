@@ -13,7 +13,8 @@ scripts:
     steps:
       - cd main && flutter build linux --release
       - mkdir -p artifacts
-      - mv main/build/linux/x64/release/bundle/trad artifacts/trad_linux
+      - cd main/build/linux/x64/release/bundle/ && zip -r trad_linux.zip .
+      - mv main/build/linux/x64/release/bundle/trad_linux.zip artifacts/
       
   build.android:
     help: Does an Android build in release mode.
