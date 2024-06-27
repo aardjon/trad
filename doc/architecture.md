@@ -300,13 +300,41 @@ boundaries.positioning | TODO
 
 ![Refinement of the `core`](bbview_level2_core.png)
 
+#### `core.entities`
+
+Contains the basic data model (types and data structures) of the application. Must not depend on anything else, but every other component is allowed to depend on it.
+
+Source location: [mobileapp/core/lib/entities](../mobileapp/core/lib/entities)
+
+#### `core.boundaries`
+
+Defines the interfaces (no implementations!) to the `adapters` ring. Separated into specific sub systems like storage or presentation. Interfaces may only depend on `entities`, not on each other.
+
+Source location: [mobileapp/core/lib/boundaries](../mobileapp/core/lib/boundaries)
+
+#### `core.usecases`
+
+Implementation of all use cases. Further separated into the different application domains. Each use case may depend on other use cases and an all core boundaries.
+
+Source location: [mobileapp/core/lib/usecases](../mobileapp/core/lib/usecases)
+
+
 ### 5.3.2 `adapters`
 
 ![Refinement of the `adapters`](bbview_level2_adapters.png)
 
+#### `adapters.boundaries`
+
+Defines the interfaces (no implementations!) to the `infrastructure` ring. Separated into specific sub systems like `repositories` or `presentation`. The interfaces shall neither depend on any `core` structures (not even `core.entities`) nor on each other.
+
+Source location: [mobileapp/adapters/lib/boundaries](../mobileapp/adapters/lib/boundaries)
+
+
 ### 5.3.3 `infrastructure`
 
 ![Refinement of the `infrastructure`](bbview_level2_infrastructure.png)
+
+Split into the `flutter` and the `vanilla` variant, which must not depend on each other.
 
 
 # 6. Runtime View
