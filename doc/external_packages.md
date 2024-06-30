@@ -77,3 +77,39 @@ libraries providing just the mapping have been considered:
 
 We are using `GetIt` because it seems to be more actively developed (as in: more versions,
 more frequent updates, more fixed bugs).
+
+
+# 2 Unit Testing
+
+External libraries used by unit tests. They are just *dev* dependencies.
+
+## 2.1 Mocking Framework
+
+For generating mock for unit tests, the following libraries have been considered:
+ 1. [mockito](https://pub.dev/packages/mockito)
+ 2. [mocktail](https://pub.dev/packages/mocktail)
+
+We finally decided to use `mocktail`(#2). Note that due to the similar APIs, it should be relatively
+easy to switch to `mockito`in the future if it becomes necessary.
+
+### mockito
+
+Advantages:
+  - Recommended by the [Dart documentation](https://dart.dev/guides/testing#generally-useful-libraries), probably kind of de-facto standard
+  - Mature and feature-rich (has been there for several years)
+ 
+Disadvanatages:
+ - Quite complex, needs explicit code generation (which requires additional build steps and a separate package)
+ - Documentation seems to lack some information (e.g. introduction how-to doesn't work as-is; no information about how to generate the mocks)
+
+### mocktail
+
+Advantages:
+ - Lightweight, easier to learn
+ - Doesn't require code generation
+ - Same (or at least very similar) API as `mockito`
+
+Disadvantages:
+ - Quite new, i.e. its API may change in the future
+ - Seems to lack some popular features that are provided with the [`mocktailx`](https://pub.dev/documentation/mocktailx) extension package
+ - Unclear limitations (i.e. what `mockito`s code generation is actually needed for)
