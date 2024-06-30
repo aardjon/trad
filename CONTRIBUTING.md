@@ -50,3 +50,7 @@ IDEs with Dart/Flutter support (e.g. Android Studio) usually rely on the Dart to
 - All public communication (code comments, documentation, log messages) as well as code entity names shall be in English.
 - Before committing a change, always run the auto formatter and the linter (i.e. `melos run format` and `melos run analyze`).
 - See [Commit Guidelines](doc/commit_guidelines.md) for rules about commits and commit messages.
+
+## Architecture
+
+For studying and modifying the *trad* sources, some understanding of its basic structure and design decisions may be useful. So it is probably a good idea to read the [Software Architecture Documentation](doc/architecture.md) before contributing a change.
