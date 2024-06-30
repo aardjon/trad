@@ -94,14 +94,14 @@ licensed as FLOSS (free, libre and open source software).
 
 The following diagram shows the system context and the data flows to and from external entities.
 
-![Business context diagram, showing external data flows](contextview_business.png)
+![Business context diagram, showing external data flows](architecture/contextview_business.png)
 
 ## 3.2 Technical context
 
 The following diagram shows the dependencies between *trad* and external systems, along with the
 interfaces we plan or expect to use.
 
-![Technical context diagram, showing external dependencies](contextview_technical.png)
+![Technical context diagram, showing external dependencies](architecture/contextview_technical.png)
 
 
 # 4. Solution Strategy
@@ -198,7 +198,7 @@ automatically without the users knowledge (see [4.4 Compliance, Security](#44-co
 The following diagram provides an overview of the mobile app architecture, which is refined more
 detailled in the following sections.
 
-![Architectural overview](sysarc-overview.png)
+![Architectural overview](architecture/sysarc-overview.png)
 
 The general rules for source code dependencies are:
  - The most important and most abstract code is inner most
@@ -212,7 +212,7 @@ The general rules for source code dependencies are:
 
 ## 5.2 Level 1
 
-![Refinement of the first level](bbview_level1.png)
+![Refinement of the first level](architecture/bbview_level1.png)
 
 ### 5.2.1 Motivation
 
@@ -298,7 +298,7 @@ boundaries.positioning | TODO
 
 ### 5.3.1 `core`
 
-![Refinement of the `core`](bbview_level2_core.png)
+![Refinement of the `core`](architecture/bbview_level2_core.png)
 
 #### `core.entities`
 
@@ -321,7 +321,7 @@ Source location: [mobileapp/core/lib/usecases](../mobileapp/core/lib/usecases)
 
 ### 5.3.2 `adapters`
 
-![Refinement of the `adapters`](bbview_level2_adapters.png)
+![Refinement of the `adapters`](architecture/bbview_level2_adapters.png)
 
 #### `adapters.boundaries`
 
@@ -332,7 +332,7 @@ Source location: [mobileapp/adapters/lib/boundaries](../mobileapp/adapters/lib/b
 
 ### 5.3.3 `infrastructure`
 
-![Refinement of the `infrastructure`](bbview_level2_infrastructure.png)
+![Refinement of the `infrastructure`](architecture/bbview_level2_infrastructure.png)
 
 Split into the `flutter` and the `vanilla` variant, which must not depend on each other.
 
@@ -346,7 +346,7 @@ the way to a `core` use case. Shortcuts are not allowed.
 
 The following diagram shows an example control flow for adding a new journal entry.
 
-![Control Flow: Adding new journal entry](rtview_level1_newjournal.png)
+![Control Flow: Adding new journal entry](architecture/rtview_level1_newjournal.png)
 
 
 # 8. Crosscutting Concepts
@@ -378,7 +378,7 @@ The source code is located at [crosscuttings/lib/di.dart](../mobileapp/crosscutt
 
 ### 8.1.2 Component Interface
 
-![Public interface of the Dependency Injection component](crosscuttings_di.png)
+![Public interface of the Dependency Injection component](architecture/crosscuttings_di.png)
 
 
 ## 8.2 Logging
@@ -402,7 +402,7 @@ the internal implementation at [crosscuttings/lib/src/logging](../mobileapp/cros
 
 The following diagram shows the public interface of the `logging` component:
 
-![Public interface of the Logging component](crosscuttings_logging.png)
+![Public interface of the Logging component](architecture/crosscuttings_logging.png)
 
 When using the `Logger` class, it is important to use a useful channel name. The name must start
 with `trad` (to not mix up with external libraries accidentially), reflect the architectural
