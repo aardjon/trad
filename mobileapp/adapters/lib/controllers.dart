@@ -37,7 +37,7 @@ class ApplicationWideController {
 
   /// The user requested a switch to the knowledge base domain.
   void requestSwitchToKnowledgebase() {
-    _knowledgebaseUsecases.showHomePage();
+    unawaited(_knowledgebaseUsecases.showHomePage());
   }
 
   /// The user requested a switch to the Route DB domain.
