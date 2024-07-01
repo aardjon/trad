@@ -79,11 +79,28 @@ We are using `GetIt` because it seems to be more actively developed (as in: more
 more frequent updates, more fixed bugs).
 
 
-# 2 Unit Testing
+# 2 Infrastructure
+
+External libraries used by the `infrastructure` implementations.
+
+## 2.1. SQLite binding
+
+There are two SQLite bindings available for Dart:
+  1. [sqlite3](https://pub.dev/packages/sqlite3)
+  2. [sqflite](https://pub.dev/packages/sqflite)
+
+`sqlite3` is a pure Dart binding and requires some build system configuration to always ship a compatible sqlite3 binary (which can be done automatically in our cases by using the package `sqlite3_flutter_libs`).
+
+`sqflite` depends on Flutter and always uses its sqlite3 binary. However, `sqflite` is based on the `sqlite3` package internally, and from the overview page it is not clear what further advantages it has.
+
+Because we want to keep things as simple and lightweight as possible, we are using `sqlite3` directly for now (even though we already depend on Flutter anyway).
+
+
+# 3 Unit Testing
 
 External libraries used by unit tests. They are just *dev* dependencies.
 
-## 2.1 Mocking Framework
+## 3.1. Mocking Framework
 
 For generating mock for unit tests, the following libraries have been considered:
  1. [mockito](https://pub.dev/packages/mockito)
