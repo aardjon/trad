@@ -8,6 +8,8 @@
 ///
 library;
 
+import 'dart:async';
+
 import 'package:core/usecases/appwide.dart';
 import 'package:core/usecases/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
@@ -57,6 +59,6 @@ class KnowledgebaseController {
   /// The user requested to display the document wit ID [documentId].
   void requestShowDocument(BlobId documentId) {
     _logger.debug('UI request: Show knowledgebase document $documentId');
-    _knowledgebaseUsecases.showDocumentPage(documentId);
+    unawaited(_knowledgebaseUsecases.showDocumentPage(documentId));
   }
 }

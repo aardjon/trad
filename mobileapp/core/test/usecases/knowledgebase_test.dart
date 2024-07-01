@@ -54,14 +54,12 @@ void main() {
 
       // Run the actual test case
       KnowledgebaseUseCases usecases = KnowledgebaseUseCases(di);
-      usecases.showDocumentPage(testedDocumentId);
+      await usecases.showDocumentPage(testedDocumentId);
 
       // Make sure the requested document is loaded from the storage
       verify(() => storageBoundaryMock.loadDocument(testedDocumentId)).called(1);
       // Make sure the retrieved document is sent to the UI
-      // TODO(aardjon): This check doesn't pass yet because the core doesn't request the UI directly.
-      //    Should be refactored to improve testability, though.
-      //verify(() => presentationBoundaryMock.showKnowledgebaseDocument(testedDocument)).called(1);
+      verify(() => presentationBoundaryMock.showKnowledgebaseDocument(testedDocument)).called(1);
     });
 
     /// Ensures the correct behaviour of the showHomePage() method:
@@ -80,16 +78,14 @@ void main() {
 
       // Run the actual test case
       KnowledgebaseUseCases usecases = KnowledgebaseUseCases(di);
-      usecases.showHomePage();
+      await usecases.showHomePage();
 
       // Make sure the home document ID is retrieved
       verify(storageBoundaryMock.getHomeIdentifier).called(1);
       // Make sure the requested document is loaded from the storage
       verify(() => storageBoundaryMock.loadDocument(homeDocumentId)).called(1);
       // Make sure the retrieved document is sent to the UI
-      // TODO(aardjon): This check doesn't pass yet because the core doesn't request the UI directly.
-      //    Should be refactored to improve testability, though.
-      //verify(() => presentationBoundaryMock.showKnowledgebaseDocument(homeDocument)).called(1);
+      verify(() => presentationBoundaryMock.showKnowledgebaseDocument(homeDocument)).called(1);
     });
   });
 }

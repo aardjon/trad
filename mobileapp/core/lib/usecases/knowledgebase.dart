@@ -29,21 +29,17 @@ class KnowledgebaseUseCases {
         _storageBoundary = di.provide<KnowledgebaseStorageBoundary>();
 
   /// Use Case: Switching to the home document of the knowledge base domain.
-  void showHomePage() {
+  Future<void> showHomePage() async {
     _logger.info('Running use case showHomePage()');
     KnowledgebaseDocumentId homeId = _storageBoundary.getHomeIdentifier();
-    unawaited(
-      _storageBoundary.loadDocument(homeId).then(_presentationBoundary.showKnowledgebaseDocument),
-    );
+    KnowledgebaseDocument document = await _storageBoundary.loadDocument(homeId);
+    _presentationBoundary.showKnowledgebaseDocument(document);
   }
 
   /// Use Case: Show the requested knowledge base document.
-  void showDocumentPage(KnowledgebaseDocumentId documentId) {
+  Future<void> showDocumentPage(KnowledgebaseDocumentId documentId) async {
     _logger.info('Running use case showDocumentPage($documentId)');
-    unawaited(
-      _storageBoundary
-          .loadDocument(documentId)
-          .then(_presentationBoundary.showKnowledgebaseDocument),
-    );
+    KnowledgebaseDocument document = await _storageBoundary.loadDocument(documentId);
+    _presentationBoundary.showKnowledgebaseDocument(document);
   }
 }
