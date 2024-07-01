@@ -28,7 +28,7 @@ Requirements & Goals
 
 # 2. Route Database
 ## 2.1 List of climbing routes in the Saxon Switzerland area
- - List of all summits:
+ - Show a list of all summits:
     - Summit name
     - Area
     - Stop sign, if currently banned from climbing
@@ -62,13 +62,21 @@ Requirements & Goals
  - May it'd be enough to simply import a manually downloaded SQLite file?
 
 # 3. Knowledgebase
-## 3.1 Information about Knots
- - Important knots and their usage for climbing in the Saxon Switzerland
- - Including a sketch
 
-## 3.2 Saxon Switzerland Climbing Regulations
- - Source: SBB
- - Changes very rarely only (some like "once in ten years")
+A collection of "articles" displaying formatted text including images and links to other articles.
+
+Required articles:
+  - Information about Knots
+    - Important knots and their usage for climbing in the Saxon Switzerland
+    - Including a sketch and/or photo
+    - Data source: Unclear, maybe Wikipedia?
+    - Updating with an app update only is sufficient
+  - Saxon Switzerland Climbing Regulations
+    - Source: SBB
+    - Changes very rarely (something like "once in ten years"), so only updating with an app update is enough
+  - Important emergency information (e.g. phone numbers, first aid tips)
+  - Index
+    - Structured Index/"Table of Contents" to easily list and navigate articles
 
 # 4 General/Misc
  - User interface language: German
@@ -77,7 +85,7 @@ Requirements & Goals
 
 # 5 User Stories
 ## 5.1 Information about climbing bans
-In the summit and in the route lists, I want to see some kind of stop sign (maybe 🚫?) if this summti/route is currently banned from climbing (based on the current system date). Furthermore, on the details page of this summit/route I want to see the exact dates this ban is active (e.g. 02/01-07/31).
+In the summit and in the route lists, I want to see some kind of stop sign (maybe 🚫?) if this summit/route is currently banned from climbing (based on the current system date). Furthermore, on the details page of this summit/route I want to see the exact dates this ban is active (e.g. 02/01-07/31).
 
 ## 5.2 Location-based summit search
-I want to be able to sort the summit list by distance to my current location, to easily find the closest summits (start with the closest). Also, I want to be able to filter for summits within a certain distance (e.g. "1 km").
+I want to be able to sort the summit list by distance to my current location, to easily find the closest summits (starting with the closest). Also, I want to be able to filter for summits within a certain distance (e.g. "1 km").
