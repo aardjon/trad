@@ -26,10 +26,12 @@ scripts:
   coverage:
     help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
     steps:
-      - melos exec dart pub global run coverage:format_coverage --packages=.dart_tool/package_config.json --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
-      - dart pub global run combine_coverage --repo-path=.
+      - find . -name lcov.info -exec rm {} \;
+      - melos exec --dir-exists=coverage/test dart pub global run coverage:format_coverage --packages=.dart_tool/package_config.json --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
+      - mkdir -p coverage
+      - melos exec --dir-exists=coverage 'cat coverage/lcov.info >> ../coverage/lcov.info'
+      - dart pub global run cobertura convert
       - genhtml -o ./coverage/report ./coverage/lcov.info
-      #dart pub global activate combine_coverage
       
   deploy.android:
     help: Install the build APK on the connected Android device (via ADB).

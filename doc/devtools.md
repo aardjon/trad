@@ -59,11 +59,15 @@ The `build.*` scripts build the mobile application for different platforms. The 
 - `build.android`: Builds the Android application, creating an APK file
 - `build.linux`: Builds the Linux application, creating an Ubuntu ELF binary
 
+### coverage: Generator code coverage reports
+
+The `coverage` script generates code coverage reports in HTML and Cobertura (XML) formats and stores them in the `coverage` directory. All unit tests  (i.e. `melos run test`) must have run successfully before!
+
 ### format: Auto format all sources
 
 The `format` script auto-formats the sources according to our coding style guidelines (by running `dart format --line-length=100`).
 
-### test: Run unit tests
+### test: Run all unit tests
 
 The `test` script runs all unit tests (i.e. `dart test` or `flutter test`) for all sub projects and gathers code coverage information.
 
