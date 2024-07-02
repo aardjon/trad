@@ -111,6 +111,20 @@ jobs:
              dart pub global activate melos
              echo "--- Install requirements"
              melos bootstrap
+             echo "--- Install coverage tools"
+             sudo apt install -y lcov
+             dart pub global activate coverage
+             dart pub global activate cobertura
 
       - name: Run all tests
         run: melos run test
+
+      - name: Generate code coverage report
+        run: melos run coverage
+
+      - name: Archive build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trad-coverage-report
+          path: mobileapp/coverage/report/*
+          retention-days: 1
