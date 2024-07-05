@@ -15,9 +15,7 @@ import 'journal.dart';
 import 'knowledgebase.dart';
 import 'routedb.dart';
 import 'routes.dart';
-
-/// Global navigation key for switching between pages without having a `context` object.
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+import 'state.dart';
 
 /// The applications main widget.
 ///
@@ -36,12 +34,16 @@ class MainWidget extends StatelessWidget {
   /// Factory for creating drawer (=navigation menu) instances as needed.
   final TradDrawerFactory _appDrawerFactory;
 
+  /// Reference to the central state of the GUI.
+  final GuiState _guiState;
+
   /// Constructor for directly initializing all members.
   MainWidget(
     String appName,
     String splashMessage,
     DomainLabelDefinition domainLabels,
-    ApplicationWideController controller, {
+    ApplicationWideController controller,
+    GuiState guiState, {
     super.key,
   })  : _appName = appName,
         _splashMessage = splashMessage,
@@ -50,7 +52,8 @@ class MainWidget extends StatelessWidget {
           appName,
           domainLabels,
           controller,
-        );
+        ),
+        _guiState = guiState;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +90,7 @@ class MainWidget extends StatelessWidget {
         },
       },
       initialRoute: UiRoute.splash.toRouteString(),
-      navigatorKey: navigatorKey,
+      navigatorKey: _guiState.getNavigatorKey(),
     );
   }
 }
