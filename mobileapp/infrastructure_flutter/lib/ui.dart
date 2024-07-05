@@ -82,16 +82,17 @@ class ApplicationUI implements ApplicationUiBoundary {
     // Directly switch to the requested route if the UI is already initialized (=normal case),
     // but delay it if it is not (i.e. before the initial page is shown).
     if (!_uiState.isInitializing()) {
-      unawaited(_uiState
-          .getNavigatorKey()
-          .currentState!
-          .pushNamed(routeString, arguments: routeArguments));
+      unawaited(
+        _uiState.getNavigatorKey().currentState!.pushNamed(routeString, arguments: routeArguments),
+      );
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        unawaited(_uiState
-            .getNavigatorKey()
-            .currentState!
-            .pushNamed(routeString, arguments: routeArguments));
+        unawaited(
+          _uiState
+              .getNavigatorKey()
+              .currentState!
+              .pushNamed(routeString, arguments: routeArguments),
+        );
       });
     }
   }

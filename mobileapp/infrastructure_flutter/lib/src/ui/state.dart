@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 ///
 /// There should ever be only one instance of this class.
 class GuiState {
-
   /// State flag storing whether the UI is currently initializing (true) or not (false).
   bool _isInitializing = true;
 
@@ -44,5 +43,4 @@ class GuiState {
   GlobalKey<NavigatorState> getNavigatorKey() {
     return _navigatorKey;
   }
-
 }
