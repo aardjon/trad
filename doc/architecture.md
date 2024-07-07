@@ -444,6 +444,26 @@ This approach clearly separates data from code and allows to add, remove or modi
 Please see [Knowledge Base Documentation](knowledgebase.md) for further documentation of this application
 domain.
 
+## 8.4 UI
+
+The UI implementation is split into the presentation layer (`adapters` ring) and the concrete
+Flutter implementation (`infrastructure` ring). Besides being the biggest and most complex of the
+"outer ring" components, the constraints, guidelines and rules described in sections
+[4](#4-solution-strategy) and [5](#5-building-block-view) apply normally: The
+`adapters.presentation` component finally decides *what exactly to display*, while the
+`infrastructure.flutter.ui` component is responsible for deciding *where* and (technically) *how*.
+The Flutter UI itself must be "as dumb as possible" and must not maintain any state that is visible
+externally.
+
+The communication works as follows:
+ - `adapters.presentation.presenters` notifies `infrastructure.flutter.ui` about modified data via the `adapters.boundaries.ui` interface
+ - `infrastructure.flutter.ui` directly notifies `adapters.presentation.controllers` about user actions
+
+![Interactions between presenters, controllers and the UI](architecture/crosscuttings_ui_interaction.png)
+
+Please see [Flutter UI Documentation](ui-flutter.md) for further documentation of the Flutter UI
+implementation.
+
 
 # 9. Architecture Decisions
 

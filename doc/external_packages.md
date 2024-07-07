@@ -95,6 +95,25 @@ There are two SQLite bindings available for Dart:
 
 Because we want to keep things as simple and lightweight as possible, we are using `sqlite3` directly for now (even though we already depend on Flutter anyway).
 
+## 2.2. Flutter UI state management
+
+The [Flutter documentation](https://docs.flutter.dev/data-and-backend/state-mgmt/options) lists
+several packages and frameworks for state management, many of them providing advanced additional
+features. As we want to start with a simple and light-weight one to avoid unnecessary dependencies
+and complexity, we considered the two most basic options from that list:
+ 1. [provider](https://pub.dev/packages/provider)
+ 2. [June](https://pub.dev/packages/june)
+
+`provider` is the standard approach which is probably most widely used and is also recommended by
+the Flutter documentation for beginners to start with.
+
+`June` is a much newer implementation trying to combine the native Flutter approach with some of
+the best ideas from other packages, avoiding some of `provider`s limitations and disadvantages.
+
+We decided to start with the recommended `provider` package because it is a well-known, proven and
+recommended *Flutter favourite*. Furthermore, there is no obvious advantage in using an alternative
+for now.
+
 
 # 3 Unit Testing
 
@@ -115,7 +134,7 @@ Advantages:
   - Recommended by the [Dart documentation](https://dart.dev/guides/testing#generally-useful-libraries), probably kind of de-facto standard
   - Mature and feature-rich (has been there for several years)
  
-Disadvanatages:
+Disadvantages:
  - Quite complex, needs explicit code generation (which requires additional build steps and a separate package)
  - Documentation seems to lack some information (e.g. introduction how-to doesn't work as-is; no information about how to generate the mocks)
 
