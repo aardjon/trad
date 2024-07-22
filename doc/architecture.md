@@ -286,6 +286,20 @@ Implementation rules:
  - In general: "This ring shall be as dumb as possible"
  - All third party/external libs are allowed as needed
 
+#### `crosscuttings`
+
+This part contains special components providing very generic, reusable functionality that are meant to be
+used directly from everywhere. All other rings may depend on it directly.
+
+The crosscutting components are described more detailed in [section 8](#8-crosscutting-concepts).
+
+Implementation rules:
+ - May use external libraries except for the **Flutter** framework.
+ - External dependencies must be completely encapsuled to make it easy to update/replace them if necessary
+
+Source location: [mobileapp/crosscuttings](../mobileapp/crosscuttings)
+
+
 ### 5.2.3 Interface documentation
 
 Interface name | Source location
@@ -352,24 +366,14 @@ The following diagram shows an example control flow for adding a new journal ent
 
 # 8. Crosscutting Concepts
 
-These are special components providing very generic, reusable functionality and are meant to be
-used directly from everywhere. That's why they are stored in a separate architectural ring named
-`crosscuttings`. All other rings may depend on it directly.
-
-Crosscutting components may use external libraries but not the **Flutter** framework. External
-dependencies must be completely encapsuled to make it easy to update/replace them in the future,
-if necessary. The reasons for choosing certain packages are documented in
-[External Package Evaluations](external_packages.md#crosscutting_concepts).
-
-The API documentation of this system part is located as part of the source code within
-[mobileapp/crosscuttings](../mobileapp/crosscuttings)
-
 ## 8.1 Dependency Injection (DI)
 
 Provides the central mechanism for mapping interfaces (e.g. boundaries) to their concrete
 implementations.
 
 The source code is located at [crosscuttings/lib/di.dart](../mobileapp/crosscuttings/lib/di.dart).
+The reasons for choosing certain external packages are documented in
+[External Package Evaluations](external_packages.md#crosscutting_concepts).
 
 ### 8.1.1 Use Cases
 
@@ -389,6 +393,8 @@ file).
 
 The public interface is located at [crosscuttings/lib/logging](../mobileapp/crosscuttings/lib/logging),
 the internal implementation at [crosscuttings/lib/src/logging](../mobileapp/crosscuttings/lib/src/logging).
+The reasons for choosing certain external packages are documented in
+[External Package Evaluations](external_packages.md#crosscutting_concepts).
 
 ### 8.1.1 Use Cases
 
@@ -410,6 +416,19 @@ with `trad` (to not mix up with external libraries accidentially), reflect the a
 (and thus, also directory) position of the current source module/library and use dots as
 delimeters, e.g. `trad.core.usecases.journal`. This schema allows to easily filter log files for
 messages from certain system parts later on.
+
+## 8.3 Knowledge Base
+
+The knowledge base domain is implemented in a simple, generic way (similar to a wiki): It basically consists
+of a storage providing *documents*, and a UI widget for displaying a single *document*. Each such *document*
+represents a single knowledge base article. Index/ToC pages are also *documents* (containing lists of links).
+The *documents* are Markdown text files stored and deployed as application assets.
+
+This approach clearly separates data from code and allows to add, remove or modify documents very easily
+(i.e. without any source code knowledge).
+
+Please see [Knowledge Base Documentation](knowledgebase.md) for further documentation of this application
+domain.
 
 
 # 9. Architecture Decisions
