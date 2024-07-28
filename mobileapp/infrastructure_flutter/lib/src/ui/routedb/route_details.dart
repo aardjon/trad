@@ -1,22 +1,31 @@
+///
+/// Provides the route details page widget of the *Route DB* domain.
+///
+library;
+
+import 'dart:async';
+
+import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:teufelsturm_viewer/models/post_data.dart';
-import 'package:teufelsturm_viewer/models/route_data.dart';
-import 'package:teufelsturm_viewer/utils/posts_filter_mode.dart';
-import 'package:teufelsturm_viewer/utils/rating_helper.dart';
-import 'package:teufelsturm_viewer/utils/shared_preferences_manager.dart';
-import 'package:teufelsturm_viewer/utils/sqlite_manager.dart';
+import 'package:loading_indicator/loading_indicator.dart';
+import 'package:provider/provider.dart';
 
+import '../icons.dart';
+import '../state.dart';
+
+/// Widget representing a single post with the post list.
 class _PostItem extends StatelessWidget {
-  final PostData post;
+  /// The post data to be displayed.
+  final ListViewItem post;
 
-  const _PostItem({required this.post, super.key});
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+
+  const _PostItem({required this.post});
 
   @override
   Widget build(BuildContext context) {
-    DateFormat formatter = DateFormat('dd.MM.yyyy HH:mm');
-    String formattedDate = formatter.format(post.postDate);
-
     return Card(
       margin: const EdgeInsets.all(10),
       child: Padding(
@@ -28,16 +37,16 @@ class _PostItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  post.userName,
+                  post.mainTitle,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                RatingHelper.getIntRatingIcon(post.rating),
+                _iconFactory.getIconWidget(post.endIcon),
               ],
             ),
             const SizedBox(height: 5),
-            Text(formattedDate),
+            Text(post.subTitle!),
             const SizedBox(height: 5),
-            Text(post.comment),
+            Text(post.content!),
           ],
         ),
       ),
@@ -45,51 +54,57 @@ class _PostItem extends StatelessWidget {
   }
 }
 
-class RouteDetailsView extends StatefulWidget {
-  final RouteData route;
-  final SqliteManager sqliteManager;
+/// Widget representing the *Route Details* page.
+class RouteDetailsView extends StatelessWidget {
+  /// The app drawer (navigation menu) to use.
+  final NavigationDrawer _appDrawer;
 
-  const RouteDetailsView({required this.route, required this.sqliteManager, super.key});
+  /// Notifier providing the current post list state to be displayed.
+  final PostListNotifier _postListState;
 
-  @override
-  State<RouteDetailsView> createState() => _RouteDetailsViewState();
-}
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
-class _RouteDetailsViewState extends State<RouteDetailsView> {
-  List<PostData> _posts = <PostData>[];
-  PostsFilterMode _postsFilterMode = PostsFilterMode.newestFirst;
-  final SharedPreferencesManager _sharedPreferencesManager = SharedPreferencesManager();
+  /// Constructor for directly initializing all members.
+  const RouteDetailsView(this._appDrawer, this._postListState, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar(),
-      body: _listView(),
+    final RouteDetailsModel model =
+        ModalRoute.of(context)!.settings.arguments! as RouteDetailsModel;
+
+    return ChangeNotifierProvider<PostListNotifier>.value(
+      value: _postListState,
+      child: Consumer<PostListNotifier>(
+        builder: (BuildContext context, PostListNotifier state, Widget? child) {
+          if (state.postsLoaded()) {
+            return Scaffold(
+              appBar: _appBar(model, state, context),
+              body: _listView(state, context),
+              drawer: _appDrawer,
+            );
+          } else {
+            return _showLoadingIndicator();
+          }
+        },
+      ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    Future.wait(<Future<void>>[_loadPostsFilterMode(), _loadPostsFromDatabase()]).then((_) {
-      _sortPosts();
-    });
-  }
-
-  AppBar _appBar() {
-    String routeName = widget.route.routeName;
-    String routeGrade = widget.route.routeGrade;
-
+  AppBar _appBar(
+    RouteDetailsModel model,
+    PostListNotifier state,
+    BuildContext context,
+  ) {
     return AppBar(
       title: Column(
         children: <Widget>[
           Text(
-            routeName,
+            model.pageTitle,
             style: const TextStyle(fontSize: 20),
           ),
           Text(
-            routeGrade,
+            model.pageSubTitle,
             style: const TextStyle(fontSize: 14),
           ),
         ],
@@ -98,90 +113,66 @@ class _RouteDetailsViewState extends State<RouteDetailsView> {
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[
         IconButton(
-          onPressed: _showFilterOptions,
+          onPressed: () {
+            unawaited(
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) => _createFilterMenu(model, state, context),
+              ),
+            );
+          },
           icon: const Icon(Icons.filter_list),
         ),
       ],
     );
   }
 
-  ListTile _createFilterMenuItem(
+  Widget _createFilterMenu(
+    RouteDetailsModel model,
+    PostListNotifier state,
     BuildContext context,
-    PostsFilterMode postsFilterMode,
-    String title,
   ) {
-    return ListTile(
-      title: Text(title),
-      trailing: _postsFilterMode == postsFilterMode ? const Icon(Icons.done) : const Icon(null),
-      onTap: () {
-        _setFilter(postsFilterMode);
-        Navigator.pop(context);
-      },
+    List<ListTile> menuItems = <ListTile>[];
+    for (final ListViewItem item in state.getSortMenuItems()) {
+      menuItems.add(
+        ListTile(
+          title: Text(item.mainTitle),
+          trailing: _iconFactory.getIconWidget(item.endIcon),
+          onTap: () {
+            _onOrderingChanged(model.routeDataId, item.itemId!);
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: menuItems,
     );
   }
 
-  ListView _listView() {
+  Widget _listView(PostListNotifier state, BuildContext context) {
     return ListView.builder(
-      itemCount: _posts.length,
+      itemCount: state.getPostCount(),
       itemBuilder: (BuildContext context, int index) {
-        return _PostItem(post: _posts[index]);
+        final ListViewItem post = state.getPostItem(index);
+        return _PostItem(post: post);
       },
     );
   }
 
-  Future<void> _loadPostsFilterMode() async {
-    _postsFilterMode = await _sharedPreferencesManager.getEnum<PostsFilterMode>(
-          'postsFilterMode',
-          PostsFilterMode.values,
-        ) ??
-        _postsFilterMode;
+  void _onOrderingChanged(
+    ItemDataId routeDataId,
+    ItemDataId sortMenuItemId,
+  ) {
+    RouteDbController controller = RouteDbController();
+    controller.requestPostListSorting(routeDataId, sortMenuItemId);
   }
 
-  Future<void> _loadPostsFromDatabase() async {
-    List<PostData> posts = await widget.sqliteManager.getAllPosts(
-      widget.route.id,
+  Widget _showLoadingIndicator() {
+    return const LoadingIndicator(
+      indicatorType: Indicator.ballClipRotateMultiple,
+      colors: <Color>[Colors.lightGreen],
     );
-    setState(() {
-      _posts = posts;
-    });
-  }
-
-  Future<bool> _savePostsFilterMode() async {
-    return await _sharedPreferencesManager.setEnum(
-      'postsFilterMode',
-      _postsFilterMode,
-    );
-  }
-
-  void _setFilter(PostsFilterMode postsFilterMode) {
-    _postsFilterMode = postsFilterMode;
-    _savePostsFilterMode();
-    _sortPosts();
-  }
-
-  void _showFilterOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _createFilterMenuItem(context, PostsFilterMode.newestFirst, 'Neuste zuerst'),
-            _createFilterMenuItem(context, PostsFilterMode.oldestFirst, 'Älteste zuerst'),
-          ],
-        );
-      },
-    );
-  }
-
-  void _sortPosts() {
-    final Map<PostsFilterMode, Function> sortFunction = <PostsFilterMode, Function>{
-      PostsFilterMode.newestFirst: () => _posts.sortByDateNewestFirst(),
-      PostsFilterMode.oldestFirst: () => _posts.sortByDateOldestFirst(),
-    };
-
-    setState(() {
-      sortFunction[_postsFilterMode]?.call();
-    });
   }
 }

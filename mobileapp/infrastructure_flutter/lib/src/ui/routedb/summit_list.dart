@@ -1,98 +1,82 @@
+///
+/// Provides the summit list page widget of the *Route DB* domain.
+///
+library;
+
+import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
-import 'package:teufelsturm_viewer/models/peak_data.dart';
-import 'package:teufelsturm_viewer/pages/routes_page.dart';
-import 'package:teufelsturm_viewer/utils/sqlite_manager.dart';
+import 'package:provider/provider.dart';
 
-class SummitListView extends StatefulWidget {
-  const SummitListView({super.key});
+import '../state.dart';
 
-  @override
-  State<SummitListView> createState() => _SummitListViewState();
-}
+/// Widget representing the *Summit List* page.
+class SummitListView extends StatelessWidget {
+  /// The app drawer (navigation menu) to use.
+  final NavigationDrawer _appDrawer;
 
-class _SummitListViewState extends State<SummitListView> {
-  late TextEditingController _controller;
-  List<PeakData> _allPeaks = <PeakData>[];
-  List<PeakData> _filteredPeaks = <PeakData>[];
-  final SqliteManager _sqliteManager = SqliteManager();
+  /// Notifier providing the current summit list state to be displayed.
+  final SummitListNotifier _summitListState;
+
+  final TextEditingController _controller = TextEditingController();
+
+  /// Constructor for directly initializing all members.
+  SummitListView(this._appDrawer, this._summitListState, {super.key});
 
   @override
   Widget build(BuildContext context) {
+    final SummitListModel model = ModalRoute.of(context)!.settings.arguments! as SummitListModel;
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(model),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          _searchBar(),
+          _searchBar(model.searchBarHint),
           _listView(),
         ],
       ),
+      drawer: _appDrawer,
     );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-    _loadSummitsFromDatabase();
-  }
-
-  AppBar _appBar() {
+  AppBar _appBar(SummitListModel model) {
     return AppBar(
-      title: const Text('Gipfel'),
+      title: Text(model.pageTitle),
       centerTitle: true,
       backgroundColor: Colors.lightGreen,
     );
   }
 
   void _filterSummits(String query) {
-    setState(() {
-      _filteredPeaks = _allPeaks
-          .where(
-            (PeakData? peak) => peak.peakName.toLowerCase().contains(query.toLowerCase()),
-          )
-          .toList();
-    });
+    RouteDbController controller = RouteDbController();
+    controller.requestFilterSummitList(query);
   }
 
-  Expanded _listView() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: _filteredPeaks.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text(_filteredPeaks[index].peakName),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => RoutesPage(
-                    peak: _filteredPeaks[index],
-                    sqliteManager: _sqliteManager,
-                  ),
-                ),
-              );
-            },
+  Widget _listView() {
+    return ChangeNotifierProvider<SummitListNotifier>.value(
+      value: _summitListState,
+      child: Consumer<SummitListNotifier>(
+        builder: (BuildContext context, SummitListNotifier state, Widget? child) {
+          return Expanded(
+            child: ListView.builder(
+              itemCount: state.getSummitCount(),
+              itemBuilder: (BuildContext context, int index) {
+                final ListViewItem summit = state.getSummitItem(index);
+                return ListTile(
+                  title: Text(summit.mainTitle),
+                  onTap: () {
+                    _onSummitTap(summit.itemId!);
+                  },
+                );
+              },
+            ),
           );
         },
       ),
     );
   }
 
-  void _loadSummitsFromDatabase() async {
-    List<PeakData> peaks = await _sqliteManager.getAllPeaks();
-    setState(() {
-      _allPeaks = peaks;
-      _filteredPeaks.addAll(_allPeaks);
-    });
-  }
-
-  Container _searchBar() {
+  Container _searchBar(String searchBarHint) {
     return Container(
       margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
       decoration: BoxDecoration(
@@ -111,7 +95,7 @@ class _SummitListViewState extends State<SummitListView> {
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(15),
-          hintText: 'Gipfel suchen',
+          hintText: searchBarHint,
           prefixIcon: const Padding(
             padding: EdgeInsets.all(12),
             child: Icon(Icons.search),
@@ -130,5 +114,10 @@ class _SummitListViewState extends State<SummitListView> {
         ),
       ),
     );
+  }
+
+  void _onSummitTap(ItemDataId summitDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestSummitDetails(summitDataId);
   }
 }

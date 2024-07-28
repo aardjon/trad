@@ -1,169 +1,134 @@
+///
+/// Provides the summit details page widget of the *Route DB* domain.
+///
+library;
+
+import 'dart:async';
+
+import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:teufelsturm_viewer/models/peak_data.dart';
-import 'package:teufelsturm_viewer/models/route_data.dart';
-import 'package:teufelsturm_viewer/pages/posts_page.dart';
-import 'package:teufelsturm_viewer/utils/rating_helper.dart';
-import 'package:teufelsturm_viewer/utils/routes_filter_mode.dart';
-import 'package:teufelsturm_viewer/utils/shared_preferences_manager.dart';
-import 'package:teufelsturm_viewer/utils/sqlite_manager.dart';
+import 'package:provider/provider.dart';
 
-class SummitDetailsView extends StatefulWidget {
-  final PeakData peak;
-  final SqliteManager sqliteManager;
+import '../icons.dart';
+import '../state.dart';
 
-  const SummitDetailsView({required this.peak, required this.sqliteManager, super.key});
+/// Widget representing the *Summit Details* page.
+class SummitDetailsView extends StatelessWidget {
+  /// The app drawer (navigation menu) to use.
+  final NavigationDrawer _appDrawer;
 
-  @override
-  State<SummitDetailsView> createState() => _SummitDetailsViewState();
-}
+  /// Notifier providing the current route list state to be displayed.
+  final RouteListNotifier _routeListState;
 
-class _SummitDetailsViewState extends State<SummitDetailsView> {
-  List<RouteData> _routes = <RouteData>[];
-  bool _routesLoaded = false;
-  final SharedPreferencesManager _sharedPreferencesManager = SharedPreferencesManager();
-  RoutesFilterMode _routesFilterMode = RoutesFilterMode.name;
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+
+  /// Constructor for directly initializing all members.
+  const SummitDetailsView(this._appDrawer, this._routeListState, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar(),
-      body: _routesLoaded ? _listView() : _showLoadingIndicator(),
+    final SummitDetailsModel model =
+        ModalRoute.of(context)!.settings.arguments! as SummitDetailsModel;
+    return ChangeNotifierProvider<RouteListNotifier>.value(
+      value: _routeListState,
+      child: Consumer<RouteListNotifier>(
+        builder: (BuildContext context, RouteListNotifier state, Widget? child) {
+          if (state.routesLoaded()) {
+            return Scaffold(
+              appBar: _appBar(model, state, context),
+              body: _listView(state, context),
+              drawer: _appDrawer,
+            );
+          } else {
+            return _showLoadingIndicator();
+          }
+        },
+      ),
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.wait(<Future<void>>[_loadRoutesFilterMode(), _loadRoutesFromDatabase()]).then((_) {
-      _sortRoutes();
-    });
-  }
-
-  AppBar _appBar() {
+  AppBar _appBar(SummitDetailsModel model, RouteListNotifier state, BuildContext context) {
     return AppBar(
-      title: Text(widget.peak.peakName),
+      title: Text(model.pageTitle),
       centerTitle: true,
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[
         IconButton(
-          onPressed: _showFilterOptions,
+          onPressed: () {
+            unawaited(
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) => _createFilterMenu(model, state, context),
+              ),
+            );
+          },
           icon: const Icon(Icons.filter_list),
         ),
       ],
     );
   }
 
-  ListTile _createFilterMenuItem(
+  Widget _createFilterMenu(
+    SummitDetailsModel model,
+    RouteListNotifier state,
     BuildContext context,
-    RoutesFilterMode routesFilterMode,
-    String title,
   ) {
-    return ListTile(
-      title: Text(title),
-      trailing: _routesFilterMode == routesFilterMode ? const Icon(Icons.done) : const Icon(null),
-      onTap: () {
-        _setFilter(routesFilterMode);
-        Navigator.pop(context);
-      },
+    List<ListTile> menuItems = <ListTile>[];
+    for (final ListViewItem item in state.getSortMenuItems()) {
+      menuItems.add(
+        ListTile(
+          title: Text(item.mainTitle),
+          trailing: _iconFactory.getIconWidget(item.endIcon),
+          onTap: () {
+            _onOrderingChanged(model.summitDataId, item.itemId!);
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: menuItems,
     );
   }
 
-  ListView _listView() {
+  Widget _listView(RouteListNotifier state, BuildContext context) {
     return ListView.builder(
-      itemCount: _routes.length,
+      itemCount: state.getRouteCount(),
       itemBuilder: (BuildContext context, int index) {
-        String routeName = _routes[index].routeName;
-        String routeGrade = _routes[index].routeGrade;
-        double? routeRating = _routes[index].routeRating;
-
+        final ListViewItem route = state.getRouteItem(index);
         return ListTile(
-          title: Text(routeName),
-          subtitle: Text(routeGrade),
-          trailing: RatingHelper.getDoubleRatingIcon(routeRating),
+          title: Text(route.mainTitle),
+          subtitle: Text(route.subTitle ?? ''),
+          trailing: _iconFactory.getIconWidget(route.endIcon),
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => PostsPage(
-                  route: _routes[index],
-                  sqliteManager: widget.sqliteManager,
-                ),
-              ),
-            );
+            _onRouteTap(route.itemId!);
           },
         );
       },
     );
   }
 
-  Future<void> _loadRoutesFilterMode() async {
-    _routesFilterMode = await _sharedPreferencesManager.getEnum<RoutesFilterMode>(
-          'routesFilterMode',
-          RoutesFilterMode.values,
-        ) ??
-        _routesFilterMode;
+  void _onOrderingChanged(
+    ItemDataId summitDataId,
+    ItemDataId sortMenuItemId,
+  ) {
+    RouteDbController controller = RouteDbController();
+    controller.requestRouteListSorting(summitDataId, sortMenuItemId);
   }
 
-  Future<void> _loadRoutesFromDatabase() async {
-    List<RouteData> routes = await widget.sqliteManager.getAllRoutes(
-      widget.peak.id,
-    );
-    _routes = routes;
-    _routesLoaded = true;
+  void _onRouteTap(ItemDataId routeDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestRouteDetails(routeDataId);
   }
 
-  Future<bool> _saveRoutesFilterMode() async {
-    return await _sharedPreferencesManager.setEnum(
-      'routesFilterMode',
-      _routesFilterMode,
-    );
-  }
-
-  void _setFilter(RoutesFilterMode routesFilterMode) {
-    _routesFilterMode = routesFilterMode;
-    _saveRoutesFilterMode();
-    _sortRoutes();
-  }
-
-  void _showFilterOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _createFilterMenuItem(context, RoutesFilterMode.name, 'Name'),
-            _createFilterMenuItem(context, RoutesFilterMode.grade, 'Schwierigkeitsgrad'),
-            _createFilterMenuItem(context, RoutesFilterMode.rating, 'Bewertung'),
-          ],
-        );
-      },
-    );
-  }
-
-  LoadingIndicator _showLoadingIndicator() {
+  Widget _showLoadingIndicator() {
     return const LoadingIndicator(
       indicatorType: Indicator.ballClipRotateMultiple,
       colors: <Color>[Colors.lightGreen],
     );
-  }
-
-  void _sortRoutes() {
-    final Map<RoutesFilterMode, Function> sortFunction = <RoutesFilterMode, Function>{
-      RoutesFilterMode.name: () => _routes.sortByRouteName(),
-      RoutesFilterMode.grade: () => _routes.sortByRouteGrade(),
-      RoutesFilterMode.rating: () => _routes.sortByRouteRating(),
-    };
-
-    setState(() {
-      sortFunction[_routesFilterMode]?.call();
-    });
   }
 }

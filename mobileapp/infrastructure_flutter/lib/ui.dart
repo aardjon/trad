@@ -34,6 +34,19 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// and never create their own!
   static final GuiState _uiState = GuiState();
 
+  /// The central summit list state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients should only reference this one
+  /// and never create their own!
+  // TODO(aardjon): There should be no central state within the GUI implementation, i.e. each summit
+  //    list widget should probably have its own notifier/state (the UI interface documentation is
+  //    correct, the current implementation is not). Can we find a better solution for this?
+  static final SummitListNotifier _summitListState = SummitListNotifier();
+
+  static final RouteListNotifier _routeListState = RouteListNotifier();
+
+  static final PostListNotifier _postListState = PostListNotifier();
+
   @override
   void initializeUserInterface(
     String appName,
@@ -47,6 +60,9 @@ class ApplicationUI implements ApplicationUiBoundary {
         routeLabels,
         ApplicationWideController(),
         _uiState,
+        _summitListState,
+        _routeListState,
+        _postListState,
       ),
     );
     // Set the UI state to initialized after the first event frame is done.
@@ -56,8 +72,38 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void switchToRouteDb() {
-    _switchToRoute(UiRoute.summitlist.toRouteString());
+  void showSummitList(SummitListModel model) {
+    _logger.debug('Displaying summit list page');
+    _switchToRoute(UiRoute.summitlist.toRouteString(), routeArguments: model);
+  }
+
+  @override
+  void updateSummitList(List<ListViewItem> summitItems) {
+    _summitListState.replaceSummits(summitItems);
+  }
+
+  @override
+  void showSummitDetails(SummitDetailsModel model) {
+    _logger.debug('Displaying route list page');
+    _switchToRoute(UiRoute.summitdetails.toRouteString(), routeArguments: model);
+  }
+
+  @override
+  void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems) {
+    _logger.debug('Updating route list data');
+    _routeListState.replaceRoutes(routeItems, sortMenuItems);
+  }
+
+  @override
+  void showRouteDetails(RouteDetailsModel model) {
+    _logger.debug('Displaying post list page');
+    _switchToRoute(UiRoute.routedetails.toRouteString(), routeArguments: model);
+  }
+
+  @override
+  void updatePostList(List<ListViewItem> postItems, List<ListViewItem> sortMenuItems) {
+    _logger.debug('Updating post list data');
+    _postListState.replacePosts(postItems, sortMenuItems);
   }
 
   @override
