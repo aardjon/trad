@@ -26,15 +26,30 @@ class DependencyProvider {
     return _getIt.get<T>();
   }
 
-  /// Registers a new implementation for the interface [T].
+  /// Registers a factory for creating new implementations of the interface [T].
   ///
-  /// The [instanceFactory] is a functor that must return a new instance of [T]. It will be called
-  /// at any time, at the latest when the instance requested via [provide()]. Any previous
-  /// implementation registration is discarded.
+  /// Any previous implementation registration for [T] is discarded.
+  ///
+  /// The [instanceFactory] is a functor that must return a new instance of [T]. It is called once
+  /// for each [provide<T>()] call, creating (and thus, providing) a new implementation instance
+  /// each time.
   ///
   /// Registration should be done only once during start up from within `trad.main`.
   void register<T extends Object>(T Function() instanceFactory) {
     _getIt.registerFactory<T>(instanceFactory);
+  }
+
+  /// Registers a singleton implementation of the interface [T].
+  ///
+  /// Any previous implementation registration for [T] is discarded.
+  ///
+  /// The [instanceFactory] is a functor that must return a new instance of [T]. It is called at any
+  /// time but exactly once, at the latest when the implementation is requested for the first time.
+  /// Each [provide<T>()] call returns the same implementation instance.
+  ///
+  /// Registration should be done only once during start up from within `trad.main`.
+  void registerSingleton<T extends Object>(T Function() instanceFactory) {
+    _getIt.registerLazySingleton<T>(instanceFactory);
   }
 
   /// Cleans up the DI registry by removing all registrations at once.

@@ -38,6 +38,32 @@ void main() {
       // expect(di.provide<ExampleInterface2>, throwsA(isA<StateError>()));
     });
 
+    /// Ensure the correct behaviour for registered factories: The factory must be executed on each
+    /// provide<T>() call, usually returning a new implementation of T each time.
+    test('testFactory', () async {
+      await di.shutdown();
+      di.register<ExampleInterface1>(() {
+        return ExampleImpl();
+      });
+
+      ExampleInterface1 impl1 = di.provide<ExampleInterface1>();
+      ExampleInterface1 impl2 = di.provide<ExampleInterface1>();
+      expect(identical(impl1, impl2), isFalse);
+    });
+
+    /// Ensure the correct behaviour for registered singleton: The factory must be executed exactly
+    /// once, and each provide<T>() call must return the same implementation of T.
+    test('testSingleton', () async {
+      await di.shutdown();
+      di.registerSingleton<ExampleInterface1>(() {
+        return ExampleImpl();
+      });
+
+      ExampleInterface1 impl1 = di.provide<ExampleInterface1>();
+      ExampleInterface1 impl2 = di.provide<ExampleInterface1>();
+      expect(identical(impl1, impl2), isTrue);
+    });
+
     /// Ensure that all instances share the same DI configuration: A different instance must return
     /// the registered implementation, too.
     test('testSharedConfiguration', () {
