@@ -24,8 +24,8 @@ void main() {
     final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
 
     // Configure DI to provide the boundary mocks
-    di.register<KnowledgebaseStorageBoundary>(() => storageBoundaryMock);
-    di.register<PresentationBoundary>(() => presentationBoundaryMock);
+    di.registerFactory<KnowledgebaseStorageBoundary>(() => storageBoundaryMock);
+    di.registerFactory<PresentationBoundary>(() => presentationBoundaryMock);
 
     setUpAll(() {
       // Register a default document object which is used by mocktails `any` matcher

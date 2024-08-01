@@ -19,7 +19,7 @@ void main() {
     final DependencyProvider di = DependencyProvider();
 
     setUp(() {
-      di.register<ExampleInterface1>(() {
+      di.registerFactory<ExampleInterface1>(() {
         return ExampleImpl();
       });
     });
@@ -42,7 +42,7 @@ void main() {
     /// provide<T>() call, usually returning a new implementation of T each time.
     test('testFactory', () async {
       await di.shutdown();
-      di.register<ExampleInterface1>(() {
+      di.registerFactory<ExampleInterface1>(() {
         return ExampleImpl();
       });
 

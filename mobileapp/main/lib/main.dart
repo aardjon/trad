@@ -68,10 +68,11 @@ class ApplicationBootstrap {
   void _setupDependencies() {
     _logger.info('Initializing dependencies');
 
-    _dependencyProvider.register<PresentationBoundary>(ApplicationWidePresenter.new);
-    _dependencyProvider.register<ApplicationUiBoundary>(ApplicationUI.new);
-    _dependencyProvider
-        .register<KnowledgebaseStorageBoundary>(() => KnowledgebaseStorage(_dependencyProvider));
-    _dependencyProvider.register<BlobRepositoryBoundary>(AssetRepository.new);
+    _dependencyProvider.registerFactory<PresentationBoundary>(ApplicationWidePresenter.new);
+    _dependencyProvider.registerFactory<ApplicationUiBoundary>(ApplicationUI.new);
+    _dependencyProvider.registerFactory<KnowledgebaseStorageBoundary>(
+      () => KnowledgebaseStorage(_dependencyProvider),
+    );
+    _dependencyProvider.registerFactory<BlobRepositoryBoundary>(AssetRepository.new);
   }
 }

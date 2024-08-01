@@ -35,7 +35,7 @@ class DependencyProvider {
   /// each time.
   ///
   /// Registration should be done only once during start up from within `trad.main`.
-  void register<T extends Object>(T Function() instanceFactory) {
+  void registerFactory<T extends Object>(T Function() instanceFactory) {
     _getIt.registerFactory<T>(instanceFactory);
   }
 
