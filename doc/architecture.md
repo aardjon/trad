@@ -136,6 +136,7 @@ update in case of changes.
 Resources:
  - [The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
  - [A primer on the clean architecture pattern and its principles](https://www.techtarget.com/searchapparchitecture/tip/A-primer-on-the-clean-architecture-pattern-and-its-principles)
+ - [Summary of Uncle Bobs book](https://github.com/serodriguez68/clean-architecture/tree/master)
  - [Clean Code Developers](https://clean-code-developer.com/)
  - [Test-driven development](https://en.wikipedia.org/wiki/Test-driven_development)
 
