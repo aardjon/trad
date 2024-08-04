@@ -16,4 +16,9 @@ class Summit {
 
   /// Constructor for directly initializing all members.
   Summit(this.id, this.name);
+
+  @override
+  String toString() {
+    return "${super.toString()}: '$name'";
+  }
 }

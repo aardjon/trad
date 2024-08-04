@@ -22,4 +22,9 @@ class Route {
 
   /// Constructor for directly initializing all members.
   Route(this.id, this.routeName, this.routeGrade, this.routeRating);
+
+  @override
+  String toString() {
+    return "${super.toString()}: '$routeName'";
+  }
 }
