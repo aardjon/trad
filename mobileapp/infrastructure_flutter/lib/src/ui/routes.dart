@@ -14,8 +14,16 @@ enum UiRoute {
   /// Route to the *Journal* main screen.
   journal,
 
-  /// Route to the *Route Database* main screen.
-  routedb,
+  /// Route to the *summit list* screen (one of the *route database* screens).
+  summitlist,
+
+  /// Route to the *summit details* screen (one of the *route database* screens) showing e.g. the
+  /// list of climbing routes to a certain summit.
+  summitdetails,
+
+  /// Route to the *route details* screen (one of the *route database* screens) showing e.g. the
+  /// community comments of a certain route.
+  routedetails,
 
   /// Route to the *Knowledgebase* main screen.
   knowledgebase,
@@ -33,8 +41,12 @@ enum UiRoute {
         return '/splash';
       case journal:
         return '/journal';
-      case routedb:
-        return '/routedb';
+      case summitlist:
+        return '/routedb/summits';
+      case summitdetails:
+        return '/routedb/summit';
+      case routedetails:
+        return '/routedb/route';
       case knowledgebase:
         return '/knowledgebase';
       case about:
