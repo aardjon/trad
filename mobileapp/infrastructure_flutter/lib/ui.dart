@@ -57,7 +57,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void switchToRouteDb() {
-    _switchToRoute(UiRoute.routedb.toRouteString());
+    _switchToRoute(UiRoute.summitlist.toRouteString());
   }
 
   @override

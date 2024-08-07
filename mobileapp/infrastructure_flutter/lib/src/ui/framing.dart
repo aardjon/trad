@@ -70,7 +70,7 @@ class MainWidget extends StatelessWidget {
             _domainLabels.journalLabel,
           );
         },
-        UiRoute.routedb.toRouteString(): (BuildContext context) {
+        UiRoute.summitlist.toRouteString(): (BuildContext context) {
           return RouteDbPage(
             _appDrawerFactory.create(context),
             _domainLabels.routedbLabel,

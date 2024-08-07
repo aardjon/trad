@@ -44,6 +44,7 @@ dependencies:
   sqlite3_flutter_libs: '>=0.5.24'
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0
@@ -51,6 +52,13 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# Configuration of the flutter_launcher_icon tool which set/replaces app launcher icons
+# See also: https://pub.dev/packages/flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: 'assets/icons/launcher.png'
 
 # The following section is specific to Flutter packages.
 flutter:
