@@ -5,6 +5,7 @@
 library;
 
 import 'package:adapters/boundaries/repositories/blob.dart';
+import 'package:adapters/boundaries/repositories/database.dart';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/presenters.dart';
 import 'package:adapters/storage/knowledgebase.dart';
@@ -17,6 +18,7 @@ import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:infrastructure_flutter/repository/blobs.dart';
 import 'package:infrastructure_flutter/ui.dart';
+import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
 
 /// The global main entry point - The one and only :)
 void main() {
@@ -78,5 +80,6 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<BlobRepositoryBoundary>(AssetRepository.new);
     _dependencyProvider
         .registerFactory<RouteDbStorageBoundary>(() => RouteDbStorage(_dependencyProvider));
+    _dependencyProvider.registerSingleton<RelationalDatabaseBoundary>(Sqlite3Database.new);
   }
 }
