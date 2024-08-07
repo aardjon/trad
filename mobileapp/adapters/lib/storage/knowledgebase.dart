@@ -10,7 +10,7 @@ import 'package:core/entities/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
-import '../boundaries/repositories.dart';
+import '../boundaries/repositories/blob.dart';
 
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.adapters.storage.knowledgebase');

@@ -4,7 +4,7 @@
 ///
 library;
 
-import 'package:adapters/boundaries/repositories.dart';
+import 'package:adapters/boundaries/repositories/blob.dart';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/presenters.dart';
 import 'package:adapters/storage/knowledgebase.dart';
