@@ -8,8 +8,10 @@ import 'package:adapters/boundaries/repositories/blob.dart';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/presenters.dart';
 import 'package:adapters/storage/knowledgebase.dart';
+import 'package:adapters/storage/routedb.dart';
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/boundaries/storage/knowledgebase.dart';
+import 'package:core/boundaries/storage/routedb.dart';
 import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
@@ -74,5 +76,7 @@ class ApplicationBootstrap {
       () => KnowledgebaseStorage(_dependencyProvider),
     );
     _dependencyProvider.registerFactory<BlobRepositoryBoundary>(AssetRepository.new);
+    _dependencyProvider
+        .registerFactory<RouteDbStorageBoundary>(() => RouteDbStorage(_dependencyProvider));
   }
 }
