@@ -7,10 +7,10 @@ import 'package:teufelsturm_viewer/utils/rating_helper.dart';
 import 'package:teufelsturm_viewer/utils/shared_preferences_manager.dart';
 import 'package:teufelsturm_viewer/utils/sqlite_manager.dart';
 
-class PostItem extends StatelessWidget {
+class _PostItem extends StatelessWidget {
   final PostData post;
 
-  const PostItem({required this.post, super.key});
+  const _PostItem({required this.post, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,17 +45,17 @@ class PostItem extends StatelessWidget {
   }
 }
 
-class PostsPage extends StatefulWidget {
+class RouteDetailsView extends StatefulWidget {
   final RouteData route;
   final SqliteManager sqliteManager;
 
-  const PostsPage({required this.route, required this.sqliteManager, super.key});
+  const RouteDetailsView({required this.route, required this.sqliteManager, super.key});
 
   @override
-  State<PostsPage> createState() => _PostsPageState();
+  State<RouteDetailsView> createState() => _RouteDetailsViewState();
 }
 
-class _PostsPageState extends State<PostsPage> {
+class _RouteDetailsViewState extends State<RouteDetailsView> {
   List<PostData> _posts = <PostData>[];
   PostsFilterMode _postsFilterMode = PostsFilterMode.newestFirst;
   final SharedPreferencesManager _sharedPreferencesManager = SharedPreferencesManager();
@@ -124,7 +124,7 @@ class _PostsPageState extends State<PostsPage> {
     return ListView.builder(
       itemCount: _posts.length,
       itemBuilder: (BuildContext context, int index) {
-        return PostItem(post: _posts[index]);
+        return _PostItem(post: _posts[index]);
       },
     );
   }

@@ -8,17 +8,17 @@ import 'package:teufelsturm_viewer/utils/routes_filter_mode.dart';
 import 'package:teufelsturm_viewer/utils/shared_preferences_manager.dart';
 import 'package:teufelsturm_viewer/utils/sqlite_manager.dart';
 
-class RoutesPage extends StatefulWidget {
+class SummitDetailsView extends StatefulWidget {
   final PeakData peak;
   final SqliteManager sqliteManager;
 
-  const RoutesPage({required this.peak, required this.sqliteManager, super.key});
+  const SummitDetailsView({required this.peak, required this.sqliteManager, super.key});
 
   @override
-  State<RoutesPage> createState() => _RoutesPageState();
+  State<SummitDetailsView> createState() => _SummitDetailsViewState();
 }
 
-class _RoutesPageState extends State<RoutesPage> {
+class _SummitDetailsViewState extends State<SummitDetailsView> {
   List<RouteData> _routes = <RouteData>[];
   bool _routesLoaded = false;
   final SharedPreferencesManager _sharedPreferencesManager = SharedPreferencesManager();

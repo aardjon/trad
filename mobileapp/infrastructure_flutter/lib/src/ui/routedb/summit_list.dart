@@ -3,14 +3,14 @@ import 'package:teufelsturm_viewer/models/peak_data.dart';
 import 'package:teufelsturm_viewer/pages/routes_page.dart';
 import 'package:teufelsturm_viewer/utils/sqlite_manager.dart';
 
-class PeaksPage extends StatefulWidget {
-  const PeaksPage({super.key});
+class SummitListView extends StatefulWidget {
+  const SummitListView({super.key});
 
   @override
-  State<PeaksPage> createState() => _PeaksPageState();
+  State<SummitListView> createState() => _SummitListViewState();
 }
 
-class _PeaksPageState extends State<PeaksPage> {
+class _SummitListViewState extends State<SummitListView> {
   late TextEditingController _controller;
   List<PeakData> _allPeaks = <PeakData>[];
   List<PeakData> _filteredPeaks = <PeakData>[];
@@ -39,7 +39,7 @@ class _PeaksPageState extends State<PeaksPage> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    _loadPeaksFromDatabase();
+    _loadSummitsFromDatabase();
   }
 
   AppBar _appBar() {
@@ -50,7 +50,7 @@ class _PeaksPageState extends State<PeaksPage> {
     );
   }
 
-  void _filterPeaks(String query) {
+  void _filterSummits(String query) {
     setState(() {
       _filteredPeaks = _allPeaks
           .where(
@@ -84,7 +84,7 @@ class _PeaksPageState extends State<PeaksPage> {
     );
   }
 
-  void _loadPeaksFromDatabase() async {
+  void _loadSummitsFromDatabase() async {
     List<PeakData> peaks = await _sqliteManager.getAllPeaks();
     setState(() {
       _allPeaks = peaks;
@@ -106,7 +106,7 @@ class _PeaksPageState extends State<PeaksPage> {
       ),
       child: TextField(
         controller: _controller,
-        onChanged: _filterPeaks,
+        onChanged: _filterSummits,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
@@ -120,7 +120,7 @@ class _PeaksPageState extends State<PeaksPage> {
             icon: const Icon(Icons.clear),
             onPressed: () {
               _controller.clear();
-              _filterPeaks('');
+              _filterSummits('');
             },
           ),
           border: OutlineInputBorder(
