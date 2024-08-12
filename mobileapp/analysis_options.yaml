@@ -7,8 +7,8 @@
 # The following include enables "Very Good Analysis" which contains many additional linting rules
 # besides the ones recommended by Dart and Flutter. For an overview and comparison about the
 # different linter rule sets, see https://rydmike.com/blog_flutter_linting.html and
-# https://docs.google.com/spreadsheets/d/1Nc1gFjmCOMubWZD7f2E4fLhWN7LYaOE__tsA7bf2NjA, for some
-# rationales why other projects may (not) use certain rules have a look at
+# https://docs.google.com/spreadsheets/d/1Nc1gFjmCOMubWZD7f2E4fLhWN7LYaOE__tsA7bf2NjA (last checked
+# version: 2.2.0), for some rationales why other projects may (not) use certain rules have a look at
 # https://gist.github.com/rydmike/fdb53ddd933c37d20e6f3188a936cd4c
 # A list of all available rules (and their descriptions including examples) can be found at
 # https://dart.dev/tools/linter-rules
@@ -29,7 +29,7 @@ linter:
     avoid_redundant_argument_values: false
     cascade_invocations: false
     deprecated_member_use_from_same_package: true
-    diagnostic_describe_all_properties: true
+    diagnostic_describe_all_properties: false
     directives_ordering: false
     discarded_futures: true
     lines_longer_than_80_chars: false
@@ -77,6 +77,10 @@ analyzer:
 #   external ones (e.g. Flutter). It'd actually be nicer to have two groups of package imports
 #   (separated by an empty line) and order the imports within each group only. Maybe we'll find a
 #   solution for this in the future.
+
+# diagnostic_describe_all_properties: Disabled because we do not provide diagnostic properties
+#   debugFillProperties() method at all (because this is not a reusable Flutter package but just a
+#   regular app), so this rule basically enforced unnecessary creation of a separate method.
 
 # lines_longer_than_80_chars: Disabled because we are using a line length of 100 characters.
 
