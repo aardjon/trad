@@ -8,16 +8,27 @@
 ///
 library;
 
+import 'package:intl/intl.dart';
+
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/entities/knowledgebase.dart';
+import 'package:core/entities/post.dart';
+import 'package:core/entities/route.dart';
+import 'package:core/entities/sorting/posts_filter_mode.dart';
+import 'package:core/entities/sorting/routes_filter_mode.dart';
+import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 
 import 'boundaries/ui.dart';
+import 'src/ui/rating.dart';
 
 /// Implementation of the application-wide presenter used by the core to interact with the user.
 class ApplicationWidePresenter implements PresentationBoundary {
   /// DI instance for obtaining dependencies from other rings.
   final DependencyProvider _dependencyProvider = DependencyProvider();
+
+  /// Mapper for getting the icon definitions describing certain ratings.
+  static const RatingIconFactory _ratingMapper = RatingIconFactory();
 
   @override
   void initUserInterface() {
@@ -35,9 +46,122 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void switchToRouteDb() {
+  void showSummitList() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.switchToRouteDb();
+    SummitListModel model = SummitListModel('Gipfel', 'Gipfel suchen');
+    ui.showSummitList(model);
+  }
+
+  @override
+  void updateSummitList(List<Summit> summitList) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    List<ListViewItem> summitItems = <ListViewItem>[];
+    for (final Summit summit in summitList) {
+      summitItems.add(ListViewItem(summit.name, itemId: summit.id));
+    }
+    ui.updateSummitList(summitItems);
+  }
+
+  @override
+  void showSummitDetails(Summit selectedSummit) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    SummitDetailsModel model = SummitDetailsModel(
+      selectedSummit.id,
+      selectedSummit.name,
+    );
+    ui.showSummitDetails(model);
+  }
+
+  @override
+  void updateRouteList(List<Route> routeList, RoutesFilterMode usedSortCriterion) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    List<ListViewItem> routeItems = <ListViewItem>[];
+    for (final Route route in routeList) {
+      routeItems.add(
+        ListViewItem(
+          route.routeName,
+          subTitle: route.routeGrade,
+          endIcon: _ratingMapper.getDoubleRatingIcon(route.routeRating ?? 0.0),
+          itemId: route.id,
+        ),
+      );
+    }
+    ui.updateRouteList(routeItems, _createRoutesSortCriterionItems(usedSortCriterion));
+  }
+
+  List<ListViewItem> _createRoutesSortCriterionItems(RoutesFilterMode usedSortCriterion) {
+    return <ListViewItem>[
+      ListViewItem(
+        'Name',
+        endIcon:
+            usedSortCriterion == RoutesFilterMode.name ? const IconDefinition(Glyph.checked) : null,
+        itemId: RoutesFilterMode.name.index,
+      ),
+      ListViewItem(
+        'Schwierigkeitsgrad',
+        endIcon: usedSortCriterion == RoutesFilterMode.grade
+            ? const IconDefinition(Glyph.checked)
+            : null,
+        itemId: RoutesFilterMode.grade.index,
+      ),
+      ListViewItem(
+        'Bewertung',
+        endIcon: usedSortCriterion == RoutesFilterMode.rating
+            ? const IconDefinition(Glyph.checked)
+            : null,
+        itemId: RoutesFilterMode.rating.index,
+      ),
+    ];
+  }
+
+  @override
+  void showRouteDetails(Route selectedRoute) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    RouteDetailsModel model = RouteDetailsModel(
+      selectedRoute.id,
+      selectedRoute.routeName,
+      selectedRoute.routeGrade,
+    );
+    ui.showRouteDetails(model);
+  }
+
+  @override
+  void updatePostList(List<Post> postList, PostsFilterMode usedSortCriterion) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    List<ListViewItem> postItems = <ListViewItem>[];
+    for (final Post post in postList) {
+      DateFormat formatter = DateFormat('dd.MM.yyyy HH:mm');
+      String formattedDate = formatter.format(post.postDate);
+
+      postItems.add(
+        ListViewItem(
+          post.userName,
+          subTitle: formattedDate,
+          content: post.comment,
+          endIcon: _ratingMapper.getIntRatingIcon(post.rating),
+        ),
+      );
+    }
+    ui.updatePostList(postItems, _createPostsSortCriterionItems(usedSortCriterion));
+  }
+
+  List<ListViewItem> _createPostsSortCriterionItems(PostsFilterMode usedSortCriterion) {
+    return <ListViewItem>[
+      ListViewItem(
+        'Neueste zuerst',
+        endIcon: usedSortCriterion == PostsFilterMode.newestFirst
+            ? const IconDefinition(Glyph.checked)
+            : null,
+        itemId: PostsFilterMode.newestFirst.index,
+      ),
+      ListViewItem(
+        'Älteste zuerst',
+        endIcon: usedSortCriterion == PostsFilterMode.oldestFirst
+            ? const IconDefinition(Glyph.checked)
+            : null,
+        itemId: PostsFilterMode.oldestFirst.index,
+      ),
+    ];
   }
 
   @override

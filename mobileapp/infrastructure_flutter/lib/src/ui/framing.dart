@@ -13,7 +13,9 @@ import 'about.dart';
 import 'drawer.dart';
 import 'journal.dart';
 import 'knowledgebase.dart';
-import 'routedb.dart';
+import 'routedb/route_details.dart';
+import 'routedb/summit_details.dart';
+import 'routedb/summit_list.dart';
 import 'routes.dart';
 import 'state.dart';
 
@@ -37,13 +39,23 @@ class MainWidget extends StatelessWidget {
   /// Reference to the central state of the GUI.
   final GuiState _guiState;
 
+  /// Reference to the central summit list state notifier.
+  final SummitListNotifier _summitListState;
+
+  final RouteListNotifier _routeListState;
+
+  final PostListNotifier _postListState;
+
   /// Constructor for directly initializing all members.
   MainWidget(
     String appName,
     String splashMessage,
     DomainLabelDefinition domainLabels,
     ApplicationWideController controller,
-    GuiState guiState, {
+    GuiState guiState,
+    SummitListNotifier summitListState,
+    RouteListNotifier routeListState,
+    PostListNotifier postListState, {
     super.key,
   })  : _appName = appName,
         _splashMessage = splashMessage,
@@ -53,7 +65,10 @@ class MainWidget extends StatelessWidget {
           domainLabels,
           controller,
         ),
-        _guiState = guiState;
+        _guiState = guiState,
+        _summitListState = summitListState,
+        _routeListState = routeListState,
+        _postListState = postListState;
 
   @override
   Widget build(BuildContext context) {
@@ -71,9 +86,21 @@ class MainWidget extends StatelessWidget {
           );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
-          return RouteDbPage(
+          return SummitListView(
             _appDrawerFactory.create(context),
-            _domainLabels.routedbLabel,
+            _summitListState,
+          );
+        },
+        UiRoute.summitdetails.toRouteString(): (BuildContext context) {
+          return SummitDetailsView(
+            _appDrawerFactory.create(context),
+            _routeListState,
+          );
+        },
+        UiRoute.routedetails.toRouteString(): (BuildContext context) {
+          return RouteDetailsView(
+            _appDrawerFactory.create(context),
+            _postListState,
           );
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
