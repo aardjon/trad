@@ -8,12 +8,18 @@ import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/routedb.dart';
+import '../boundaries/sysenv.dart';
+import '../entities/path.dart';
 
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.core.usecases.appwide');
 
 /// General, application-wide use cases that are not specific to a certain domain.
 class ApplicationWideUseCases {
+  /// Interface to the system environment component, used to retrieve environment specific
+  /// information.
+  final SystemEnvironmentBoundary _sysEnvBoundary;
+
   /// Interface to the presentation boundary component, used for displaying things.
   final PresentationBoundary _presentationBoundary;
 
@@ -25,13 +31,14 @@ class ApplicationWideUseCases {
   /// Expects a reference to the (fully configured) [DependencyProvider] to initialize all members.
   ApplicationWideUseCases(DependencyProvider di)
       : _presentationBoundary = di.provide<PresentationBoundary>(),
-        _routeDbBoundary = di.provide<RouteDbStorageBoundary>();
+        _routeDbBoundary = di.provide<RouteDbStorageBoundary>(),
+        _sysEnvBoundary = di.provide<SystemEnvironmentBoundary>();
 
   /// Use case of starting the trad application as a whole.
   ///
   /// This is the main use case ("entry point") for the app and is usually run exactly once during
   /// startup, after all initialization is done.
-  void startApplication() {
+  Future<void> startApplication() async {
     // Initialize the UI
     _logger.info('Running use case startApplication()');
     _presentationBoundary.initUserInterface();
