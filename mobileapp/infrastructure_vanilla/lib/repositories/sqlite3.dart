@@ -21,8 +21,11 @@ class Sqlite3Database implements RelationalDatabaseBoundary {
   Database? _dbHandle;
 
   @override
-  void connect(String connectionString) {
-    _dbHandle = sqlite3.open(connectionString);
+  void connect(String connectionString, {bool readOnly = false}) {
+    _dbHandle = sqlite3.open(
+      connectionString,
+      mode: readOnly ? OpenMode.readOnly : OpenMode.readWriteCreate,
+    );
   }
 
   @override

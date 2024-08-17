@@ -11,7 +11,9 @@ import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
+import 'package:crosscuttings/path.dart';
 
+import '../boundaries/paths.dart';
 import '../boundaries/repositories/database.dart';
 
 /// Logger to be used in this library file.
@@ -19,16 +21,26 @@ final Logger _logger = Logger('trad.adapters.storage.routedb');
 
 /// Implementation of the storage adapter used by the core to interact with the route DB repository.
 class RouteDbStorage implements RouteDbStorageBoundary {
+  /// The filename of the route database file (within the application data dir).
+  static const String _dbFileName = 'peaks.sqlite';
+
+  /// Interface to the component used to retrieve environment specific path information.
+  final PathProviderBoundary _pathProviderBoundary;
+
   /// The route db data repository.
   final RelationalDatabaseBoundary _repository;
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
   RouteDbStorage(DependencyProvider dependencyProvider)
-      : _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
+      : _pathProviderBoundary = dependencyProvider.provide<PathProviderBoundary>(),
+        _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
 
   @override
-  void initStorage(String routeDbFile) {
-    _repository.connect(routeDbFile);
+  Future<void> initStorage() async {
+    Path dataDir = await _pathProviderBoundary.getAppDataDir();
+    String connectionString = dataDir.join(_dbFileName).toString();
+    _logger.info('Connecting to route database at: $connectionString');
+    _repository.connect(connectionString, readOnly: true);
     // TODO(aardjon): Check schema version!
   }
 

@@ -18,7 +18,7 @@ library;
 /// All database operations work synchronously.
 abstract interface class RelationalDatabaseBoundary {
   /// Connects to the database specified by the [connectionString].
-  void connect(String connectionString);
+  void connect(String connectionString, {bool readOnly = false});
 
   /// Executes a query on a certain database table and returns the result set.
   ///

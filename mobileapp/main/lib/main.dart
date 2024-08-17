@@ -4,7 +4,9 @@
 ///
 library;
 
-import 'package:adapters/boundaries/environment.dart';
+import 'dart:async';
+
+import 'package:adapters/boundaries/paths.dart';
 import 'package:adapters/boundaries/repositories/blob.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
 import 'package:adapters/sysenv.dart';
@@ -27,7 +29,7 @@ import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
 /// The global main entry point - The one and only :)
 void main() {
   ApplicationBootstrap bootstrap = ApplicationBootstrap();
-  bootstrap.boot();
+  unawaited(bootstrap.boot());
 }
 
 /// The applications bootstrapping process.
@@ -43,9 +45,9 @@ class ApplicationBootstrap {
   final DependencyProvider _dependencyProvider = DependencyProvider();
 
   /// Initializes and starts the trad application.
-  void boot() {
+  Future<void> boot() async {
     _initApp();
-    _startApp();
+    await _startApp();
     _logger.info('Application started successfully');
   }
 
@@ -57,10 +59,10 @@ class ApplicationBootstrap {
   }
 
   /// Starts the trad application.
-  void _startApp() {
+  Future<void> _startApp() async {
     _logger.info('Starting trad application');
     ApplicationWideUseCases appUseCases = ApplicationWideUseCases(_dependencyProvider);
-    appUseCases.startApplication();
+    await appUseCases.startApplication();
   }
 
   /// Initializes the logging framework.

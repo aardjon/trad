@@ -15,11 +15,11 @@ import '../../entities/summit.dart';
 ///
 /// The route database is a read only data storage.
 abstract interface class RouteDbStorageBoundary {
-  /// Initializes the storage with the file provided as [routeDbFile].
+  /// Initializes the storage.
   ///
-  /// An exception is thrown if the storage cannot be initialized (e.g. because of the file not
-  /// being found or invalid).
-  void initStorage(String routeDbFile);
+  /// An exception is thrown if the storage cannot be initialized (e.g. because of the database file
+  /// being not found or invalid).
+  Future<void> initStorage();
 
   /// Retrieve all data of the single summit identified by [summitDataId].
   Future<Summit> retrieveSummit(int summitDataId);
