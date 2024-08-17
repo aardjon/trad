@@ -1,7 +1,7 @@
 ///
 /// Logging library that can be used by all parts of the trad application.
 ///
-/// Together with `trad.crosscuttings.logging.entities`, this library is the public logging API.
+/// Together with `trad.crosscuttings.logging.config`, this library is the public logging API.
 ///
 library;
 
