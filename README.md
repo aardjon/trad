@@ -8,10 +8,10 @@ A utility for climbing in the Saxon Switzerland area providing the following mai
 
 ## Setup & Running
 
-To run the app (locally or on any mobile device), you need the route database file named `peaks.sqlite` (currently not publiclyavailable for legal reasons). Put it into the data directory your operations system assigned to the `trad` application. Some examples for the data directory on different platforms are:
- - On Linux: $HOME.local/share/trad/
- - On Windows: %APPDATA%\trad
- - On Android: /data/user/0/de.wesenigk.trad/files/
+To run the app (locally or on any mobile device), you need the route database file named `peaks.sqlite` (currently not publicly available for legal reasons). Put it into the data directory your operating system assigned to the `trad` application. Some examples for the data directory on different platforms are:
+ - Linux: `$HOME/.local/share/trad/`
+ - Windows: `%APPDATA%\trad`
+ - Android: `/data/user/0/de.wesenigk.trad/files/`
 
 On startup, the expected file path is logged on the info level as follows:
 
