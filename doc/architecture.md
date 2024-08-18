@@ -414,6 +414,61 @@ messages from certain system parts later on.
 
 # 9. Architecture Decisions
 
+## 9.1 ADR-1 (08/24): Decouple the mobile app from external route data services
+
+### Context
+The mobile app needs to import the summit and route data from various online sources (see also
+[route database requirements](requirements.md#21-list-of-climbing-routes-in-the-saxon-switzerland-area))
+beyond our control. External interfaces may change at any time (note: there are no machine readable APIs,
+we have to parse the HTML). Their operators may not like too much additional traffic from our apps.
+Preparing the imported data for mobile app usage may be a complex task in some cases. Rolling out a new
+version of the mobile app to AppStores can take from some days up to several weeks.
+
+### Proposal
+Put a facade/cache component ("scraper") in between to fully decouple the mobile app from external sources.
+The system is split into two parts:
+ - A `scraper` service imports the external data from time to time and creates optimized, working route databases
+ - The `mobile app` just downloads and imports the prepared route database
+
+### Consequences
+
+ - Pros:
+   - Mobile app can update independently from the status of external sites
+   - On external interface change, only the scraper needs to be adapted (no app update)
+   - It can be made possible to add or remove external sources without having to roll out a new app version
+   - Data update can be scheduled centrally in cooperation with the external operators, if necessary
+   - Offline database preparation allows more expensive optimization as there are looser performance restrictions
+   - Can be made very easy for users (i.e. automatically downloading/updating the route DB)
+   - The most resource and energy efficient solution
+ 
+ - Cons:
+   - We need some web service for running the scraper
+   - We need some web storage for providing the prepared database files
+   - May cause copyright problems because we are publicly sharing a copy of the data
+
+
+### Considered Alternatives
+
+#### 1. Let the mobile app import route data directly from external sites
+   - Pros:
+     - No copyright issues
+     - No web storage/service needed
+   - Cons:
+     - External interface/web site changes (beyond our control!) may cause problems in the mobile app
+     - Some expensive database operations/optimizations may not be possible on mobile devices due to their runtime
+     - May cause quite a lot of additional traffic on external sites
+ #### 2. Let the users run the scraper by themselves
+   - Pros:
+     - No web storage/service needed
+     - On external interface change, only the scraper needs to be adapted (no app update)
+     - Offline database preparation allows more expensive optimization as there are looser performance restrictions
+     - (Probably) no copyright issues
+   - Cons:
+     - May cause unwanted additional traffic on external sites
+     - App setup gets quite complicated (users have to run the scraper on a PC and then copy some file to the mobile)
+
+A future switch between the proposal and alternative #2 should be relatively easy.
+
 
 # 10. Quality Requirements
 
