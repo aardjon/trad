@@ -17,12 +17,24 @@ final Logger _logger = Logger('trad.infrastructure_vanilla.repositories.sqlite3'
 /// [connect()]ing to a SQLite database, the connectionString is simply the full path to the SQLite
 /// database file to open.
 class Sqlite3Database implements RelationalDatabaseBoundary {
-  // Handle to the currently opened database, or `null` if no database has been opened.
+  /// Interface to the sqlite3 library.
+  ///
+  /// Having this as a separate member allows to replace the real library with a different or mocked
+  /// one, e.g. for unit testing. Never use `sqlite3` directly but only this member.
+  final Sqlite3 _extLibApi;
+
+  /// Handle to the currently opened database, or `null` if no database has been opened.
   Database? _dbHandle;
+
+  /// Constructor for injecting an alternative sqlite3 library.
+  ///
+  /// For easier unit testing, a mocked sqlite3 library can be injected by providing it as
+  /// [extLibApi]. In normal/productive cases always use the default parameter value.
+  Sqlite3Database({Sqlite3? extLibApi}) : _extLibApi = extLibApi ?? sqlite3;
 
   @override
   void connect(String connectionString, {bool readOnly = false}) {
-    _dbHandle = sqlite3.open(
+    _dbHandle = _extLibApi.open(
       connectionString,
       mode: readOnly ? OpenMode.readOnly : OpenMode.readWriteCreate,
     );
