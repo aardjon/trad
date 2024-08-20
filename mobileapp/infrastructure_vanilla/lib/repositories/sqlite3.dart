@@ -8,6 +8,8 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
+import '../src/sql_stmt_factory.dart';
+
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.infrastructure_vanilla.repositories.sqlite3');
 
@@ -41,91 +43,18 @@ class Sqlite3Database implements RelationalDatabaseBoundary {
   }
 
   @override
-  Future<ResultRows> queryJoin(
-    String leftTable,
-    String rightTable,
-    String joinCondition,
-    List<String> columns, {
-    String? whereClause,
-    List<Object?> whereParameters = const <Object?>[],
-    List<String>? groupBy,
-    String? orderBy,
-  }) async {
+  Future<ResultRows> executeQuery(Query query) async {
     if (_dbHandle == null) {
       throw StateError('Please connect() to a database before querying it.');
     }
-    // TODO(aardjon): Check whereClause and whereParameters validity
-    ResultRows resultRows = <ResultRow>[];
 
-    /// To be able to reference the columns in the result set by the same name as they are
-    /// requested, we always use the AS keyword. But only if the client didn't specify one by
-    /// itself, of course.
-    List<String> normalizedColumnNames = <String>[];
-    for (final String colName in columns) {
-      if (!colName.contains(' AS ')) {
-        normalizedColumnNames.add("$colName AS '$colName'");
-      } else {
-        normalizedColumnNames.add(colName);
-      }
-    }
-    String sqlStatement = "SELECT ${normalizedColumnNames.join(', ')} "
-        "FROM '$leftTable' "
-        "LEFT JOIN '$rightTable' ON $joinCondition";
-    if (whereClause != null) {
-      sqlStatement += ' WHERE $whereClause';
-    }
-    if (groupBy != null) {
-      sqlStatement += " GROUP BY ${groupBy.join(', ')}";
-    }
-    if (orderBy != null) {
-      sqlStatement += ' ORDER BY $orderBy';
-    }
+    SqlStmtFactory sqlGenerator = SqlStmtFactory();
+    String sqlStatement = sqlGenerator.generateSqlStatement(query);
 
     _logger.debug('Executing SQL statement: $sqlStatement');
-    ResultSet resultSet = _dbHandle!.select(sqlStatement, whereParameters);
+    ResultSet resultSet = _dbHandle!.select(sqlStatement, query.whereParameters);
 
-    for (final Row row in resultSet) {
-      resultRows.add(ResultRow(row));
-    }
-    return resultRows;
-  }
-
-  @override
-  Future<ResultRows> queryTable(
-    String table,
-    List<String> columns, {
-    String? whereClause,
-    List<Object?> whereParameters = const <Object?>[],
-    String? orderBy,
-  }) async {
-    if (_dbHandle == null) {
-      throw StateError('Please connect() to a database before querying it.');
-    }
     ResultRows resultRows = <ResultRow>[];
-
-    /// To be able to reference the columns in the result set by the same name as they are
-    /// requested, we always use the AS keyword. But only if the client didn't specify one by
-    /// itself, of course.
-    List<String> normalizedColumnNames = <String>[];
-    for (final String colName in columns) {
-      if (!colName.contains(' AS ')) {
-        normalizedColumnNames.add("$colName AS '$colName'");
-      } else {
-        normalizedColumnNames.add(colName);
-      }
-    }
-
-    String sqlStatement = "SELECT ${normalizedColumnNames.join(', ')} FROM '$table' ";
-    if (whereClause != null) {
-      sqlStatement += 'WHERE $whereClause ';
-    }
-    if (orderBy != null) {
-      sqlStatement += 'ORDER BY $orderBy';
-    }
-
-    _logger.debug('Executing SQL statement: $sqlStatement');
-    ResultSet resultSet = _dbHandle!.select(sqlStatement, whereParameters);
-
     for (final Row row in resultSet) {
       resultRows.add(ResultRow(row));
     }

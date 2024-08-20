@@ -46,12 +46,12 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Summit> retrieveSummit(int summitDataId) async {
-    List<ResultRow> resultSet = await _repository.queryTable(
+    Query query = Query.table(
       _SummitTable.tableName,
       <String>[_SummitTable.columnId, _SummitTable.columnName],
-      whereClause: '${_SummitTable.columnId} = ?',
-      whereParameters: <int>[summitDataId],
     );
+    query.setWhereCondition('${_SummitTable.columnId} = ?', <int>[summitDataId]);
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
     int? id = resultSet[0].getIntValue(_SummitTable.columnId);
     String? name = resultSet[0].getStringValue(_SummitTable.columnName);
     return Summit(id!, name!);
@@ -59,25 +59,22 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
-    // Build the WHERE clause if filtering is requested
-    String? whereClause;
-    List<Object?> whereParameters = <Object?>[];
+    // Configure the query
+    Query query = Query.table(
+      _SummitTable.tableName,
+      <String>[_SummitTable.columnId, _SummitTable.columnName],
+    );
     if (nameFilter != null) {
       _logger.debug('Retrieving filtered summit list for "$nameFilter"');
-      String filterColumn = _SummitTable.columnName;
-      whereClause = '$filterColumn LIKE ?';
-      whereParameters.add('%$nameFilter%');
+      query.setWhereCondition('${_SummitTable.columnName} LIKE ?', <String>['%$nameFilter%']);
     } else {
       _logger.debug('Retrieving complete summit list');
     }
+    query.orderByColumns = <String>[_SummitTable.columnName];
+
     // Run the database query
-    List<ResultRow> resultSet = await _repository.queryTable(
-      _SummitTable.tableName,
-      <String>[_SummitTable.columnId, _SummitTable.columnName],
-      whereClause: whereClause,
-      whereParameters: whereParameters,
-      orderBy: _SummitTable.columnName,
-    );
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
     // Convert and return the result data
     List<Summit> summits = <Summit>[];
     for (final ResultRow dataRow in resultSet) {
@@ -95,35 +92,38 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   ) async {
     const String averageRatingColumnName = 'rating'; // Name of the virtual column from the join
 
-    String orderByClause;
+    /// Configure the query
+    String orderByColumn;
     switch (sortCriterion) {
       case RoutesFilterMode.name:
-        orderByClause = '${_RoutesTable.columnName} ASC';
+        orderByColumn = '${_RoutesTable.columnName} ASC';
       case RoutesFilterMode.grade:
-        orderByClause = '${_RoutesTable.columnGrade} ASC';
+        orderByColumn = '${_RoutesTable.columnGrade} ASC';
       case RoutesFilterMode.rating:
-        orderByClause = '$averageRatingColumnName DESC';
+        orderByColumn = '$averageRatingColumnName DESC';
     }
 
-    List<ResultRow> resultSet = await _repository.queryJoin(
-      _RoutesTable.tableName,
-      _PostsTable.tableName,
-      '${_RoutesTable.columnRouteId} = ${_PostsTable.columnRouteId}',
+    Query query = Query.join(
+      <String>[_RoutesTable.tableName, _PostsTable.tableName],
+      <String>['${_RoutesTable.columnRouteId} = ${_PostsTable.columnRouteId}'],
       <String>[
         _RoutesTable.columnRouteId,
         _RoutesTable.columnName,
         _RoutesTable.columnGrade,
         "AVG(${_PostsTable.columnRating}) AS '$averageRatingColumnName'",
       ],
-      whereClause: '${_RoutesTable.columnSummitId} = ?',
-      whereParameters: <Object>[summitId],
-      groupBy: <String>[
-        _RoutesTable.columnRouteId,
-        _RoutesTable.columnName,
-        _RoutesTable.columnGrade,
-      ],
-      orderBy: orderByClause,
     );
+    query.setWhereCondition('${_RoutesTable.columnSummitId} = ?', <Object>[summitId]);
+    query.groupByColumns = <String>[
+      _RoutesTable.columnRouteId,
+      _RoutesTable.columnName,
+      _RoutesTable.columnGrade,
+    ];
+    query.orderByColumns = <String>[orderByColumn];
+
+    // Execute the query
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
     // Convert and return the result data
     List<Route> routes = <Route>[];
     for (final ResultRow dataRow in resultSet) {
@@ -138,12 +138,14 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Route> retrieveRoute(int routeDataId) async {
-    List<ResultRow> resultSet = await _repository.queryTable(
+    Query query = Query.table(
       _RoutesTable.tableName,
       <String>[_RoutesTable.columnRouteId, _RoutesTable.columnName, _RoutesTable.columnGrade],
-      whereClause: '${_RoutesTable.columnRouteId} = ?',
-      whereParameters: <int>[routeDataId],
     );
+    query.setWhereCondition('${_RoutesTable.columnRouteId} = ?', <int>[routeDataId]);
+
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
     int? id = resultSet[0].getIntValue(_RoutesTable.columnRouteId);
     String? name = resultSet[0].getStringValue(_RoutesTable.columnName);
     String? grade = resultSet[0].getStringValue(_RoutesTable.columnGrade);
@@ -156,16 +158,16 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     PostsFilterMode sortCriterion,
   ) async {
     _logger.debug('Retrieving posts for route "$routeId", sorted by $sortCriterion');
-    // Build the WHERE and ORDER BY clauses
-    String whereClause = '${_PostsTable.columnRouteId} = ?';
-    String orderByClause = '${_PostsTable.columnTimestamp} ';
+
+    // Configure the query
+    String orderByColumn = '${_PostsTable.columnTimestamp} ';
     if (sortCriterion == PostsFilterMode.newestFirst) {
-      orderByClause += 'DESC';
+      orderByColumn += 'DESC';
     } else {
-      orderByClause += 'ASC';
+      orderByColumn += 'ASC';
     }
-    // Run the database query
-    List<ResultRow> resultSet = await _repository.queryTable(
+
+    Query query = Query.table(
       _PostsTable.tableName,
       <String>[
         _PostsTable.columnPostId,
@@ -174,10 +176,13 @@ class RouteDbStorage implements RouteDbStorageBoundary {
         _PostsTable.columnComment,
         _PostsTable.columnRating,
       ],
-      whereClause: whereClause,
-      whereParameters: <int>[routeId],
-      orderBy: orderByClause,
     );
+    query.setWhereCondition('${_PostsTable.columnRouteId} = ?', <int>[routeId]);
+    query.orderByColumns = <String>[orderByColumn];
+
+    // Run the database query
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
     // Convert and return the result data
     List<Post> posts = <Post>[];
     for (final ResultRow dataRow in resultSet) {

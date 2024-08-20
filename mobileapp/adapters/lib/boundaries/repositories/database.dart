@@ -18,46 +18,111 @@ library;
 /// All database operations work synchronously.
 abstract interface class RelationalDatabaseBoundary {
   /// Connects to the database specified by the [connectionString].
+  ///
+  /// If [readOnly] is set to true, the database is opened for reading only which allows some
+  /// optimization (especially for concurrent access). However, trying to update any data will lead
+  /// to an exception then.
   void connect(String connectionString, {bool readOnly = false});
 
-  /// Executes a query on a certain database table and returns the result set.
+  /// Executes the provided query and returns the result set.
   ///
-  /// The name of the table and the names of all columns to request must be specified by [table] and
-  /// [columns]. The result rows are sorted by the column whose name is specified by [orderBy].
-  /// [whereClause] allows to filter the result set, it is a regular SQL WHERE clause (without the
-  /// WHERE keyword). [whereParameters] must be provided if the [whereClause] references query
-  /// parameters ('?') to be bound later. Their count and order must correspond to the [whereClause].
-  Future<ResultRows> queryTable(
-    String table,
-    List<String> columns, {
-    String? whereClause,
-    List<Object?> whereParameters = const <Object?>[],
-    String? orderBy,
-  });
+  /// If the provided query is in any way invalid, an exception is raised. It the query doesn't
+  /// return any results, the returned result row list is empty.
+  Future<ResultRows> executeQuery(Query query);
+}
 
-  /// Executes a query on a (left) join between [leftTable] and [rightTable] and returns the result
-  /// set.
+/// Defines all properties and parameters of a query that can be run on the database.
+///
+/// To create a simple table query, use [Query.table()]. For joining several tables, use
+/// [Query.join()].
+///
+/// This class is merely for transporting and representing queries, it doesn't do much validation.
+/// It can be executed by handing it to [RelationalDatabaseBoundary.executeQuery()], which will
+/// cause an error if the query is in any way invalid (e.g. non-existent column names, parameter
+/// count mismatch etc).
+class Query {
+  /// Table names to query.
+  final List<String> _tableNames;
+
+  /// Join conditions (for joins only). This list is one item shorter than [_tableNames].
+  final List<String>? _joinConditions;
+
+  /// Columns to retrieve.
+  final List<String> _columnNames;
+
+  /// The WHERE condition.
+  String? _whereCondition;
+
+  /// WHERE parameters.
+  List<Object?> _whereParameters = const <Object?>[];
+
+  /// Names of the tables to query.
+  List<String> get tableNames => _tableNames;
+
+  /// The SQL JOIN conditions (without the ON keywords) in case [tableNames] contains more than one.
   ///
-  /// The join must be specified by [joinCondition] using a regular SQL condition clause (without
-  /// the ON keyword). The names of all columns to request must be specified by [columns]. The
-  /// result rows are grouped by the column whose names are specified with [groupBy] and ordered by
-  /// the column name specified by [orderBy]. [whereClause] allows to filter the result set, it is a
-  /// regular SQL WHERE clause (without the WHERE keyword). [whereParameters] must be provided if
-  /// the [whereClause] references query parameters ('?') to be bound later. Their count and order
-  /// must correspond to the [whereClause].
-  Future<ResultRows> queryJoin(
-    String leftTable,
-    String rightTable,
-    String joinCondition,
-    List<String> columns, {
-    String? whereClause,
-    List<Object?> whereParameters = const <Object?>[],
-    List<String>? groupBy,
-    String? orderBy,
-  });
+  /// The length of the returned list is always the number of [tableNames] minus one.
+  List<String>? get joinConditions => _joinConditions;
+
+  /// The names of the columns to retrieve.
+  List<String> get columNames => _columnNames;
+
+  /// The SQL WHERE condition to filter by (without the WHERE keyword).
+  String? get whereCondition => _whereCondition;
+
+  /// Parameter values referenced by [whereCondition].
+  List<Object?> get whereParameters => _whereParameters;
+
+  /// Specifies the names of the columns the result rows are grouped by.
+  List<String> groupByColumns = <String>[];
+
+  /// Specifies the names of the columns the result rows are ordered by.
+  List<String> orderByColumns = <String>[];
+
+  /// Defines a query on a single database table.
+  ///
+  /// The name of the table and the names of all columns to request must be specified by [tableName]
+  /// and [_columnNames]. The column names specified here are used to retrieve the resulting values
+  /// from [ResultRow] objects after the query has run.
+  Query.table(String tableName, this._columnNames)
+      : _tableNames = <String>[tableName],
+        _joinConditions = null,
+        assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
+
+  /// Defines a query on a (left) join between the specified tables.
+  ///
+  /// The tables specified by [_tableNames] are joined using the given [joinConditions], which is a
+  /// list of regular SQL condition clauses without the ON keywords. Its length must be the number
+  /// of provided [_tableNames] minus one.
+  ///
+  /// The names of all columns to request must be specified by [_columnNames]. The column names
+  /// specified here are used to retrieve the resulting values from [ResultRow] objects after the
+  /// query has run.
+  Query.join(this._tableNames, List<String> joinConditions, this._columnNames)
+      : assert(_tableNames.length > 1, 'Joining requires at least two table names.'),
+        assert(
+          joinConditions.length == _tableNames.length - 1,
+          "Joining requires 'table count - 1' join conditions.",
+        ),
+        _joinConditions = joinConditions,
+        assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
+
+  /// Defines a condition to filter the result set for.
+  ///
+  /// [whereCondition] is a regular SQL WHERE clause without the WHERE keyword. All non-static
+  /// parameter values should be provided in the [whereParameters] list and only referenced by '?'
+  /// within [whereCondition]. This avoids SQL injection errors. Of course, the number of given
+  /// parameters must match the number of references, otherwise the query will fail upon execution.
+  void setWhereCondition(String whereCondition, List<Object?> whereParameters) {
+    _whereCondition = whereCondition;
+    _whereParameters = whereParameters;
+  }
 }
 
 /// A single row of a query result set.
+///
+/// All cell values are accessed based on their column name. These names are the same as configured
+/// for retrieval by [Query.tableNames].
 class ResultRow {
   /// Raw result data row coming from the database.
   final Map<String, Object?> _resultData;
