@@ -197,7 +197,7 @@ automatically without the users knowledge (see [4.4 Compliance, Security](#44-co
 ## 5.1 Overview
 
 The following diagram provides an overview of the mobile app architecture, which is refined more
-detailled in the following sections.
+detailled in the following sections. Arrows are source code dependencies.
 
 ![Architectural overview](architecture/sysarc-overview.png)
 
@@ -217,20 +217,19 @@ The general rules for source code dependencies are:
 
 ### 5.2.1 Motivation
 
-The mobile app implementation utilizes the *Clean Architecture* pattern,
-[section 4.1](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6)
-(software parts) as described in [section 5.2](#52-level-1). Additionally, the `infrastructure`
-ring is split into a *flutter* and a *vanilla* part, containing all flutter and all non-flutter
-dependent `infrastructure` components, respectively - see also [section 9.1 TODO](#). A separate
-part touching all rings contains crosscutting concepts as described in
-[section 8](#8-crosscutting-concepts).
+As described in [section 4.1](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6),
+the mobile app implementation utilizes the *Clean Architecture* pattern with only three rings
+(software parts). Additionally, the `infrastructure` ring is split into a *flutter* and a *vanilla* part,
+containing all flutter and all non-flutter dependent `infrastructure` components, respectively - see also
+[section 9.1 TODO](#). A separate part touching all rings contains some of the crosscutting concepts
+described in [section 8](#8-crosscutting-concepts).
 
 ### 5.2.2 System parts
 
 #### `core`
 
 This part contains all business entities and implements all business logic (use cases) on an
-abstract level. It also defines the interface to the `adapters` ring.
+abstract level. It also defines the interface ("boundary") to the `adapters` ring.
 
 Source location: [mobileapp/core](../mobileapp/core)
 
@@ -243,26 +242,33 @@ Implementation Rules:
 
 #### `adapters`
 
-This part provides adapter implementations for connecting the `core` with `infrastructure`
+This part provides gateway implementations for connecting the `core` with `infrastructure`
 interfaces, converting the data structures coming from one part into the data structures needed
-by the other. It also defines the interface to the `infrastructure`.
+by the other. It also defines the interface ("boundary") to the `infrastructure`.
 
 Source location: [mobileapp/adapters](../mobileapp/adapters)
 
 Examples for adapter responsibilities:
  - Defining or translating a string being displayed to the user
  - Formatting dates or numbers into the users preferred string representation
+ - Knowledge about the schema of a relation database (but still independent of a certain DBMS!)
+ - Deciding which DB query to run on which table and parameterizing it
+ - Converting a query result set (rows) into the `core`s entity objects
  - Choosing between different `infrastructure` implementations at runtime
 
 Implementation Rules:
+ - No business logic
  - If possible, only pure dart language features (some std libs may be allowed)
  - No technical details (independent from specific hardware or certain implementation details)
  - No dependencies to external interfaces of any kind (IO, UI)
+ - One adapter implementation may access more than one infrastructure boundary to retrieve data
 
 #### `infrastructure`
 
-This part contains all concrete implementations and all technical details. The special `main`
-and `test` components are considered a part of the infrastructure, too.
+This part contains all concrete implementations and all technical details. In general, this part
+provides a customized, generic interface for each external library which makes it possible to
+(or at least easier) to replace this library in the future if necessary. The special `main`
+component is considered a part of the infrastructure, too.
 
 Source locations:
  - [mobileapp/infrastructure_vanilla](../mobileapp/infrastructure_vanilla)
@@ -274,9 +280,11 @@ Examples:
 ----------|--------------------------------
   ✔️ | Everything that requires *Flutter*
   ✔️ | A package requiring `dart:io` imports
-  ✔️ | A SQLite based storage implementation
-  ✔️ | Hardware specific code or hardware abstraction
+  ✔️ | Generating and executing SQL statements
+  ✔️ | Generic, SQLite specific database repository (schema agnostic)
+  ✔️ | Platform specific code or hardware abstraction
   ✖️ (`adapters`) | Display strings/i18n
+  ✖️ (`adapters`) | A concrete table name to query in a certain situation
   ✖️ (`core`) | The decision whether a certain button must be disabled
   ✖️ (`core`) | Trigger a switch to another UI screen/page after a user action
 
@@ -304,10 +312,14 @@ Source location: [mobileapp/crosscuttings](../mobileapp/crosscuttings)
 
 Interface name | Source location
 ------------|--------------------------------------------------------
-boundaries.presentation | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/presentation.dart)
-boundaries.data_exchange | TODO
-boundaries.storage | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/storage)
-boundaries.positioning | TODO
+core.boundaries.presentation | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/presentation.dart)
+core.boundaries.data_exchange | TODO
+core.boundaries.storage | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/storage)
+core.boundaries.positioning | TODO
+adapters.boundaries.ui | [adapters.boundaries.ui](../mobileapp/adapters/lib/boundaries/ui.dart)
+adapters.boundaries.repositories | [adapters.boundaries.repositories](../mobileapp/core/lib/boundaries/repositories)
+adapters.boundaries.positioning | TODO
+
 
 ## 5.3 Level 2
 
@@ -329,7 +341,7 @@ Source location: [mobileapp/core/lib/boundaries](../mobileapp/core/lib/boundarie
 
 #### `core.usecases`
 
-Implementation of all use cases. Further separated into the different application domains. Each use case may depend on other use cases and an all core boundaries.
+Implementation of all use cases. Further separated into the different application domains. Each use case may depend on other use cases and on all core boundaries.
 
 Source location: [mobileapp/core/lib/usecases](../mobileapp/core/lib/usecases)
 
@@ -349,7 +361,9 @@ Source location: [mobileapp/adapters/lib/boundaries](../mobileapp/adapters/lib/b
 
 ![Refinement of the `infrastructure`](architecture/bbview_level2_infrastructure.png)
 
-Split into the `flutter` and the `vanilla` variant, which must not depend on each other.
+The `infrastructure` ring is split into the `flutter` and the `vanilla` variant, which do not depend on each
+other. However, if it is useful for some reason, the `infrastructure.flutter` part may depend on the
+`infrastructure.vanilla` part (but not vice-versa).
 
 
 # 6. Runtime View
@@ -518,7 +532,8 @@ QREQ-15 | 4 | Transferability | It shall be easily possible to add a new destina
 
 ## 12.1 Important terms
 
-- Ban: Legal prohibition to climb on a certain summit (or route), usually temporarily due to nature protection
+- Ban: Legal prohibition to climb on a certain summit (or route), usually temporarily due to nature protection.
+- Boundary: A special component which acts as the interface from one architectural ring to the next outer ring (e.g `core` to `adapters`).
 - Technical grade: Difficulty of a climbing route, measured e.g. with UIAA or Saxon scale.
 - Adjectival grade: This gives an overall picture of the route including how well protected it is.
 - Knowledgebase: Encyclopaedia with climbing related information, e.g. regulations or knots.
