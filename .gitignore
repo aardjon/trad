@@ -1,4 +1,4 @@
-doc/*.bkp
+doc/**/*.bkp
 
 # Eclipse related
 .project
@@ -14,3 +14,4 @@ doc/*.bkp
 
 # Visual Studio Code
 .vscode/
+
