@@ -447,58 +447,161 @@ domain.
 
 # 9. Architecture Decisions
 
-## 9.1 ADR-1 (08/24): Decouple the mobile app from external route data services
+## 9.1 ADR-1: How to integrate Flutter into the architecture?
+
+### Context
+Flutter as a framework should be considered an implementation detail, much like any other external
+package. However, because of its size and importance it has a much bigger impact on the code and
+software structure. Following the Clean Architecture pattern, everything that has to do with
+Flutter must still be limited to the outer (`infrastructure`) ring, to strictly separate it from
+any business logic and to be able to update or replace the framework in the future if necessary.
+Only the software parts that really need Flutter shall be able to access (import) from it.
+
+### Decision
+
+The `adapters` ring provides a generic, Flutter independent interface to the services that are
+implemented using Flutter (e.g. UI, Positioning, platform specific information). Their
+implementation within the `infrastructure` ring may import and use Flutter services normally. In
+addition, the `infrastructure` ring is split into two parts: The Flutter one and the Non-Flutter
+("vanilla") one, from which only the Flutter one depends on the Flutter framework.
+
+### Status
+Accepted (04/2024)
+
+### Consequences
+ - Positive:
+   - Flutter usage is limited to the places that really need it
+   - It's relatively easy to add e.g. alternative UI implementations in the future (e.g. Qt or CLI?)
+   - The effort for adapting to new Flutter versions is limited to a single system part
+   - In a way this structure encourages strict separation of business logic and details
+ - Neutral:
+   - Developers need a more advanced knowledge of Flutter to do things "right" (e.g. implementing a proper
+    [state management](https://docs.flutter.dev/data-and-backend/state-mgmt/intro) instead of just using a
+    [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html))
+ - Cons:
+   - Many "see how easy you can get started" tutorials do not work because they don't separate UI from business
+   - Probably more work to implement the UI
+
+
+## 9.2. ADR-2: Single flutter project or multiple sub-projects?
+
+### Context
+
+The architecture should be represented as good as possible in the source code and project
+structure. The main goals are:
+ - Architectural entities should more or less directly map to certain file system/source entities (e.g. packages)
+ - Accidential usage of invalid dependency relations should be detected and prohibited as early as possible
+
+### Decision
+
+The mobile app project is split into several sub-projects (i.e. Dart and Flutter packages) that are
+managed by [`melos`](https://melos.invertase.dev/). All of these sub-projects are stored within one
+source code repository, though.
+
+There is one Dart package for each level 1 part of the software (i.e. the `core`, `crosscuttings`
+and `adapters` rings). Because the `infrastructure` ring is split (see
+[ADR-1](#91-adr-1-how-to-integrate-flutter-into-the-architecture)), there is a Dart package
+`infrastructure_vanilla` and a Flutter package `infrastructure_flutter` for it. Furthermore, `main`
+is the actual Flutter application which ties everything together (but doesn't contain much code).
+
+### Status
+Accepted (04/2024)
+
+### Consequences
+
+Positive:
+ - Inter-ring dependency rules are enforced automatically
+ - Dependencies to external libraries are enforced automatically
+ - Explicit dependency definition for each package makes it easy to find out what may be used there
+ - Source directory stays clean, because the Flutter platform stuff is hidden inside the `main` project
+
+Neutral:
+ - Unsure about IDE support and setup
+
+Con:
+ - Need separate tooling for managing the subprojects (e.g. `melos`)
+ - Combining subprojects' metrics can be complicated
+ - Some tool configuration may be duplicated
+
+### Considered Alternatives
+
+The alternative would be one big, single Flutter project.
+
+Positive:
+ - Easy to gather complete metrics (e.g. test coverage, linter reports)
+ - Single source of truth for tool configuration
+ - Can simply use `flutter` CLI command (+ IDE tools etc.),
+
+Con:
+ - We need a separate mechanism to enforce the dependency rules (may some linter rule?)
+ - Allowed dependencies and violations are not as obvious
+ - Flutter directory structure pollutes the source root
+ - Much more difficult to build a non-Flutter variant in the future
+
+
+## 9.3 ADR-3: Decouple the mobile app from external route data services
 
 ### Context
 The mobile app needs to import the summit and route data from various online sources (see also
 [route database requirements](requirements.md#21-list-of-climbing-routes-in-the-saxon-switzerland-area))
-beyond our control. External interfaces may change at any time (note: there are no machine readable APIs,
-we have to parse the HTML). Their operators may not like too much additional traffic from our apps.
-Preparing the imported data for mobile app usage may be a complex task in some cases. Rolling out a new
-version of the mobile app to AppStores can take from some days up to several weeks.
+beyond our control. External interfaces may change at any time (note: there are no machine readable
+APIs, we have to parse the HTML). Their operators may not like too much additional traffic from our
+apps. Preparing the imported data for mobile app usage may be a complex task in some cases. Rolling
+out a new version of the mobile app to AppStores can take from some days up to several weeks.
 
-### Proposal
+### Decision
 Put a facade/cache component ("scraper") in between to fully decouple the mobile app from external sources.
 The system is split into two parts:
  - A `scraper` service imports the external data from time to time and creates optimized, working route databases
  - The `mobile app` just downloads and imports the prepared route database
 
+### Status
+
+Proposal (08/24)
+
 ### Consequences
 
- - Pros:
-   - Mobile app can update independently from the status of external sites
+ - Positive:
+   - Mobile app can update independently from the status (disruptions?) of external sites
    - On external interface change, only the scraper needs to be adapted (no app update)
    - It can be made possible to add or remove external sources without having to roll out a new app version
+   - Additional traffic on external sites is kept as low as possible
+   - External site load does not increase with increasing number of mobile app users
    - Data update can be scheduled centrally in cooperation with the external operators, if necessary
-   - Offline database preparation allows more expensive optimization as there are looser performance restrictions
+   - Offline database preparation allows more expensive optimization and validation as there are looser performance restrictions
    - Can be made very easy for users (i.e. automatically downloading/updating the route DB)
    - The most resource and energy efficient solution
- 
- - Cons:
+   - In general:
+     - Improves maintainability, reliability, extensibility and scalability
+     - Embarks the risks coming from the dependency to external services
+
+ - Negative:
    - We need some web service for running the scraper
    - We need some web storage for providing the prepared database files
    - May cause copyright problems because we are publicly sharing a copy of the data
-
+   - We have to provide a stable interface between the mobile app and the scraper (increased development effort) 
 
 ### Considered Alternatives
 
 #### 1. Let the mobile app import route data directly from external sites
-   - Pros:
+   - Positive:
      - No copyright issues
      - No web storage/service needed
-   - Cons:
+   - Negative:
      - External interface/web site changes (beyond our control!) may cause problems in the mobile app
      - Some expensive database operations/optimizations may not be possible on mobile devices due to their runtime
-     - May cause quite a lot of additional traffic on external sites
- #### 2. Let the users run the scraper by themselves
-   - Pros:
+     - May cause quite a lot of additional traffic on external sites with increasing numbers of app users (doesn't scale)
+
+#### 2. Let the users run the scraper by themselves
+   - Positive:
      - No web storage/service needed
      - On external interface change, only the scraper needs to be adapted (no app update)
      - Offline database preparation allows more expensive optimization as there are looser performance restrictions
      - (Probably) no copyright issues
-   - Cons:
+   - Negative:
      - May cause unwanted additional traffic on external sites
-     - App setup gets quite complicated (users have to run the scraper on a PC and then copy some file to the mobile)
+     - The scraper must be an end user piece of software, which increases the development effort
+     - App setup gets quite complicated (users have to run the scraper on a PC and then copy some file onto their mobile)
 
 A future switch between the proposal and alternative #2 should be relatively easy.
 
