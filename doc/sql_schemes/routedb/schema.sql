@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS peaks 
+	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+	 peak_name TEXT NOT NULL UNIQUE);
+	 
+CREATE INDEX IdxPeakId ON peaks (id);
+CREATE INDEX IdxPeakName ON peaks (peak_name);	
+
+CREATE TABLE IF NOT EXISTS routes 
+	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 peak_id INTEGER NOT NULL,
+	 route_name TEXT NOT NULL,
+	 route_grade TEXT NOT NULL,
+	 UNIQUE(peak_id,route_name,route_grade),
+	 FOREIGN KEY(peak_id) REFERENCES peaks (id) ON DELETE CASCADE);
+	 
+CREATE INDEX IdxRouteId ON routes (id);
+CREATE INDEX IdxRouteName ON routes (route_name);
+
+CREATE TABLE IF NOT EXISTS posts
+	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 route_id INTEGER NOT NULL,
+	 user_name TEXT NOT NULL,
+	 post_date TEXT NOT NULL,
+	 comment TEXT NOT NULL,
+     rating INTEGER NOT NULL,
+     FOREIGN KEY(route_id) REFERENCES routes (id) ON DELETE CASCADE);	
+	 
+ANALYZE;
