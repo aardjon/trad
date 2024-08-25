@@ -8,7 +8,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
-import '../src/sql_stmt_factory.dart';
+import '../src/sqlite/sql_stmt_factory.dart';
 
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.infrastructure_vanilla.repositories.sqlite3');
