@@ -243,8 +243,10 @@ Implementation Rules:
 #### `adapters`
 
 This part provides gateway implementations for connecting the `core` with `infrastructure`
-interfaces, converting the data structures coming from one part into the data structures needed
-by the other. It also defines the interface ("boundary") to the `infrastructure`.
+interfaces, and for managing and controlling the necessary `infrastructure`. It is responsible for
+retrieving/collecting data from the `infrastructure` parts and converts its structure into the data
+structures needed by the `core`. It also defines the interface ("boundary") to the
+`infrastructure` ring.
 
 Source location: [mobileapp/adapters](../mobileapp/adapters)
 
