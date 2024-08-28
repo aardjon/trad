@@ -99,6 +99,12 @@ class DbSchemaV1Pipe(Pipe):
                         RoutesTable.COLUMN_SUMMIT_ID: summit_query,
                         RoutesTable.COLUMN_NAME: route.route_name,
                         RoutesTable.COLUMN_GRADE: route.grade,
+                        RoutesTable.COLUMN_GRADE_AF: route.grade_af,
+                        RoutesTable.COLUMN_GRADE_RP: route.grade_rp,
+                        RoutesTable.COLUMN_GRADE_OU: route.grade_ou,
+                        RoutesTable.COLUMN_GRADE_JUMP: route.grade_jump,
+                        RoutesTable.COLUMN_STARS: route.star_count,
+                        RoutesTable.COLUMN_DANGER: route.dangerous,
                     }
                 ),
             )

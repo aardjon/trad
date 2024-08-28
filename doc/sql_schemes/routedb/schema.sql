@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS routes
 	 peak_id INTEGER NOT NULL,
 	 route_name TEXT NOT NULL,
 	 route_grade TEXT NOT NULL,
+	 danger BOOLEAN NOT NULL DEFAULT 0,
+	 stars INTEGER NOT NULL DEFAULT 0,
+	 grade_af INTEGER NOT NULL DEFAULT 0,
+	 grade_rp INTEGER NOT NULL DEFAULT 0,
+	 grade_ou INTEGER NOT NULL DEFAULT 0,
+	 grade_jump INTEGER NOT NULL DEFAULT 0,
 	 UNIQUE(peak_id,route_name,route_grade),
 	 FOREIGN KEY(peak_id) REFERENCES peaks (id) ON DELETE CASCADE);
 	 

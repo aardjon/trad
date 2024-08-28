@@ -37,8 +37,26 @@ class RoutesTable {
   /// Name of the route name column.
   static const String columnName = '$tableName.route_name';
 
-  /// Name of the route grade column.
+  /// Name of the grade name column (deprecated!).
   static const String columnGrade = '$tableName.route_grade';
+
+  /// Name of the "af" climbing grade column.
+  static const String columnGradeAf = '$tableName.grade_af';
+
+  /// Name of the "ou" climbing grade column.
+  static const String columnGradeOu = '$tableName.grade_ou';
+
+  /// Name of the "rp" climbing grade column.
+  static const String columnGradeRp = '$tableName.grade_rp';
+
+  /// Name of the jumping grade column.
+  static const String columnJumpGrade = '$tableName.grade_jump';
+
+  /// Name of the star count column.
+  static const String columnGradeStars = '$tableName.grade_stars';
+
+  /// Name of the danger (exclamation) mark count column.
+  static const String columnGradeDanger = '$tableName.grade_danger';
 }
 
 /// Represents the `posts` table containing all post data.

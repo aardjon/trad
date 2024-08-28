@@ -111,13 +111,31 @@ class RoutesTable(TableSchema):
     """ Name of the route ID column. """
 
     COLUMN_SUMMIT_ID: Final = "peak_id"
-    """ Name of the column referencing the summit a route belongs to. """
+    """ Name of the summit ID column (referencing the summit a route belongs to). """
 
     COLUMN_NAME: Final = "route_name"
     """ Name of the route name column. """
 
     COLUMN_GRADE: Final = "route_grade"
-    """ Name of the route grade column. """
+    """ Name of the grade name column (deprecated!). """
+
+    COLUMN_GRADE_AF: Final = "grade_af"
+    """ Name of the 'af' climbing grade column. """
+
+    COLUMN_GRADE_RP: Final = "grade_rp"
+    """ Name of the 'rp' climbing grade column. """
+
+    COLUMN_GRADE_OU: Final = "grade_ou"
+    """ Name of the 'ou' climbing grade column. """
+
+    COLUMN_GRADE_JUMP: Final = "grade_jump"
+    """ Name of the jumping grade column. """
+
+    COLUMN_STARS: Final = "stars"
+    """ Name of the star count column. """
+
+    COLUMN_DANGER: Final = "danger"
+    """ Name of the danger (exclamation) mark count column. """
 
     @override
     def table_name(self) -> EntityName:
@@ -139,6 +157,12 @@ class RoutesTable(TableSchema):
             ),
             ColumnDefinition(self.COLUMN_NAME, ColumnType.STRING, nullable=False),
             ColumnDefinition(self.COLUMN_GRADE, ColumnType.STRING, nullable=False),
+            ColumnDefinition(self.COLUMN_GRADE_AF, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_GRADE_RP, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_GRADE_OU, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_GRADE_JUMP, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_STARS, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_DANGER, ColumnType.BOOLEAN, nullable=False),
         ]
 
     @override
