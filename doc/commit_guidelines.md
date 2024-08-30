@@ -33,8 +33,8 @@ These guidelines help to ensure consistent and understandable commit messages, m
 - **test:** Commits, that add missing tests or correcting existing tests
 - **chore:** Miscellaneous commits e.g. modifying .gitignore
 - **ci:** Commits, that affect CI configuration
-- **clean:**: Commits, that removes unnecessary code or files
-- **merge:**: Commits that explicitly merge a branch into another
+- **clean:** Commits, that removes unnecessary code or files
+- **merge:** Commits that explicitly merge a branch into another
 
 ### Examples
 
