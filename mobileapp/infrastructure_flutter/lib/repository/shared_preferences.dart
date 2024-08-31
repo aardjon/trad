@@ -11,88 +11,71 @@ import 'package:adapters/boundaries/repositories/key_value_store.dart';
 ///
 /// This is a wrapper implementation for the `shared_preferences` Flutter package.
 class SharedPreferencesRepository implements KeyValueStoreBoundary {
-  static SharedPreferences? _prefs;
+  static SharedPreferences? _preferences;
 
   @override
   Future<void> initialize() async {
-    await prefs;
-  }
-
-  Future<SharedPreferences?> get prefs async {
-    _prefs ??= await SharedPreferences.getInstance();
-    return _prefs;
+    _preferences ??= await SharedPreferences.getInstance();
   }
 
   @override
   Future<bool> setInt({required String key, required int value}) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.setInt(key, value);
+    return _preferences!.setInt(key, value);
   }
 
   @override
   Future<bool> setBool({required String key, required bool value}) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.setBool(key, value);
+    return _preferences!.setBool(key, value);
   }
 
   @override
   Future<bool> setDouble({required String key, required double value}) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.setDouble(key, value);
+    return _preferences!.setDouble(key, value);
   }
 
   @override
   Future<bool> setString({required String key, required String value}) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.setString(key, value);
+    return _preferences!.setString(key, value);
   }
 
   @override
   Future<bool> setStringList({required String key, required List<String> value}) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.setStringList(key, value);
+    return _preferences!.setStringList(key, value);
   }
 
   @override
   Future<bool> setEnum({required String key, required Enum value}) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.setString(key, _enumToString(value));
+    return _preferences!.setString(key, _enumToString(value));
   }
 
   @override
   Future<int?> getInt(String key) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.getInt(key);
+    return _preferences!.getInt(key);
   }
 
   @override
   Future<bool?> getBool(String key) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.getBool(key);
+    return _preferences!.getBool(key);
   }
 
   @override
   Future<double?> getDouble(String key) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.getDouble(key);
+    return _preferences!.getDouble(key);
   }
 
   @override
   Future<String?> getString(String key) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.getString(key);
+    return _preferences!.getString(key);
   }
 
   @override
   Future<List<String>?> getStringList(String key) async {
-    SharedPreferences? preferences = await prefs;
-    return preferences!.getStringList(key);
+    return _preferences!.getStringList(key);
   }
 
   @override
   Future<T?> getEnum<T extends Enum>(String key, List<T> enumValues) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? value = preferences.getString(key);
+    String? value = _preferences!.getString(key);
     return value == null ? null : _tryStringToEnum<T>(value, enumValues);
   }
 
