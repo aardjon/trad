@@ -316,7 +316,7 @@ Interface name | Source location
 ------------|--------------------------------------------------------
 core.boundaries.presentation | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/presentation.dart)
 core.boundaries.data_exchange | TODO
-core.boundaries.storage | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/storage)
+core.boundaries.storage | [core.boundaries.storage](../mobileapp/core/lib/boundaries/storage)
 core.boundaries.positioning | TODO
 adapters.boundaries.ui | [adapters.boundaries.ui](../mobileapp/adapters/lib/boundaries/ui.dart)
 adapters.boundaries.repositories | [adapters.boundaries.repositories](../mobileapp/core/lib/boundaries/repositories)
