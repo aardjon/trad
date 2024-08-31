@@ -9,6 +9,8 @@ import 'dart:async';
 import 'package:adapters/boundaries/paths.dart';
 import 'package:adapters/boundaries/repositories/blob.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
+import 'package:adapters/boundaries/repositories/key_value_store.dart';
+import 'package:adapters/storage/app_preferences.dart';
 import 'package:adapters/sysenv.dart';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/presenters.dart';
@@ -16,6 +18,7 @@ import 'package:adapters/storage/knowledgebase.dart';
 import 'package:adapters/storage/routedb.dart';
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/boundaries/storage/knowledgebase.dart';
+import 'package:core/boundaries/storage/preferences.dart';
 import 'package:core/boundaries/storage/routedb.dart';
 import 'package:core/boundaries/sysenv.dart';
 import 'package:core/usecases/appwide.dart';
@@ -23,6 +26,7 @@ import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:infrastructure_flutter/path_provider.dart';
 import 'package:infrastructure_flutter/repository/blobs.dart';
+import 'package:infrastructure_flutter/repository/shared_preferences.dart';
 import 'package:infrastructure_flutter/ui.dart';
 import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
 
@@ -90,10 +94,13 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<RouteDbStorageBoundary>(
       () => RouteDbStorage(_dependencyProvider),
     );
+    _dependencyProvider
+        .registerFactory<AppPreferencesBoundary>(() => PreferencesStorage(_dependencyProvider));
 
     // infrastructure components
     _dependencyProvider.registerFactory<PathProviderBoundary>(SystemPathProvider.new);
     _dependencyProvider.registerFactory<BlobRepositoryBoundary>(AssetRepository.new);
     _dependencyProvider.registerSingleton<RelationalDatabaseBoundary>(Sqlite3Database.new);
+    _dependencyProvider.registerSingleton<KeyValueStoreBoundary>(SharedPreferencesRepository.new);
   }
 }
