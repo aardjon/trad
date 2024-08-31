@@ -9,6 +9,7 @@ import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/presentation.dart';
+import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
@@ -27,10 +28,15 @@ class RouteDbUseCases {
   /// Interface to the storage boundary component, used for loading stored data.
   final RouteDbStorageBoundary _storageBoundary;
 
+  /// Interface to the storage boundary component, used for reading and writing application config
+  /// settings.
+  final AppPreferencesBoundary _preferencesBoundary;
+
   /// Constructor for creating a new RouteDbUseCases instance.
   RouteDbUseCases(DependencyProvider di)
       : _presentationBoundary = di.provide<PresentationBoundary>(),
-        _storageBoundary = di.provide<RouteDbStorageBoundary>();
+        _storageBoundary = di.provide<RouteDbStorageBoundary>(),
+        _preferencesBoundary = di.provide<AppPreferencesBoundary>();
 
   /// Use Case: Switch to the summit list, resetting any previous filter
   Future<void> showSummitListPage() async {
@@ -51,21 +57,23 @@ class RouteDbUseCases {
   /// Use Case: Show all routes for the selected summit.
   Future<void> showRouteListPage(int summitId) async {
     _logger.info('Running use case showRouteListPage($summitId)');
+    RoutesFilterMode sortCriterion = await _preferencesBoundary.getInitialRoutesSortCriterion();
     Summit selectedSummit = await _storageBoundary.retrieveSummit(summitId);
     _presentationBoundary.showSummitDetails(selectedSummit);
     List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(
       summitId,
-      RoutesFilterMode.name,
+      sortCriterion,
     );
     _presentationBoundary.updateRouteList(
       routeList,
-      RoutesFilterMode.name,
+      sortCriterion,
     );
   }
 
   /// Use Case: Sort the route list by a certain criterion
   Future<void> sortRouteList(int summitId, RoutesFilterMode sortCriterion) async {
     _logger.info('Running use case sortRouteList($summitId, $sortCriterion)');
+    unawaited(_preferencesBoundary.setInitialRoutesSortCriterium(sortCriterion));
     List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(summitId, sortCriterion);
     _presentationBoundary.updateRouteList(routeList, sortCriterion);
   }
@@ -73,21 +81,23 @@ class RouteDbUseCases {
   /// Use Case: Show all posts for the selected route.
   Future<void> showPostsPage(int routeId) async {
     _logger.info('Running use case showPostsPage($routeId)');
+    PostsFilterMode sortCriterion = await _preferencesBoundary.getInitialPostsSortCriterion();
     Route selectedRoute = await _storageBoundary.retrieveRoute(routeId);
     _presentationBoundary.showRouteDetails(selectedRoute);
     List<Post> postList = await _storageBoundary.retrievePostsOfRoute(
       routeId,
-      PostsFilterMode.newestFirst,
+      sortCriterion,
     );
     _presentationBoundary.updatePostList(
       postList,
-      PostsFilterMode.newestFirst,
+      sortCriterion,
     );
   }
 
   /// Use Case: Sort the post list by a certain criterion.
   Future<void> sortPostList(int routeId, PostsFilterMode sortCriterion) async {
     _logger.info('Running use case sortPostList($routeId, $sortCriterion)');
+    unawaited(_preferencesBoundary.setInitialPostsSortCriterion(sortCriterion));
     List<Post> postList = await _storageBoundary.retrievePostsOfRoute(routeId, sortCriterion);
     _presentationBoundary.updatePostList(postList, sortCriterion);
   }
