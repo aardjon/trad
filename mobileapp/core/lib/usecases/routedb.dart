@@ -73,7 +73,7 @@ class RouteDbUseCases {
   /// Use Case: Sort the route list by a certain criterion
   Future<void> sortRouteList(int summitId, RoutesFilterMode sortCriterion) async {
     _logger.info('Running use case sortRouteList($summitId, $sortCriterion)');
-    unawaited(_preferencesBoundary.setInitialRoutesSortCriterium(sortCriterion));
+    unawaited(_preferencesBoundary.setInitialRoutesSortCriterion(sortCriterion));
     List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(summitId, sortCriterion);
     _presentationBoundary.updateRouteList(routeList, sortCriterion);
   }

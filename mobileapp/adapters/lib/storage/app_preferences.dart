@@ -54,7 +54,7 @@ class PreferencesStorage implements AppPreferencesBoundary {
   }
 
   @override
-  Future<void> setInitialRoutesSortCriterium(RoutesFilterMode sortCriterion) async {
+  Future<void> setInitialRoutesSortCriterion(RoutesFilterMode sortCriterion) async {
     await _repository.setEnum(key: AppConfigKeys.routedbRoutesSortCriterion, value: sortCriterion);
   }
 }

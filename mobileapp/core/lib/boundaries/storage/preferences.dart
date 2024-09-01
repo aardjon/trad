@@ -33,5 +33,5 @@ abstract interface class AppPreferencesBoundary {
 
   /// Stores the [sortCriterion] that shall be used to initially order the routes within the route
   /// list.
-  Future<void> setInitialRoutesSortCriterium(RoutesFilterMode sortCriterion);
+  Future<void> setInitialRoutesSortCriterion(RoutesFilterMode sortCriterion);
 }
