@@ -23,6 +23,15 @@ scripts:
       - mkdir -p artifacts
       - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/trad_android.apk
 
+  clean:
+    help: Deletes local files that are generated during by melos tasks, e.g. build files and coverage information.
+    steps:
+      - find . -name dlcov_references_test.dart -exec rm {} \;
+      - rm -rf ./coverage
+      - melos exec rm -rf coverage
+      - melos exec rm -rf build
+      - rm -rf artifacts
+
   coverage:
     help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
     steps:
