@@ -54,6 +54,8 @@ linter:
 analyzer:
   errors:
     avoid_print: error # Always use the logging framework (i.e. crosscuttings.logging) instead!
+  exclude:
+    - test/dlcov_references_test.dart # dlcov generated test files to improve coverage calculation
 
 
 ####################################################################################################

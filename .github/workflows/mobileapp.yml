@@ -113,8 +113,6 @@ jobs:
              melos bootstrap
              echo "--- Install coverage tools"
              sudo apt install -y lcov
-             dart pub global activate coverage
-             dart pub global activate cobertura
 
       - name: Run all tests
         run: melos run test

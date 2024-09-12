@@ -56,6 +56,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  cli_badges:
+    dependency: transitive
+    description:
+      name: cli_badges
+      sha256: "1e7e18aa32e908f727e49efb4a9c4d675c28abaf3ebe9229e777a497bbffeaa1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   cli_util:
     dependency: transitive
     description:
@@ -72,6 +80,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  cobertura:
+    dependency: "direct dev"
+    description:
+      name: cobertura
+      sha256: "388c7b7e5dbd1aa7fd33687ca0e928714ee300bb2dd6fd1f15e43f411558dfa0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   collection:
     dependency: transitive
     description:
@@ -87,6 +103,14 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  coverage:
+    dependency: "direct dev"
+    description:
+      name: coverage
+      sha256: c1fb2dce3c0085f39dc72668e85f8e0210ec7de05345821ff58530567df345a5
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.2"
   crosscuttings:
     dependency: "direct main"
     description:
@@ -110,6 +134,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dlcov:
+    dependency: "direct dev"
+    description:
+      name: dlcov
+      sha256: ae47fd6d530012d018e5ea44c6257bffd9ef7aee2654150225c5ea29e91e3e7b
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.1"
   fake_async:
     dependency: transitive
     description:
@@ -173,6 +205,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.7.0"
+  glob:
+    dependency: transitive
+    description:
+      name: glob
+      sha256: "0e7014b3b7d4dac1ca4d6114f82bf1782ee86745b9b42a92c9289c23d8a0ab63"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   image:
     dependency: transitive
     description:
@@ -211,6 +251,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+  lcov_parser:
+    dependency: transitive
+    description:
+      name: lcov_parser
+      sha256: b2a4225376e47630dbe71217bcf2296e1d79b50e6c20781c0304094b8be05968
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   leak_tracker:
     dependency: transitive
     description:
@@ -299,6 +347,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  package_config:
+    dependency: transitive
+    description:
+      name: package_config
+      sha256: "1c5b77ccc91e4823a5af61ee74e6b972db1ef98c2ff5a18d3161c982a55448bd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   path:
     dependency: transitive
     description:
@@ -448,6 +504,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  source_maps:
+    dependency: transitive
+    description:
+      name: source_maps
+      sha256: "708b3f6b97248e5781f493b765c3337db11c5d2c81c3094f10904bfa8004c703"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.12"
   source_span:
     dependency: transitive
     description:
@@ -512,6 +576,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
+  tint:
+    dependency: transitive
+    description:
+      name: tint
+      sha256: "9652d9a589f4536d5e392cf790263d120474f15da3cf1bee7f1fdb31b4de5f46"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
