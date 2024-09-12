@@ -44,6 +44,8 @@ dependencies:
   sqlite3_flutter_libs: '>=0.5.24'
 
 dev_dependencies:
+  cobertura: ^1.0.5
+  coverage: ^1.9.2
   dlcov: ^4.2.1
   flutter_launcher_icons: ^0.13.1
   flutter_test:
