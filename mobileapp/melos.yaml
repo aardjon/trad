@@ -27,7 +27,9 @@ scripts:
     help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
     steps:
       - find . -name lcov.info -exec rm {} \;
+      - rm -rf ./coverage/report
       - melos exec --dir-exists=coverage/test dart pub global run coverage:format_coverage --packages=.dart_tool/package_config.json --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
+      - melos exec --dir-exists=coverage/test lcov --remove ./coverage/lcov.info \'*/dlcov_references_test.dart\' -o ./coverage/lcov.info
       - mkdir -p coverage
       - melos exec --dir-exists=coverage 'cat coverage/lcov.info >> ../coverage/lcov.info'
       - dart pub global run cobertura convert
@@ -44,6 +46,7 @@ scripts:
   test:
     help: Run all unit tests for the mobile application.
     steps:
+      - melos exec --dir-exists=test dart run dlcov gen-refs
       - melos exec --no-flutter --dir-exists=test dart test --coverage=./coverage
       - melos exec --flutter --dir-exists=test flutter test --coverage
 
