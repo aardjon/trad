@@ -15,7 +15,6 @@ dependencies:
   sqlite3: ^2.4.4
 
 dev_dependencies:
-  cobertura: ^1.0.5
   coverage: ^1.9.2
   dlcov: ^4.2.1
   mocktail: ^1.0.0
