@@ -129,38 +129,53 @@ class ResultRow {
 
   /// Returns the value of the requested integer column [columnName].
   ///
-  /// If the requested column doesn't exist in the result row or is of a different type, an error is
-  /// thrown (because this is usually a programming error).
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
   int? getIntValue(String columnName) {
-    return _resultData[columnName] as int?;
+    return _getValue(columnName) as int?;
   }
 
   /// Returns the value of the requested floating-point column [columnName].
   ///
-  /// If the requested column doesn't exist in the result row or is of a different type, an error is
-  /// thrown (because this is usually a programming error).
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
   double? getDoubleValue(String columnName) {
-    return _resultData[columnName] as double?;
+    return _getValue(columnName) as double?;
   }
 
   /// Returns the value of the requested string column [columnName].
   ///
-  /// If the requested column doesn't exist in the result row or is of a different type, an error is
-  /// thrown (because this is usually a programming error).
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
   String? getStringValue(String columnName) {
-    return _resultData[columnName] as String?;
+    return _getValue(columnName) as String?;
   }
 
   /// Returns the value of the requested boolean column [columnName].
   ///
-  /// If the requested column doesn't exist in the result row or is of a different type, an error is
-  /// thrown (because this is usually a programming error).
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
   bool? getBoolValue(String columnName) {
-    return _resultData[columnName] as bool?;
+    return _getValue(columnName) as bool?;
   }
 
   /// Initializes a new result row from raw data.
   ResultRow(this._resultData);
+
+  /// Returns the value of the given [columnName] if the column exists in the result set.
+  ///
+  /// The value may still be null (for NULLABLE columns). If the result set doesn't contain the
+  /// requested column at all, an [ArgumentError] is thrown. This usually means that the column has
+  /// not been selected when defining the query.
+  Object? _getValue(String columnName) {
+    if (_resultData.containsKey(columnName)) {
+      return _resultData[columnName];
+    }
+    throw ArgumentError(
+      'Column $columnName is not available in the result set, did you forget to select it?',
+      'columnName',
+    );
+  }
 }
 
 /// The result set returned by a table query.
