@@ -15,3 +15,6 @@
 */build/
 
 artifacts
+
+# Generated "import all" test files for meaningful code coverage
+**/test/dlcov_references_test.dart
