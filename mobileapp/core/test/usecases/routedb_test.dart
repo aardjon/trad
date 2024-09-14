@@ -3,6 +3,12 @@
 ///
 library;
 
+import 'package:mocktail/mocktail.dart';
+import 'package:test/test.dart';
+
+import 'package:core/boundaries/presentation.dart';
+import 'package:core/boundaries/storage/preferences.dart';
+import 'package:core/boundaries/storage/routedb.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
 import 'package:core/entities/sorting/posts_filter_mode.dart';
@@ -10,12 +16,6 @@ import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:core/usecases/routedb.dart';
 import 'package:crosscuttings/di.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:test/test.dart';
-
-import 'package:core/boundaries/presentation.dart';
-import 'package:core/boundaries/storage/preferences.dart';
-import 'package:core/boundaries/storage/routedb.dart';
 
 class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary {}
 
