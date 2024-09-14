@@ -33,14 +33,15 @@ import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
 /// The global main entry point - The one and only :)
 void main() {
   ApplicationBootstrap bootstrap = ApplicationBootstrap();
-  unawaited(bootstrap.boot());
+  bootstrap.initApp();
+  unawaited(bootstrap.startApp());
 }
 
 /// The applications bootstrapping process.
 ///
 /// An instance of this represents the startup process itself and is responsible for initializing
 /// all the basic system parts like logging and DI, as well as initializing all dependencies. After
-/// successful initialization, it runs the main use case.
+/// successful initialization, it can run the main use case.
 class ApplicationBootstrap {
   /// Logger for the bootstrap process.
   final Logger _logger = Logger('trad.main');
@@ -48,22 +49,21 @@ class ApplicationBootstrap {
   /// DI instance for configuring all the system parts.
   final DependencyProvider _dependencyProvider = DependencyProvider();
 
-  /// Initializes and starts the trad application.
-  Future<void> boot() async {
-    _initApp();
-    await _startApp();
-    _logger.info('Application started successfully');
-  }
-
   /// Initializes the trad application.
-  void _initApp() {
+  ///
+  /// This method must be called first, before doing anything else. It sets up some basic
+  /// configuration like logging or dependency management, but does not yet start the application
+  /// itself. Run [startApp] afterwards to actually start the app.
+  void initApp() {
     _setupLogging(); // Setup logging before anything else to allow logging as soon as possible
     _logger.info('Bootstrapping trad application');
     _setupDependencies();
   }
 
   /// Starts the trad application.
-  Future<void> _startApp() async {
+  ///
+  /// Must be called after [initApp] to actually run the first application use case (startup).
+  Future<void> startApp() async {
     _logger.info('Starting trad application');
     ApplicationWideUseCases appUseCases = ApplicationWideUseCases(_dependencyProvider);
     await appUseCases.startApplication();
