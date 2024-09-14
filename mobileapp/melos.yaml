@@ -35,12 +35,10 @@ scripts:
   coverage:
     help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
     steps:
-      - find . -name lcov.info -exec rm {} \;
       - rm -rf ./coverage/report
-      - melos exec --dir-exists=coverage/test dart run coverage:format_coverage --packages=.dart_tool/package_config.json --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
-      - melos exec --dir-exists=coverage/test lcov --remove ./coverage/lcov.info \'*/dlcov_references_test.dart\' -o ./coverage/lcov.info
+      - melos exec --file-exists=coverage/lcov.info lcov --remove ./coverage/lcov.info \'*/dlcov_references_test.dart\' -o ./coverage/lcov.info
       - mkdir -p coverage
-      - melos exec --dir-exists=coverage 'cat coverage/lcov.info >> ../coverage/lcov.info'
+      - melos exec --file-exists=coverage/lcov.info 'cat coverage/lcov.info >> ../coverage/lcov.info'
       - dart run cobertura convert
       - genhtml -o ./coverage/report ./coverage/lcov.info
       
@@ -53,11 +51,14 @@ scripts:
     exec: dart format --line-length=100 --set-exit-if-changed .
 
   test:
-    help: Run all unit tests for the mobile application.
+    help: Run all unit tests for the mobile application and create lcov coverage files (lcov.info).
     steps:
+      - find . -name lcov.info -exec rm {} \;
       - melos exec --dir-exists=test dart run dlcov gen-refs
       - melos exec --no-flutter --dir-exists=test dart test --coverage=./coverage
+      - melos exec --no-flutter --dir-exists=coverage/test dart run coverage:format_coverage --packages=.dart_tool/package_config.json --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
       - melos exec --flutter --dir-exists=test flutter test --coverage
+      - melos exec --flutter --file-exists=coverage/lcov.info "sed -i 's#SF:lib#SF:MELOS_PACKAGE_PATH/lib#g;s#SF:test#SF:MELOS_PACKAGE_PATH/test#g' coverage/lcov.info"
 
   upgrade:
     help: Upgrades all dependencies to their most current (allowed) versions.
