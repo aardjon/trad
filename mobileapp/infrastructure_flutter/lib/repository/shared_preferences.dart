@@ -20,61 +20,73 @@ class SharedPreferencesRepository implements KeyValueStoreBoundary {
 
   @override
   Future<bool> setInt({required String key, required int value}) async {
+    _checkInitializedState();
     return _preferences!.setInt(key, value);
   }
 
   @override
   Future<bool> setBool({required String key, required bool value}) async {
+    _checkInitializedState();
     return _preferences!.setBool(key, value);
   }
 
   @override
   Future<bool> setDouble({required String key, required double value}) async {
+    _checkInitializedState();
     return _preferences!.setDouble(key, value);
   }
 
   @override
   Future<bool> setString({required String key, required String value}) async {
+    _checkInitializedState();
     return _preferences!.setString(key, value);
   }
 
   @override
   Future<bool> setStringList({required String key, required List<String> value}) async {
+    _checkInitializedState();
     return _preferences!.setStringList(key, value);
   }
 
   @override
   Future<bool> setEnum({required String key, required Enum value}) async {
+    _checkInitializedState();
     return _preferences!.setString(key, _enumToString(value));
   }
 
   @override
   Future<int?> getInt(String key) async {
+    _checkInitializedState();
     return _preferences!.getInt(key);
   }
 
   @override
   Future<bool?> getBool(String key) async {
+    _checkInitializedState();
     return _preferences!.getBool(key);
   }
 
   @override
   Future<double?> getDouble(String key) async {
+    _checkInitializedState();
     return _preferences!.getDouble(key);
   }
 
   @override
   Future<String?> getString(String key) async {
+    _checkInitializedState();
     return _preferences!.getString(key);
   }
 
   @override
   Future<List<String>?> getStringList(String key) async {
+    _checkInitializedState();
     return _preferences!.getStringList(key);
   }
 
   @override
   Future<T?> getEnum<T extends Enum>(String key, List<T> enumValues) async {
+    _checkInitializedState();
     String? value = _preferences!.getString(key);
     return value == null ? null : _tryStringToEnum<T>(value, enumValues);
   }
@@ -88,6 +100,16 @@ class SharedPreferencesRepository implements KeyValueStoreBoundary {
       return enumValues.byName(value);
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Checks whether this instance has been initialized (by calling [initialize] prior to this
+  /// check). If it is, the method returns normally, if not, a StateError is thrown.
+  void _checkInitializedState() {
+    if (_preferences == null) {
+      throw StateError(
+        'SharedPreferences repository is uninitialized, please call initialize() first.',
+      );
     }
   }
 }
