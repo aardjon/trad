@@ -36,9 +36,10 @@ scripts:
     help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
     steps:
       - rm -rf ./coverage/report
-      - melos exec --file-exists=coverage/lcov.info lcov --remove ./coverage/lcov.info \'*/dlcov_references_test.dart\' -o ./coverage/lcov.info
       - mkdir -p coverage
       - melos exec --file-exists=coverage/lcov.info 'cat coverage/lcov.info >> ../coverage/lcov.info'
+      - lcov --remove coverage/lcov.info '*/dlcov_references_test.dart' -o coverage/lcov.info
+      - lcov --remove coverage/lcov.info '*/test/*_test.dart' -o coverage/lcov.info
       - dart run cobertura convert
       - genhtml -o ./coverage/report ./coverage/lcov.info
       
