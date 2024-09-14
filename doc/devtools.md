@@ -69,7 +69,8 @@ The `format` script auto-formats the sources according to our coding style guide
 
 ### test: Run all unit tests
 
-The `test` script runs all unit tests (i.e. `dart test` or `flutter test`) for all sub projects and gathers code coverage information.
+The `test` script runs all unit tests (i.e. `dart test` or `flutter test`) for all sub projects and gathers code coverage information
+(i.e. creates lcov.info files).
 
 ### upgrade: Upgrade all dependencies
 
