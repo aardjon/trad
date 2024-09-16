@@ -18,7 +18,7 @@ import 'package:core/usecases/routedb.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
-import 'boundaries/repositories/blob.dart';
+import 'boundaries/repositories/assets.dart';
 import 'boundaries/ui.dart';
 
 /// Logger to be used in this library file.
@@ -63,7 +63,7 @@ class KnowledgebaseController {
   final KnowledgebaseUseCases _knowledgebaseUsecases = KnowledgebaseUseCases(DependencyProvider());
 
   /// The user requested to display the document with ID [documentId].
-  void requestShowDocument(BlobId documentId) {
+  void requestShowDocument(AssetId documentId) {
     _logger.debug('UI request: Show knowledgebase document $documentId');
     unawaited(_knowledgebaseUsecases.showDocumentPage(documentId));
   }

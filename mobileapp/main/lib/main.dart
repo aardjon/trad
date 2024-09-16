@@ -7,7 +7,7 @@ library;
 import 'dart:async';
 
 import 'package:adapters/boundaries/paths.dart';
-import 'package:adapters/boundaries/repositories/blob.dart';
+import 'package:adapters/boundaries/repositories/assets.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
 import 'package:adapters/boundaries/repositories/key_value_store.dart';
 import 'package:adapters/storage/app_preferences.dart';
@@ -25,7 +25,7 @@ import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:infrastructure_flutter/path_provider.dart';
-import 'package:infrastructure_flutter/repository/blobs.dart';
+import 'package:infrastructure_flutter/repository/root_bundle_assets.dart';
 import 'package:infrastructure_flutter/repository/shared_preferences.dart';
 import 'package:infrastructure_flutter/ui.dart';
 import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
@@ -99,7 +99,7 @@ class ApplicationBootstrap {
 
     // infrastructure components
     _dependencyProvider.registerFactory<PathProviderBoundary>(SystemPathProvider.new);
-    _dependencyProvider.registerFactory<BlobRepositoryBoundary>(AssetRepository.new);
+    _dependencyProvider.registerFactory<AssetRepositoryBoundary>(RootBundleAssetRepository.new);
     _dependencyProvider.registerSingleton<RelationalDatabaseBoundary>(Sqlite3Database.new);
     _dependencyProvider.registerSingleton<KeyValueStoreBoundary>(SharedPreferencesRepository.new);
   }
