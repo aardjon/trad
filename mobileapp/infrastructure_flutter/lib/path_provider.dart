@@ -5,7 +5,6 @@ library;
 
 import 'dart:io';
 
-import 'package:crosscuttings/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:adapters/boundaries/paths.dart';
@@ -18,8 +17,8 @@ import 'package:adapters/boundaries/paths.dart';
 /// upstream changes.
 class SystemPathProvider implements PathProviderBoundary {
   @override
-  Future<Path> getAppDataDir() async {
+  Future<Directory> getAppDataDir() async {
     Directory dataDir = await getApplicationSupportDirectory();
-    return Path(dataDir.absolute.path);
+    return Directory(dataDir.absolute.path);
   }
 }

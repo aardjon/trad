@@ -3,9 +3,10 @@
 ///
 library;
 
+import 'dart:io';
+
 import 'package:core/boundaries/sysenv.dart';
 import 'package:crosscuttings/di.dart';
-import 'package:crosscuttings/path.dart';
 
 import 'boundaries/paths.dart';
 
@@ -24,8 +25,8 @@ class SystemEnvironment implements SystemEnvironmentBoundary {
       : _pathProviderBoundary = di.provide<PathProviderBoundary>();
 
   @override
-  Future<Uri> getAppDataPath() async {
-    Path appDataPath = await _pathProviderBoundary.getAppDataDir();
-    return appDataPath.toUri();
+  Future<String> getAppDataPath() async {
+    Directory appDataDir = await _pathProviderBoundary.getAppDataDir();
+    return appDataDir.path;
   }
 }

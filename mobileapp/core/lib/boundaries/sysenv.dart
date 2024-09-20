@@ -11,5 +11,5 @@ abstract interface class SystemEnvironmentBoundary {
   /// This directory is the place for storing persistent, application specific data, so write
   /// permission can usually be assumed. However, whether other applications can also read it
   /// depends on the operating system, so sensitive data must still be secured properly.
-  Future<Uri> getAppDataPath();
+  Future<String> getAppDataPath();
 }
