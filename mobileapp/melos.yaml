@@ -41,7 +41,7 @@ scripts:
       - lcov --remove coverage/lcov.info '*/dlcov_references_test.dart' -o coverage/lcov.info
       - lcov --remove coverage/lcov.info '*/test/*_test.dart' -o coverage/lcov.info
       - dart run cobertura convert
-      - genhtml -o ./coverage/report ./coverage/lcov.info
+      - genhtml -o ./coverage/report ./coverage/lcov.info --title "trad.mobileapp" --header-title "trad Code Coverage Report" --legend --show-details --no-function-coverage --show-navigation
       
   deploy.android:
     help: Install the build APK on the connected Android device (via ADB).
