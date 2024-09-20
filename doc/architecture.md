@@ -262,15 +262,16 @@ Implementation Rules:
  - No business logic
  - If possible, only pure dart language features (some std libs may be allowed)
  - No technical details (independent from specific hardware or certain implementation details)
- - No dependencies to external interfaces of any kind (IO, UI)
+ - No direct dependencies to external interfaces of any kind (IO, UI)
  - One adapter implementation may access more than one infrastructure boundary to retrieve data
+ - For file system access (dart:io), please see [Accessing the file system](#85-accessing-the-file-system)
 
 #### `infrastructure`
 
-This part contains all concrete implementations and all technical details. In general, this part
-provides a customized, generic interface for each external library which makes it possible to
-(or at least easier) to replace this library in the future if necessary. The special `main`
-component is considered a part of the infrastructure, too.
+This part contains all concrete implementations and all technical details. In general, this part provides
+a customized, generic interface for each external library which makes it possible (or at least easier) to
+replace this library in the future if necessary. The special `main` component is considered a part of the
+infrastructure, too.
 
 Source locations:
  - [mobileapp/infrastructure_vanilla](../mobileapp/infrastructure_vanilla)
@@ -465,6 +466,28 @@ The communication works as follows:
 
 Please see [Flutter UI Documentation](ui-flutter.md) for further documentation of the Flutter UI
 implementation.
+
+## 8.5 Accessing the file system
+
+File system operations in general are allowed from within the `infrastructure` and the `adapters` rings.
+Since `dart:io` is part of the Dart standard library, there is no need to replace it by a different library
+in the future, so it's not necessary to completely decouple the `dart:io` library. However, to improve
+testability, we have to be able to replace the real file system operations. Furthermore, we have to support
+different path styles (e.g. `\` VS. `/` separater) on different platforms. For these reasons, a special
+`filesystem` boundary is responsible for creating entity objects like `dart.io.File` and for manipulating
+directory paths. That means, every `infrastructure` and `adapters` part except the single component
+implementing this boundary:
+- shall preferably use `File` or `Directory` to identify certain file system locations/entities
+- must use the `filesystem` component to manipullate path strings
+- must never create e.g. `File` or `Directory` instances directly but get them from the `filesystem` component
+- must never use any static methods of the `dart:io` library or its provided classes (such as `Directory.current`)
+
+It's okay to do everything offered by the `FileSystemEntity` derived objects provided by the `filesystem`
+component, though. Runtime information about the concrete platform or the running application instance (e.g.
+the current working directory) can be retrieved via the `sysenv` boundary.
+
+Within the `core` ring, no direct file system operations are allowed at all. File system entities are
+identified by simple (platform dependent) strings (containing paths) there.
 
 
 # 9. Architecture Decisions

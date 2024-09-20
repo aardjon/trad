@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:adapters/boundaries/paths.dart';
 import 'package:adapters/boundaries/repositories/assets.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
+import 'package:adapters/boundaries/repositories/filesystem.dart';
 import 'package:adapters/boundaries/repositories/key_value_store.dart';
 import 'package:adapters/storage/app_preferences.dart';
 import 'package:adapters/sysenv.dart';
@@ -28,6 +29,7 @@ import 'package:infrastructure_flutter/path_provider.dart';
 import 'package:infrastructure_flutter/repository/root_bundle_assets.dart';
 import 'package:infrastructure_flutter/repository/shared_preferences.dart';
 import 'package:infrastructure_flutter/ui.dart';
+import 'package:infrastructure_vanilla/repositories/dartio_path.dart';
 import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
 
 /// The global main entry point - The one and only :)
@@ -87,7 +89,6 @@ class ApplicationBootstrap {
       () => SystemEnvironment(_dependencyProvider),
     );
     _dependencyProvider.registerFactory<PresentationBoundary>(ApplicationWidePresenter.new);
-    _dependencyProvider.registerFactory<ApplicationUiBoundary>(ApplicationUI.new);
     _dependencyProvider.registerFactory<KnowledgebaseStorageBoundary>(
       () => KnowledgebaseStorage(_dependencyProvider),
     );
@@ -98,9 +99,11 @@ class ApplicationBootstrap {
         .registerFactory<AppPreferencesBoundary>(() => PreferencesStorage(_dependencyProvider));
 
     // infrastructure components
+    _dependencyProvider.registerFactory<ApplicationUiBoundary>(ApplicationUI.new);
     _dependencyProvider.registerFactory<PathProviderBoundary>(SystemPathProvider.new);
     _dependencyProvider.registerFactory<AssetRepositoryBoundary>(RootBundleAssetRepository.new);
     _dependencyProvider.registerSingleton<RelationalDatabaseBoundary>(Sqlite3Database.new);
     _dependencyProvider.registerSingleton<KeyValueStoreBoundary>(SharedPreferencesRepository.new);
+    _dependencyProvider.registerFactory<FileSystemBoundary>(DartIoFileSystem.new);
   }
 }

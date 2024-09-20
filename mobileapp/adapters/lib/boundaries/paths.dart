@@ -4,10 +4,10 @@
 ///
 library;
 
-import 'package:crosscuttings/path.dart';
+import 'dart:io';
 
 /// Abstract interface providing system specific file system paths for certain usages.
 abstract interface class PathProviderBoundary {
   /// Returns the full path to the application data directory.
-  Future<Path> getAppDataDir();
+  Future<Directory> getAppDataDir();
 }

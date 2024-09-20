@@ -3,6 +3,8 @@
 ///
 library;
 
+import 'dart:io';
+
 import 'package:core/boundaries/storage/routedb.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
@@ -11,10 +13,10 @@ import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
-import 'package:crosscuttings/path.dart';
 
 import '../boundaries/paths.dart';
 import '../boundaries/repositories/database.dart';
+import '../boundaries/repositories/filesystem.dart';
 import '../src/storage/routedb/schema.dart';
 
 /// Logger to be used in this library file.
@@ -28,18 +30,22 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   /// Interface to the component used to retrieve environment specific path information.
   final PathProviderBoundary _pathProviderBoundary;
 
+  /// Interface to the component providing file system access.
+  final FileSystemBoundary _fileSystemBoundary;
+
   /// The route db data repository.
   final RelationalDatabaseBoundary _repository;
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
   RouteDbStorage(DependencyProvider dependencyProvider)
       : _pathProviderBoundary = dependencyProvider.provide<PathProviderBoundary>(),
+        _fileSystemBoundary = dependencyProvider.provide<FileSystemBoundary>(),
         _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
 
   @override
   Future<void> initStorage() async {
-    Path dataDir = await _pathProviderBoundary.getAppDataDir();
-    String connectionString = dataDir.join(_dbFileName).toString();
+    Directory dataDir = await _pathProviderBoundary.getAppDataDir();
+    String connectionString = _fileSystemBoundary.joinPaths(dataDir.path, _dbFileName);
     _logger.info('Connecting to route database at: $connectionString');
     _repository.connect(connectionString, readOnly: true);
     // TODO(aardjon): Check schema version!
