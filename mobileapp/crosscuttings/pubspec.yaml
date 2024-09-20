@@ -10,7 +10,6 @@ environment:
 dependencies:
   get_it: ^7.7.0
   logging: ^1.2.0
-  path: ^1.9.0
 
 dev_dependencies:
   coverage: ^1.9.2
