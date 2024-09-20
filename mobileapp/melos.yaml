@@ -11,17 +11,27 @@ scripts:
   build.linux:
     help: Does a Linux build in release mode.
     steps:
-      - cd main && flutter build linux --release
       - mkdir -p artifacts
-      - cd main/build/linux/x64/release/bundle/ && zip -r trad_linux.zip .
+      - cd main
+      - flutter build linux --release
+      - cd build/linux/x64/release/bundle/ && zip -r trad_linux.zip . && cd $MELOS_ROOT_PATH
       - mv main/build/linux/x64/release/bundle/trad_linux.zip artifacts/
       
   build.android:
     help: Does an Android build in release mode.
     steps:
-      - cd main && flutter build apk --release
       - mkdir -p artifacts
-      - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/trad_android.apk
+      - cd main
+      - flutter build apk --release
+      - mv build/app/outputs/flutter-apk/app-release.apk ../artifacts/trad_android.apk
+
+  build.windows:
+    help: Does a Windows build in release mode.
+    steps:
+      - mkdir -p artifacts
+      - cd main
+      - flutter build windows --release
+      - mv build\windows\x64\runner\Release\trad.exe ..\artifacts\trad_windows.exe
 
   clean:
     help: Deletes local files that are generated during by melos tasks, e.g. build files and coverage information.

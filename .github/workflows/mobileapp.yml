@@ -3,11 +3,7 @@ name: mobileapp
 on: [push, pull_request]
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        platform: ["linux", "android"]
-
+  build-linux:
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -24,25 +20,92 @@ jobs:
       - name: Setup environment
         run: |
              echo "--- Install build requirements"
-             if [ "${{ matrix.platform }}" = 'linux' ]; then sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev; fi
+             sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev
              echo "--- Configure Flutter"
              flutter config --no-analytics
              flutter config --no-cli-animations
              echo "--- Install Melos"
              dart pub global activate melos
              echo "--- Install requirements"
-             melos bootstrap
+             dart run melos bootstrap
 
       - name: Build app in release mode
-        run: melos run build.${{ matrix.platform }}
+        run: dart run melos run build.linux
         
       - name: Archive build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: trad-${{ matrix.platform }}
+          name: trad-linux
           path: mobileapp/artifacts/*
           retention-days: 1
 
+  build-android:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./mobileapp
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.x
+
+      - name: Setup environment
+        run: |
+             echo "--- Configure Flutter"
+             flutter config --no-analytics
+             flutter config --no-cli-animations
+             echo "--- Install Melos"
+             dart pub global activate melos
+             echo "--- Install requirements"
+             dart run melos bootstrap
+
+      - name: Build app in release mode
+        run: dart run melos run build.android
+        
+      - name: Archive build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trad-android
+          path: mobileapp/artifacts/*
+          retention-days: 1
+
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./mobileapp
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.x
+
+      - name: Setup environment
+        run: |
+             echo "--- Configure Flutter"
+             flutter config --no-analytics
+             flutter config --no-cli-animations
+             echo "--- Install Melos"
+             dart pub global activate melos
+             echo "--- Install requirements"
+             dart run melos bootstrap
+
+      - name: Build app in release mode
+        run: dart run melos run build.windows
+        
+      - name: Archive build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trad-windows
+          path: mobileapp/artifacts/*
+          retention-days: 1
 
   check-style:
     runs-on: ubuntu-24.04
@@ -88,7 +151,7 @@ jobs:
       - name: Run the Dart linter
         run: melos run analyze
         
-  test:
+  test-linux:
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -128,7 +191,7 @@ jobs:
           name: trad-coverage-report
           path: mobileapp/coverage/report/*
           retention-days: 1
-          
+
       - name: Publish HTML coverage report
         if: github.ref == 'refs/heads/main'
         uses: sebastianpopp/ftp-action@releases/v2
@@ -139,3 +202,30 @@ jobs:
           localDir: "mobileapp/coverage/report/"
           remoteDir: ${{ env.CI_REF_NAME }}
           options: "--delete"
+
+  test-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .\mobileapp
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.x
+
+      - name: Setup environment
+        run: |
+             echo "--- Configure Flutter"
+             flutter config --no-analytics
+             flutter config --no-cli-animations
+             echo "--- Install Melos"
+             dart pub global activate melos
+             echo "--- Install requirements"
+             dart run melos bootstrap
+
+      - name: Run all tests
+        run: dart run melos run test
