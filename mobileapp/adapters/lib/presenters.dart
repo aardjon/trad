@@ -36,7 +36,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
     ui.initializeUserInterface(
       'trad - Climbing in Saxony',
       'Initializing...',
-      const DomainLabelDefinition(
+      const MainMenuModel(
         'Journal',
         'Climbing Routes',
         'Knowledgebase',

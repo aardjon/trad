@@ -51,13 +51,13 @@ class ApplicationUI implements ApplicationUiBoundary {
   void initializeUserInterface(
     String appName,
     String splashString,
-    DomainLabelDefinition routeLabels,
+    MainMenuModel menuModel,
   ) {
     runApp(
       MainWidget(
         appName,
         splashString,
-        routeLabels,
+        menuModel,
         ApplicationWideController(),
         _uiState,
         _summitListState,

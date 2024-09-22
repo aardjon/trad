@@ -4,11 +4,8 @@
 ///
 library;
 
-/// Definition of a label string for each application domain.
-///
-/// These labels are display strings and should describe the domain very shortly. They can be used
-/// in the title bar or application menu, for example.
-class DomainLabelDefinition {
+/// Model that provides all data needed to display the app's main menu to the UI.
+class MainMenuModel {
   /// Label for the journal domain.
   final String journalLabel;
 
@@ -22,7 +19,7 @@ class DomainLabelDefinition {
   final String aboutLabel;
 
   /// Constructor for directly initializing all members.
-  const DomainLabelDefinition(
+  const MainMenuModel(
     this.journalLabel,
     this.routedbLabel,
     this.knowledgebaseLabel,
@@ -202,11 +199,11 @@ abstract interface class ApplicationUiBoundary {
   ///
   /// The provided [appName] can be displayed e.g. in some title or header bar, the [splashString]
   /// is displayed during the startup phase before the UI is ready to for user interactions. The
-  /// [routeLabels] are used e.g. for the main navigation menu.
+  /// [menuModel] are used e.g. for the main navigation menu.
   void initializeUserInterface(
     String appName,
     String splashString,
-    DomainLabelDefinition routeLabels,
+    MainMenuModel menuModel,
   );
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].
