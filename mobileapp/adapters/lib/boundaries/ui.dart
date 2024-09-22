@@ -53,22 +53,24 @@ enum Glyph {
   scoreHighest,
 }
 
-/// Represents a variant of a certain symbol.
+/// Represents the color a certain glyph shall be drawn with.
 ///
-/// This is an additional hint which may influence the concrete presentation (e.g. with different
-/// colors). How (or if at all) is up to the UI implementation.
-enum Mood {
-  /// No special variance shall be applied (usually the default).
+/// This is a hint which influences the drawing color to choose. The concrete color representation
+/// (e.g. RGB value) is up to the UI, though, and may be ignored under certain conditions (e.g.
+/// monochrome display or inverted/high contrast display settings). If [unspecified], the UI can
+/// decide freely.
+enum ColorHint {
+  /// No special color hint shall be given (usually the default).
   unspecified,
 
-  /// A variant represent something positive.
-  positive,
+  /// A green/greenish color representing something positive.
+  greenPositive,
 
-  /// An explicit neutral variant.
+  /// A red/reddish colour represent something negative.
+  redNegative,
+
+  /// An explicit neutral color.
   neutral,
-
-  /// A variant represent something negative.
-  negative,
 }
 
 /// Abstract representation of a graphical symbol.
@@ -80,11 +82,11 @@ class IconDefinition {
   /// The symbol which should be presented.
   final Glyph glyph;
 
-  /// The variance of the displayed symbol.
-  final Mood mood;
+  /// The color hint for drawing the displayed symbol.
+  final ColorHint colorHint;
 
   /// Constructor for directly initializing all members.
-  const IconDefinition(this.glyph, [this.mood = Mood.unspecified]);
+  const IconDefinition(this.glyph, [this.colorHint = ColorHint.unspecified]);
 }
 
 /// Model that provides all data needed to display a single knowledge base document to the UI.

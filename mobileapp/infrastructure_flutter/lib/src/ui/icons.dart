@@ -21,27 +21,27 @@ class IconWidgetFactory {
       case Glyph.checked:
         return const Icon(Icons.done);
       case Glyph.scoreLowest:
-        return _getRatingIcon(Icons.star_border, iconDefinition.mood);
+        return _getRatingIcon(Icons.star_border, iconDefinition.colorHint);
       case Glyph.scoreLowerMid:
-        return _getRatingIcon(Icons.star_half, iconDefinition.mood);
+        return _getRatingIcon(Icons.star_half, iconDefinition.colorHint);
       case Glyph.scoreUpperMid:
-        return _getRatingIcon(Icons.star, iconDefinition.mood);
+        return _getRatingIcon(Icons.star, iconDefinition.colorHint);
       case Glyph.scoreHighest:
-        return _getRatingIcon(Icons.hotel_class, iconDefinition.mood);
+        return _getRatingIcon(Icons.hotel_class, iconDefinition.colorHint);
     }
   }
 
-  /// Create an Icon (widget) displaying the requested [mood] of the given [iconData].
-  Icon _getRatingIcon(IconData iconData, Mood mood) {
+  /// Create an Icon (widget) displaying the requested [colorHint] of the given [iconData].
+  Icon _getRatingIcon(IconData iconData, ColorHint colorHint) {
     Color? color;
-    switch (mood) {
-      case Mood.neutral:
+    switch (colorHint) {
+      case ColorHint.neutral:
         color = Colors.grey;
-      case Mood.positive:
+      case ColorHint.greenPositive:
         color = Colors.green;
-      case Mood.negative:
+      case ColorHint.redNegative:
         color = Colors.red;
-      case Mood.unspecified:
+      case ColorHint.unspecified:
         color = null;
     }
     return Icon(iconData, color: color);
