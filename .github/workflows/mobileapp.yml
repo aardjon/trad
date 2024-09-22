@@ -8,7 +8,7 @@ jobs:
       matrix:
         platform: ["linux", "android"]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
@@ -45,7 +45,7 @@ jobs:
 
 
   check-style:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
@@ -62,7 +62,7 @@ jobs:
         run: melos run format
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
@@ -89,7 +89,7 @@ jobs:
         run: melos run analyze
         
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
@@ -110,6 +110,7 @@ jobs:
              echo "--- Install Melos"
              dart pub global activate melos
              echo "--- Install requirements"
+             sudo apt install -y libsqlite3-dev
              melos bootstrap
              echo "--- Install coverage tools"
              sudo apt install -y lcov
