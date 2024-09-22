@@ -4,29 +4,30 @@
 ///
 library;
 
-/// Definition of a label string for each application domain.
-///
-/// These labels are display strings and should describe the domain very shortly. They can be used
-/// in the title bar or application menu, for example.
-class DomainLabelDefinition {
-  /// Label for the journal domain.
-  final String journalLabel;
+/// Model that provides all data needed to display the app's main menu to the UI.
+class MainMenuModel {
+  /// Header string for the main menu
+  final String menuHeader;
 
-  /// Label for the route db domain.
-  final String routedbLabel;
+  /// List item for the journal domain.
+  final ListViewItem journalItem;
 
-  /// Label for the knowledge base domain.
-  final String knowledgebaseLabel;
+  /// List item for the route db domain.
+  final ListViewItem routedbItem;
 
-  /// Label for the about domain.
-  final String aboutLabel;
+  /// List item for the knowledge base domain.
+  final ListViewItem knowledgebaseItem;
+
+  /// List item for the about domain.
+  final ListViewItem aboutItem;
 
   /// Constructor for directly initializing all members.
-  const DomainLabelDefinition(
-    this.journalLabel,
-    this.routedbLabel,
-    this.knowledgebaseLabel,
-    this.aboutLabel,
+  const MainMenuModel(
+    this.menuHeader,
+    this.journalItem,
+    this.routedbItem,
+    this.knowledgebaseItem,
+    this.aboutItem,
   );
 }
 
@@ -202,11 +203,11 @@ abstract interface class ApplicationUiBoundary {
   ///
   /// The provided [appName] can be displayed e.g. in some title or header bar, the [splashString]
   /// is displayed during the startup phase before the UI is ready to for user interactions. The
-  /// [routeLabels] are used e.g. for the main navigation menu.
+  /// [menuModel] are used e.g. for the main navigation menu.
   void initializeUserInterface(
     String appName,
     String splashString,
-    DomainLabelDefinition routeLabels,
+    MainMenuModel menuModel,
   );
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].

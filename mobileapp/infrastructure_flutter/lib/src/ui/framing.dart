@@ -30,8 +30,8 @@ class MainWidget extends StatelessWidget {
   /// The splash massage to display during initialization.
   final String _splashMessage;
 
-  /// Mapping of display labels to the various domains pages.
-  final DomainLabelDefinition _domainLabels;
+  /// Model for the app's main menu (drawer).
+  final MainMenuModel _menuModel;
 
   /// Factory for creating drawer (=navigation menu) instances as needed.
   final TradDrawerFactory _appDrawerFactory;
@@ -50,7 +50,7 @@ class MainWidget extends StatelessWidget {
   MainWidget(
     String appName,
     String splashMessage,
-    DomainLabelDefinition domainLabels,
+    MainMenuModel menuModel,
     ApplicationWideController controller,
     GuiState guiState,
     SummitListNotifier summitListState,
@@ -59,10 +59,9 @@ class MainWidget extends StatelessWidget {
     super.key,
   })  : _appName = appName,
         _splashMessage = splashMessage,
-        _domainLabels = domainLabels,
+        _menuModel = menuModel,
         _appDrawerFactory = TradDrawerFactory(
-          appName,
-          domainLabels,
+          menuModel,
           controller,
         ),
         _guiState = guiState,
@@ -82,7 +81,7 @@ class MainWidget extends StatelessWidget {
         UiRoute.journal.toRouteString(): (BuildContext context) {
           return JournalPage(
             _appDrawerFactory.create(context),
-            _domainLabels.journalLabel,
+            _menuModel.journalItem.mainTitle,
           );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
@@ -109,7 +108,7 @@ class MainWidget extends StatelessWidget {
         UiRoute.about.toRouteString(): (BuildContext context) {
           return AboutPage(
             _appDrawerFactory.create(context),
-            _domainLabels.aboutLabel,
+            _menuModel.aboutItem.mainTitle,
           );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {
