@@ -6,6 +6,9 @@ library;
 
 /// Model that provides all data needed to display the app's main menu to the UI.
 class MainMenuModel {
+  /// Header string for the main menu
+  final String menuHeader;
+
   /// List item for the journal domain.
   final ListViewItem journalItem;
 
@@ -20,6 +23,7 @@ class MainMenuModel {
 
   /// Constructor for directly initializing all members.
   const MainMenuModel(
+    this.menuHeader,
     this.journalItem,
     this.routedbItem,
     this.knowledgebaseItem,

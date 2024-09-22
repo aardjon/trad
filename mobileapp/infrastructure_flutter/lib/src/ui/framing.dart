@@ -61,7 +61,6 @@ class MainWidget extends StatelessWidget {
         _splashMessage = splashMessage,
         _menuModel = menuModel,
         _appDrawerFactory = TradDrawerFactory(
-          appName,
           menuModel,
           controller,
         ),

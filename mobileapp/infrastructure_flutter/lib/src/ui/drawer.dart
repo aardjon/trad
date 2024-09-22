@@ -5,9 +5,6 @@ import 'package:adapters/controllers.dart';
 
 /// Factory for creating the global application drawer.
 class TradDrawerFactory {
-  /// The application name (displayed in the drawer header).
-  final String _appName;
-
   /// Model for the application main menu data.
   final MainMenuModel _model;
 
@@ -15,7 +12,7 @@ class TradDrawerFactory {
   final ApplicationWideController _controller;
 
   /// Constructor for directly initializing all members.
-  TradDrawerFactory(this._appName, this._model, this._controller);
+  TradDrawerFactory(this._model, this._controller);
 
   /// Creates and returns a new instance of the application drawer for the given build [context].
   NavigationDrawer create(BuildContext context) {
@@ -24,7 +21,7 @@ class TradDrawerFactory {
         decoration: const BoxDecoration(
           color: Colors.lightGreen,
         ),
-        child: Text(_appName),
+        child: Text(_model.menuHeader),
       ),
       ListTile(
         title: Text(_model.journalItem.mainTitle),

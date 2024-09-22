@@ -32,11 +32,13 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void initUserInterface() {
+    const String appName = 'trad - Climbing in Saxony';
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.initializeUserInterface(
-      'trad - Climbing in Saxony',
+      appName,
       'Initializing...',
       MainMenuModel(
+        appName,
         ListViewItem('Journal'),
         ListViewItem('Climbing Routes'),
         ListViewItem('Knowledgebase'),
