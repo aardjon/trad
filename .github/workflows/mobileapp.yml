@@ -96,6 +96,7 @@ jobs:
         working-directory: ./mobileapp
 
     steps:
+      - uses: FranzDiebold/github-env-vars-action@v2
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
@@ -127,3 +128,14 @@ jobs:
           name: trad-coverage-report
           path: mobileapp/coverage/report/*
           retention-days: 1
+          
+      - name: Publish HTML coverage report
+        if: github.ref == 'refs/heads/main'
+        uses: sebastianpopp/ftp-action@releases/v2
+        with:
+          host: ${{ secrets.REPORT_FTP_HOST }}
+          user: ${{ secrets.REPORT_FTP_USER }}
+          password: ${{ secrets.REPORT_FTP_PW }}
+          localDir: "mobileapp/coverage/report/"
+          remoteDir: ${{ env.CI_REF_NAME }}
+          options: "--delete"

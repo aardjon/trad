@@ -58,3 +58,16 @@ These guidelines help to ensure consistent and understandable commit messages, m
 - The `main` branch shall always be sane, i.e. the CI pipeline shall succeed for all commits.
 - Use branches for developing new features or bug fixes.
 - Do not *fast forward* merge branches with more than a single commit (create a dedicated merge commit instead).
+
+## Source Reports
+
+The CI generates and publishes some reports on the source code, which may be interesting to look at
+during development:
+
+- Detailed code coverage of the last successful test run on the `main` branch: https://www.fomori.de/trad/reports/main
+
+Please note that reports are published for the `main` branch only, but the ones for your feature
+branch are still kept as artifacts for a while so you can download them from the corresponding
+[Github Workflow Run](https://github.com/Headbucket/trad/actions). Alternatively, it's also possible
+to create them locally using some melos script, please refer to [Development tools and CI](devtools.md)
+for further information.
