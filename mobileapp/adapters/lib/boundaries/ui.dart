@@ -6,24 +6,24 @@ library;
 
 /// Model that provides all data needed to display the app's main menu to the UI.
 class MainMenuModel {
-  /// Label for the journal domain.
-  final String journalLabel;
+  /// List item for the journal domain.
+  final ListViewItem journalItem;
 
-  /// Label for the route db domain.
-  final String routedbLabel;
+  /// List item for the route db domain.
+  final ListViewItem routedbItem;
 
-  /// Label for the knowledge base domain.
-  final String knowledgebaseLabel;
+  /// List item for the knowledge base domain.
+  final ListViewItem knowledgebaseItem;
 
-  /// Label for the about domain.
-  final String aboutLabel;
+  /// List item for the about domain.
+  final ListViewItem aboutItem;
 
   /// Constructor for directly initializing all members.
   const MainMenuModel(
-    this.journalLabel,
-    this.routedbLabel,
-    this.knowledgebaseLabel,
-    this.aboutLabel,
+    this.journalItem,
+    this.routedbItem,
+    this.knowledgebaseItem,
+    this.aboutItem,
   );
 }
 

@@ -27,19 +27,19 @@ class TradDrawerFactory {
         child: Text(_appName),
       ),
       ListTile(
-        title: Text(_model.journalLabel),
+        title: Text(_model.journalItem.mainTitle),
         onTap: _controller.requestSwitchToJournal,
       ),
       ListTile(
-        title: Text(_model.routedbLabel),
+        title: Text(_model.routedbItem.mainTitle),
         onTap: _controller.requestSwitchToRouteDb,
       ),
       ListTile(
-        title: Text(_model.knowledgebaseLabel),
+        title: Text(_model.knowledgebaseItem.mainTitle),
         onTap: _controller.requestSwitchToKnowledgebase,
       ),
       ListTile(
-        title: Text(_model.aboutLabel),
+        title: Text(_model.aboutItem.mainTitle),
         onTap: _controller.requestSwitchToAbout,
       ),
     ];

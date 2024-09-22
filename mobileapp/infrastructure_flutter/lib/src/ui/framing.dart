@@ -82,7 +82,7 @@ class MainWidget extends StatelessWidget {
         UiRoute.journal.toRouteString(): (BuildContext context) {
           return JournalPage(
             _appDrawerFactory.create(context),
-            _menuModel.journalLabel,
+            _menuModel.journalItem.mainTitle,
           );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
@@ -109,7 +109,7 @@ class MainWidget extends StatelessWidget {
         UiRoute.about.toRouteString(): (BuildContext context) {
           return AboutPage(
             _appDrawerFactory.create(context),
-            _menuModel.aboutLabel,
+            _menuModel.aboutItem.mainTitle,
           );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {

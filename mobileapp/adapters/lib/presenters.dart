@@ -36,11 +36,11 @@ class ApplicationWidePresenter implements PresentationBoundary {
     ui.initializeUserInterface(
       'trad - Climbing in Saxony',
       'Initializing...',
-      const MainMenuModel(
-        'Journal',
-        'Climbing Routes',
-        'Knowledgebase',
-        'About',
+      MainMenuModel(
+        ListViewItem('Journal'),
+        ListViewItem('Climbing Routes'),
+        ListViewItem('Knowledgebase'),
+        ListViewItem('About'),
       ),
     );
   }
