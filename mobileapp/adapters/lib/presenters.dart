@@ -180,8 +180,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void switchToSettings() {
+  void showSettings() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.switchToSettings();
+    ui.showSettings();
   }
 }

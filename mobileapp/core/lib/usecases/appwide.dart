@@ -57,6 +57,6 @@ class ApplicationWideUseCases {
   /// Change the active domain to the "Settings" domain.
   void switchToSettings() {
     _logger.info('Running use case switchToSettings()');
-    _presentationBoundary.switchToSettings();
+    _presentationBoundary.showSettings();
   }
 }

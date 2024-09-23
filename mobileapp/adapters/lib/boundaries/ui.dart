@@ -270,5 +270,5 @@ abstract interface class ApplicationUiBoundary {
   void showKnowledgebase(KnowledgebaseModel document);
 
   /// Request the UI to display the *Settings* screen.
-  void switchToSettings();
+  void showSettings();
 }

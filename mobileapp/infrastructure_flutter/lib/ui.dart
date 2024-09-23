@@ -118,7 +118,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void switchToSettings() {
+  void showSettings() {
     _switchToRoute(UiRoute.settings.toRouteString());
   }
 
