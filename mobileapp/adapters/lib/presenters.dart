@@ -42,7 +42,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem('Journal', icon: const IconDefinition(Glyph.logoJournal)),
         ListViewItem('Climbing Routes', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Knowledgebase', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
-        ListViewItem('Settings'),
+        ListViewItem('Settings', icon: const IconDefinition(Glyph.logoSettings)),
       ),
     );
   }
