@@ -18,8 +18,8 @@ class MainMenuModel {
   /// List item for the knowledge base domain.
   final ListViewItem knowledgebaseItem;
 
-  /// List item for the about domain.
-  final ListViewItem aboutItem;
+  /// List item for the settings domain.
+  final ListViewItem settingsItem;
 
   /// Constructor for directly initializing all members.
   const MainMenuModel(
@@ -27,7 +27,7 @@ class MainMenuModel {
     this.journalItem,
     this.routedbItem,
     this.knowledgebaseItem,
-    this.aboutItem,
+    this.settingsItem,
   );
 }
 
@@ -269,6 +269,6 @@ abstract interface class ApplicationUiBoundary {
   /// Request the UI to display the provided [document] on the  *Knowledge Base* screen.
   void showKnowledgebase(KnowledgebaseModel document);
 
-  /// Request the UI to display the *About* screen.
-  void switchToAbout();
+  /// Request the UI to display the *Settings* screen.
+  void switchToSettings();
 }

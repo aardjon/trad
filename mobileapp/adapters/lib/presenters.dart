@@ -42,7 +42,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem('Journal', icon: const IconDefinition(Glyph.logoJournal)),
         ListViewItem('Climbing Routes', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Knowledgebase', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
-        ListViewItem('About'),
+        ListViewItem('Settings'),
       ),
     );
   }
@@ -180,8 +180,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void switchToAbout() {
+  void switchToSettings() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.switchToAbout();
+    ui.switchToSettings();
   }
 }

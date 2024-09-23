@@ -1,14 +1,14 @@
 ///
-/// Provides the *About* page widget.
+/// Provides the *Settings* page widget.
 ///
 library;
 
 import 'package:flutter/material.dart';
 
-/// Widget representing the *About* page.
+/// Widget representing the *Settings* page.
 ///
 // TODO(aardjon): This is only a stub for now.
-class AboutPage extends StatelessWidget {
+class SettingsPage extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final NavigationDrawer _appDrawer;
 
@@ -16,7 +16,7 @@ class AboutPage extends StatelessWidget {
   final String _title;
 
   /// Constructor for directly initializing all members.
-  const AboutPage(this._appDrawer, this._title, {super.key});
+  const SettingsPage(this._appDrawer, this._title, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class AboutPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'This is the About Page',
+              'This is the Settings Page',
             ),
           ],
         ),

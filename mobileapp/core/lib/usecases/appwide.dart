@@ -54,9 +54,9 @@ class ApplicationWideUseCases {
     _presentationBoundary.switchToJournal();
   }
 
-  /// Change the active domain to the "About" domain.
-  void switchToAbout() {
-    _logger.info('Running use case switchToAbout()');
-    _presentationBoundary.switchToAbout();
+  /// Change the active domain to the "Settings" domain.
+  void switchToSettings() {
+    _logger.info('Running use case switchToSettings()');
+    _presentationBoundary.switchToSettings();
   }
 }

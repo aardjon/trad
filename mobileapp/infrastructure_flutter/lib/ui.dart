@@ -118,8 +118,8 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void switchToAbout() {
-    _switchToRoute(UiRoute.about.toRouteString());
+  void switchToSettings() {
+    _switchToRoute(UiRoute.settings.toRouteString());
   }
 
   /// Let the UI display the page with the given [routeString], forwarding the providing

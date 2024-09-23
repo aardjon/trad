@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 
-import 'about.dart';
 import 'drawer.dart';
 import 'journal.dart';
 import 'knowledgebase.dart';
@@ -17,6 +16,7 @@ import 'routedb/route_details.dart';
 import 'routedb/summit_details.dart';
 import 'routedb/summit_list.dart';
 import 'routes.dart';
+import 'settings.dart';
 import 'state.dart';
 
 /// The applications main widget.
@@ -105,10 +105,10 @@ class MainWidget extends StatelessWidget {
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
           return KnowledgebaseView(_appDrawerFactory.create(context));
         },
-        UiRoute.about.toRouteString(): (BuildContext context) {
-          return AboutPage(
+        UiRoute.settings.toRouteString(): (BuildContext context) {
+          return SettingsPage(
             _appDrawerFactory.create(context),
-            _menuModel.aboutItem.mainTitle,
+            _menuModel.settingsItem.mainTitle,
           );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {

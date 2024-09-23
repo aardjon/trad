@@ -43,9 +43,9 @@ class TradDrawerFactory {
         onTap: _controller.requestSwitchToKnowledgebase,
       ),
       ListTile(
-        leading: _iconFactory.getIconWidget(_model.aboutItem.icon),
-        title: Text(_model.aboutItem.mainTitle),
-        onTap: _controller.requestSwitchToAbout,
+        leading: _iconFactory.getIconWidget(_model.settingsItem.icon),
+        title: Text(_model.settingsItem.mainTitle),
+        onTap: _controller.requestSwitchToSettings,
       ),
     ];
     return NavigationDrawer(children: itemList);

@@ -59,6 +59,6 @@ abstract interface class PresentationBoundary {
   /// Let the UI display the provided [document] in the *Knowledge base* domain.
   void showKnowledgebaseDocument(KnowledgebaseDocument document);
 
-  /// Change the active domain to the *About* domain.
-  void switchToAbout();
+  /// Change the active domain to the *Settings* domain.
+  void switchToSettings();
 }

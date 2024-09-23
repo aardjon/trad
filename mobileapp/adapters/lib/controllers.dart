@@ -51,9 +51,9 @@ class ApplicationWideController {
     unawaited(_routeDbUseCases.showSummitListPage());
   }
 
-  /// The user requested a switch to the About domain.
-  void requestSwitchToAbout() {
-    _globalUsecases.switchToAbout();
+  /// The user requested a switch to the Settings domain.
+  void requestSwitchToSettings() {
+    _globalUsecases.switchToSettings();
   }
 }
 
