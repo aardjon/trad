@@ -39,9 +39,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
       'Initializing...',
       MainMenuModel(
         appName,
-        ListViewItem('Journal'),
-        ListViewItem('Climbing Routes'),
-        ListViewItem('Knowledgebase'),
+        ListViewItem('Journal', icon: const IconDefinition(Glyph.logoJournal)),
+        ListViewItem('Climbing Routes', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Knowledgebase', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('About'),
       ),
     );

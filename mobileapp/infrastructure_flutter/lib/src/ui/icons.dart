@@ -20,6 +20,14 @@ class IconWidgetFactory {
     switch (iconDefinition.glyph) {
       case Glyph.checked:
         return const Icon(Icons.done);
+      case Glyph.logoJournal:
+        return const Icon(Icons.event_note);
+      case Glyph.logoKnowledgeBase:
+        return const Icon(Icons.school);
+      case Glyph.logoRouteDb:
+        return const Icon(Icons.landscape);
+      case Glyph.logoSettings:
+        return const Icon(Icons.settings);
       case Glyph.scoreLowest:
         return _getRatingIcon(Icons.star_border, iconDefinition.colorHint);
       case Glyph.scoreLowerMid:

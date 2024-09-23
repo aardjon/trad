@@ -40,6 +40,18 @@ enum Glyph {
   /// Represents a "checked" or "activated" state.
   checked,
 
+  /// Represents the logo for the journal application domain.
+  logoJournal,
+
+  /// Represents the logo for the knowledge base application domain.
+  logoKnowledgeBase,
+
+  /// Represents the logo for the route database application domain.
+  logoRouteDb,
+
+  /// Represents the logo for the application settings.
+  logoSettings,
+
   /// Represents the lowest possible score in some rating (e.g. "zero points").
   scoreLowest,
 
@@ -134,7 +146,11 @@ class ListViewItem {
   /// An optional sub label which is displayed less prominently (e.g. below) the main one.
   final String? subTitle;
 
-  /// A graphical icon to display at the end (e.g. after the label text) if the list item.
+  /// A graphical icon to display at the beginning (e.g. before the mainTitle text) of the list
+  /// item.
+  final IconDefinition? icon;
+
+  /// A graphical icon to display at the end (e.g. after the mainTitle text) of the list item.
   final IconDefinition? endIcon;
 
   /// Optional item content.
@@ -150,6 +166,7 @@ class ListViewItem {
   ListViewItem(
     this.mainTitle, {
     this.subTitle,
+    this.icon,
     this.endIcon,
     this.content,
     this.itemId,
