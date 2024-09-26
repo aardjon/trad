@@ -69,6 +69,45 @@ void main() {
     }
   });
 
+  /// Unit test for the disconnect() method.
+  ///
+  /// Ensures that:
+  ///  - the database is really closed again
+  ///  - calling disconnect() on a closed database doesn't do any harm
+  group('infrastructure_vanilla.sqlite3.Sqlite3Database.testDisconnect', () {
+    /// List of test parameters for infrastructure_vanilla.sqlite3.Sqlite3Database.testConnect.
+    ///
+    /// Each list item is record of [bool readOnly, OpenMode expectedOpenMode] with:
+    ///  - `readOnly` being the equally named parameter of connect()
+    ///  - `expectedOpenMode` being the resulting OpenMode expected on Sqlite3 side
+    List<(bool, OpenMode)> testParameters = <(bool, OpenMode)>[
+      (true, OpenMode.readOnly),
+      (false, OpenMode.readWriteCreate),
+    ];
+
+    for (final bool dbIsConnected in [true, false]) {
+      test('connected=$dbIsConnected', () {
+        final _SqliteApiMock sqliteMock = _SqliteApiMock();
+        final _DatabaseMock dbMock = _DatabaseMock();
+        when(() => sqliteMock.open(any(), mode: any(named: 'mode'))).thenReturn(dbMock);
+
+        Sqlite3Database database = Sqlite3Database(extLibApi: sqliteMock);
+        if (dbIsConnected) {
+          database.connect('/some/random/file.sqlite');
+        }
+
+        // The disconnect() call must not throw
+        expect(database.disconnect, returnsNormally);
+
+        if (dbIsConnected) {
+          verify(dbMock.dispose).called(1);
+        } else {
+          verifyNever(dbMock.dispose);
+        }
+      });
+    }
+  });
+
   /// Unit test for the executeQuery() method.
   ///
   /// Ensures that the expected values are given to the sqlite3 library for certain Query instances:

@@ -43,6 +43,12 @@ class Sqlite3Database implements RelationalDatabaseBoundary {
   }
 
   @override
+  void disconnect() {
+    _dbHandle?.dispose();
+    _dbHandle = null;
+  }
+
+  @override
   Future<ResultRows> executeQuery(Query query) async {
     if (_dbHandle == null) {
       throw StateError('Please connect() to a database before querying it.');
