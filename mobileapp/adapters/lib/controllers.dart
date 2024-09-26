@@ -74,6 +74,11 @@ class RouteDbController {
   /// The use case object from the `core` ring.
   final RouteDbUseCases _routeDbUseCases = RouteDbUseCases(DependencyProvider());
 
+  /// The user selected the route database file [selectedDbFile] to be imported.
+  void requestRouteDbFileImport(String selectedDbFile) {
+    _logger.debug('UI request: Import route DB file "$selectedDbFile"');
+  }
+
   /// The user requested to filter the summit list by [filterText].
   void requestFilterSummitList(String filterText) {
     _logger.debug('UI request: Filter summit list for "$filterText"');

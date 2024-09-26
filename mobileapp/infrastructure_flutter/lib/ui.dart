@@ -118,8 +118,9 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void showSettings() {
-    _switchToRoute(UiRoute.settings.toRouteString());
+  void showSettings(SettingsModel model) {
+    _logger.debug('Displaying settings page');
+    _switchToRoute(UiRoute.settings.toRouteString(), routeArguments: model);
   }
 
   /// Let the UI display the page with the given [routeString], forwarding the providing

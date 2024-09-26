@@ -181,7 +181,14 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void showSettings() {
+    SettingsModel settingsModel = SettingsModel(
+      pageTitle: 'Einstellungen',
+      routeDbIdLabel: 'Aktuelle Wegedatenbank:',
+      routeDbIdentifier: 'Unbekannt',
+      routeDbFileSelectionActionLabel: 'Wegedatenbank importieren',
+      routeDbFileSelectionFieldLabel: 'Bitte eine Wegedatenbankdatei zum Importieren auswählen',
+    );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.showSettings();
+    ui.showSettings(settingsModel);
   }
 }
