@@ -6,6 +6,8 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:adapters/boundaries/paths.dart';
 import 'package:adapters/boundaries/repositories/assets.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
@@ -74,7 +76,7 @@ class ApplicationBootstrap {
   /// Initializes the logging framework.
   void _setupLogging() {
     LogConfiguration logConfig = LogConfiguration();
-    logConfig.globalLevel = LogLevel.info;
+    logConfig.globalLevel = kDebugMode ? LogLevel.debug : LogLevel.info;
     logConfig.destination = ConsoleLogDestination();
     // TODO(aardjon): For logging to a file, use
     //  logConfig.destination = FileLogDestination("/path/to/file.log");
