@@ -80,12 +80,7 @@ void main() {
     /// Each list item is record of [bool readOnly, OpenMode expectedOpenMode] with:
     ///  - `readOnly` being the equally named parameter of connect()
     ///  - `expectedOpenMode` being the resulting OpenMode expected on Sqlite3 side
-    List<(bool, OpenMode)> testParameters = <(bool, OpenMode)>[
-      (true, OpenMode.readOnly),
-      (false, OpenMode.readWriteCreate),
-    ];
-
-    for (final bool dbIsConnected in [true, false]) {
+    for (final bool dbIsConnected in <bool>[true, false]) {
       test('connected=$dbIsConnected', () {
         final _SqliteApiMock sqliteMock = _SqliteApiMock();
         final _DatabaseMock dbMock = _DatabaseMock();

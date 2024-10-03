@@ -49,6 +49,11 @@ class Sqlite3Database implements RelationalDatabaseBoundary {
   }
 
   @override
+  bool isConnected() {
+    return _dbHandle != null;
+  }
+
+  @override
   Future<ResultRows> executeQuery(Query query) async {
     if (_dbHandle == null) {
       throw StateError('Please connect() to a database before querying it.');
