@@ -38,6 +38,15 @@ class RouteDbUseCases {
         _storageBoundary = di.provide<RouteDbStorageBoundary>(),
         _preferencesBoundary = di.provide<AppPreferencesBoundary>();
 
+  /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
+  Future<void> importRouteDbFile(String filePath) async {
+    if(_storageBoundary.isStarted()) {
+      _storageBoundary.stopStorage();
+    }
+    await _storageBoundary.importRouteDbFile(filePath);
+    await _storageBoundary.initStorage();
+  }
+
   /// Use Case: Switch to the summit list, resetting any previous filter
   Future<void> showSummitListPage() async {
     _logger.info('Running use case showSummitListPage()');

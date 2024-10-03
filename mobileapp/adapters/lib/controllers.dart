@@ -77,6 +77,7 @@ class RouteDbController {
   /// The user selected the route database file [selectedDbFile] to be imported.
   void requestRouteDbFileImport(String selectedDbFile) {
     _logger.debug('UI request: Import route DB file "$selectedDbFile"');
+    unawaited(_routeDbUseCases.importRouteDbFile(selectedDbFile));
   }
 
   /// The user requested to filter the summit list by [filterText].
