@@ -44,7 +44,7 @@ class RouteDbUseCases {
       _storageBoundary.stopStorage();
     }
     await _storageBoundary.importRouteDbFile(filePath);
-    await _storageBoundary.initStorage();
+    await _storageBoundary.startStorage();
   }
 
   /// Use Case: Switch to the summit list, resetting any previous filter

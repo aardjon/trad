@@ -76,9 +76,9 @@ void main() {
   /// database
   ///  - with the expected database file path
   ///  - with the readOnly parameter set to true
-  test('test initStorage', () async {
+  test('test startStorage', () async {
     RouteDbStorage storage = RouteDbStorage(di);
-    await storage.initStorage();
+    await storage.startStorage();
 
     verify(() => rdbMock.connect(expectedDbFilePath, readOnly: true)).called(1);
   });

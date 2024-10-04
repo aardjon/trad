@@ -16,23 +16,23 @@ import '../../entities/summit.dart';
 /// The route database is a read only data storage.
 ///
 /// This storage can be in one of two possible states (STOPPED and STARTED) which can be changed by
-/// [initStorage] and [stopStorage]. Most methods require a certain state to work, otherwise they
+/// [startStorage] and [stopStorage]. Most methods require a certain state to work, otherwise they
 /// usually throw a StateError. For example, all of the `retrieve*()` methods can only be called
 /// when the storage is STARTED.
 abstract interface class RouteDbStorageBoundary {
-  /// Initializes the storage, changing its state to STARTED.
+  /// Starts the storage, changing its state to STARTED.
   ///
-  /// An exception is thrown if the storage cannot be initialized (e.g. because of the database file
+  /// An exception is thrown if the storage cannot be started (e.g. because of the database file
   /// being not found or invalid).
-  Future<void> initStorage();
+  Future<void> startStorage();
 
   /// Stops the storage, changing its state to STOPPED.
   ///
-  /// This is the opposite operation of [initStorage], it closes all connections to the storage and
+  /// This is the opposite operation of [startStorage], it closes all connections to the storage and
   /// releases all resources. If the storage is already STOPPED, this method does nothing.
   void stopStorage();
 
-  /// Returns true if the storage is in the STARTED state (i.e. [initStorage] has been called), or
+  /// Returns true if the storage is in the STARTED state (i.e. [startStorage] has been called), or
   /// false otherwise.
   bool isStarted();
 

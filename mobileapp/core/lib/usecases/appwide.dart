@@ -43,7 +43,7 @@ class ApplicationWideUseCases {
     _presentationBoundary.initUserInterface();
     // Initialize the storage components
     await _preferencesBoundary.initStorage();
-    await _routeDbBoundary.initStorage();
+    await _routeDbBoundary.startStorage();
     // Finally, switch to the journal domain
     switchToJournal();
   }

@@ -43,7 +43,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
         _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
 
   @override
-  Future<void> initStorage() async {
+  Future<void> startStorage() async {
     String connectionString = await _getExpectedDbFile();
     _logger.info('Connecting to route database at: $connectionString');
     _repository.connect(connectionString, readOnly: true);
