@@ -38,14 +38,24 @@ class ApplicationWideUseCases {
   /// This is the main use case ("entry point") for the app and is usually run exactly once during
   /// startup, after all initialization is done.
   Future<void> startApplication() async {
+    // Function that switches the UI to the desired starting domain. By default we start with the
+    // Journal, but this may change due to startup problems.
+    void Function() switchToInitialDomain = switchToJournal;
     // Initialize the UI
     _logger.info('Running use case startApplication()');
     _presentationBoundary.initUserInterface();
     // Initialize the storage components
     await _preferencesBoundary.initStorage();
-    await _routeDbBoundary.startStorage();
-    // Finally, switch to the journal domain
-    switchToJournal();
+    try {
+      await _routeDbBoundary.startStorage();
+      _presentationBoundary.updateRouteDbStatus('[unknown]');
+    } on Exception {
+      // No (usable) route database, display a hint and start with the settings page
+      _presentationBoundary.updateRouteDbStatus(null);
+      switchToInitialDomain = switchToSettings;
+    }
+    // Finally, switch to the starting domain
+    switchToInitialDomain();
   }
 
   /// Change the active domain to the "Journal" domain.

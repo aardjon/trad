@@ -40,11 +40,12 @@ class RouteDbUseCases {
 
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
-    if(_storageBoundary.isStarted()) {
+    if (_storageBoundary.isStarted()) {
       _storageBoundary.stopStorage();
     }
     await _storageBoundary.importRouteDbFile(filePath);
     await _storageBoundary.startStorage();
+    _presentationBoundary.updateRouteDbStatus('[unknown]');
   }
 
   /// Use Case: Switch to the summit list, resetting any previous filter

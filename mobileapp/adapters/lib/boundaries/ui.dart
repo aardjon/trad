@@ -225,9 +225,6 @@ class SettingsModel {
   /// Label to use for the route database identifier.
   final String routeDbIdLabel;
 
-  /// The actual route database identification string.
-  final String routeDbIdentifier;
-
   /// Label to use for the "select new route database to import" action.
   final String routeDbFileSelectionActionLabel;
 
@@ -238,7 +235,6 @@ class SettingsModel {
   SettingsModel({
     required this.pageTitle,
     required this.routeDbIdLabel,
-    required this.routeDbIdentifier,
     required this.routeDbFileSelectionActionLabel,
     required this.routeDbFileSelectionFieldLabel,
   });
@@ -259,6 +255,15 @@ abstract interface class ApplicationUiBoundary {
     String splashString,
     MainMenuModel menuModel,
   );
+
+  /// Notify the UI about changed route database status.
+  ///
+  /// This will update the display with the given [routeDbIdentifier] and [availabilityMessage]. The
+  /// latter may be `null` to not display any additional hint about the status.
+  void updateRouteDbStatus({
+    required String routeDbIdentifier,
+    String? availabilityMessage,
+  });
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].
   ///

@@ -34,6 +34,8 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// and never create their own!
   static final GuiState _uiState = GuiState();
 
+  static final SettingsNotifier _settingsState = SettingsNotifier();
+
   /// The central summit list state of the UI.
   ///
   /// This is the only real instance of this, all other clients should only reference this one
@@ -60,6 +62,7 @@ class ApplicationUI implements ApplicationUiBoundary {
         menuModel,
         ApplicationWideController(),
         _uiState,
+        _settingsState,
         _summitListState,
         _routeListState,
         _postListState,
@@ -69,6 +72,17 @@ class ApplicationUI implements ApplicationUiBoundary {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _uiState.setInitialized();
     });
+  }
+
+  @override
+  void updateRouteDbStatus({
+    required String routeDbIdentifier,
+    String? availabilityMessage,
+  }) {
+    _settingsState.updateRouteDbStatus(
+      dbIdentifier: routeDbIdentifier,
+      availabilityMessage: availabilityMessage,
+    );
   }
 
   @override
