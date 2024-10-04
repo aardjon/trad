@@ -48,9 +48,10 @@ class ApplicationWideUseCases {
     await _preferencesBoundary.initStorage();
     try {
       await _routeDbBoundary.startStorage();
-      _presentationBoundary.updateRouteDbStatus('[unknown]');
+      DateTime routeDbDate = await _routeDbBoundary.getCreationDate();
+      _presentationBoundary.updateRouteDbStatus(routeDbDate);
     } on Exception {
-      // No (usable) route database, display a hint and start with the settings page
+      // No (usable) route database, notify the GUI and start with the settings page
       _presentationBoundary.updateRouteDbStatus(null);
       switchToInitialDomain = switchToSettings;
     }

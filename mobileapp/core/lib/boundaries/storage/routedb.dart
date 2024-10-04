@@ -46,6 +46,13 @@ abstract interface class RouteDbStorageBoundary {
   ///  - PathNotFoundException: The provided [filePath] doesn't exist or is not a file
   Future<void> importRouteDbFile(String filePath);
 
+  /// Returns the date the data within the route database was retrieved from external services.
+  ///
+  /// This is the creation date of the imported data file, *not* the date it was imported!
+  ///
+  /// This method must only be called on a STARTED storage.
+  Future<DateTime> getCreationDate();
+
   /// Retrieve all data of the single summit identified by [summitDataId].
   ///
   /// This must only be called on a STARTED storage.

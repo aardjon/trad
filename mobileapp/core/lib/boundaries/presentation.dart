@@ -19,8 +19,8 @@ abstract interface class PresentationBoundary {
   /// This may display some kind of "loading" or "splash" screen if appropriate.
   void initUserInterface();
 
-  /// Let the UI display/update the given [routeDatabaseLabel].
-  void updateRouteDbStatus(String? routeDatabaseLabel);
+  /// Let the UI display/update the [routeDatabaseDate] as given.
+  void updateRouteDbStatus(DateTime? routeDatabaseDate);
 
   /// Let the UI display the list of summits in the *route db* domain.
   ///

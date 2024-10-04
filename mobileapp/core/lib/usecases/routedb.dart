@@ -45,7 +45,8 @@ class RouteDbUseCases {
     }
     await _storageBoundary.importRouteDbFile(filePath);
     await _storageBoundary.startStorage();
-    _presentationBoundary.updateRouteDbStatus('[unknown]');
+    DateTime routeDbDate = await _storageBoundary.getCreationDate();
+    _presentationBoundary.updateRouteDbStatus(routeDbDate);
   }
 
   /// Use Case: Switch to the summit list, resetting any previous filter

@@ -48,15 +48,15 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteDbStatus(String? routeDatabaseLabel) {
+  void updateRouteDbStatus(DateTime? routeDatabaseDate) {
     const String noDbMessage =
         'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Um sie zu '
         'aktivieren, importieren Sie bitte eine Wegedatenbankdatei.';
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
-      routeDbIdentifier: routeDatabaseLabel ?? 'Keine',
-      availabilityMessage: routeDatabaseLabel != null ? null : noDbMessage,
+      routeDbIdentifier: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
+      availabilityMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
   }
 
