@@ -213,6 +213,33 @@ class RouteDetailsModel {
   );
 }
 
+/// Model that provides all static data needed to display the settings page to the UI.
+///
+/// "Static" means, that this data does not change while the page is shown, so it can be provided
+/// once during the initial page display. Certain UI implementations may choose to ignore some of
+/// those fields on certain platforms.
+class SettingsModel {
+  /// Title of the settings page.
+  final String pageTitle;
+
+  /// Label to use for the route database identifier.
+  final String routeDbIdLabel;
+
+  /// Label to use for the "select new route database to import" action.
+  final String routeDbFileSelectionActionLabel;
+
+  /// Label to use for the actual route db file selection widget.
+  final String routeDbFileSelectionFieldLabel;
+
+  /// Constructor for directly initializing all members.
+  SettingsModel({
+    required this.pageTitle,
+    required this.routeDbIdLabel,
+    required this.routeDbFileSelectionActionLabel,
+    required this.routeDbFileSelectionFieldLabel,
+  });
+}
+
 /// Boundary interface to the concrete, domain-independent part of the UI implementation.
 ///
 /// This interface provides general, application-wide UI operations. Domain specific concerns are
@@ -228,6 +255,15 @@ abstract interface class ApplicationUiBoundary {
     String splashString,
     MainMenuModel menuModel,
   );
+
+  /// Notify the UI about changed route database status.
+  ///
+  /// This will update the display with the given [routeDbIdentifier] and [availabilityMessage]. The
+  /// latter may be `null` to not display any additional hint about the status.
+  void updateRouteDbStatus({
+    required String routeDbIdentifier,
+    String? availabilityMessage,
+  });
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].
   ///
@@ -269,6 +305,6 @@ abstract interface class ApplicationUiBoundary {
   /// Request the UI to display the provided [document] on the  *Knowledge Base* screen.
   void showKnowledgebase(KnowledgebaseModel document);
 
-  /// Request the UI to display the *Settings* screen.
-  void switchToSettings();
+  /// Request the UI to display the *Settings* screen based on the provided [model].
+  void showSettings(SettingsModel model);
 }

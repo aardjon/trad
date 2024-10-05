@@ -19,6 +19,9 @@ abstract interface class PresentationBoundary {
   /// This may display some kind of "loading" or "splash" screen if appropriate.
   void initUserInterface();
 
+  /// Let the UI display/update the [routeDatabaseDate] as given.
+  void updateRouteDbStatus(DateTime? routeDatabaseDate);
+
   /// Let the UI display the list of summits in the *route db* domain.
   ///
   /// The actual summit list data must be set separately by calling [updateSummitList()].
@@ -59,6 +62,6 @@ abstract interface class PresentationBoundary {
   /// Let the UI display the provided [document] in the *Knowledge base* domain.
   void showKnowledgebaseDocument(KnowledgebaseDocument document);
 
-  /// Change the active domain to the *Settings* domain.
-  void switchToSettings();
+  /// Let the UI display the application settings (aka *settings* domain).
+  void showSettings();
 }

@@ -39,6 +39,9 @@ class MainWidget extends StatelessWidget {
   /// Reference to the central state of the GUI.
   final GuiState _guiState;
 
+  /// Reference to the central settings state notifier.
+  final SettingsNotifier _settingsState;
+
   /// Reference to the central summit list state notifier.
   final SummitListNotifier _summitListState;
 
@@ -53,6 +56,7 @@ class MainWidget extends StatelessWidget {
     MainMenuModel menuModel,
     ApplicationWideController controller,
     GuiState guiState,
+    SettingsNotifier settingsState,
     SummitListNotifier summitListState,
     RouteListNotifier routeListState,
     PostListNotifier postListState, {
@@ -65,6 +69,7 @@ class MainWidget extends StatelessWidget {
           controller,
         ),
         _guiState = guiState,
+        _settingsState = settingsState,
         _summitListState = summitListState,
         _routeListState = routeListState,
         _postListState = postListState;
@@ -109,6 +114,7 @@ class MainWidget extends StatelessWidget {
           return SettingsPage(
             _appDrawerFactory.create(context),
             _menuModel.settingsItem.mainTitle,
+            _settingsState,
           );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {

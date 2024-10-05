@@ -24,6 +24,14 @@ abstract interface class RelationalDatabaseBoundary {
   /// to an exception then.
   void connect(String connectionString, {bool readOnly = false});
 
+  /// Closes the current database connection, if any.
+  ///
+  /// If no database is connected, this method does nothing.
+  void disconnect();
+
+  /// Returns true if the repository is currently connected to a database, otherwise false.
+  bool isConnected();
+
   /// Executes the provided query and returns the result set.
   ///
   /// If the provided query is in any way invalid, an exception is raised. It the query doesn't

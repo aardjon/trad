@@ -3,8 +3,9 @@
 ///
 library;
 
-import 'package:adapters/boundaries/ui.dart';
 import 'package:flutter/material.dart';
+
+import 'package:adapters/boundaries/ui.dart';
 
 /// The central GUI state.
 ///
@@ -43,6 +44,39 @@ class GuiState {
   /// This key is needed for switching without having a `context` object.
   GlobalKey<NavigatorState> getNavigatorKey() {
     return _navigatorKey;
+  }
+}
+
+/// Represents the current state of the application settings and notifies about changes.
+class SettingsNotifier extends ChangeNotifier {
+  /// A message informing the user about the current state of the route database domain, e.g. when
+  /// it's not available because of missing data. Set to `null` if no such message should be shown
+  /// at all.
+  String? _routeDbAvailabilityMessage;
+
+  /// The identifier of the currently used route database
+  String _routeDbIdentifier = '';
+
+  /// Returns the identifying label of the current route database.
+  String getRouteDbIdentifier() {
+    return _routeDbIdentifier;
+  }
+
+  /// Returns the additional message about the route database that should be displayed to the user.
+  ///
+  /// If there is no such additional message, `null` is returned.
+  String? getRouteDbAvailabilityMessage() {
+    return _routeDbAvailabilityMessage;
+  }
+
+  /// Replaces the status information of the route database with the given [dbIdentifier] and
+  /// [availabilityMessage].
+  ///
+  /// All listeners are notified so that that e.g. views can be updated.
+  void updateRouteDbStatus({required String dbIdentifier, String? availabilityMessage}) {
+    _routeDbAvailabilityMessage = availabilityMessage;
+    _routeDbIdentifier = dbIdentifier;
+    notifyListeners();
   }
 }
 

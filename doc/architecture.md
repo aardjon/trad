@@ -478,7 +478,7 @@ different path styles (e.g. `\` VS. `/` separater) on different platforms. For t
 directory paths. That means, every `infrastructure` and `adapters` part except the single component
 implementing this boundary:
 - shall preferably use `File` or `Directory` to identify certain file system locations/entities
-- must use the `filesystem` component to manipullate path strings
+- must use the `filesystem` component to manipulate path strings
 - must never create e.g. `File` or `Directory` instances directly but get them from the `filesystem` component
 - must never use any static methods of the `dart:io` library or its provided classes (such as `Directory.current`)
 
@@ -488,6 +488,9 @@ the current working directory) can be retrieved via the `sysenv` boundary.
 
 Within the `core` ring, no direct file system operations are allowed at all. File system entities are
 identified by simple (platform dependent) strings (containing paths) there.
+
+For unit testing, file system operations can be mocked with the in-memory implementation provided by the
+[file](https://pub.dev/packages/file) package (only available for tests, not in a release build).
 
 
 # 9. Architecture Decisions

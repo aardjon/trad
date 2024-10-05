@@ -48,6 +48,19 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
+  void updateRouteDbStatus(DateTime? routeDatabaseDate) {
+    const String noDbMessage =
+        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Um sie zu '
+        'aktivieren, importieren Sie bitte eine Wegedatenbankdatei.';
+
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateRouteDbStatus(
+      routeDbIdentifier: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
+      availabilityMessage: routeDatabaseDate != null ? null : noDbMessage,
+    );
+  }
+
+  @override
   void showSummitList() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     SummitListModel model = SummitListModel('Gipfel', 'Gipfel suchen');
@@ -180,8 +193,14 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void switchToSettings() {
+  void showSettings() {
+    SettingsModel settingsModel = SettingsModel(
+      pageTitle: 'Einstellungen',
+      routeDbIdLabel: 'Aktuelle Wegedatenbank:',
+      routeDbFileSelectionActionLabel: 'Wegedatenbank importieren',
+      routeDbFileSelectionFieldLabel: 'Bitte eine Wegedatenbankdatei zum Importieren auswählen',
+    );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.switchToSettings();
+    ui.showSettings(settingsModel);
   }
 }

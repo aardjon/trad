@@ -43,12 +43,69 @@ class RouteDbStorage implements RouteDbStorageBoundary {
         _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
 
   @override
-  Future<void> initStorage() async {
-    Directory dataDir = await _pathProviderBoundary.getAppDataDir();
-    String connectionString = _fileSystemBoundary.joinPaths(dataDir.path, _dbFileName);
+  Future<void> startStorage() async {
+    String connectionString = await _getExpectedDbFile();
     _logger.info('Connecting to route database at: $connectionString');
     _repository.connect(connectionString, readOnly: true);
     // TODO(aardjon): Check schema version!
+  }
+
+  @override
+  void stopStorage() {
+    if (isStarted()) {
+      _logger.info('Disconnecting from route database');
+      _repository.disconnect();
+    }
+  }
+
+  @override
+  bool isStarted() {
+    return _repository.isConnected();
+  }
+
+  @override
+  Future<void> importRouteDbFile(String filePath) async {
+    if (isStarted()) {
+      throw StateError('Cannot import a DB file when the storage is STARTED.');
+    }
+
+    final File fileToImport = _fileSystemBoundary.getFile(filePath);
+    final File destinationFile = _fileSystemBoundary.getFile(await _getExpectedDbFile());
+
+    if (!fileToImport.existsSync()) {
+      throw PathNotFoundException(
+        filePath,
+        const OSError('File not found'),
+        'Unable to import "{filePath}" because it does not exist.',
+      );
+    }
+
+    // Remove the existing database, if any
+    if (destinationFile.existsSync()) {
+      _logger.debug('Deleting the old database at "${destinationFile.path}"');
+      destinationFile.deleteSync();
+    }
+
+    // Copy the new database file to its final destination
+    _logger.debug('Copying "${fileToImport.path}" to "${destinationFile.path}"');
+    fileToImport.copySync(destinationFile.path);
+  }
+
+  Future<String> _getExpectedDbFile() async {
+    Directory dataDir = await _pathProviderBoundary.getAppDataDir();
+    return _fileSystemBoundary.joinPaths(dataDir.path, _dbFileName);
+  }
+
+  @override
+  Future<DateTime> getCreationDate() async {
+    if (!isStarted()) {
+      throw StateError('Cannot get database creation date while the storage is STOPPED.');
+    }
+    // TODO(aardjon): The data retrieval date must be stored in the database itself. But for now, we
+    //    use the file modification date for simplicity.
+    String dbFilePath = await _getExpectedDbFile();
+    File dbFile = _fileSystemBoundary.getFile(dbFilePath);
+    return dbFile.statSync().modified;
   }
 
   @override
