@@ -2,7 +2,7 @@
 
 ## Feedback
 
-Feel free to [open an issue](https://github.com/Headbucket/trad/issues) for bug reports, feature requests or simple questions. Please apply the corresponding label your new issue.
+Feel free to [open an issue](https://github.com/Headbucket/trad/issues) for bug reports, feature requests or simple questions. Please assign the corresponding label your new issue.
 
 ## Setup a development environment for the mobile app
 
