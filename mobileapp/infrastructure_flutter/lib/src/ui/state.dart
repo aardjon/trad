@@ -49,6 +49,9 @@ class GuiState {
 
 /// Represents the current state of the application settings and notifies about changes.
 class SettingsNotifier extends ChangeNotifier {
+  /// The activation status of the route database: true (available) or false (unavailable).
+  bool _routeDbActivationStatus = true;
+
   /// A message informing the user about the current state of the route database domain, e.g. when
   /// it's not available because of missing data. Set to `null` if no such message should be shown
   /// at all.
@@ -56,6 +59,11 @@ class SettingsNotifier extends ChangeNotifier {
 
   /// The identifier of the currently used route database
   String _routeDbIdentifier = '';
+
+  /// Returns true if the route database is currently available, false if not.
+  bool isRouteDbAavailable() {
+    return _routeDbActivationStatus;
+  }
 
   /// Returns the identifying label of the current route database.
   String getRouteDbIdentifier() {
@@ -73,7 +81,12 @@ class SettingsNotifier extends ChangeNotifier {
   /// [availabilityMessage].
   ///
   /// All listeners are notified so that that e.g. views can be updated.
-  void updateRouteDbStatus({required String dbIdentifier, String? availabilityMessage}) {
+  void updateRouteDbStatus({
+    required bool routeDbActivationStatus,
+    required String dbIdentifier,
+    String? availabilityMessage,
+  }) {
+    _routeDbActivationStatus = routeDbActivationStatus;
     _routeDbAvailabilityMessage = availabilityMessage;
     _routeDbIdentifier = dbIdentifier;
     notifyListeners();

@@ -81,6 +81,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     String? availabilityMessage,
   }) {
     _settingsState.updateRouteDbStatus(
+      routeDbActivationStatus: routeDbActivated,
       dbIdentifier: routeDbIdentifier,
       availabilityMessage: availabilityMessage,
     );

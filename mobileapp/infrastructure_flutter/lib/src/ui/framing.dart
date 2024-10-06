@@ -66,6 +66,7 @@ class MainWidget extends StatelessWidget {
         _menuModel = menuModel,
         _appDrawerFactory = TradDrawerFactory(
           menuModel,
+          settingsState,
           controller,
         ),
         _guiState = guiState,
