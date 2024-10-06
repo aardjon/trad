@@ -76,6 +76,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateRouteDbStatus({
+    required bool routeDbActivated,
     required String routeDbIdentifier,
     String? availabilityMessage,
   }) {

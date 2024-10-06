@@ -258,9 +258,15 @@ abstract interface class ApplicationUiBoundary {
 
   /// Notify the UI about changed route database status.
   ///
-  /// This will update the display with the given [routeDbIdentifier] and [availabilityMessage]. The
-  /// latter may be `null` to not display any additional hint about the status.
+  /// This will update the display with the given status information:
+  /// - [routeDbActivated]: The activation status of the route database (true: enabled, false:
+  ///   disabled)
+  /// - [routeDbIdentifier]: A label for identifying the current route database (may of course be
+  ///   something like 'None' if the route database is disabled)
+  /// - [availabilityMessage]: A message with more detailed information about the route database
+  ///   status. Set to `null` to not display any additional hint at all.
   void updateRouteDbStatus({
+    required bool routeDbActivated,
     required String routeDbIdentifier,
     String? availabilityMessage,
   });
