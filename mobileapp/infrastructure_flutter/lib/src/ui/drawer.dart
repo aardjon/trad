@@ -13,7 +13,7 @@ class TradDrawerFactory {
   final MainMenuModel _model;
 
   /// Notifier providing the current settings state to be displayed.
-  SettingsNotifier _settingsState;
+  final SettingsNotifier _settingsState;
 
   /// Controller instance to notify for any user interaction.
   final ApplicationWideController _controller;
@@ -29,39 +29,40 @@ class TradDrawerFactory {
         ChangeNotifierProvider<SettingsNotifier>.value(
       value: _settingsState,
       child: Consumer<SettingsNotifier>(
-          builder: (BuildContext context, SettingsNotifier state, Widget? child) {
-        List<Widget> itemList = <Widget>[
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Colors.lightGreen,
+        builder: (BuildContext context, SettingsNotifier state, Widget? child) {
+          List<Widget> itemList = <Widget>[
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.lightGreen,
+              ),
+              child: Text(_model.menuHeader),
             ),
-            child: Text(_model.menuHeader),
-          ),
-          ListTile(
-            leading: _iconFactory.getIconWidget(_model.journalItem.icon),
-            title: Text(_model.journalItem.mainTitle),
-            onTap: _controller.requestSwitchToJournal,
-          ),
-          ListTile(
-            enabled: _settingsState.isRouteDbAavailable(),
-            leading: _iconFactory.getIconWidget(_model.routedbItem.icon),
-            title: Text(_model.routedbItem.mainTitle),
-            onTap: _controller.requestSwitchToRouteDb,
-          ),
-          ListTile(
-            leading: _iconFactory.getIconWidget(_model.knowledgebaseItem.icon),
-            title: Text(_model.knowledgebaseItem.mainTitle),
-            onTap: _controller.requestSwitchToKnowledgebase,
-          ),
-          const Divider(),
-          ListTile(
-            leading: _iconFactory.getIconWidget(_model.settingsItem.icon),
-            title: Text(_model.settingsItem.mainTitle),
-            onTap: _controller.requestSwitchToSettings,
-          ),
-        ];
-        return NavigationDrawer(children: itemList);
-      }),
+            ListTile(
+              leading: _iconFactory.getIconWidget(_model.journalItem.icon),
+              title: Text(_model.journalItem.mainTitle),
+              onTap: _controller.requestSwitchToJournal,
+            ),
+            ListTile(
+              enabled: _settingsState.isRouteDbAavailable(),
+              leading: _iconFactory.getIconWidget(_model.routedbItem.icon),
+              title: Text(_model.routedbItem.mainTitle),
+              onTap: _controller.requestSwitchToRouteDb,
+            ),
+            ListTile(
+              leading: _iconFactory.getIconWidget(_model.knowledgebaseItem.icon),
+              title: Text(_model.knowledgebaseItem.mainTitle),
+              onTap: _controller.requestSwitchToKnowledgebase,
+            ),
+            const Divider(),
+            ListTile(
+              leading: _iconFactory.getIconWidget(_model.settingsItem.icon),
+              title: Text(_model.settingsItem.mainTitle),
+              onTap: _controller.requestSwitchToSettings,
+            ),
+          ];
+          return NavigationDrawer(children: itemList);
+        },
+      ),
     );
     return changeNotifier;
   }
