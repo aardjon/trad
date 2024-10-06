@@ -53,6 +53,7 @@ class TradDrawerFactory {
             title: Text(_model.knowledgebaseItem.mainTitle),
             onTap: _controller.requestSwitchToKnowledgebase,
           ),
+          const Divider(),
           ListTile(
             leading: _iconFactory.getIconWidget(_model.settingsItem.icon),
             title: Text(_model.settingsItem.mainTitle),
