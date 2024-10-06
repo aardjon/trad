@@ -19,7 +19,7 @@ class TradDrawerFactory {
   TradDrawerFactory(this._model, this._controller);
 
   /// Creates and returns a new instance of the application drawer for the given build [context].
-  NavigationDrawer create(BuildContext context) {
+  Widget create(BuildContext context) {
     List<Widget> itemList = <Widget>[
       DrawerHeader(
         decoration: const BoxDecoration(

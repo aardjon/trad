@@ -15,7 +15,7 @@ import 'state.dart';
 /// Widget representing the *Settings* page.
 class SettingsPage extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
-  final NavigationDrawer _appDrawer;
+  final Widget _appDrawer;
 
   /// The page title
   final String _title;

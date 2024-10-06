@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 // TODO(aardjon): This is only a stub for now.
 class JournalPage extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
-  final NavigationDrawer _appDrawer;
+  final Widget _appDrawer;
 
   /// The page title
   final String _title;

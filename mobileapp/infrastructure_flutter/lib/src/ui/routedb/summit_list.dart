@@ -13,7 +13,7 @@ import '../state.dart';
 /// Widget representing the *Summit List* page.
 class SummitListView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
-  final NavigationDrawer _appDrawer;
+  final Widget _appDrawer;
 
   /// Notifier providing the current summit list state to be displayed.
   final SummitListNotifier _summitListState;

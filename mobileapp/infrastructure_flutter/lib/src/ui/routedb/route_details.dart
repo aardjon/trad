@@ -57,7 +57,7 @@ class _PostItem extends StatelessWidget {
 /// Widget representing the *Route Details* page.
 class RouteDetailsView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
-  final NavigationDrawer _appDrawer;
+  final Widget _appDrawer;
 
   /// Notifier providing the current post list state to be displayed.
   final PostListNotifier _postListState;

@@ -15,7 +15,7 @@ import 'package:adapters/controllers.dart';
 /// the `Markdown` widget from the `flutter_markdown` library is used.
 class KnowledgebaseView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
-  final NavigationDrawer _appDrawer;
+  final Widget _appDrawer;
 
   /// Controller to notify about user actions.
   final KnowledgebaseController _controller;
