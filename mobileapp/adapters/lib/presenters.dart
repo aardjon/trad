@@ -32,17 +32,17 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void initUserInterface() {
-    const String appName = 'trad - Climbing in Saxony';
+    const String appName = 'trad - Sandsteinklettern in Sachsen';
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.initializeUserInterface(
       appName,
-      'Initializing...',
+      'Initialisierung läuft...',
       MainMenuModel(
         appName,
-        ListViewItem('Journal', icon: const IconDefinition(Glyph.logoJournal)),
-        ListViewItem('Climbing Routes', icon: const IconDefinition(Glyph.logoRouteDb)),
-        ListViewItem('Knowledgebase', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
-        ListViewItem('Settings', icon: const IconDefinition(Glyph.logoSettings)),
+        ListViewItem('Fahrtenbuch', icon: const IconDefinition(Glyph.logoJournal)),
+        ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
+        ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
       ),
     );
   }
