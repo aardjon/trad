@@ -41,6 +41,7 @@ flutter:
     - assets/knowledgebase/barbarine-wp.jpg
     - assets/knowledgebase/index.md
     - assets/knowledgebase/example.md
+    - assets/logo.png
 
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages

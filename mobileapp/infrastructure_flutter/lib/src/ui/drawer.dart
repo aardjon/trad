@@ -35,7 +35,16 @@ class TradDrawerFactory {
               decoration: const BoxDecoration(
                 color: Colors.lightGreen,
               ),
-              child: Text(_model.menuHeader),
+              child: Column(
+                children: <Widget>[
+                  const Image(
+                    image: AssetImage('assets/logo.png', package: 'infrastructure_flutter'),
+                    width: 100,
+                    height: 100,
+                  ),
+                  Text(_model.menuHeader),
+                ],
+              ),
             ),
             ListTile(
               leading: _iconFactory.getIconWidget(_model.journalItem.icon),
