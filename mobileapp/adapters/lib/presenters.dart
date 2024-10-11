@@ -32,7 +32,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void initUserInterface() {
-    const String appName = 'trad - Sandsteinklettern in Sachsen';
+    const String appName = 'Sandsteinklettern in Sachsen';
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.initializeUserInterface(
       appName,
