@@ -1,7 +1,9 @@
 Architecture Documentation
 ==========================
 
-This documents the architectural views and decisions of the trad application. Its structure is based on the [Arc42](https://arc42.org/overview) documentation template, please follow this template if appropriate when modifying.
+This is the documention of the architectural views and decisions of the trad application. Its
+structure is based on the [Arc42](https://arc42.org/overview) documentation template, please follow
+this template if appropriate when modifying.
 
 # 1. Introduction and Goals
 
@@ -110,7 +112,9 @@ This section describes our solution strategies for the quality goals. Please ref
 [section 10](10-quality-requirements) for their descriptions.
 
 The mobile app will be written in [Dart 3](https://dart.dev/), mainly because we want to learn
-this language. We are using [Git](https://github.com/Headbucket/trad) for version control.
+this language. We are using [Git](https://github.com/Headbucket/trad) for version control, all
+software parts are stored in a single [Github repository](https://github.com/Headbucket/trad)
+(monorepo).
 
 ## 4.1 Flexibility, Maintainability, Testability (QREQ-1, QREQ-2, QREQ-3, QREQ-6)
 
@@ -142,9 +146,15 @@ Resources:
 
 ## 4.2 Reliability, Usability (QREQ-3)
 
-To ensure no critical use cases depend on any network connection, all necessary data (e.g.
-route data, journal) is replicated to/stored within the local device. The business core works on
-this local copy only.
+To ensure no critical use cases of the mobile app depend on any network connection, all necessary
+data (e.g. route data, journal) is replicated to/stored within the local device. The business core
+works on this local copy only.
+
+By separating the actual route data source access into a separate scraper application (see also
+[ADR-3](#93-adr-3-decouple-the-mobile-app-from-external-route-data-services), the mobile app
+becomes independent from any external problems or changes, increasing both reliability and
+usability.
+
 
 ## 4.3 Reliability, Durability (QREQ-4)
 
@@ -179,8 +189,8 @@ The usage of the [Clean Architecture](#41-flexibility-maintainability-testabilit
 pattern and consistent decoupling and encapsulating details also supports us in adapting to
 external changes or different platforms. Additionally, we use the [Flutter 3](https://flutter.dev/)
 framework for GUI and hardware abstraction because it allows to easily transfer the app to
-different platforms. However, Flutter itself shall be kept an implementation detail and
-therefore only be used within the `infrastructure` ring.
+different platforms. However, Flutter itself shall be kept an implementation detail and therefore
+only be used within the `infrastructure` ring.
 
 ## 4.6 Security (QREQ-11)
 
@@ -219,10 +229,11 @@ The general rules for source code dependencies are:
 
 As described in [section 4.1](#41-flexibility-maintainability-testability-qreq-1-qreq-2-qreq-3-qreq-6),
 the mobile app implementation utilizes the *Clean Architecture* pattern with only three rings
-(software parts). Additionally, the `infrastructure` ring is split into a *flutter* and a *vanilla* part,
-containing all flutter and all non-flutter dependent `infrastructure` components, respectively - see also
-[section 9.1 TODO](#). A separate part touching all rings contains some of the crosscutting concepts
-described in [section 8](#8-crosscutting-concepts).
+(software parts). Additionally, the `infrastructure` ring is split into a *flutter* and a *vanilla*
+part, containing all flutter and all non-flutter dependent `infrastructure` components,
+respectively - see also [ADR-1](#91-adr-1-how-to-integrate-flutter-into-the-architecture).  A
+separate part touching all rings contains some of the crosscutting concepts described in
+[section 8](#8-crosscutting-concepts).
 
 ### 5.2.2 System parts
 
@@ -320,7 +331,7 @@ core.boundaries.data_exchange | TODO
 core.boundaries.storage | [core.boundaries.storage](../mobileapp/core/lib/boundaries/storage)
 core.boundaries.positioning | TODO
 adapters.boundaries.ui | [adapters.boundaries.ui](../mobileapp/adapters/lib/boundaries/ui.dart)
-adapters.boundaries.repositories | [adapters.boundaries.repositories](../mobileapp/core/lib/boundaries/repositories)
+adapters.boundaries.repositories | [adapters.boundaries.repositories](../mobileapp/adapters/lib/boundaries/repositories)
 adapters.boundaries.positioning | TODO
 
 
