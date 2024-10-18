@@ -614,9 +614,14 @@ The system is split into two parts:
  - A `scraper` service imports the external data from time to time and creates optimized, working route databases
  - The `mobile app` just downloads and imports the prepared route database
 
+On the upper level, the `trad` system looks like this:
+
+![Top-level parts of the trad system](architecture/bbview_separate_scraper.png)
+
+
 ### Status
 
-Proposal (08/24)
+Accepted (09/24)
 
 ### Consequences
 
