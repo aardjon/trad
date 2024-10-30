@@ -1,15 +1,17 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+
 @dataclass
-class PostData():    
+class PostData:
     user_name: str
     post_date: datetime
     comment: str
     rating: int
 
+
 @dataclass
-class PageData():
+class PageData:
     peak: str
     route: str
     grade: str
