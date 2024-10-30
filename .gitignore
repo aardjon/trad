@@ -2,6 +2,7 @@ doc/**/*.bkp
 
 # Eclipse related
 .project
+.pydevproject
 
 # IntelliJ related
 *.iml

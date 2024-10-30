@@ -1,0 +1,3 @@
+# Python/pip related
+**/__pycache__
+src/*.egg-info
