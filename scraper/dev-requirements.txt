@@ -9,6 +9,8 @@ beautifulsoup4==4.12.3
     #   -c app-requirements.txt
     #   pandas
     #   trad_scraper (pyproject.toml)
+black==24.10.0
+    # via trad_scraper (pyproject.toml)
 certifi==2024.8.30
     # via
     #   -c app-requirements.txt
@@ -17,6 +19,8 @@ charset-normalizer==3.4.0
     # via
     #   -c app-requirements.txt
     #   requests
+click==8.1.7
+    # via black
 html5lib==1.1
     # via
     #   -c app-requirements.txt
@@ -33,16 +37,24 @@ lxml==5.3.0
     # via
     #   -c app-requirements.txt
     #   pandas
+mypy-extensions==1.0.0
+    # via black
 numpy==2.1.2
     # via
     #   -c app-requirements.txt
     #   pandas
 packaging==24.1
-    # via pytest
+    # via
+    #   black
+    #   pytest
 pandas==2.2.3
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
+pathspec==0.12.1
+    # via black
+platformdirs==4.3.6
+    # via black
 pluggy==1.5.0
     # via pytest
 pytest==8.3.3

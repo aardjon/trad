@@ -17,6 +17,7 @@ _PIPTOOLS_MIN_VERSION = "7.4.1"
 The minimum 'pip-tools' package version to install during bootstrap.
 """
 
+
 @task
 def bootstrap(context: Context) -> None:
     """
@@ -47,6 +48,14 @@ def bootstrap(context: Context) -> None:
         )
     )
     context.run("pip-sync dev-requirements.txt")
+
+
+@task
+def format(context: Context) -> None:
+    """
+    Auto-format all source files according to our formatting rules.
+    """
+    context.run("black --line-length=100 .")
 
 
 @task
