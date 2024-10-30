@@ -46,7 +46,7 @@ Runs the requested script as provided by the Melos configuration. `melos run` sh
 
 ## Provided Melos Scripts
 
-Melos scripts can be executed by `melos run [script]`. Alle available scripts are defined in the [Melos configuration file](../mobileapp/melos.yaml).
+Melos scripts can be executed by `melos run [script]`. All available scripts are defined in the [Melos configuration file](../mobileapp/melos.yaml).
 
 ### analyze: Run the linter
 
@@ -56,8 +56,9 @@ The `analyze` script runs the [Dart Linter](https://dart.dev/tools/dart-analyze)
 
 The `build.*` scripts build the mobile application for different platforms. The generated artifacts are stored in the `artifacts` directory.
 
-- `build.android`: Builds the Android application, creating an APK file
-- `build.linux`: Builds the Linux application, creating an Ubuntu ELF binary
+- `build.android`: Builds the Android application, creating an APK file.
+- `build.linux`: Builds the Linux application, creating an Ubuntu ELF binary. Only works on Linux.
+- `build.windows`: Builds the Windows application, creating an EXE file. Only works on Windows.
 
 ### coverage: Generator code coverage reports
 
