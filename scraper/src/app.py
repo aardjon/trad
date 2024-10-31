@@ -1,8 +1,10 @@
-import requests
-from parser_module import parse_page
-from sqlite_module import Database
 import os
 import sys
+
+import requests
+
+from parser_module import parse_page
+from sqlite_module import Database
 
 BASE_URL = "https://www.teufelsturm.de/wege/bewertungen/anzeige.php?wegnr={}"
 

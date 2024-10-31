@@ -1,9 +1,11 @@
-from data_module import PostData, PageData
 import re
-from datetime import datetime
-from bs4 import BeautifulSoup
-import pandas as pd
 import warnings
+from datetime import datetime
+
+import pandas as pd
+from bs4 import BeautifulSoup
+
+from data_module import PageData, PostData
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 

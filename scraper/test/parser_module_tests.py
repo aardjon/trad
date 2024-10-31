@@ -1,6 +1,8 @@
 import os
+
 import pandas as pd
-from parser_module import parse_post, parse_posts, parse_rating, parse_user_name, parse_page
+
+from parser_module import parse_page, parse_post, parse_posts, parse_rating, parse_user_name
 
 
 def test_parse_post():
