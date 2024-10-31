@@ -72,6 +72,9 @@ def format(context: Context) -> None:
     """
     Auto-format all source files according to our formatting rules.
     """
+    # Sort all imports using ruff (same as 'isort')
+    context.run("python -m ruff check --select I . --fix")
+    # Format all sources with black
     context.run("black --line-length=100 .")
 
 
