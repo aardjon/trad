@@ -19,6 +19,14 @@ The minimum 'pip-tools' package version to install during bootstrap.
 
 
 @task
+def analyze(context: Context) -> None:
+    """
+    Run the configured linters on all source files.
+    """
+    context.run("echo 'Not yet available - coming soon!'")
+
+
+@task
 def bootstrap(context: Context) -> None:
     """
     Initialize the development environment.
@@ -48,6 +56,15 @@ def bootstrap(context: Context) -> None:
         )
     )
     context.run("pip-sync dev-requirements.txt")
+
+
+@task
+def clean(context: Context) -> None:
+    """
+    Deletes local files that are generated during other tasks, e.g. build files and coverage
+    information.
+    """
+    context.run("rm -rf coverage")
 
 
 @task
