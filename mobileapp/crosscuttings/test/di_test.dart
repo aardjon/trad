@@ -51,7 +51,7 @@ void main() {
       expect(identical(impl1, impl2), isFalse);
     });
 
-    /// Ensure the correct behaviour for registered singleton: The factory must be executed exactly
+    /// Ensure the correct behaviour for registered singletons: The factory must be executed exactly
     /// once, and each provide<T>() call must return the same implementation of T.
     test('testSingleton', () async {
       await di.shutdown();
