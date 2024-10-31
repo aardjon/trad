@@ -37,7 +37,7 @@ scripts:
       - mv main\build\windows\x64\runner\Release artifacts\trad_windows
 
   clean:
-    help: Deletes local files that are generated during by melos tasks, e.g. build files and coverage information.
+    help: Deletes local files that are generated during melos tasks, e.g. build files and coverage information.
     steps:
       - find . -name dlcov_references_test.dart -exec rm {} \;
       - rm -rf ./coverage
