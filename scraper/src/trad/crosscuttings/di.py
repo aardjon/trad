@@ -5,7 +5,8 @@ To simplify things, the public interface shall be kept as similar as possible to
 counterpart.
 """
 
-from typing import Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 from lidipy import Lidi
 from lidipy.exceptions import BindingMissing

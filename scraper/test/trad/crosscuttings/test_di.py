@@ -2,18 +2,16 @@
 Unit tests for the trad.crosscuttings.di module.
 """
 
-from abc import ABCMeta
-
 import pytest
 
 from trad.crosscuttings.di import DependencyProvider
 from trad.crosscuttings.errors import InvalidStateError
 
 
-class ExampleInterface1(metaclass=ABCMeta): ...
+class ExampleInterface1: ...
 
 
-class ExampleInterface2(metaclass=ABCMeta): ...
+class ExampleInterface2: ...
 
 
 class ExampleImpl(ExampleInterface1): ...
