@@ -2,6 +2,7 @@
 Collection of some general exception types that can be useful in all parts of the application.
 """
 
+
 class InvalidStateException(Exception):
     """
     Raised when an operation cannot be fulfilled due to an invalid application (or component) state.

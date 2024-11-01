@@ -6,8 +6,10 @@ counterpart.
 """
 
 from typing import Callable, TypeVar
+
 from lidipy import Lidi
 from lidipy.exceptions import BindingMissing
+
 from trad.crosscuttings.errors import InvalidStateException
 
 _InterfaceType = TypeVar("_InterfaceType")
