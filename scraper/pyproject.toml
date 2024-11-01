@@ -14,6 +14,7 @@ classifiers = ["Private :: Do Not Upload"]
 requires-python = ">=3.12.7"
 dependencies = [
   "beautifulsoup4",
+  "lidipy",
   "pandas[html]",
   "requests",
 ]
