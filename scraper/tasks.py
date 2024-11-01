@@ -92,7 +92,7 @@ def test(context: Context) -> None:
     """
     Run all unit tests for the scraper application.
     """
-    context.run("pytest test")
+    context.run("PYTHONPATH=src pytest test")
 
 
 @task
