@@ -18,12 +18,6 @@ void main() {
   group('crosscuttings.di', () {
     final DependencyProvider di = DependencyProvider();
 
-    setUp(() {
-      di.registerFactory<ExampleInterface1>(() {
-        return ExampleImpl();
-      });
-    });
-
     tearDown(() async {
       return di.shutdown();
     });
@@ -32,6 +26,8 @@ void main() {
     ///  - Return the registered implementation, if any
     ///  - Throw if the requested interface has not been registered
     test('testProvide', () {
+      di.registerFactory<ExampleInterface1>(ExampleImpl.new);
+
       expect(di.provide<ExampleInterface1>(), const TypeMatcher<ExampleImpl>());
       expect(di.provide<ExampleInterface2>, throwsStateError);
       // Syntax for custom exceptions:
@@ -41,10 +37,7 @@ void main() {
     /// Ensure the correct behaviour for registered factories: The factory must be executed on each
     /// provide<T>() call, usually returning a new implementation of T each time.
     test('testFactory', () async {
-      await di.shutdown();
-      di.registerFactory<ExampleInterface1>(() {
-        return ExampleImpl();
-      });
+      di.registerFactory<ExampleInterface1>(ExampleImpl.new);
 
       ExampleInterface1 impl1 = di.provide<ExampleInterface1>();
       ExampleInterface1 impl2 = di.provide<ExampleInterface1>();
@@ -54,10 +47,7 @@ void main() {
     /// Ensure the correct behaviour for registered singletons: The factory must be executed exactly
     /// once, and each provide<T>() call must return the same implementation of T.
     test('testSingleton', () async {
-      await di.shutdown();
-      di.registerSingleton<ExampleInterface1>(() {
-        return ExampleImpl();
-      });
+      di.registerSingleton<ExampleInterface1>(ExampleImpl.new);
 
       ExampleInterface1 impl1 = di.provide<ExampleInterface1>();
       ExampleInterface1 impl2 = di.provide<ExampleInterface1>();
@@ -68,6 +58,7 @@ void main() {
     /// the registered implementation, too.
     test('testSharedConfiguration', () {
       DependencyProvider localDependencyProvider = DependencyProvider();
+      di.registerFactory<ExampleInterface1>(ExampleImpl.new);
       expect(
         localDependencyProvider.provide<ExampleInterface1>(),
         const TypeMatcher<ExampleImpl>(),
