@@ -7,7 +7,7 @@ from abc import ABCMeta
 import pytest
 
 from trad.crosscuttings.di import DependencyProvider
-from trad.crosscuttings.errors import InvalidStateException
+from trad.crosscuttings.errors import InvalidStateError
 
 
 class ExampleInterface1(metaclass=ABCMeta): ...
@@ -37,7 +37,7 @@ class TestDependencyProvider:
         di.register_factory(ExampleInterface1, lambda: ExampleImpl())
 
         assert isinstance(di.provide(ExampleInterface1), ExampleImpl)
-        with pytest.raises(InvalidStateException):
+        with pytest.raises(InvalidStateError):
             di.provide(ExampleInterface2)
 
     def test_factory(self) -> None:
@@ -88,5 +88,5 @@ class TestDependencyProvider:
         di.register_singleton(ExampleInterface1, lambda: ExampleImpl())
         di.shutdown()
         # Now there mustn't be a binding for ExampleInterface1 anymore
-        with pytest.raises(InvalidStateException):
+        with pytest.raises(InvalidStateError):
             di.provide(ExampleInterface1)

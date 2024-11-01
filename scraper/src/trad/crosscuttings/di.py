@@ -10,7 +10,7 @@ from typing import Callable, TypeVar
 from lidipy import Lidi
 from lidipy.exceptions import BindingMissing
 
-from trad.crosscuttings.errors import InvalidStateException
+from trad.crosscuttings.errors import InvalidStateError
 
 _InterfaceType = TypeVar("_InterfaceType")
 """ The interface type being registered or requested. """
@@ -36,13 +36,13 @@ class DependencyProvider:
         """
         Returns the concrete implementation for the interface requested by [interface_class].
 
-        Throws [InvalidStateException] if the requested interface has not been [register()]ed
+        Throws [InvalidStateError] if the requested interface has not been [register()]ed
         before.
         """
         try:
             return DependencyProvider._lidi_instance.resolve(interface_class)
         except BindingMissing as e:
-            raise InvalidStateException(
+            raise InvalidStateError(
                 f"No implementation is available for the requested interface {interface_class}"
             ) from e
 

@@ -3,7 +3,7 @@ Collection of some general exception types that can be useful in all parts of th
 """
 
 
-class InvalidStateException(Exception):
+class InvalidStateError(Exception):
     """
     Raised when an operation cannot be fulfilled due to an invalid application (or component) state.
     The reason is usually a programming or configuration error, the end user cannot do much about it
