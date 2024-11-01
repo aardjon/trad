@@ -46,7 +46,7 @@ class DependencyProvider:
                 f"No implementation is available for the requested interface {interface_class}"
             ) from e
 
-    def registerFactory(
+    def register_factory(
         self,
         interface_class: type[_InterfaceType],
         instance_factory: Callable[[], _InterfaceType],
@@ -64,7 +64,7 @@ class DependencyProvider:
         """
         DependencyProvider._lidi_instance.bind(interface_class, instance_factory, singleton=False)
 
-    def registerSingleton(
+    def register_singleton(
         self,
         interface_class: type[_InterfaceType],
         instance_factory: Callable[[], _InterfaceType],

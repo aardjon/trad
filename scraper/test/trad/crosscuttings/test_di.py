@@ -34,7 +34,7 @@ class TestDependencyProvider:
          - Throw if the requested interface has not been registered
         """
         di = DependencyProvider()
-        di.registerFactory(ExampleInterface1, lambda: ExampleImpl())
+        di.register_factory(ExampleInterface1, lambda: ExampleImpl())
 
         assert isinstance(di.provide(ExampleInterface1), ExampleImpl)
         with pytest.raises(InvalidStateException):
@@ -46,7 +46,7 @@ class TestDependencyProvider:
         provide() call, returning a new interface implementation instance each time.
         """
         di = DependencyProvider()
-        di.registerFactory(ExampleInterface1, lambda: ExampleImpl())
+        di.register_factory(ExampleInterface1, lambda: ExampleImpl())
 
         impl1 = di.provide(ExampleInterface1)
         impl2 = di.provide(ExampleInterface1)
@@ -60,7 +60,7 @@ class TestDependencyProvider:
         once, and each provide() call must return the same implementation.
         """
         di = DependencyProvider()
-        di.registerSingleton(ExampleInterface1, lambda: ExampleImpl())
+        di.register_singleton(ExampleInterface1, lambda: ExampleImpl())
 
         impl1 = di.provide(ExampleInterface1)
         impl2 = di.provide(ExampleInterface1)
@@ -76,7 +76,7 @@ class TestDependencyProvider:
         di2 = DependencyProvider()
 
         # Register an implementation on the first instance...
-        di1.registerFactory(ExampleInterface1, lambda: ExampleImpl())
+        di1.register_factory(ExampleInterface1, lambda: ExampleImpl())
         # ...and get it from the second one
         assert isinstance(di2.provide(ExampleInterface1), ExampleImpl)
 
@@ -85,7 +85,7 @@ class TestDependencyProvider:
         Ensure that calling shutdown() really discards all bindings.
         """
         di = DependencyProvider()
-        di.registerSingleton(ExampleInterface1, lambda: ExampleImpl())
+        di.register_singleton(ExampleInterface1, lambda: ExampleImpl())
         di.shutdown()
         # Now there mustn't be a binding for ExampleInterface1 anymore
         with pytest.raises(InvalidStateException):
