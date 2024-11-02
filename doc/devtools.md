@@ -143,7 +143,7 @@ successfully before!
 ## format: Auto format all sources
 
 The `format` script auto-formats the sources according to our coding style guidelines (by running
-`dart format` or `black`).
+`dart format` or `ruff format`).
 
 ## test: Run all unit tests
 
