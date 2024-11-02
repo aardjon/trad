@@ -23,7 +23,7 @@ def analyze(context: Context) -> None:
     """
     Run the configured linters on all source files.
     """
-    context.run("echo 'Not yet available - coming soon!'")
+    context.run("python -m ruff check .")
 
 
 @task
