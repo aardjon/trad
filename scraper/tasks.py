@@ -5,6 +5,7 @@ The `invoke` command must be invoked from the scraper source root directory, i.e
 this file.
 """
 
+import platform
 from pathlib import Path
 
 from invoke import task
@@ -52,7 +53,10 @@ def bootstrap(context: Context) -> None:
     This installs all (dev) dependencies into the current virtualenv. After that, all other `invoke`
     scripts can be executed.
     """
-    context.run(f"pip install -U '{_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}'")
+    if platform.system() == "Windows":
+        context.run(f"pip install -U {_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}")
+    else:
+        context.run(f"pip install -U '{_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}'")
     context.run(
         "pip-compile "
         "-q "
@@ -124,7 +128,8 @@ def test(context: Context) -> None:
     """
     # Explicitly include all source directories to also capture unimported source files
     dirnames = ",".join({str(f.parent) for f in Path("src").glob("**/*.py")})
-    context.run(f"PYTHONPATH=src coverage run --source '{dirnames}' -m pytest test")
+    setpythonpath = "set PYTHONPATH=src &&" if platform.system() == "Windows" else "PYTHONPATH=src"
+    context.run(f"{setpythonpath} coverage run --source '{dirnames}' -m pytest test")
 
 
 @task

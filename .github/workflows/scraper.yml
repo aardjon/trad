@@ -1,0 +1,128 @@
+name: trad.scraper
+
+on: [push, pull_request]
+
+jobs:
+  check-style:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./scraper
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+            python-version: '>=3.12.7 <3.13.0' 
+
+      - name: Setup environment
+        run: |
+             echo "--- Upgrade pip"
+             pip install -U pip
+             echo "--- Install Invoke"
+             pip install invoke
+             echo "--- Install requirements"
+             invoke bootstrap
+
+      - name: Check code style
+        run: invoke format
+
+  lint:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./scraper
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+            python-version: '>=3.12.7 <3.13.0' 
+
+      - name: Setup environment
+        run: |
+             echo "--- Upgrade pip"
+             pip install -U pip
+             echo "--- Install Invoke"
+             pip install invoke
+             echo "--- Install requirements"
+             invoke bootstrap
+
+      - name: Run all linters
+        run: invoke analyze
+        
+  test-linux:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./scraper
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+            python-version: '>=3.12.7 <3.13.0'
+
+      - name: Setup environment
+        run: |
+             echo "--- Upgrade pip"
+             pip install -U pip
+             echo "--- Install Invoke"
+             pip install invoke
+             echo "--- Install requirements"
+             invoke bootstrap
+             echo "--- Install coverage tools"
+             sudo apt install -y lcov
+
+      - name: Run all tests
+        run: invoke test
+        
+      - name: Generate code coverage report
+        run: invoke coverage
+
+      - name: Archive build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trad-coverage-report
+          path: scraper/coverage/report/*
+          retention-days: 1
+
+      - name: Publish HTML coverage report
+        if: github.ref == 'refs/heads/main'
+        uses: sebastianpopp/ftp-action@releases/v2
+        with:
+          host: ${{ secrets.REPORT_FTP_HOST }}
+          user: ${{ secrets.REPORT_FTP_USER }}
+          password: ${{ secrets.REPORT_FTP_PW }}
+          localDir: "scraper/coverage/report/"
+          remoteDir: "${{ env.CI_REF_NAME }}/scraper"
+          options: "--delete"
+
+  test-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .\scraper
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+            python-version: '>=3.12.7 <3.13.0'
+
+      - name: Setup environment
+        run: |
+             echo "--- Upgrade pip"
+             python -m pip install -U pip
+             echo "--- Install Invoke"
+             pip install invoke
+             echo "--- Install requirements"
+             invoke bootstrap
+
+      - name: Run all tests
+        run: invoke test

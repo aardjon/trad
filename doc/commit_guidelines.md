@@ -64,7 +64,9 @@ These guidelines help to ensure consistent and understandable commit messages, m
 The CI generates and publishes some reports on the source code, which may be interesting to look at
 during development:
 
-- Detailed code coverage of the last successful test run on the `main` branch: https://www.fomori.de/trad/reports/main
+- Detailed code coverage of the last successful test run on the `main` branch:
+  - Mobile App: https://www.fomori.de/trad/reports/main/mobileapp
+  - Scraper: https://www.fomori.de/trad/reports/main/scraper
 
 Please note that reports are published for the `main` branch only, but the ones for your feature
 branch are still kept as artifacts for a while so you can download them from the corresponding

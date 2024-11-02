@@ -1,4 +1,4 @@
-name: mobileapp
+name: trad.mobileapp
 
 on: [push, pull_request]
 
@@ -200,7 +200,7 @@ jobs:
           user: ${{ secrets.REPORT_FTP_USER }}
           password: ${{ secrets.REPORT_FTP_PW }}
           localDir: "mobileapp/coverage/report/"
-          remoteDir: ${{ env.CI_REF_NAME }}
+          remoteDir: "${{ env.CI_REF_NAME }}/mobileapp"
           options: "--delete"
 
   test-windows:
