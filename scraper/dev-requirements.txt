@@ -63,7 +63,7 @@ requests==2.32.3
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-ruff==0.7.1
+ruff==0.7.2
     # via trad_scraper (pyproject.toml)
 six==1.16.0
     # via
