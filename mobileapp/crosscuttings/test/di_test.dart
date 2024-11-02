@@ -67,7 +67,6 @@ void main() {
 
     /// Ensure that calling shutdown() really discards all bindings.
     test('testShutdown', () async {
-      DependencyProvider localDependencyProvider = DependencyProvider();
       di.registerFactory<ExampleInterface1>(ExampleImpl.new);
       await di.shutdown();
       // Now there mustn't be a binding for ExampleInterface1 anymore
