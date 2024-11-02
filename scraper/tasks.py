@@ -36,24 +36,20 @@ def bootstrap(context: Context) -> None:
     """
     context.run(f"pip install -U '{_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}'")
     context.run(
-        (
-            "pip-compile "
-            "-q "
-            "--strip-extras "
-            "--output-file=app-requirements.txt "
-            "pyproject.toml"
-        )
+        "pip-compile "
+        "-q "
+        "--strip-extras "
+        "--output-file=app-requirements.txt "
+        "pyproject.toml"
     )
     context.run(
-        (
-            "pip-compile "
-            "-q "
-            "--strip-extras "
-            "--extra=dev "
-            "--constraint=app-requirements.txt "
-            "--output-file=dev-requirements.txt "
-            "pyproject.toml"
-        )
+        "pip-compile "
+        "-q "
+        "--strip-extras "
+        "--extra=dev "
+        "--constraint=app-requirements.txt "
+        "--output-file=dev-requirements.txt "
+        "pyproject.toml"
     )
     context.run("pip-sync dev-requirements.txt")
 
@@ -67,8 +63,8 @@ def clean(context: Context) -> None:
     context.run("rm -rf coverage")
 
 
-@task
-def format(context: Context) -> None:
+@task(name="format")
+def autoformat(context: Context) -> None:
     """
     Auto-format all source files according to our formatting rules.
     """
@@ -105,27 +101,23 @@ def upgrade(context: Context) -> None:
     """
     print("Upgrading app requirements...")
     context.run(
-        (
-            "pip-compile "
-            "-q "
-            "--strip-extras "
-            "--upgrade "
-            "--output-file=app-requirements.txt "
-            "pyproject.toml"
-        )
+        "pip-compile "
+        "-q "
+        "--strip-extras "
+        "--upgrade "
+        "--output-file=app-requirements.txt "
+        "pyproject.toml"
     )
     print("Upgrading dev requirements...")
     context.run(
-        (
-            "pip-compile "
-            "-q "
-            "--strip-extras "
-            "--upgrade "
-            "--extra=dev "
-            "--constraint=app-requirements.txt "
-            "--output-file=dev-requirements.txt "
-            "pyproject.toml"
-        )
+        "pip-compile "
+        "-q "
+        "--strip-extras "
+        "--upgrade "
+        "--extra=dev "
+        "--constraint=app-requirements.txt "
+        "--output-file=dev-requirements.txt "
+        "pyproject.toml"
     )
     print("Syncing environment...")
     context.run("pip-sync dev-requirements.txt")
