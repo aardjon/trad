@@ -223,7 +223,7 @@ The general rules for source code dependencies are:
 
 ## 5.2 Level 1
 
-![Refinement of the first level](architecture/bbview_level1.png)
+![Refinement of the first level](architecture/mobileapp/bbview_level1.png)
 
 ### 5.2.1 Motivation
 
@@ -339,7 +339,7 @@ adapters.boundaries.positioning | TODO
 
 ### 5.3.1 `core`
 
-![Refinement of the `core`](architecture/bbview_level2_core.png)
+![Refinement of the `core`](architecture/mobileapp/bbview_level2_core.png)
 
 #### `core.entities`
 
@@ -362,7 +362,7 @@ Source location: [mobileapp/core/lib/usecases](../mobileapp/core/lib/usecases)
 
 ### 5.3.2 `adapters`
 
-![Refinement of the `adapters`](architecture/bbview_level2_adapters.png)
+![Refinement of the `adapters`](architecture/mobileapp/bbview_level2_adapters.png)
 
 #### `adapters.boundaries`
 
@@ -373,7 +373,7 @@ Source location: [mobileapp/adapters/lib/boundaries](../mobileapp/adapters/lib/b
 
 ### 5.3.3 `infrastructure`
 
-![Refinement of the `infrastructure`](architecture/bbview_level2_infrastructure.png)
+![Refinement of the `infrastructure`](architecture/mobileapp/bbview_level2_infrastructure.png)
 
 The `infrastructure` ring is split into the `flutter` and the `vanilla` variant, which do not depend on each
 other. However, if it is useful for some reason, the `infrastructure.flutter` part may depend on the
