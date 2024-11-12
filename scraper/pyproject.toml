@@ -99,8 +99,11 @@ ignore = [
   "EM102",  # Exception must not use an f-string literal, assign to variable first
   "EM103",  # Exception must not use a .format() string directly, assign to variable first
 
-  # flake8-no-pep420: Do not ban implicit namespace packages, because it's unclear why they are bad.
+  # Do not ban implicit namespace packages, because it's unclear why they are bad.
   "INP001",  # File is part of an implicit namespace package. Add an __init__.py.
+
+  # We don't want to create issues for every single TODO.
+  "TD003",  # TODO: this link has no issue
 
   # Disabled because we don't want to enforce many specialized exception classes just for different
   # messages for now.
