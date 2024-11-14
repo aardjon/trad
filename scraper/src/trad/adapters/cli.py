@@ -23,7 +23,7 @@ class CliSettings(SettingsBoundary):
         """
         args = self.__parse_command_line()
         self.__is_verbose = args.verbose
-        self.__output_file = args.output_file
+        self.__output_dir = args.output_dir
 
     def __parse_command_line(self):
         """Returns the parsed command line."""
@@ -37,8 +37,8 @@ class CliSettings(SettingsBoundary):
         """
         parser = ArgumentParser()
         parser.add_argument(
-            "output_file",
-            help="path to the route database file to create (must not exist already)",
+            "output_dir",
+            help="path to the directory to create the route database file(s) in",
             type=Path,
         )
         parser.add_argument(
@@ -56,5 +56,5 @@ class CliSettings(SettingsBoundary):
         return self.__is_verbose
 
     @override
-    def get_output_file(self) -> Path:
-        return self.__output_file
+    def get_output_dir(self) -> Path:
+        return self.__output_dir

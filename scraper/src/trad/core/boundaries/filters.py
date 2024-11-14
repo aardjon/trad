@@ -5,7 +5,7 @@ Boundary interface to the filters component.
 from abc import ABCMeta, abstractmethod
 from enum import Enum, auto
 
-from trad.crosscuttings.di import DependencyProvider
+from trad.core.boundaries.pipes import Pipe
 
 
 class FilterStage(Enum):
@@ -68,46 +68,25 @@ class Filter(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def execute_filter(self) -> None:
+    def execute_filter(self, pipe: Pipe) -> None:
         """
-        Executes the operation of this Filter.
+        Executes the operation of this Filter, reading and writing data from/to the given [pipe].
 
         In case of an unrecoverable error, this method may raise any Exception. The whole scraper
         run is cancelled in such a case.
         """
 
 
-class FilterRegistry:
+class FilterFactory(metaclass=ABCMeta):
     """
-    The registry managing all filters that should be executed.
+    The factory for creating all filters that should be executed.
 
-    Each Filter class must be registered to this class by calling [register_filter_class()]. Filters
-    are only instantiated when they are used.
+    Filters are only instantiated when they are used.
     """
 
-    def __init__(self, dependency_provider: DependencyProvider) -> None:
-        """
-        Create a new FilterRegistry with the given [dependency_provider].
-        """
-        self.__dependency_provider = dependency_provider
-        self.__registered_filter_classes: list[type[Filter]] = []
-        """
-        All registered filter classes.
-        """
-
-    def get_filters(self, stage: FilterStage) -> list[Filter]:
+    @abstractmethod
+    def create_filters(self, stage: FilterStage) -> list[Filter]:
         """
         Instantiates and returns all filters that are assigned to the given [stage], in an arbitrary
         order.
         """
-        return [
-            filter_class(self.__dependency_provider)
-            for filter_class in self.__registered_filter_classes
-            if filter_class.get_stage() == stage
-        ]
-
-    def register_filter_class(self, new_filter_class: Filter) -> None:
-        """
-        Registers [new_filter_class] for execution.
-        """
-        self.__registered_filter_classes.append(new_filter_class)

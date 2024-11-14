@@ -5,8 +5,8 @@ Filter implementations that are supposed to run in INITIALIZING stage.
 from logging import getLogger
 from typing import override
 
-from trad.adapters.filters.boundaries import RouteDbCreatingPipe
 from trad.core.boundaries.filters import Filter, FilterStage
+from trad.core.boundaries.pipes import Pipe
 from trad.core.boundaries.settings import SettingsBoundary
 from trad.crosscuttings.di import DependencyProvider
 
@@ -26,7 +26,6 @@ class PipeInitializingFilter(Filter):
         Constructor.
         """
         self._application_settings = dependency_provider.provide(SettingsBoundary)
-        self._pipe = dependency_provider.provide(RouteDbCreatingPipe)
 
     @staticmethod
     @override
@@ -38,8 +37,7 @@ class PipeInitializingFilter(Filter):
         return "PipeInitialization"
 
     @override
-    def execute_filter(self) -> None:
+    def execute_filter(self, pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
-        output_path = self._application_settings.get_output_file()
-        self._pipe.initialize_pipe(output_path)
+        pipe.initialize_pipe()
         _logger.debug("'%s' filter finished", self.get_name())

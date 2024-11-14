@@ -12,13 +12,13 @@ class SettingsBoundary(ABC):
     """
 
     @abstractmethod
-    def get_output_file(self) -> Path:
+    def get_output_dir(self) -> Path:
         """
-        Returns the full path to the output database file that shall be created.
+        Returns the full path to the directory into which the created database files are written.
         """
 
     @abstractmethod
     def is_verbose(self) -> bool:
         """
-        Returns True if the applicaiton is configured for verbose/debug output, or False if not.
+        Returns True if the application is configured for verbose/debug output, or False if not.
         """

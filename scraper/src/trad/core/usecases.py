@@ -4,7 +4,8 @@ The scraper use case implementations.
 
 from logging import getLogger
 
-from trad.core.boundaries.filters import FilterRegistry, FilterStage
+from trad.core.boundaries.filters import FilterFactory, FilterStage
+from trad.core.boundaries.pipes import Pipe, PipeFactory
 from trad.crosscuttings.di import DependencyProvider
 
 _logger = getLogger(__name__)
@@ -19,7 +20,8 @@ class ScraperUseCases:
         """
         Create a new instance using the provided [dependency_provider] for getting dependencies.
         """
-        self.__filter_registry = dependency_provider.provide(FilterRegistry)
+        self.__filter_factory = dependency_provider.provide(FilterFactory)
+        self.__pipe_factory = dependency_provider.provide(PipeFactory)
 
     def produce_routedb(self) -> None:
         """
@@ -27,16 +29,20 @@ class ScraperUseCases:
         freshly retrieved external data.
         """
         _logger.info("Now running usecase 'produce_routedb'")
+        pipes = self.__pipe_factory.create_pipes()
         for stage in FilterStage:
-            self.__run_filters_of_stage(stage)
+            self.__run_filters_of_stage(
+                stage,
+                pipes[0],
+            )
 
-    def __run_filters_of_stage(self, stage: FilterStage) -> None:
+    def __run_filters_of_stage(self, stage: FilterStage, pipe: Pipe) -> None:
         """
-        Executes all filters of a single stage.
+        Executes all filters of a single `stage` on the given `pipe`.
         """
-        filters = self.__filter_registry.get_filters(stage)
+        filters = self.__filter_factory.create_filters(stage)
         _logger.info("Executing %i filters for stage %s", len(filters), stage.name)
         # For now, run them sequentially. To improve performance, running in parallel may be an
         # option in the future.
         for current_filter in filters:
-            current_filter.execute_filter()
+            current_filter.execute_filter(pipe)

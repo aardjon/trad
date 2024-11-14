@@ -6,12 +6,12 @@ from logging import getLogger
 from pathlib import Path
 from typing import override
 
-from trad.adapters.filters.boundaries import RouteDbCreatingPipe
+from trad.core.boundaries.pipes import Pipe
 
 _logger = getLogger(__name__)
 
 
-class DbSchemaV1Pipe(RouteDbCreatingPipe):
+class DbSchemaV1Pipe(Pipe):
     """
     Pipe implementation for creating a route database file (schema version 1) that can be used with
     the trad mobile app.
@@ -20,8 +20,14 @@ class DbSchemaV1Pipe(RouteDbCreatingPipe):
     particular schema version.
     """
 
+    def __init__(self, output_directory: Path):
+        """
+        Create a new pipe that writes the generated database file into the given [output_directory].
+        """
+        self.__output_directory = output_directory
+
     @override
-    def initialize_pipe(self, destination_path: Path) -> None:
+    def initialize_pipe(self) -> None:
         # Create/Open DB file
         # Create part of the schema (all tables and constraints, but no indices!)
-        _logger.debug("Initializing routedb pipe for writing into %s", destination_path)
+        _logger.debug("Initializing routedb pipe for writing into %s", self.__output_directory)
