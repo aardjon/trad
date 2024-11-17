@@ -8,7 +8,7 @@ tool to our needs.
 from logging import basicConfig
 
 
-def configure_logging(default_log_level: int | str):
+def configure_logging(default_log_level: int | str) -> None:
     """
     Configure the logging framework (i.e. the root logger) to output all messages with at the given
     log level.
