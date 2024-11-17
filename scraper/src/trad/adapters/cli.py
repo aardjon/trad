@@ -3,7 +3,7 @@ Implementation of the `trad.core.boundaries.settings` interface, which gives acc
 application configuration.
 """
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import override
 
@@ -22,10 +22,10 @@ class CliSettings(SettingsBoundary):
         In case of parsing errors, the application may immediately exit() from this constructor.
         """
         args = self.__parse_command_line()
-        self.__is_verbose = args.verbose
-        self.__output_dir = args.output_dir
+        self.__is_verbose: bool = args.verbose
+        self.__output_dir: Path = args.output_dir
 
-    def __parse_command_line(self):
+    def __parse_command_line(self) -> Namespace:
         """Returns the parsed command line."""
         parser = self.__create_parser()
         return parser.parse_args()
