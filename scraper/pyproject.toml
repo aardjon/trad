@@ -43,6 +43,12 @@ explicit_package_bases = true
 namespace_packages = true
 
 
+# Override some settings for external packages to avoid issues them
+[[tool.mypy.overrides]]
+module = "lidipy"
+implicit_reexport = true
+
+
 
 [tool.ruff]
 # Same as Black.
