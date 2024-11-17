@@ -37,6 +37,10 @@ lxml==5.3.0
     # via
     #   -c app-requirements.txt
     #   pandas
+mypy==1.13.0
+    # via trad_scraper (pyproject.toml)
+mypy-extensions==1.0.0
+    # via mypy
 numpy==2.1.2
     # via
     #   -c app-requirements.txt
@@ -74,6 +78,8 @@ soupsieve==2.6
     # via
     #   -c app-requirements.txt
     #   beautifulsoup4
+typing-extensions==4.12.2
+    # via mypy
 tzdata==2024.2
     # via
     #   -c app-requirements.txt

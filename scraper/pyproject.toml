@@ -25,6 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "invoke",
+  "mypy",
   "pytest",
   "ruff",
 ]
@@ -32,6 +33,14 @@ dev = [
 
 [project.urls]
 Home = "https://github.com/Headbucket/trad"
+
+
+
+[tool.mypy]
+strict = true
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
 
 
 
