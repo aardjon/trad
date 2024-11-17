@@ -7,6 +7,7 @@ this file.
 
 from invoke import task
 from invoke.context import Context
+from invoke.exceptions import UnexpectedExit
 
 _PIPTOOLS_PKG_NAME = "pip-tools"
 """
@@ -21,9 +22,24 @@ The minimum 'pip-tools' package version to install during bootstrap.
 @task
 def analyze(context: Context) -> None:
     """
-    Run the configured linters on all source files.
+    Run all configured linters on all source files.
+
+    If any of the linter commands fails (i.e. finds some issues), only the last failure is
+    propagated.
     """
-    context.run("python -m ruff check .")
+    last_failure = None
+    try:
+        lint_ruff(context)
+    except UnexpectedExit as e:
+        last_failure = e
+
+    try:
+        lint_mypy(context)
+    except UnexpectedExit as e:
+        last_failure = e
+
+    if last_failure:
+        raise last_failure
 
 
 @task
@@ -72,6 +88,22 @@ def autoformat(context: Context) -> None:
     context.run("python -m ruff check --select I --fix .")
     # Format all sources
     context.run("python -m ruff format .")
+
+
+@task
+def lint_mypy(context: Context) -> None:
+    """
+    Run MyPy on all source files.
+    """
+    context.run("mypy .")
+
+
+@task
+def lint_ruff(context: Context) -> None:
+    """
+    Run ruff on all source files.
+    """
+    context.run("python -m ruff check .")
 
 
 @task
