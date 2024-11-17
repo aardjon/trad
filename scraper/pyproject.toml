@@ -62,6 +62,10 @@ disable_error_code = "type-abstract"
 module = "lidipy"
 implicit_reexport = true
 
+[[tool.mypy.overrides]]
+module = "invoke"
+implicit_reexport = true
+
 
 
 [tool.ruff]
