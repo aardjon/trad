@@ -45,12 +45,15 @@ numpy==2.1.3
     # via
     #   -c app-requirements.txt
     #   pandas
+    #   pandas-stubs
 packaging==24.2
     # via pytest
 pandas==2.2.3
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
+pandas-stubs==2.2.3.241126
+    # via trad_scraper (pyproject.toml)
 pluggy==1.5.0
     # via pytest
 pytest==8.3.3
@@ -78,6 +81,14 @@ soupsieve==2.6
     # via
     #   -c app-requirements.txt
     #   beautifulsoup4
+types-beautifulsoup4==4.12.0.20241020
+    # via trad_scraper (pyproject.toml)
+types-html5lib==1.1.11.20241018
+    # via types-beautifulsoup4
+types-pytz==2024.2.0.20241003
+    # via pandas-stubs
+types-requests==2.32.0.20241016
+    # via trad_scraper (pyproject.toml)
 typing-extensions==4.12.2
     # via mypy
 tzdata==2024.2
@@ -88,6 +99,7 @@ urllib3==2.2.3
     # via
     #   -c app-requirements.txt
     #   requests
+    #   types-requests
 webencodings==0.5.1
     # via
     #   -c app-requirements.txt

@@ -26,8 +26,11 @@ dependencies = [
 dev = [
   "invoke",
   "mypy",
+  "pandas-stubs",
   "pytest",
   "ruff",
+  "types-beautifulsoup4",
+  "types-requests",
 ]
 
 
