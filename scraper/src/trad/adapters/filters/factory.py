@@ -4,6 +4,7 @@ Implementation of the FilterFactory component.
 
 from typing import override
 
+from trad.adapters.filters.filling.teufelsturm import TeufelsturmDataFilter
 from trad.adapters.filters.initialization import PipeInitializingFilter
 from trad.core.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.crosscuttings.di import DependencyProvider
@@ -26,6 +27,9 @@ class AllFiltersFactory(FilterFactory):
     def create_filters(self, stage: FilterStage) -> list[Filter]:
         return [
             filter_class(self.__dependency_provider)
-            for filter_class in [PipeInitializingFilter]
+            for filter_class in [
+                PipeInitializingFilter,
+                TeufelsturmDataFilter,
+            ]
             if filter_class.get_stage() == stage
         ]
