@@ -7,6 +7,8 @@ starts the actual application.
 
 import logging
 
+from trad.adapters.boundaries.database import RelationalDatabaseBoundary
+from trad.adapters.boundaries.http import HttpNetworkingBoundary
 from trad.adapters.cli import CliSettings
 from trad.adapters.filters.factory import AllFiltersFactory
 from trad.adapters.pipes.factory import AllPipesFactory
@@ -16,6 +18,8 @@ from trad.core.boundaries.settings import SettingsBoundary
 from trad.core.usecases import ScraperUseCases
 from trad.crosscuttings.di import DependencyProvider
 from trad.crosscuttings.logging import configure_logging
+from trad.infrastructure.requests import RequestsHttp
+from trad.infrastructure.sqlite3db import Sqlite3Database
 
 _logger = logging.getLogger(__name__)
 
@@ -76,6 +80,8 @@ class ApplicationBootstrap:
         )
 
         # Initialize all [infrastructure] components
+        self.__dependency_provider.register_singleton(RelationalDatabaseBoundary, Sqlite3Database)
+        self.__dependency_provider.register_factory(HttpNetworkingBoundary, RequestsHttp)
 
     def run_application(self) -> None:
         """
