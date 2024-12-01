@@ -4,6 +4,8 @@ Boundary interface to the `pipes` component.
 
 from abc import ABCMeta, abstractmethod
 
+from trad.core.entities import Post, Route, Summit
+
 
 class Pipe(metaclass=ABCMeta):
     """
@@ -28,6 +30,39 @@ class Pipe(metaclass=ABCMeta):
         Initializes the pipe for creating a new route database.
 
         Must be called exactly once prior to any other operation.
+        """
+
+    @abstractmethod
+    def collect_statistics(self) -> None:
+        """
+        Analyzes the storage content and collects and stores some statistical information to improve
+        the performance of future data query.
+        """
+
+    @abstractmethod
+    def shrink(self) -> None:
+        """
+        Shrinks the current route database result file to the necessary minimum, without deleting
+        or compressing any data.
+        """
+
+    @abstractmethod
+    def add_summit_data(self, summit: Summit) -> None:
+        """
+        Add the given [summit] data to the pipe.
+        """
+
+    @abstractmethod
+    def add_route_data(self, summit_name: str, route: Route) -> None:
+        """
+        Add the given [route] to the pipe, assigning it to the summit [summit_name].
+        """
+
+    @abstractmethod
+    def add_post_data(self, summit_name: str, route_name: str, post: Post) -> None:
+        """
+        Add the given [post] to the pipe, assigning it to the route [route_name] on the summit
+        [summit_name].
         """
 
 
