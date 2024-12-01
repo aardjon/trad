@@ -67,6 +67,17 @@ class ApplicationBootstrap:
         settings = self.__dependency_provider.provide(SettingsBoundary)
         configure_logging(logging.DEBUG if settings.is_verbose() else logging.INFO)
 
+        if settings.is_verbose():
+            # Disable some log channels even in debug mode because they are still too chatty
+            # The statement_creator logs all executed SQL statements on DEBUG level
+            sql_statement_logger = logging.getLogger(
+                "trad.infrastructure.sqlite3db.statement_creator"
+            )
+            sql_statement_logger.setLevel(logging.INFO)
+            # urllib3 logs every single HTTP request
+            urllib3_logger = logging.getLogger("urllib3")
+            urllib3_logger.setLevel(logging.WARNING)
+
     def __setup_dependencies(self) -> None:
         """
         Setup all components (dependencies).
