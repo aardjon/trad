@@ -44,7 +44,7 @@ class RoutesTable {
 /// Represents the `posts` table containing all post data.
 ///
 /// The main purpose of this class is to provide a namespace with all string constants corresponding
-/// to the routes table. Always use these constants when referring to this table or its columns
+/// to the posts table. Always use these constants when referring to this table or its columns
 /// to make future schema changes easier.
 class PostsTable {
   /// Name of the table.

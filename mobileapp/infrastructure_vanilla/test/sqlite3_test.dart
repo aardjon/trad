@@ -75,11 +75,8 @@ void main() {
   ///  - the database is really closed again
   ///  - calling disconnect() on a closed database doesn't do any harm
   group('infrastructure_vanilla.sqlite3.Sqlite3Database.testDisconnect', () {
-    /// List of test parameters for infrastructure_vanilla.sqlite3.Sqlite3Database.testConnect.
-    ///
-    /// Each list item is record of [bool readOnly, OpenMode expectedOpenMode] with:
-    ///  - `readOnly` being the equally named parameter of connect()
-    ///  - `expectedOpenMode` being the resulting OpenMode expected on Sqlite3 side
+    // The parameter [dbIsConnected] defines whether the database should be connect()ed before
+    // calling disconnect().
     for (final bool dbIsConnected in <bool>[true, false]) {
       test('connected=$dbIsConnected', () {
         final _SqliteApiMock sqliteMock = _SqliteApiMock();
