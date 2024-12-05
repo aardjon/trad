@@ -6,6 +6,7 @@ from typing import override
 
 from trad.adapters.filters.filling.teufelsturm import TeufelsturmDataFilter
 from trad.adapters.filters.initialization import PipeInitializingFilter
+from trad.adapters.filters.optimization import PipeOptimizingFilter
 from trad.core.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.crosscuttings.di import DependencyProvider
 
@@ -30,6 +31,7 @@ class AllFiltersFactory(FilterFactory):
             for filter_class in [
                 PipeInitializingFilter,
                 TeufelsturmDataFilter,
+                PipeOptimizingFilter,
             ]
             if filter_class.get_stage() == stage
         ]
