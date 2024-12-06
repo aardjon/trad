@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from io import StringIO
 from typing import TYPE_CHECKING, Any, Final
 
 import pandas as pd
@@ -99,7 +100,7 @@ def parse_page(page_text: str) -> PageData:
     grade = grade_result.group(1).strip()
 
     df_list = pd.read_html(
-        page_text.replace("<br>", "|")
+        StringIO(page_text.replace("<br>", "|"))
     )  # this parses all the tables in webpages to a list
     posts_table = df_list[3]
     posts = parse_posts(posts_table)
