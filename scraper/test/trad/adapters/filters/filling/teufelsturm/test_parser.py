@@ -82,10 +82,10 @@ def test_parse_post() -> None:
         comment=posts_test_dict[1][raw_data_index],
         rating=posts_test_dict[2][raw_data_index].count("+"),
     )
+    posts_table = pd.DataFrame.from_dict(posts_test_dict)
 
-    df = pd.DataFrame.from_dict(posts_test_dict)
+    post = parse_post(posts_table.loc[2])
 
-    post = parse_post(df.loc[2])
     assert post == expected_result_post
 
 
@@ -101,11 +101,11 @@ def test_parse_posts() -> None:
         )
         for i in range(1, len(posts_test_dict[0]))
     ]
-
-    df = pd.DataFrame.from_dict(posts_test_dict)
+    posts_table = pd.DataFrame.from_dict(posts_test_dict)
 
     # Parse post table
-    results = parse_posts(df)
+    results = parse_posts(posts_table)
+
     assert len(results) == len(expected_results)
     assert results == expected_results
 
