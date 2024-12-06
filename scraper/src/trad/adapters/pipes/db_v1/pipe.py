@@ -2,10 +2,9 @@
 Concrete pipe implementation writing a route database with schema version 1.
 """
 
-from collections.abc import Sequence
 from logging import getLogger
 from pathlib import Path
-from typing import Final, override
+from typing import TYPE_CHECKING, Final, override
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
@@ -13,6 +12,9 @@ from trad.adapters.boundaries.database.structure import CreateIndexQuery, Create
 from trad.adapters.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitsTable, TableSchema
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import Post, Route, Summit
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 _logger = getLogger(__name__)
 

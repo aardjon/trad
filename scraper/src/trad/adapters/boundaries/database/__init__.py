@@ -28,7 +28,7 @@ class RelationalDatabaseBoundary(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def connect(self, destination_file: Path, overwrite: bool = False) -> None:
+    def connect(self, destination_file: Path, *, overwrite: bool = False) -> None:
         """
         Connects to the database specified by the [destination_file]. [overwrite] controls what to
         do in case the file already exists: True, replaces the existing file, False raises an Error.

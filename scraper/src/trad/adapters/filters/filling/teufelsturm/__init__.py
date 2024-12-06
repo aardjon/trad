@@ -47,9 +47,9 @@ class TeufelsturmDataFilter(Filter):
 
     def _perform_scan(self, pipe: Pipe, start_id: int, end_id: int) -> None:
         count: Final = end_id - start_id + 1
-        for id in range(start_id, end_id + 1):
-            _logger.debug("Importing route %d (%d of %d)", id, id - start_id + 1, count)
-            page_text = self._get_page_text(id)
+        for page_id in range(start_id, end_id + 1):
+            _logger.debug("Importing route %d (%d of %d)", page_id, page_id - start_id + 1, count)
+            page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text)
             if post_data.peak:
                 pipe.add_summit_data(post_data.peak)

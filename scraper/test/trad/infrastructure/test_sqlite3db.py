@@ -97,6 +97,7 @@ class TestSqlite3Database:
     @pytest.mark.parametrize("is_connected", [True, False])
     def test_disconnect(
         self,
+        *,
         is_connected: bool,
         sqlite3_database: Sqlite3Mock,
     ) -> None:

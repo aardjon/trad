@@ -58,7 +58,7 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         """ Delegate for creating SQL statements from Query instances. """
 
     @override
-    def connect(self, destination_file: Path, overwrite: bool = False) -> None:
+    def connect(self, destination_file: Path, *, overwrite: bool = False) -> None:
         if overwrite:
             destination_file.unlink(missing_ok=True)
         elif destination_file.exists():
