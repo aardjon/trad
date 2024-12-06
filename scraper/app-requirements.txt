@@ -16,7 +16,7 @@ html5lib==1.1
     # via pandas
 idna==3.10
     # via requests
-lidipy==0.3.0
+lidipy==0.3.1
     # via trad_scraper (pyproject.toml)
 lxml==5.3.0
     # via pandas
@@ -30,7 +30,7 @@ pytz==2024.2
     # via pandas
 requests==2.32.3
     # via trad_scraper (pyproject.toml)
-six==1.16.0
+six==1.17.0
     # via
     #   html5lib
     #   python-dateutil
