@@ -5,7 +5,6 @@ Teufelsturm route page content parser.
 from __future__ import annotations
 
 import re
-import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Final
@@ -18,8 +17,6 @@ from trad.core.entities import Post, Route, Summit
 if TYPE_CHECKING:
     from pandas.core.frame import DataFrame
     from pandas.core.series import Series
-
-warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 @dataclass
