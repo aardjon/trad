@@ -11,6 +11,7 @@ from io import StringIO
 from typing import TYPE_CHECKING, Any, Final
 
 import pandas as pd
+import pytz
 from bs4 import BeautifulSoup
 
 from trad.core.entities import Post, Route, Summit
@@ -37,13 +38,14 @@ def parse_user_name(user_as_string: str) -> tuple[str, datetime]:
     """
     Parses a posts header data, returning the user name and the posting date.
     """
+    timezone_berlin: Final = pytz.timezone("Europe/Berlin")
     header_field_count: Final = 5
     result = re.search(r"^(.*?)((\|\|\|)|(\|.*?\|\|\|))(.*)$", user_as_string)
     if not result or len(result.groups()) != header_field_count:
         raise DataProcessingError("User name could not be parsed")
 
     user_name = result.group(1)
-    post_date = datetime.strptime(result.group(5), "%d.%m.%Y %H:%M")
+    post_date = timezone_berlin.localize(datetime.strptime(result.group(5), "%d.%m.%Y %H:%M"))
 
     return user_name, post_date
 

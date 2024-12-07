@@ -8,6 +8,7 @@ from typing import Final
 
 import pandas as pd
 import pytest
+import pytz
 
 from trad.adapters.filters.filling.teufelsturm.parser import (
     parse_page,
@@ -72,13 +73,17 @@ posts_test_dict: Final = {
     },
 }
 
+timezone_berlin: Final = pytz.timezone("Europe/Berlin")
+
 
 def test_parse_post() -> None:
     raw_data_index: Final = 2
     user_column_content = posts_test_dict[0][raw_data_index]
     expected_result_post = Post(
         user_name=user_column_content.split("|")[0],
-        post_date=datetime.datetime.strptime(user_column_content.split("|")[-1], "%d.%m.%Y %H:%M"),
+        post_date=timezone_berlin.localize(
+            datetime.datetime.strptime(user_column_content.split("|")[-1], "%d.%m.%Y %H:%M")
+        ),
         comment=posts_test_dict[1][raw_data_index],
         rating=posts_test_dict[2][raw_data_index].count("+"),
     )
@@ -93,8 +98,8 @@ def test_parse_posts() -> None:
     expected_results = [
         Post(
             user_name=posts_test_dict[0][i].split("|")[0],
-            post_date=datetime.datetime.strptime(
-                posts_test_dict[0][i].split("|")[-1], "%d.%m.%Y %H:%M"
+            post_date=timezone_berlin.localize(
+                datetime.datetime.strptime(posts_test_dict[0][i].split("|")[-1], "%d.%m.%Y %H:%M")
             ),
             comment=posts_test_dict[1][i],
             rating=posts_test_dict[2][i].count("+"),
