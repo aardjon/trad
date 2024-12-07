@@ -38,13 +38,13 @@ from trad.adapters.boundaries.database.structure import (
             ["id"],
             ["id", "undefined"],
             None,
-            pytest.raises(ValueError),
+            pytest.raises(ValueError, match=".+primary key.*undefined column.*"),
         ),
         (  # Unique constraint column undefined
             ["id"],
             ["id"],
             [["undefined"]],
-            pytest.raises(ValueError),
+            pytest.raises(ValueError, match=".+unique constraint.*undefined column.*"),
         ),
     ],
 )
