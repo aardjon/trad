@@ -125,6 +125,11 @@ ignore = [
   "D415",  # First line should end with a period, question mark, or exclamation point
   "D416",  # Section name should end with a colon 
 
+  # Disabled because some external data sources (e.g. teufelsturm.de and sandsteinklettern.de) do
+  # not provide time zone information for e.g. the post dates, so we indeed have to parse them into
+  # naive objects in most cases.
+  "DTZ007",  # Naive datetime constructed using `datetime.datetime.strptime()` without %z
+
   # Line length is controlled by the formatter which may produce longer lines in some cases. So
   # we disable the hard check during linting.
   "E501",  # Line too long
