@@ -35,25 +35,33 @@ class DataRow:
         """
         Returns the value of the requested integer column [column_name].
 
-        If the requested column doesn't exist in this row or is of a different type, an
-        [ArgumentError] is thrown (because this is usually a programming error).
+        Exceptions (usually programming errors):
+         - KeyError: The requested column doesn't exist in this row
+         - TypeError: he requested column is of a different type
         """
-        return self.__get_value(column_name)
+        value = self.__get_value(column_name)
+        if not isinstance(value, int | None):
+            raise TypeError("Value of column {column_name} is of unexpected type {type(value)}.")
+        return value
 
     def get_string_value(self, column_name: EntityName) -> str | None:
         """
         Returns the value of the requested string column [column_name].
 
-        If the requested column doesn't exist in this row or is of a different type, an
-        [ArgumentError] is thrown (because this is usually a programming error).
+        Exceptions (usually programming errors):
+         - KeyError: The requested column doesn't exist in this row
+         - TypeError: he requested column is of a different type
         """
-        return self.__get_value(column_name)
+        value = self.__get_value(column_name)
+        if not isinstance(value, str | None):
+            raise TypeError("Value of column {column_name} is of unexpected type {type(value)}.")
+        return value
 
     def get_object_value(self, column_name: EntityName) -> object:
         """
         Returns the value of the requested column [column_name].
 
-        If the requested column doesn't exist in this row, a [KeyError] is thrown (this is usually a
+        If the requested column doesn't exist in this row, a [KeyError] is raised (this is usually a
         programming error).
         """
         return self.__get_value(column_name)
