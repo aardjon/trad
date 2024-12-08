@@ -17,6 +17,8 @@ charset-normalizer==3.4.0
     # via
     #   -c app-requirements.txt
     #   requests
+coverage==7.6.9
+    # via trad_scraper (pyproject.toml)
 html5lib==1.1
     # via
     #   -c app-requirements.txt
