@@ -123,7 +123,7 @@ def test(context: Context) -> None:
     Run all unit tests for the scraper application and collect coverage data.
     """
     # Explicitly include all source directories to also capture unimported source files
-    dirnames = ",".join(set(str(f.parent) for f in Path("src").glob("**/*.py")))
+    dirnames = ",".join({str(f.parent) for f in Path("src").glob("**/*.py")})
     context.run(f"PYTHONPATH=src coverage run --source '{dirnames}' -m pytest test")
 
 
