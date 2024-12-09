@@ -5,6 +5,8 @@ The `invoke` command must be invoked from the scraper source root directory, i.e
 this file.
 """
 
+from pathlib import Path
+
 from invoke import task
 from invoke.context import Context
 from invoke.exceptions import UnexpectedExit
@@ -118,9 +120,20 @@ def run(context: Context) -> None:
 @task
 def test(context: Context) -> None:
     """
-    Run all unit tests for the scraper application.
+    Run all unit tests for the scraper application and collect coverage data.
     """
-    context.run("PYTHONPATH=src pytest test")
+    # Explicitly include all source directories to also capture unimported source files
+    dirnames = ",".join(set(str(f.parent) for f in Path("src").glob("**/*.py")))
+    context.run(f"PYTHONPATH=src coverage run --source '{dirnames}' -m pytest test")
+
+
+@task
+def coverage(context: Context) -> None:
+    """
+    Calculates test coverage for the whole scraper application. 'invoke test' must have been
+    executed before.
+    """
+    context.run("coverage html")
 
 
 @task

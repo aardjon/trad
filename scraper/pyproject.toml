@@ -40,6 +40,20 @@ Home = "https://github.com/Headbucket/trad"
 
 
 
+[tool.coverage.run]
+dynamic_context = "test_function"
+omit = [
+  "test/*",
+]
+
+
+[tool.coverage.html]
+show_contexts = true
+title = "trad.scraper Code Coverage Report"
+directory = "coverage/report"
+
+
+
 [tool.mypy]
 mypy_path = "src"
 explicit_package_bases = true
