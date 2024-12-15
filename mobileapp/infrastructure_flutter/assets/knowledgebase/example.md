@@ -17,7 +17,7 @@ amet.
 - List item 3
 
 # Image test
-![Die Barbarine](resource:packages/infrastructure_flutter/assets/knowledgebase/barbarine-wp.jpg)
+![Ein Beispielbild](resource:packages/infrastructure_flutter/assets/knowledgebase/example.jpg)
 
 # Link test
 [Link Text](packages/infrastructure_flutter/assets/knowledgebase/index.md)
