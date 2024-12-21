@@ -145,6 +145,15 @@ disable = [
   # function if that's really all we want in a certain situation.
   "too-few-public-methods",
 
+  # Disabled because blindly following this rule may cause hard to find problems and also can make
+  # the code less explicit. It is also disabled by default for this reason.
+  "use-implicit-booleaness-not-comparison-to-string",
+
+  # Disabled because blindly following this rule may cause hard to find problems and also can make
+  # the code less explicit. It is also disabled by default for this reason.
+  "use-implicit-booleaness-not-comparison-to-zero",
+
+
   # Disable most docstring checkers because we dont't want to enforce too much of their content and
   # style. See also the "pydocstyle" comment at the ruff config.
   "missing-param-doc",
