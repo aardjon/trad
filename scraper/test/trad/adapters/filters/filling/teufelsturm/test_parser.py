@@ -80,9 +80,12 @@ def test_parse_post() -> None:
     raw_data_index: Final = 2
     user_column_content = posts_test_dict[0][raw_data_index]
     expected_result_post = Post(
-        user_name=user_column_content.split("|")[0],
+        user_name=user_column_content.split("|", maxsplit=1)[0],
         post_date=timezone_berlin.localize(
-            datetime.datetime.strptime(user_column_content.split("|")[-1], "%d.%m.%Y %H:%M")
+            datetime.datetime.strptime(
+                user_column_content.rsplit("|", maxsplit=1)[-1],
+                "%d.%m.%Y %H:%M",
+            )
         ),
         comment=posts_test_dict[1][raw_data_index],
         rating=posts_test_dict[2][raw_data_index].count("+"),

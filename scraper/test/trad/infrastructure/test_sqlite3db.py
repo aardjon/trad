@@ -164,11 +164,12 @@ class TestSqlite3Database:
     )
     def test_create_table(
         self,
+        connected_sqlite3_database: Sqlite3Mock,
+        *,
         column_definition: list[ColumnDefinition],
         primary_key: list[str],
         unique_constraints: list[list[str]] | None,
         expected_sql: str,
-        connected_sqlite3_database: Sqlite3Mock,
     ) -> None:
         connected_sqlite3_database.database.execute_create_table(
             CreateTableQuery(

@@ -38,9 +38,9 @@ class SqlStatementCreator:
         # Generate the table DDL statement
         sql_statement = f"CREATE TABLE IF NOT EXISTS {query.table_name} ({column_clause}"
         if len(query.primary_key) > 1:
-            sql_statement += ", PRIMARY KEY({columns})".format(columns=", ".join(query.primary_key))
+            sql_statement += f", PRIMARY KEY({', '.join(query.primary_key)})"
         for unique_columns in query.unique_constraints or []:
-            sql_statement += ", UNIQUE({columns})".format(columns=", ".join(unique_columns))
+            sql_statement += f", UNIQUE({', '.join(unique_columns)})"
         if fk_clause:
             sql_statement += f", {fk_clause}"
         sql_statement += ")"
