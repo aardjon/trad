@@ -28,6 +28,8 @@ dev = [
   "invoke",
   "mypy",
   "pandas-stubs",
+  "pylint",
+  "pylint-restricted-imports",
   "pytest",
   "ruff",
   "types-beautifulsoup4",
@@ -83,6 +85,57 @@ implicit_reexport = true
 [[tool.mypy.overrides]]
 module = "invoke"
 implicit_reexport = true
+
+
+
+[tool.pylint.main]
+# List of plugins (as comma separated values of python module names) to load,
+# usually to register additional checkers.
+load-plugins = [
+  # Enable all "internal" (i.e. deployed with pylint) extensions
+  "pylint.extensions.bad_builtin",
+  "pylint.extensions.broad_try_clause",
+  "pylint.extensions.check_elif",
+  "pylint.extensions.code_style",
+  "pylint.extensions.comparison_placement",
+  "pylint.extensions.confusing_elif",
+  "pylint.extensions.consider_refactoring_into_while_condition",
+  "pylint.extensions.consider_ternary_expression",
+  "pylint.extensions.dict_init_mutate",
+  "pylint.extensions.docparams",
+  "pylint.extensions.docstyle",
+  "pylint.extensions.dunder",
+  "pylint.extensions.empty_comment",
+  "pylint.extensions.eq_without_hash",
+  "pylint.extensions.for_any_all",
+  "pylint.extensions.magic_value",
+  "pylint.extensions.mccabe",
+  "pylint.extensions.no_self_use",
+  "pylint.extensions.overlapping_exceptions",
+  "pylint.extensions.private_import",
+  "pylint.extensions.redefined_loop_name",
+  "pylint.extensions.redefined_variable_type",
+  "pylint.extensions.set_membership",
+  "pylint.extensions.typing",
+  "pylint.extensions.while_used",
+
+  # Plugin to restrict imports: https://github.com/pexip/pylint-restricted-imports
+  "pylint_restricted_imports",
+]
+
+[tool.pylint."messages control"]
+# Only show warnings with the listed confidence levels. Leave empty to show all.
+# Valid levels: HIGH, CONTROL_FLOW, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
+confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFINED"]
+
+# The 'disable' and 'enable' settings configure the rules checked by PyLint.
+# categories.
+disable = [
+]
+
+enable = [
+  "all",
+]
 
 
 
