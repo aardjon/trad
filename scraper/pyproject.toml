@@ -29,6 +29,7 @@ dev = [
   "mypy",
   "pandas-stubs",
   "pylint",
+  "pylint-pytest",
   "pylint-restricted-imports",
   "pytest",
   "ruff",
@@ -121,6 +122,9 @@ load-plugins = [
 
   # Plugin to restrict imports: https://github.com/pexip/pylint-restricted-imports
   "pylint_restricted_imports",
+
+  # Plugin to avoid some false positives in test code: https://github.com/reverbc/pylint-pytest
+  "pylint_pytest",
 ]
 
 [tool.pylint."messages control"]
