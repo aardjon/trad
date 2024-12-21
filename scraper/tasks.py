@@ -41,6 +41,11 @@ def analyze(context: Context) -> None:
     except UnexpectedExit as e:
         last_failure = e
 
+    try:
+        lint_pylint(context)
+    except UnexpectedExit as e:
+        last_failure = e
+
     if last_failure:
         raise last_failure
 
@@ -102,6 +107,14 @@ def lint_mypy(context: Context) -> None:
     Run MyPy on all source files.
     """
     context.run("mypy .")
+
+
+@task
+def lint_pylint(context: Context) -> None:
+    """
+    Run PyLint on all source files.
+    """
+    context.run("python -m pylint src test/trad test/integration")
 
 
 @task
