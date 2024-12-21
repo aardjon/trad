@@ -90,6 +90,9 @@ implicit_reexport = true
 
 
 [tool.pylint.main]
+# Pylint linter configuration. As with other linters, the basic idea is to first enable everything
+# and only disable checkers/rules/plugins that we don't want for some reason.
+
 # List of plugins (as comma separated values of python module names) to load,
 # usually to register additional checkers.
 load-plugins = [
@@ -135,12 +138,16 @@ confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFIN
 # The 'disable' and 'enable' settings configure the rules checked by PyLint.
 # categories.
 disable = [
-  # too-few-public-methods
+
   # Disabled because a class (even with only one member) is often more flexible
   # for future extension (i.e., if a second method is needed, the class can simply be extended while
   # a function needs to be refactored). But of course it's also not forbidden to simply use a
   # function if that's really all we want in a certain situation.
   "too-few-public-methods",
+
+  # Disable most docstring checkers because we dont't want to enforce too much of their content and
+  # style. See also the "pydocstyle" comment at the ruff config.
+  "missing-param-doc",
 
   # Disable all rules that are checked by ruff or mypy, to avoid unnecessary double checks
   # Comparison table: https://github.com/astral-sh/ruff/issues/970
