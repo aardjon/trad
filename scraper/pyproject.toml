@@ -131,6 +131,13 @@ confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFIN
 # The 'disable' and 'enable' settings configure the rules checked by PyLint.
 # categories.
 disable = [
+  # too-few-public-methods
+  # Disabled because a class (even with only one member) is often more flexible
+  # for future extension (i.e., if a second method is needed, the class can simply be extended while
+  # a function needs to be refactored). But of course it's also not forbidden to simply use a
+  # function if that's really all we want in a certain situation.
+  "too-few-public-methods",
+
   # Disable all rules that are checked by ruff or mypy, to avoid unnecessary double checks
   # Comparison table: https://github.com/astral-sh/ruff/issues/970
   # Last checked: 2024-12-15
