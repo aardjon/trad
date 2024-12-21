@@ -4,6 +4,10 @@
 #
 #    pip-compile --constraint=app-requirements.txt --extra=dev --output-file=dev-requirements.txt --strip-extras pyproject.toml
 #
+astroid==3.3.6
+    # via
+    #   pylint
+    #   pylint-restricted-imports
 beautifulsoup4==4.12.3
     # via
     #   -c app-requirements.txt
@@ -19,6 +23,8 @@ charset-normalizer==3.4.0
     #   requests
 coverage==7.6.9
     # via trad_scraper (pyproject.toml)
+dill==0.3.9
+    # via pylint
 html5lib==1.1
     # via
     #   -c app-requirements.txt
@@ -31,6 +37,8 @@ iniconfig==2.0.0
     # via pytest
 invoke==2.2.0
     # via trad_scraper (pyproject.toml)
+isort==5.13.2
+    # via pylint
 lidipy==0.3.1
     # via
     #   -c app-requirements.txt
@@ -39,6 +47,8 @@ lxml==5.3.0
     # via
     #   -c app-requirements.txt
     #   pandas
+mccabe==0.7.0
+    # via pylint
 mypy==1.13.0
     # via trad_scraper (pyproject.toml)
 mypy-extensions==1.0.0
@@ -56,8 +66,16 @@ pandas==2.2.3
     #   trad_scraper (pyproject.toml)
 pandas-stubs==2.2.3.241126
     # via trad_scraper (pyproject.toml)
+platformdirs==4.3.6
+    # via pylint
 pluggy==1.5.0
     # via pytest
+pylint==3.3.2
+    # via
+    #   pylint-restricted-imports
+    #   trad_scraper (pyproject.toml)
+pylint-restricted-imports==0.2.2
+    # via trad_scraper (pyproject.toml)
 pytest==8.3.4
     # via trad_scraper (pyproject.toml)
 python-dateutil==2.9.0.post0
@@ -83,6 +101,8 @@ soupsieve==2.6
     # via
     #   -c app-requirements.txt
     #   beautifulsoup4
+tomlkit==0.13.2
+    # via pylint
 types-beautifulsoup4==4.12.0.20241020
     # via trad_scraper (pyproject.toml)
 types-html5lib==1.1.11.20241018
