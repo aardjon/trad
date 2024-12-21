@@ -135,6 +135,30 @@ disable = [
 
 enable = [
   "all",
+  # Explicitly enable the rules from the restricted-import plugin
+  "E6901",
+  "E6902",
+]
+
+[tool.pylint."restricted import"]
+# Configuration of the "pylint_restricted_imports" plugin
+
+# Check restricted imports recursively
+restricted-import-recurse=true
+
+# Colon/semicolon-delimited sets of names that determine what modules are
+# allowed to be imported from another module
+# "trad.a:trad.r1;trad.r2" means: trad.a must not import trad.r1 or trad.r2"
+restricted-imports=[
+  # Restrictions derived from the Clean Architecture Pattern:
+  "trad.crosscuttings:trad.core;trad.adapters;trad.infrastructure;trad.main",
+  "trad.core:trad.adapters;trad.infrastructure;trad.main",
+  "trad.adapters:trad.infrastructure;trad.main",
+  "trad.infrastructure:trad.main;trad.core",
+
+  # Restrictions derived from the Pipes-and-Filters Pattern within trad.adapters:
+  "trad.adapters.filters:trad.adapters.pipes",
+  "trad.adapters.pipes:trad.adapters.filters",
 ]
 
 
