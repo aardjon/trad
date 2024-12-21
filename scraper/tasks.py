@@ -30,17 +30,26 @@ def analyze(context: Context) -> None:
     If any of the linter commands fails (i.e. finds some issues), only the last failure is
     propagated.
     """
+    def print_step(linter_name: str) -> None:
+        print()
+        print("*"*80)
+        print(f"Linting with {linter_name}")
+        print("*"*80)
+
     last_failure = None
+    print_step("ruff")
     try:
         lint_ruff(context)
     except UnexpectedExit as e:
         last_failure = e
 
+    print_step("mypy")
     try:
         lint_mypy(context)
     except UnexpectedExit as e:
         last_failure = e
 
+    print_step("pylint")
     try:
         lint_pylint(context)
     except UnexpectedExit as e:
@@ -48,6 +57,7 @@ def analyze(context: Context) -> None:
 
     if last_failure:
         raise last_failure
+    print("No linter complained. Congratulations!")
 
 
 @task
