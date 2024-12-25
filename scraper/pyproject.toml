@@ -130,6 +130,7 @@ load-plugins = [
   "pylint_pytest",
 ]
 
+
 [tool.pylint."messages control"]
 # Only show warnings with the listed confidence levels. Leave empty to show all.
 # Valid levels: HIGH, CONTROL_FLOW, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
@@ -152,6 +153,10 @@ disable = [
   # Disabled because blindly following this rule may cause hard to find problems and also can make
   # the code less explicit. It is also disabled by default for this reason.
   "use-implicit-booleaness-not-comparison-to-zero",
+
+  # Disabled because it essentially forbids the usage of while loops, which we don't consider a
+  # great benefit.
+  "while-used",
 
 
   # Disable most docstring checkers because we dont't want to enforce too much of their content and
