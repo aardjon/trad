@@ -30,11 +30,12 @@ def analyze(context: Context) -> None:
     If any of the linter commands fails (i.e. finds some issues), only the last failure is
     propagated.
     """
+
     def print_step(linter_name: str) -> None:
         print()
-        print("*"*80)
+        print("*" * 80)
         print(f"Linting with {linter_name}")
-        print("*"*80)
+        print("*" * 80)
 
     last_failure = None
     print_step("ruff")
