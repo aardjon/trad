@@ -21,7 +21,7 @@ class FilterStage(Enum):
     (e.g. initializing the storage).
     """
 
-    FILLING = auto()
+    IMPORTING = auto()
     """
     The storage already contains some but still uncomplete data. This is the state in which most
     filters run, additional data shall be added in this stage.

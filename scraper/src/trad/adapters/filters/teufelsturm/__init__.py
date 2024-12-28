@@ -35,7 +35,7 @@ class TeufelsturmDataFilter(Filter):
     @staticmethod
     @override
     def get_stage() -> FilterStage:
-        return FilterStage.FILLING
+        return FilterStage.IMPORTING
 
     @override
     def get_name(self) -> str:
