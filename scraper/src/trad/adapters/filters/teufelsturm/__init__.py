@@ -53,9 +53,11 @@ class TeufelsturmDataFilter(Filter):
         chunk_size: Final = 15000
         route_ids: list[int] = []
         while True:
+            start_idx = len(route_ids) + 1  # The remote site starts counting at 1
+            _logger.debug("Requesting %d route IDs, starting with %d", chunk_size, start_idx)
             routelist_page = self._http_boundary.retrieve_text_resource(
                 self._ROUTE_LIST_URL.format(
-                    start=len(route_ids) + 1,
+                    start=start_idx,
                     count=chunk_size,
                 ),
             )
@@ -69,7 +71,7 @@ class TeufelsturmDataFilter(Filter):
     def _perform_scan(self, pipe: Pipe, page_ids: list[int]) -> None:
         count: Final = len(page_ids)
         for idx, page_id in enumerate(page_ids):
-            _logger.debug("Importing route %d (%d of %d)", page_id, idx + 1, count)
+            _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text)
             if post_data.peak:
