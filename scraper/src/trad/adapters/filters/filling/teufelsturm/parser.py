@@ -5,6 +5,7 @@ Teufelsturm route page content parser.
 from __future__ import annotations
 
 import re
+import urllib
 from dataclasses import dataclass
 from datetime import datetime
 from io import StringIO
@@ -108,3 +109,11 @@ def parse_page(page_text: str) -> PageData:
     posts_table = df_list[3]
     posts = parse_posts(posts_table)
     return PageData(peak=Summit(name=peak), route=Route(route_name=route, grade=grade), posts=posts)
+
+
+def parse_route_list(page_text: str) -> set[int]:
+    """Parses the given HTML [page_text] and returns the IDs of all referenced routes."""
+    regexp = re.compile(r"/wege/bewertungen/anzeige\.php\?wegnr=\d+")
+    return {
+        int(urllib.parse.urlsplit(url).query.split("=")[1]) for url in regexp.findall(page_text)
+    }

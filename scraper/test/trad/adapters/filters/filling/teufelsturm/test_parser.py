@@ -15,6 +15,7 @@ from trad.adapters.filters.filling.teufelsturm.parser import (
     parse_post,
     parse_posts,
     parse_rating,
+    parse_route_list,
     parse_user_name,
 )
 from trad.core.entities import Post
@@ -165,7 +166,7 @@ def test_parse_user(input_text: str) -> None:
 
 def test_parse_page() -> None:
     dir_name = Path(__file__).parent
-    with dir_name.joinpath("parser_test_sample.html").open("rt", encoding="iso-8859-1") as file:
+    with dir_name.joinpath("route_page_sample.html").open("rt", encoding="iso-8859-1") as file:
         page_text = file.read()
     page_data = parse_page(page_text)
     assert page_data.peak.name == "Beispielwand"
@@ -175,3 +176,26 @@ def test_parse_page() -> None:
     assert page_data.posts[0].user_name == "Max Mustermann"
     assert page_data.posts[0].comment.startswith("Lorem ipsum")
     assert page_data.posts[0].rating == 0
+
+
+def test_parse_route_list() -> None:
+    """
+    Ensures that the route IDs are extracted correctly from the route list HTML page.
+    """
+    dir_name = Path(__file__).parent
+    page_text = dir_name.joinpath("route_list_sample.html").read_text(encoding="iso-8859-1")
+    route_ids = parse_route_list(page_text)
+
+    expected_route_ids = {
+        13336,
+        13583,
+        277,
+        11524,
+        6118,
+        13582,
+        3293,
+        11040,
+        8361,
+        3143,
+    }
+    assert route_ids == expected_route_ids
