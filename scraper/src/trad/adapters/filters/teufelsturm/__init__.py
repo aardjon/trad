@@ -6,7 +6,7 @@ from logging import getLogger
 from typing import Final, override
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary
-from trad.adapters.filters.filling.teufelsturm.parser import parse_page, parse_route_list
+from trad.adapters.filters.teufelsturm.parser import parse_page, parse_route_list
 from trad.core.boundaries.filters import Filter, FilterStage
 from trad.core.boundaries.pipes import Pipe
 from trad.crosscuttings.di import DependencyProvider

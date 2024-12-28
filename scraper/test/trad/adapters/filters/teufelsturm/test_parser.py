@@ -1,5 +1,5 @@
 """
-Unit tests for the trad.adapters.filters.filling.teufelsturm.parser module.
+Unit tests for the trad.adapters.filters.teufelsturm.parser module.
 """
 
 import datetime
@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 import pytz
 
-from trad.adapters.filters.filling.teufelsturm.parser import (
+from trad.adapters.filters.teufelsturm.parser import (
     parse_page,
     parse_post,
     parse_posts,
