@@ -68,6 +68,13 @@ namespace_packages = true
 # Please refer tp https://mypy.readthedocs.io/en/stable/error_codes.html for information about the
 # available error codes.
 strict = true  # Enable strict mode
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+# Enable additional error codes that seem to be not included in 'strict'
+enable_error_code = ["ignore-without-code"]
+
+# Disabled error codes:
 disable_error_code = "type-abstract"
 
 # Reasoning and rationales for the disabled error codes:
@@ -78,7 +85,7 @@ disable_error_code = "type-abstract"
 #   May be re-enabled once this issues is fixed.
 
 
-# Override some settings for external packages to avoid issues them
+# Override some settings for external packages to avoid issues from them
 [[tool.mypy.overrides]]
 module = "lidipy"
 implicit_reexport = true
