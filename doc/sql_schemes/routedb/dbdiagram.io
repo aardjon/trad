@@ -1,3 +1,10 @@
+Table database_metadata {
+  schema_version_major integer [not null]
+  schema_version_minor integer [not null]
+  compile_time text [not null]
+  vendor text [not null]
+}
+
 Table summits {
   id integer [primary key]
   summit_name text [not null]

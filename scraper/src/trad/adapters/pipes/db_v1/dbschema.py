@@ -51,6 +51,53 @@ class TableSchema(metaclass=ABCMeta):
         """
 
 
+class DbMetadataTable(TableSchema):
+    """
+    Represents the "database_metadata" table containing some static metadata. Contains exactly one
+    row only.
+    """
+
+    TABLE_NAME = "database_metadata"
+    """ Name of the table. """
+
+    COLUMN_SCHEMA_VERSION_MAJOR: Final = "schema_version_major"
+    """ Name of the major schema version column. """
+
+    COLUMN_SCHEMA_VERSION_MINOR: Final = "schema_version_minor"
+    """ Name of the minor schema version column. """
+
+    COLUMN_COMPILE_TIME: Final = "compile_time"
+    """ Name of the compile time column. """
+
+    COLUM_VENDOR: Final = "vendor"
+    """ Name of the vendor string column. """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def column_specification(self) -> list[ColumnDefinition]:
+        return [
+            ColumnDefinition(self.COLUMN_SCHEMA_VERSION_MAJOR, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_SCHEMA_VERSION_MINOR, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_COMPILE_TIME, ColumnType.STRING, nullable=False),
+            ColumnDefinition(self.COLUM_VENDOR, ColumnType.STRING, nullable=False),
+        ]
+
+    @override
+    def indices(self) -> list[IndexDefinition]:
+        return []
+
+    @override
+    def primary_key(self) -> list[EntityName]:
+        return []
+
+    @override
+    def unique_constraints(self) -> list[list[EntityName]]:
+        return []
+
+
 class SummitsTable(TableSchema):
     """
     Represents the `summits` table containing all summit data.

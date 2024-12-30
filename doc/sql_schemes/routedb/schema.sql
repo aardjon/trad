@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS database_metadata 
+	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+	 schema_version_major INTEGER NOT NULL,
+	 schema_version_minor INTEGER NOT NULL,
+	 compile_time TEXT NOT NULL,
+	 vendor TEXT NOT NULL);
+
 CREATE TABLE IF NOT EXISTS summits 
 	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
 	 summit_name TEXT NOT NULL UNIQUE);

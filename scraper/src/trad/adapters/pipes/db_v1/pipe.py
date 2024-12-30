@@ -9,7 +9,13 @@ from typing import TYPE_CHECKING, Final, override
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
 from trad.adapters.boundaries.database.structure import CreateIndexQuery, CreateTableQuery
-from trad.adapters.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitsTable, TableSchema
+from trad.adapters.pipes.db_v1.dbschema import (
+    DbMetadataTable,
+    PostsTable,
+    RoutesTable,
+    SummitsTable,
+    TableSchema,
+)
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import Post, Route, Summit
 
@@ -45,6 +51,7 @@ class DbSchemaV1Pipe(Pipe):
         self.__database_boundary.connect(self.__destination_file, overwrite=True)
 
         table_schemes: Sequence[type[TableSchema]] = (
+            DbMetadataTable,
             SummitsTable,
             RoutesTable,
             PostsTable,
