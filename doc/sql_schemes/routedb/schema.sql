@@ -1,13 +1,13 @@
-CREATE TABLE IF NOT EXISTS peaks 
+CREATE TABLE IF NOT EXISTS summits 
 	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
-	 peak_name TEXT NOT NULL UNIQUE);
+	 summit_name TEXT NOT NULL UNIQUE);
 	 
-CREATE INDEX IdxPeakId ON peaks (id);
-CREATE INDEX IdxPeakName ON peaks (peak_name);	
+CREATE INDEX IdxSummitId ON summits (id);
+CREATE INDEX IdxSummitName ON summits (summit_name);	
 
 CREATE TABLE IF NOT EXISTS routes 
 	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 peak_id INTEGER NOT NULL,
+	 summit_id INTEGER NOT NULL,
 	 route_name TEXT NOT NULL,
 	 route_grade TEXT NOT NULL,
 	 danger BOOLEAN NOT NULL DEFAULT 0,
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS routes
 	 grade_rp INTEGER NOT NULL DEFAULT 0,
 	 grade_ou INTEGER NOT NULL DEFAULT 0,
 	 grade_jump INTEGER NOT NULL DEFAULT 0,
-	 UNIQUE(peak_id,route_name,route_grade),
-	 FOREIGN KEY(peak_id) REFERENCES peaks (id) ON DELETE CASCADE);
+	 UNIQUE(summit_id,route_name,route_grade),
+	 FOREIGN KEY(summit_id) REFERENCES summits (id) ON DELETE CASCADE);
 	 
 CREATE INDEX IdxRouteId ON routes (id);
 CREATE INDEX IdxRouteName ON routes (route_name);

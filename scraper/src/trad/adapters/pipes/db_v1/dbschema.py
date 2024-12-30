@@ -60,13 +60,13 @@ class SummitsTable(TableSchema):
     when referring to this table or its columns to make future schema changes easier.
     """
 
-    TABLE_NAME = "peaks"
+    TABLE_NAME = "summits"
     """ Name of the table. """
 
     COLUMN_ID: Final = "id"
     """ Name of the ID column. """
 
-    COLUMN_NAME: Final = "peak_name"
+    COLUMN_NAME: Final = "summit_name"
     """ Name of the summit name column. """
 
     @override
@@ -84,7 +84,7 @@ class SummitsTable(TableSchema):
 
     @override
     def indices(self) -> list[IndexDefinition]:
-        return [IndexDefinition(name="IdxPeakName", column_names=[self.COLUMN_NAME])]
+        return [IndexDefinition(name="IdxSummitName", column_names=[self.COLUMN_NAME])]
 
     @override
     def primary_key(self) -> list[EntityName]:
@@ -110,7 +110,7 @@ class RoutesTable(TableSchema):
     COLUMN_ROUTE_ID: Final = "id"
     """ Name of the route ID column. """
 
-    COLUMN_SUMMIT_ID: Final = "peak_id"
+    COLUMN_SUMMIT_ID: Final = "summit_id"
     """ Name of the summit ID column (referencing the summit a route belongs to). """
 
     COLUMN_NAME: Final = "route_name"

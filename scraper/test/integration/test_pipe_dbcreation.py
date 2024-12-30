@@ -16,7 +16,9 @@ from trad.infrastructure.sqlite3db import Sqlite3Database
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
     post_date: Final = datetime.datetime.now(tz=datetime.UTC)
     post_rating: Final = 2
-    expected_index_count: Final = 2  # 'peaks' and 'routes' tables each have one user-defined index
+    expected_index_count: Final = (
+        2  # 'summits' and 'routes' tables each have one user-defined index
+    )
 
     pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
     pipe.initialize_pipe()
@@ -39,7 +41,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     connection = connect(str(expected_db_file))
 
     # Ensure the summit has been added
-    result_set = list(connection.execute("SELECT peak_name FROM peaks"))
+    result_set = list(connection.execute("SELECT summit_name FROM summits"))
     assert len(result_set) == 1
     assert result_set[0][0] == "Falkenturm"
 

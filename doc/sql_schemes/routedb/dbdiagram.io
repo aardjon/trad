@@ -1,11 +1,11 @@
-Table peaks {
+Table summits {
   id integer [primary key]
-  peak_name text [not null]
+  summit_name text [not null]
 }
 
 Table routes {
   id integer [primary key]
-  peak_id integer [ref: > peaks.id, not null]
+  summit_id integer [ref: > summits.id, not null]
   route_name text [not null]
   route_grade text [not null]
   grade_af integer [not null]

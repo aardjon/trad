@@ -10,13 +10,13 @@ library;
 /// to make future schema changes easier.
 class SummitTable {
   /// Name of the table.
-  static const String tableName = 'peaks';
+  static const String tableName = 'summits';
 
   /// Name of the ID column.
   static const String columnId = '$tableName.id';
 
   /// Name of the summit name column.
-  static const String columnName = '$tableName.peak_name';
+  static const String columnName = '$tableName.summit_name';
 }
 
 /// Represents the `routes` table containing all route data.
@@ -32,7 +32,7 @@ class RoutesTable {
   static const String columnRouteId = '$tableName.id';
 
   /// Name of the summit ID column (referencing the summit a route belongs to).
-  static const String columnSummitId = '$tableName.peak_id';
+  static const String columnSummitId = '$tableName.summit_id';
 
   /// Name of the route name column.
   static const String columnName = '$tableName.route_name';
