@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS database_metadata
 
 CREATE TABLE IF NOT EXISTS summits 
 	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
-	 summit_name TEXT NOT NULL UNIQUE);
+	 summit_name TEXT NOT NULL UNIQUE,
+	 latitude INTEGER NOT NULL,
+	 longitude INTEGER NOT NULL);
 	 
 CREATE INDEX IdxSummitId ON summits (id);
 CREATE INDEX IdxSummitName ON summits (summit_name);	

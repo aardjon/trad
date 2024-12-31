@@ -116,6 +116,12 @@ class SummitsTable(TableSchema):
     COLUMN_NAME: Final = "summit_name"
     """ Name of the summit name column. """
 
+    COLUMN_LATITUDE: Final = "latitude"
+    """ Name of the latitude column. """
+
+    COLUMN_LONGITUDE: Final = "longitude"
+    """ Name of the longitude column. """
+
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
@@ -127,6 +133,8 @@ class SummitsTable(TableSchema):
                 self.COLUMN_ID, ColumnType.INTEGER, nullable=False, autoincrement=True
             ),
             ColumnDefinition(self.COLUMN_NAME, ColumnType.STRING, nullable=False),
+            ColumnDefinition(self.COLUMN_LATITUDE, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_LONGITUDE, ColumnType.INTEGER, nullable=False),
         ]
 
     @override

@@ -17,6 +17,12 @@ class SummitTable {
 
   /// Name of the summit name column.
   static const String columnName = '$tableName.summit_name';
+
+  /// Name of the latitude column.
+  static const String columnLatitude = '$tableName.latitude';
+
+  /// Name of the longitude column.
+  static const String columnLongitude = '$tableName.longitude';
 }
 
 /// Represents the `routes` table containing all route data.

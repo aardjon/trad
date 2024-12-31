@@ -8,6 +8,8 @@ Table database_metadata {
 Table summits {
   id integer [primary key]
   summit_name text [not null]
+  latitude INTEGER [not null]
+  longitude INTEGER [not null]
 }
 
 Table routes {

@@ -89,7 +89,13 @@ class DbSchemaV1Pipe(Pipe):
         self.__database_boundary.execute_insert(
             InsertQuery(
                 table_name=SummitsTable.TABLE_NAME,
-                data_row=DataRow({SummitsTable.COLUMN_NAME: summit.name}),
+                data_row=DataRow(
+                    {
+                        SummitsTable.COLUMN_NAME: summit.name,
+                        SummitsTable.COLUMN_LATITUDE: 0,
+                        SummitsTable.COLUMN_LONGITUDE: 0,
+                    }
+                ),
             )
         )
 
