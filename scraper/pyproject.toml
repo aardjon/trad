@@ -396,6 +396,13 @@ enable = [
   "E6902",
 ]
 
+
+[tool.pylint.design]
+# Configuration of the design checker
+
+# Allow more class attributes than the default 7
+max-attributes=10
+
 [tool.pylint."restricted import"]
 # Configuration of the "pylint_restricted_imports" plugin
 
