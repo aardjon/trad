@@ -20,6 +20,7 @@ class HttpNetworkingBoundary(metaclass=ABCMeta):
         If the resource is available in different formats, the one best matching "text" is chosen.
         Raises in case of problems, such as:
          - Connection problem
+         - Connection timeout
          - Resource not available
          - Not a text resource
         """
