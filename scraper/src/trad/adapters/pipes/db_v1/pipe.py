@@ -2,25 +2,23 @@
 Concrete pipe implementation writing a route database with schema version 1.
 """
 
+import datetime
 from logging import getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, override
+from typing import Final, override
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
 from trad.adapters.boundaries.database.structure import CreateIndexQuery, CreateTableQuery
 from trad.adapters.pipes.db_v1.dbschema import (
+    DatabaseSchema,
     DbMetadataTable,
     PostsTable,
     RoutesTable,
     SummitsTable,
-    TableSchema,
 )
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import Post, Route, Summit
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 _logger = getLogger(__name__)
 
@@ -50,14 +48,13 @@ class DbSchemaV1Pipe(Pipe):
         _logger.debug("Initializing routedb pipe for writing into %s", self.__destination_file)
         self.__database_boundary.connect(self.__destination_file, overwrite=True)
 
-        table_schemes: Sequence[type[TableSchema]] = (
-            DbMetadataTable,
-            SummitsTable,
-            RoutesTable,
-            PostsTable,
-        )
-        for table_class in table_schemes:
-            table_definition = table_class()
+        schema = DatabaseSchema()
+        self._create_schema(schema)
+        self._write_metadata(schema)
+
+    def _create_schema(self, schema_definition: DatabaseSchema) -> None:
+        _logger.debug("Creating database schema")
+        for table_definition in schema_definition.get_table_schemata():
             # Create the table
             self.__database_boundary.execute_create_table(
                 CreateTableQuery(
@@ -75,6 +72,25 @@ class DbSchemaV1Pipe(Pipe):
                         index_definition=index,
                     )
                 )
+
+    def _write_metadata(self, schema_definition: DatabaseSchema) -> None:
+        _logger.debug("Writing database metadata")
+        major, minor = schema_definition.get_schema_version()
+        self.__database_boundary.execute_insert(
+            InsertQuery(
+                table_name=DbMetadataTable.TABLE_NAME,
+                data_row=DataRow(
+                    {
+                        DbMetadataTable.COLUMN_SCHEMA_VERSION_MAJOR: major,
+                        DbMetadataTable.COLUMN_SCHEMA_VERSION_MINOR: minor,
+                        DbMetadataTable.COLUM_VENDOR: "",
+                        DbMetadataTable.COLUMN_COMPILE_TIME: datetime.datetime.now(
+                            tz=datetime.UTC
+                        ).isoformat(),
+                    }
+                ),
+            )
+        )
 
     @override
     def collect_statistics(self) -> None:

@@ -3,6 +3,7 @@ Contains information about the database schema, e.g. table structure and column 
 """
 
 from abc import ABCMeta, abstractmethod
+from collections.abc import Sequence
 from typing import Final, override
 
 from trad.adapters.boundaries.database.common import EntityName
@@ -298,3 +299,43 @@ class PostsTable(TableSchema):
     @override
     def unique_constraints(self) -> list[list[EntityName]]:
         return []
+
+
+class DatabaseSchema:
+    """
+    Represents the whole database schema itself.
+    """
+
+    _MAJOR_VERSION: Final = 1
+    """
+    Major schema version.
+
+    To be incremented for incompatible schema changes, i.e. the mobile app needs to be adapted to
+    work with the new database. For example, the removal or renaming of column or tables.
+    When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
+    """
+
+    _MINOR_VERSION: Final = 0
+    """
+    Minor schema version.
+
+    To be incremented for backward-compatible schema changes, i.e. the mobile app can use the new
+    database without adaptions (but may of course lack some new features/improvements). Examples:
+     - Adding a new table or column with additional data
+     - Adding a new index (improving performance)
+    """
+
+    def get_table_schemata(self) -> Sequence[TableSchema]:
+        """
+        Return all table definitions that are part of this schema version.
+        """
+        return (
+            DbMetadataTable(),
+            SummitsTable(),
+            RoutesTable(),
+            PostsTable(),
+        )
+
+    def get_schema_version(self) -> tuple[int, int]:
+        """Returns the version of this database schema as a tuple of (major, minor)."""
+        return self._MAJOR_VERSION, self._MINOR_VERSION
