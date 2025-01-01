@@ -244,9 +244,8 @@ of the *route database* use cases.
 
 The `scraper` produces a single route database file which can then be published or moved to a
 mobile device. The `mobileapp` imports this file, replacing the previous route database. So the
-interface between the two parts is defined by the file format and schema of the route database.
-
-TODO: Link to the interface definition between scraper and mobile app
+interface between the two parts is defined by the file format and schema of the route database,
+which is documented in [Schema of the Route Database](sql_schemes/routedb/dbdiagram.io).
 
 
 ## 5.2 Level 2: Common Considerations
