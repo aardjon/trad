@@ -21,6 +21,6 @@ class RequestsHttp(HttpNetworkingBoundary):
         page = requests.get(
             url=url,
             headers={"User-Agent": "Thunder Client (https://www.thunderclient.com)"},
-            timeout=5,
+            timeout=None,
         )
         return page.text
