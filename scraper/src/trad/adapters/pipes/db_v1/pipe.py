@@ -125,7 +125,7 @@ class DbSchemaV1Pipe(Pipe):
                         PostsTable.COLUMN_ROUTE_ID: route_query,
                         PostsTable.COLUMN_USERNAME: post.user_name,
                         PostsTable.COLUMN_COMMENT: post.comment,
-                        PostsTable.COLUMN_TIMESTAMP: post.post_date,
+                        PostsTable.COLUMN_TIMESTAMP: post.post_date.isoformat(),
                         PostsTable.COLUMN_RATING: post.rating,
                     }
                 ),
