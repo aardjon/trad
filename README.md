@@ -8,19 +8,19 @@ A utility for climbing in the Saxon Switzerland area providing the following mai
 
 ## Setup & Running
 
-To run the app (locally or on any mobile device), you need the route database file named `peaks.sqlite` (currently not publicly available for legal reasons). Put it into the data directory your operating system assigned to the `trad` application. Some examples for the data directory on different platforms are:
- - Linux: `$HOME/.local/share/trad/`
- - Windows: `%APPDATA%\trad`
- - Android: `/data/user/0/de.wesenigk.trad/files/`
+When running the `mobile app` for the first time (locally or on any mobile device), it will ask you
+to import a route database file (which is currently not publicly available for legal reasons). If
+you don't have this file, you can create it by yourself using the `scraper`:
 
-On startup, the expected file path is logged on the info level as follows:
+1. [Setup the Route Data Scraper](CONTRIBUTING.md#route-data-scraper)
+2. Run the following commands from the source root directory:
 
-```
-[2024-08-17 19:35:43.791645][INFO][trad.adapters.storage.routedb] Connecting to route database at: /home/aardjon/.local/share/trad/peaks.sqlite
+```bash
+cd scraper/src
+mkdir output_directory
+python scraper.py output_directory
 ```
 
-If the file is not found, the app start fails with the following error message:
-
-```
-SqliteException(14): while opening the database, unable to open database file, unable to open database file (code 14)
-```
+The new route database file is written into `output_directory`. Depending on your network speed,
+running the scraper may take up an hour or even longer. Provide `-v` to enable some more verbose
+debug log, which will give you some kind of progress feedback.
