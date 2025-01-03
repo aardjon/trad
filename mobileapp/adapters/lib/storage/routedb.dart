@@ -116,9 +116,9 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     );
     query.setWhereCondition('${SummitTable.columnId} = ?', <int>[summitDataId]);
     List<ResultRow> resultSet = await _repository.executeQuery(query);
-    int? id = resultSet[0].getIntValue(SummitTable.columnId);
-    String? name = resultSet[0].getStringValue(SummitTable.columnName);
-    return Summit(id!, name!);
+    int id = resultSet[0].getIntValue(SummitTable.columnId);
+    String name = resultSet[0].getStringValue(SummitTable.columnName);
+    return Summit(id, name);
   }
 
   @override
@@ -142,9 +142,9 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Summit> summits = <Summit>[];
     for (final ResultRow dataRow in resultSet) {
-      int? id = dataRow.getIntValue(SummitTable.columnId);
-      String? name = dataRow.getStringValue(SummitTable.columnName);
-      summits.add(Summit(id!, name!));
+      int id = dataRow.getIntValue(SummitTable.columnId);
+      String name = dataRow.getStringValue(SummitTable.columnName);
+      summits.add(Summit(id, name));
     }
     return summits;
   }
@@ -191,11 +191,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Route> routes = <Route>[];
     for (final ResultRow dataRow in resultSet) {
-      int? routeId = dataRow.getIntValue(RoutesTable.columnRouteId);
-      String? name = dataRow.getStringValue(RoutesTable.columnName);
-      String? grade = dataRow.getStringValue(RoutesTable.columnGrade);
-      double? rating = dataRow.getDoubleValue(averageRatingColumnName);
-      routes.add(Route(routeId!, name!, grade!, rating));
+      int routeId = dataRow.getIntValue(RoutesTable.columnRouteId);
+      String name = dataRow.getStringValue(RoutesTable.columnName);
+      String grade = dataRow.getStringValue(RoutesTable.columnGrade);
+      double rating = dataRow.getDoubleValue(averageRatingColumnName);
+      routes.add(Route(routeId, name, grade, rating));
     }
     return routes;
   }
@@ -210,10 +210,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
     List<ResultRow> resultSet = await _repository.executeQuery(query);
 
-    int? id = resultSet[0].getIntValue(RoutesTable.columnRouteId);
-    String? name = resultSet[0].getStringValue(RoutesTable.columnName);
-    String? grade = resultSet[0].getStringValue(RoutesTable.columnGrade);
-    return Route(id!, name!, grade!, 0);
+    int id = resultSet[0].getIntValue(RoutesTable.columnRouteId);
+    String name = resultSet[0].getStringValue(RoutesTable.columnName);
+    String grade = resultSet[0].getStringValue(RoutesTable.columnGrade);
+    return Route(id, name, grade, 0);
   }
 
   @override
@@ -250,12 +250,12 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Post> posts = <Post>[];
     for (final ResultRow dataRow in resultSet) {
-      String? name = dataRow.getStringValue(PostsTable.columnName);
-      String? timestamp = dataRow.getStringValue(PostsTable.columnTimestamp);
-      String? comment = dataRow.getStringValue(PostsTable.columnComment);
-      int? rating = dataRow.getIntValue(PostsTable.columnRating);
-      DateTime postDate = DateTime.parse(timestamp!);
-      posts.add(Post(name!, postDate, comment!, rating!));
+      String name = dataRow.getStringValue(PostsTable.columnName);
+      String timestamp = dataRow.getStringValue(PostsTable.columnTimestamp);
+      String comment = dataRow.getStringValue(PostsTable.columnComment);
+      int rating = dataRow.getIntValue(PostsTable.columnRating);
+      DateTime postDate = DateTime.parse(timestamp);
+      posts.add(Post(name, postDate, comment, rating));
     }
     return posts;
   }
