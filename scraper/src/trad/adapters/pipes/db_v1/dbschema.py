@@ -3,6 +3,7 @@ Contains information about the database schema, e.g. table structure and column 
 """
 
 from abc import ABCMeta, abstractmethod
+from collections.abc import Sequence
 from typing import Final, override
 
 from trad.adapters.boundaries.database.common import EntityName
@@ -51,6 +52,53 @@ class TableSchema(metaclass=ABCMeta):
         """
 
 
+class DbMetadataTable(TableSchema):
+    """
+    Represents the "database_metadata" table containing some static metadata. Contains exactly one
+    row only.
+    """
+
+    TABLE_NAME = "database_metadata"
+    """ Name of the table. """
+
+    COLUMN_SCHEMA_VERSION_MAJOR: Final = "schema_version_major"
+    """ Name of the major schema version column. """
+
+    COLUMN_SCHEMA_VERSION_MINOR: Final = "schema_version_minor"
+    """ Name of the minor schema version column. """
+
+    COLUMN_COMPILE_TIME: Final = "compile_time"
+    """ Name of the compile time column. """
+
+    COLUM_VENDOR: Final = "vendor"
+    """ Name of the vendor string column. """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def column_specification(self) -> list[ColumnDefinition]:
+        return [
+            ColumnDefinition(self.COLUMN_SCHEMA_VERSION_MAJOR, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_SCHEMA_VERSION_MINOR, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_COMPILE_TIME, ColumnType.STRING, nullable=False),
+            ColumnDefinition(self.COLUM_VENDOR, ColumnType.STRING, nullable=False),
+        ]
+
+    @override
+    def indices(self) -> list[IndexDefinition]:
+        return []
+
+    @override
+    def primary_key(self) -> list[EntityName]:
+        return []
+
+    @override
+    def unique_constraints(self) -> list[list[EntityName]]:
+        return []
+
+
 class SummitsTable(TableSchema):
     """
     Represents the `summits` table containing all summit data.
@@ -60,14 +108,20 @@ class SummitsTable(TableSchema):
     when referring to this table or its columns to make future schema changes easier.
     """
 
-    TABLE_NAME = "peaks"
+    TABLE_NAME = "summits"
     """ Name of the table. """
 
     COLUMN_ID: Final = "id"
     """ Name of the ID column. """
 
-    COLUMN_NAME: Final = "peak_name"
+    COLUMN_NAME: Final = "summit_name"
     """ Name of the summit name column. """
+
+    COLUMN_LATITUDE: Final = "latitude"
+    """ Name of the latitude column. """
+
+    COLUMN_LONGITUDE: Final = "longitude"
+    """ Name of the longitude column. """
 
     @override
     def table_name(self) -> EntityName:
@@ -80,11 +134,13 @@ class SummitsTable(TableSchema):
                 self.COLUMN_ID, ColumnType.INTEGER, nullable=False, autoincrement=True
             ),
             ColumnDefinition(self.COLUMN_NAME, ColumnType.STRING, nullable=False),
+            ColumnDefinition(self.COLUMN_LATITUDE, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_LONGITUDE, ColumnType.INTEGER, nullable=False),
         ]
 
     @override
     def indices(self) -> list[IndexDefinition]:
-        return [IndexDefinition(name="IdxPeakName", column_names=[self.COLUMN_NAME])]
+        return [IndexDefinition(name="IdxSummitName", column_names=[self.COLUMN_NAME])]
 
     @override
     def primary_key(self) -> list[EntityName]:
@@ -110,14 +166,32 @@ class RoutesTable(TableSchema):
     COLUMN_ROUTE_ID: Final = "id"
     """ Name of the route ID column. """
 
-    COLUMN_SUMMIT_ID: Final = "peak_id"
-    """ Name of the column referencing the summit a route belongs to. """
+    COLUMN_SUMMIT_ID: Final = "summit_id"
+    """ Name of the summit ID column (referencing the summit a route belongs to). """
 
     COLUMN_NAME: Final = "route_name"
     """ Name of the route name column. """
 
     COLUMN_GRADE: Final = "route_grade"
-    """ Name of the route grade column. """
+    """ Name of the grade name column (deprecated!). """
+
+    COLUMN_GRADE_AF: Final = "grade_af"
+    """ Name of the 'af' climbing grade column. """
+
+    COLUMN_GRADE_RP: Final = "grade_rp"
+    """ Name of the 'rp' climbing grade column. """
+
+    COLUMN_GRADE_OU: Final = "grade_ou"
+    """ Name of the 'ou' climbing grade column. """
+
+    COLUMN_GRADE_JUMP: Final = "grade_jump"
+    """ Name of the jumping grade column. """
+
+    COLUMN_STARS: Final = "stars"
+    """ Name of the star count column. """
+
+    COLUMN_DANGER: Final = "danger"
+    """ Name of the danger (exclamation) mark count column. """
 
     @override
     def table_name(self) -> EntityName:
@@ -139,6 +213,12 @@ class RoutesTable(TableSchema):
             ),
             ColumnDefinition(self.COLUMN_NAME, ColumnType.STRING, nullable=False),
             ColumnDefinition(self.COLUMN_GRADE, ColumnType.STRING, nullable=False),
+            ColumnDefinition(self.COLUMN_GRADE_AF, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_GRADE_RP, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_GRADE_OU, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_GRADE_JUMP, ColumnType.INTEGER, nullable=True),
+            ColumnDefinition(self.COLUMN_STARS, ColumnType.INTEGER, nullable=False),
+            ColumnDefinition(self.COLUMN_DANGER, ColumnType.BOOLEAN, nullable=False),
         ]
 
     @override
@@ -219,3 +299,43 @@ class PostsTable(TableSchema):
     @override
     def unique_constraints(self) -> list[list[EntityName]]:
         return []
+
+
+class DatabaseSchema:
+    """
+    Represents the whole database schema itself.
+    """
+
+    _MAJOR_VERSION: Final = 1
+    """
+    Major schema version.
+
+    To be incremented for incompatible schema changes, i.e. the mobile app needs to be adapted to
+    work with the new database. For example, the removal or renaming of column or tables.
+    When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
+    """
+
+    _MINOR_VERSION: Final = 0
+    """
+    Minor schema version.
+
+    To be incremented for backward-compatible schema changes, i.e. the mobile app can use the new
+    database without adaptions (but may of course lack some new features/improvements). Examples:
+     - Adding a new table or column with additional data
+     - Adding a new index (improving performance)
+    """
+
+    def get_table_schemata(self) -> Sequence[TableSchema]:
+        """
+        Return all table definitions that are part of this schema version.
+        """
+        return (
+            DbMetadataTable(),
+            SummitsTable(),
+            RoutesTable(),
+            PostsTable(),
+        )
+
+    def get_schema_version(self) -> tuple[int, int]:
+        """Returns the version of this database schema as a tuple of (major, minor)."""
+        return self._MAJOR_VERSION, self._MINOR_VERSION

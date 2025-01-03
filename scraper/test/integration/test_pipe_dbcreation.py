@@ -16,7 +16,9 @@ from trad.infrastructure.sqlite3db import Sqlite3Database
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
     post_date: Final = datetime.datetime.now(tz=datetime.UTC)
     post_rating: Final = 2
-    expected_index_count: Final = 2  # 'peaks' and 'routes' tables each have one user-defined index
+    expected_index_count: Final = (
+        2  # 'summits' and 'routes' tables each have one user-defined index
+    )
 
     pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
     pipe.initialize_pipe()
@@ -39,7 +41,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     connection = connect(str(expected_db_file))
 
     # Ensure the summit has been added
-    result_set = list(connection.execute("SELECT peak_name FROM peaks"))
+    result_set = list(connection.execute("SELECT summit_name FROM summits"))
     assert len(result_set) == 1
     assert result_set[0][0] == "Falkenturm"
 
@@ -64,3 +66,37 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
         )
     )
     assert len(result_set) == expected_index_count
+
+
+def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
+    """Ensures that the database metadata is written correctly."""
+    pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
+    pipe.initialize_pipe()
+
+    expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
+    assert expected_db_file.exists()
+
+    connection = connect(str(expected_db_file))
+
+    result_set = list(
+        connection.execute(
+            "SELECT schema_version_major, schema_version_minor, compile_time, vendor "
+            "FROM database_metadata"
+        )
+    )
+    assert len(result_set) == 1
+
+    # Check schema version
+    assert result_set[0][0] == 1
+    assert result_set[0][1] == 0
+
+    # Check vendor string
+    assert result_set[0][3] == ""
+
+    # Compare the creation time. Since the test takes a small amount of time, we cannot simply check
+    # for equality. Instead, check that the time difference is not too big instead, assuming that
+    # the test never needs more than a few seconds to run.
+    current_time: Final = datetime.datetime.now(tz=datetime.UTC)
+    compile_time = datetime.datetime.fromisoformat(result_set[0][2])
+    max_allowed_difference: Final = 30
+    assert (current_time - compile_time).total_seconds() < max_allowed_difference

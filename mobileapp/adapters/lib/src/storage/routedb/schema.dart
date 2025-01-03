@@ -10,13 +10,19 @@ library;
 /// to make future schema changes easier.
 class SummitTable {
   /// Name of the table.
-  static const String tableName = 'peaks';
+  static const String tableName = 'summits';
 
   /// Name of the ID column.
   static const String columnId = '$tableName.id';
 
   /// Name of the summit name column.
-  static const String columnName = '$tableName.peak_name';
+  static const String columnName = '$tableName.summit_name';
+
+  /// Name of the latitude column.
+  static const String columnLatitude = '$tableName.latitude';
+
+  /// Name of the longitude column.
+  static const String columnLongitude = '$tableName.longitude';
 }
 
 /// Represents the `routes` table containing all route data.
@@ -32,13 +38,31 @@ class RoutesTable {
   static const String columnRouteId = '$tableName.id';
 
   /// Name of the summit ID column (referencing the summit a route belongs to).
-  static const String columnSummitId = '$tableName.peak_id';
+  static const String columnSummitId = '$tableName.summit_id';
 
   /// Name of the route name column.
   static const String columnName = '$tableName.route_name';
 
-  /// Name of the route grade column.
+  /// Name of the grade name column (deprecated!).
   static const String columnGrade = '$tableName.route_grade';
+
+  /// Name of the "af" climbing grade column.
+  static const String columnGradeAf = '$tableName.grade_af';
+
+  /// Name of the "ou" climbing grade column.
+  static const String columnGradeOu = '$tableName.grade_ou';
+
+  /// Name of the "rp" climbing grade column.
+  static const String columnGradeRp = '$tableName.grade_rp';
+
+  /// Name of the jumping grade column.
+  static const String columnJumpGrade = '$tableName.grade_jump';
+
+  /// Name of the star count column.
+  static const String columnGradeStars = '$tableName.grade_stars';
+
+  /// Name of the danger (exclamation) mark count column.
+  static const String columnGradeDanger = '$tableName.grade_danger';
 }
 
 /// Represents the `posts` table containing all post data.
