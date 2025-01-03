@@ -139,7 +139,15 @@ class ResultRow {
   ///
   /// If the requested column doesn't exist in the result row or is of a different type, an
   /// [ArgumentError] is thrown (because this is usually a programming error).
-  int? getIntValue(String columnName) {
+  int getIntValue(String columnName) {
+    return _getValue(columnName)! as int;
+  }
+
+  /// Returns the value of the requested nullable integer column [columnName].
+  ///
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
+  int? getOptIntValue(String columnName) {
     return _getValue(columnName) as int?;
   }
 
@@ -147,7 +155,15 @@ class ResultRow {
   ///
   /// If the requested column doesn't exist in the result row or is of a different type, an
   /// [ArgumentError] is thrown (because this is usually a programming error).
-  double? getDoubleValue(String columnName) {
+  double getDoubleValue(String columnName) {
+    return _getValue(columnName)! as double;
+  }
+
+  /// Returns the value of the requested nullable floating-point column [columnName].
+  ///
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
+  double? getOptDoubleValue(String columnName) {
     return _getValue(columnName) as double?;
   }
 
@@ -155,7 +171,15 @@ class ResultRow {
   ///
   /// If the requested column doesn't exist in the result row or is of a different type, an
   /// [ArgumentError] is thrown (because this is usually a programming error).
-  String? getStringValue(String columnName) {
+  String getStringValue(String columnName) {
+    return _getValue(columnName)! as String;
+  }
+
+  /// Returns the value of the requested nullable string column [columnName].
+  ///
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
+  String? getOptStringValue(String columnName) {
     return _getValue(columnName) as String?;
   }
 
@@ -163,7 +187,15 @@ class ResultRow {
   ///
   /// If the requested column doesn't exist in the result row or is of a different type, an
   /// [ArgumentError] is thrown (because this is usually a programming error).
-  bool? getBoolValue(String columnName) {
+  bool getBoolValue(String columnName) {
+    return _getValue(columnName)! as bool;
+  }
+
+  /// Returns the value of the requested nullable boolean column [columnName].
+  ///
+  /// If the requested column doesn't exist in the result row or is of a different type, an
+  /// [ArgumentError] is thrown (because this is usually a programming error).
+  bool? getOptBoolValue(String columnName) {
     return _getValue(columnName) as bool?;
   }
 
