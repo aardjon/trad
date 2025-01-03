@@ -87,6 +87,9 @@ class Query {
   /// Specifies the names of the columns the result rows are ordered by.
   List<String> orderByColumns = <String>[];
 
+  /// Number of rows the result set shall be limited to, or null to return all results.
+  int? limit;
+
   /// Defines a query on a single database table.
   ///
   /// The name of the table and the names of all columns to request must be specified by [tableName]

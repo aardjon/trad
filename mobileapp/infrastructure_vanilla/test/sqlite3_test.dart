@@ -142,6 +142,11 @@ void main() {
         () => Query.table('table', <String>['name'])..groupByColumns = <String>['name', 'city'],
         "SELECT name AS 'name' FROM 'table' GROUP BY name, city",
       ),
+      // Ensure LIMIT works
+      (
+        () => Query.table('table', <String>['name'])..limit = 3,
+        "SELECT name AS 'name' FROM 'table' LIMIT 3",
+      ),
     ];
 
     for (final _QueryTableTestParameters singleRunParams in testParameters) {

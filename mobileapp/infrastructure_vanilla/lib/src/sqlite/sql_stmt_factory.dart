@@ -15,6 +15,7 @@ class SqlStmtFactory {
     sqlBuffer.write(_generateWhereClause(query));
     sqlBuffer.write(_generateGroupByPart(query));
     sqlBuffer.write(_generateOrderByPart(query));
+    sqlBuffer.write(_generateLimitPart(query));
     return sqlBuffer.toString();
   }
 
@@ -43,6 +44,10 @@ class SqlStmtFactory {
 
   String _generateOrderByPart(Query query) {
     return query.orderByColumns.isNotEmpty ? " ORDER BY ${query.orderByColumns.join(', ')}" : '';
+  }
+
+  String _generateLimitPart(Query query) {
+    return query.limit != null ? ' LIMIT ${query.limit}' : '';
   }
 
   /// Returns a normalized copy of the column name list.
