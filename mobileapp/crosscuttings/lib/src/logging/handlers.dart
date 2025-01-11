@@ -104,6 +104,8 @@ class _LogFormatter {
   /// Create the final string representation for the given log {record].
   String format(loglib.LogRecord record) {
     final String levelName = record.level.name.toUpperCase();
-    return '[${record.time}][$levelName][${record.loggerName}] ${record.message}';
+    final String error = record.error != null ? ' ${record.error}' : '';
+    final String stackTrace = record.stackTrace != null ? '\n${record.stackTrace}' : '';
+    return '[${record.time}][$levelName][${record.loggerName}] ${record.message}$error$stackTrace';
   }
 }

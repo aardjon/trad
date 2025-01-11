@@ -9,6 +9,29 @@ import 'package:test/test.dart';
 
 import 'package:crosscuttings/logging/logger.dart';
 
+/// Example exception for testing the exception logging mechanism.
+class _ExampleException implements Exception {
+  static const String message = 'Exception Message';
+
+  @override
+  String toString() {
+    return message;
+  }
+}
+
+/// Example StackTrace for testing the stack trace logging mechanism.
+class _ExampleStackTrace implements StackTrace {
+  static const String message = 'StackTrace Message';
+
+  @override
+  String toString() {
+    return message;
+  }
+}
+
+/// Type of a concrete log function (i.e. a Logger method). Used for test case parametrization.
+typedef _LogFunction = void Function(String message, Exception? error, StackTrace? stackTrace);
+
 /// Unit tests for the crosscuttings.logging component.
 void main() {
   /// Test cases for correct level propagation and filtering
@@ -68,6 +91,56 @@ void main() {
         for (int i = 1; i < expectedMessageCount; i++) {
           expect(fileContent[i - 1], contains('Message $i'));
         }
+      });
+    }
+  });
+
+  /// Ensure that the additional 'error' and 'stackTrace' parameters are forwarded properly with all
+  /// logging methods.
+  group('crosscuttings.logging.parameters', () {
+    _LogFunction getLoggingMethod(LogLevel level, Logger logger) {
+      switch (level) {
+        case LogLevel.fatal:
+          return logger.fatal;
+        case LogLevel.error:
+          return logger.error;
+        case LogLevel.warning:
+          return logger.warning;
+        case LogLevel.info:
+          return logger.info;
+        case LogLevel.debug:
+          return logger.debug;
+        case LogLevel.trace:
+          return logger.trace;
+        case LogLevel.off:
+        case LogLevel.all:
+          throw AssertionError('These LogLevels cannot be written into.');
+      }
+    }
+
+    List<LogLevel> paramTestData = <LogLevel>[
+      LogLevel.fatal,
+      LogLevel.error,
+      LogLevel.warning,
+      LogLevel.info,
+      LogLevel.debug,
+      LogLevel.trace,
+    ];
+    for (final LogLevel level in paramTestData) {
+      test(level, () {
+        // Configure the log level
+        final LogConfiguration logConfig = LogConfiguration();
+        logConfig.globalLevel = LogLevel.all;
+
+        // Run the actual test case
+        final Logger logger = Logger('test.channel');
+        _LogFunction logFunction = getLoggingMethod(level, logger);
+        logFunction('Some dummy txt', _ExampleException(), _ExampleStackTrace());
+
+        // Check that all parameter messages are written
+        List<String> fileContent = (logConfig.destination as MemoryLogDestination).loggedMessages;
+        expect(fileContent[0], contains(_ExampleException.message));
+        expect(fileContent[0], contains(_ExampleStackTrace.message));
       });
     }
   });
@@ -174,7 +247,7 @@ void main() {
   /// Special test cases to ensure the correct behaviour in error cases
   group('crosscuttings.logging.errors', () {
     /// Ensures the correct behaviour (ArgumentError) in case of an unknown LogDestination being
-    /// used. If this tets fails, you probably added a new [LogDestination] class without
+    /// used. If this test fails, you probably added a new [LogDestination] class without
     /// providing a corresponding [LogHandler] implementation.
     test('UnknownLogDestination', () {
       final LogConfiguration logConfig = LogConfiguration();
@@ -188,6 +261,6 @@ void main() {
   });
 }
 
-/// A new LogDestination without a correspoding handler implementation.
+/// A new LogDestination without a corresponding handler implementation.
 /// Used for testing some error behaviour.
 class _UnknownLogDestination extends LogDestination {}
