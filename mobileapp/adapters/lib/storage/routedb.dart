@@ -11,6 +11,7 @@ import 'package:core/entities/route.dart';
 import 'package:core/entities/sorting/posts_filter_mode.dart';
 import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
+import 'package:core/entities/errors.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
@@ -18,6 +19,7 @@ import '../boundaries/paths.dart';
 import '../boundaries/repositories/database.dart';
 import '../boundaries/repositories/filesystem.dart';
 import '../src/storage/routedb/schema.dart';
+import '../src/storage/version.dart';
 
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.adapters.storage.routedb');
@@ -46,8 +48,49 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   Future<void> startStorage() async {
     String connectionString = await _getExpectedDbFile();
     _logger.info('Connecting to route database at: $connectionString');
-    _repository.connect(connectionString, readOnly: true);
-    // TODO(aardjon): Check schema version!
+    await _startWithFile(connectionString);
+  }
+
+  Future<void> _startWithFile(String databaseFile) async {
+    _connectDatabase(databaseFile);
+    await _checkSchemaVersion(databaseFile);
+  }
+
+  /// Tries to connect the database with the given [connectionString]. Throws a
+  /// [StorageStartingException] in case of connection errors.
+  void _connectDatabase(String connectionString) {
+    try {
+      _repository.connect(connectionString, readOnly: true);
+    } on Exception catch (e) {
+      throw InaccessibleStorageException(connectionString, e);
+    }
+  }
+
+  /// Checks if the (already connected) database with the [connectionString] has a compatible schema
+  /// version. Throws [StorageStartingException] if it doesn't.
+  Future<void> _checkSchemaVersion(String connectionString) async {
+    Query query = Query.table(
+      MetadataTable.tableName,
+      <String>[MetadataTable.columnMajorVersion, MetadataTable.columnMinorVersion],
+    );
+    query.limit = 1;
+
+    ResultRows resultSet = <ResultRow>[];
+    try {
+      resultSet = await _repository.executeQuery(query);
+    } on Exception {
+      throw InvalidStorageFormatException(connectionString, 'Database is of an unexpected schema');
+    }
+    if (resultSet.isEmpty) {
+      throw InvalidStorageFormatException(connectionString, 'Database has no schema version');
+    }
+    Version databaseVersion = Version(
+      resultSet[0].getIntValue(MetadataTable.columnMajorVersion),
+      resultSet[0].getIntValue(MetadataTable.columnMinorVersion),
+    );
+    if (!databaseVersion.isCompatible(supportedSchemaVersion)) {
+      throw IncompatibleStorageException(connectionString, databaseVersion, supportedSchemaVersion);
+    }
   }
 
   @override
@@ -76,9 +119,15 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       throw PathNotFoundException(
         filePath,
         const OSError('File not found'),
-        'Unable to import "{filePath}" because it does not exist.',
+        'Unable to import "{filePath}" because it does not exist',
       );
     }
+
+    // Check if the given file is a usable route database by trying to start with it (throws if it
+    // is not).
+    _logger.debug('Checking database compatibility before import');
+    await _startWithFile(filePath);
+    _repository.disconnect();
 
     // Remove the existing database, if any
     if (destinationFile.existsSync()) {

@@ -3,6 +3,30 @@
 ///
 library;
 
+import '../version.dart';
+
+/// The schema version currently supported (and required) by this app.
+final Version supportedSchemaVersion = Version(1, 0);
+
+/// Contains some static metadata about the database itself. Contains exactly one row only which
+/// never changes.
+class MetadataTable {
+  /// Name of the table.
+  static const String tableName = 'database_metadata';
+
+  /// Name of the major schema version column.
+  static const String columnMajorVersion = '$tableName.schema_version_major';
+
+  /// Name of the minor schema version column.
+  static const String columnMinorVersion = '$tableName.schema_version_minor';
+
+  /// Name of the compile time column.
+  static const String columnCompileTime = '$tableName.compile_time';
+
+  /// Name of the vendor column.
+  static const String columnVendor = '$tableName.vendor';
+}
+
 /// Represents the `summits` table containing all summit data.
 ///
 /// The main purpose of this class is to provide a namespace with all string constants corresponding

@@ -113,4 +113,39 @@ void main() {
       });
     }
   });
+
+  /// Test cases for the toString method, ensuring the string serialization of Versions.
+  group('toString', () {
+    List<(Version, String)> stringTestParams = <(Version, String)>[
+      (Version(1, 2), '1.2'),
+      (Version(2, 1), '2.1'),
+      (Version(0, 0), '0.0'),
+      (Version(999, 999), '999.999'),
+    ];
+    for (final (Version, String) testParams in stringTestParams) {
+      Version version = testParams.$1;
+      String expectedString = testParams.$2;
+      test(expectedString, () {
+        expect(version.toString().contains(expectedString), isTrue);
+      });
+    }
+  });
+
+  /// Test cases for checking the hash calculation (hashCode pproperty)
+  group('hashCode', () {
+    List<(Version, int)> hashTestParams = <(Version, int)>[
+      (Version(1, 2), 1002),
+      (Version(2, 1), 2001),
+      (Version(0, 0), 0),
+      (Version(999, 999), 999999),
+    ];
+    for (final (Version, int) testParams in hashTestParams) {
+      Version version = testParams.$1;
+      int expectedResult = testParams.$2;
+
+      test('$expectedResult', () {
+        expect(version.hashCode == expectedResult, isTrue);
+      });
+    }
+  });
 }

@@ -22,8 +22,9 @@ import '../../entities/summit.dart';
 abstract interface class RouteDbStorageBoundary {
   /// Starts the storage, changing its state to STARTED.
   ///
-  /// An exception is thrown if the storage cannot be started (e.g. because of the database file
-  /// being not found or invalid).
+  /// A subtype of StorageStartingException is thrown if the storage cannot be started (e.g.
+  /// InaccessibleStorageException if the database file is not found, or
+  /// IncompatibleStorageException if it is not compatible).
   Future<void> startStorage();
 
   /// Stops the storage, changing its state to STOPPED.

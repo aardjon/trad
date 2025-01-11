@@ -11,6 +11,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
+import '../entities/errors.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
 import '../entities/sorting/posts_filter_mode.dart';
@@ -40,13 +41,27 @@ class RouteDbUseCases {
 
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
+    _logger.debug('Running use case importRouteDbFile()');
     if (_storageBoundary.isStarted()) {
       _storageBoundary.stopStorage();
     }
-    await _storageBoundary.importRouteDbFile(filePath);
-    await _storageBoundary.startStorage();
-    DateTime routeDbDate = await _storageBoundary.getCreationDate();
-    _presentationBoundary.updateRouteDbStatus(routeDbDate);
+    try {
+      await _storageBoundary.importRouteDbFile(filePath);
+    } catch (error, stackTrace) {
+      _logger.warning('Unable to import database file due to', error, stackTrace);
+      // TODO(aardjon): Request the UI to show an error
+    }
+
+    // TODO(aardjon): This is a code duplication with the startApplication() use case, eliminate!
+    try {
+      // Start again with the defautl database. If the import failed, this is the previous one
+      await _storageBoundary.startStorage();
+      DateTime routeDbDate = await _storageBoundary.getCreationDate();
+      _presentationBoundary.updateRouteDbStatus(routeDbDate);
+    } on StorageStartingException {
+      // No or an invalid DB may have been there before already
+      _presentationBoundary.updateRouteDbStatus(null);
+    }
   }
 
   /// Use Case: Switch to the summit list, resetting any previous filter
