@@ -19,75 +19,57 @@ void main() {
       logConfig.destination = MemoryLogDestination();
     });
 
-    /// Ensures that all messages matching the log level configuration are be written to the log
+    /// Ensure that all messages matching the log level configuration are be written to the log
     /// file. To achieve this, two messages are written to each level. The [level] parameter
     /// defines the level until which the messages must end up in the file. The
     /// [expectedMessageCount] defines the number of log messages that are expected to end up in
-    /// the log file. If not messages are written, the file must not be created at all.
-    void runTestCase(LogLevel level, int expectedMessageCount) {
-      // Configure the log level
-      final LogConfiguration logConfig = LogConfiguration();
-      logConfig.globalLevel = level;
+    /// the log file. If no messages are written, the file must not be created at all.
+    List<(LogLevel, int)> testCaseParams = <(LogLevel, int)>[
+      (LogLevel.all, 12),
+      (LogLevel.trace, 12),
+      (LogLevel.debug, 10),
+      (LogLevel.info, 8),
+      (LogLevel.warning, 6),
+      (LogLevel.error, 4),
+      (LogLevel.fatal, 2),
+      (LogLevel.off, 0),
+    ];
+    for (final (LogLevel, int) testParams in testCaseParams) {
+      LogLevel level = testParams.$1;
+      int expectedMessageCount = testParams.$2;
 
-      // Run the actual test case
-      final Logger logger = Logger('test.channel');
-      logger.fatal('Message 1');
-      logger.fatal('Message 2');
-      logger.error('Message 3');
-      logger.error('Message 4');
-      logger.warning('Message 5');
-      logger.warning('Message 6');
-      logger.info('Message 7');
-      logger.info('Message 8');
-      logger.debug('Message 9');
-      logger.debug('Message 10');
-      logger.trace('Message 11');
-      logger.trace('Message 12');
+      test(level, () {
+        // Configure the log level
+        final LogConfiguration logConfig = LogConfiguration();
+        logConfig.globalLevel = level;
 
-      // Check whether the log output is as expected
-      List<String> fileContent = (logConfig.destination as MemoryLogDestination).loggedMessages;
+        // Run the actual test case
+        final Logger logger = Logger('test.channel');
+        logger.fatal('Message 1');
+        logger.fatal('Message 2');
+        logger.error('Message 3');
+        logger.error('Message 4');
+        logger.warning('Message 5');
+        logger.warning('Message 6');
+        logger.info('Message 7');
+        logger.info('Message 8');
+        logger.debug('Message 9');
+        logger.debug('Message 10');
+        logger.trace('Message 11');
+        logger.trace('Message 12');
 
-      // Ensure the message count is as expected
-      expect(fileContent.length, equals(expectedMessageCount));
+        // Check whether the log output is as expected
+        List<String> fileContent = (logConfig.destination as MemoryLogDestination).loggedMessages;
 
-      // Ensure that all messages of the activated levels have been written in the correct order
-      for (int i = 1; i < expectedMessageCount; i++) {
-        expect(fileContent[i - 1], contains('Message $i'));
-      }
+        // Ensure the message count is as expected
+        expect(fileContent.length, equals(expectedMessageCount));
+
+        // Ensure that all messages of the activated levels have been written in the correct order
+        for (int i = 1; i < expectedMessageCount; i++) {
+          expect(fileContent[i - 1], contains('Message $i'));
+        }
+      });
     }
-
-    test(
-      'AllLevel',
-      () => runTestCase(LogLevel.all, 12),
-    );
-    test(
-      'TraceLevel',
-      () => runTestCase(LogLevel.trace, 12),
-    );
-    test(
-      'DebugLevel',
-      () => runTestCase(LogLevel.debug, 10),
-    );
-    test(
-      'InfoLevel',
-      () => runTestCase(LogLevel.info, 8),
-    );
-    test(
-      'WarningLevel',
-      () => runTestCase(LogLevel.warning, 6),
-    );
-    test(
-      'ErrorLevel',
-      () => runTestCase(LogLevel.error, 4),
-    );
-    test(
-      'FatalLevel',
-      () => runTestCase(LogLevel.fatal, 2),
-    );
-    test(
-      'OffLevel',
-      () => runTestCase(LogLevel.off, 0),
-    );
   });
 
   /// Special test cases for the LogConfiguration class
