@@ -109,8 +109,8 @@ void main() {
       when(() => rdbMock.executeQuery(any())).thenAnswer((_) async {
         return <ResultRow>[
           ResultRow(<String, Object?>{
-            MetadataTable.columnMajorVersion: supportedSchemaVersion.major,
-            MetadataTable.columnMinorVersion: supportedSchemaVersion.minor,
+            DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major,
+            DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
           }),
         ];
       });
@@ -177,8 +177,8 @@ void main() {
         return <ResultRow>[
           ResultRow(
             <String, Object?>{
-              MetadataTable.columnMajorVersion: supportedSchemaVersion.major + 1,
-              MetadataTable.columnMinorVersion: supportedSchemaVersion.minor,
+              DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major + 1,
+              DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
             },
           ),
         ];
@@ -225,8 +225,8 @@ void main() {
       when(() => rdbMock.executeQuery(any())).thenAnswer((_) async {
         return <ResultRow>[
           ResultRow(<String, Object?>{
-            MetadataTable.columnMajorVersion: supportedSchemaVersion.major,
-            MetadataTable.columnMinorVersion: supportedSchemaVersion.minor,
+            DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major,
+            DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
           }),
         ];
       });
@@ -266,8 +266,8 @@ void main() {
       when(() => rdbMock.executeQuery(any())).thenAnswer((_) async {
         return <ResultRow>[
           ResultRow(<String, Object?>{
-            MetadataTable.columnMajorVersion: supportedSchemaVersion.major,
-            MetadataTable.columnMinorVersion: supportedSchemaVersion.minor,
+            DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major,
+            DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
           }),
         ];
       });
@@ -344,8 +344,8 @@ void main() {
         return <ResultRow>[
           ResultRow(
             <String, Object?>{
-              MetadataTable.columnMajorVersion: supportedSchemaVersion.major + 1,
-              MetadataTable.columnMinorVersion: supportedSchemaVersion.minor,
+              DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major + 1,
+              DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
             },
           ),
         ];

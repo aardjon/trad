@@ -70,8 +70,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   /// version. Throws [StorageStartingException] if it doesn't.
   Future<void> _checkSchemaVersion(String connectionString) async {
     Query query = Query.table(
-      MetadataTable.tableName,
-      <String>[MetadataTable.columnMajorVersion, MetadataTable.columnMinorVersion],
+      DatabaseMetadataTable.tableName,
+      <String>[
+        DatabaseMetadataTable.columnSchemaVersionMajor,
+        DatabaseMetadataTable.columnSchemaVersionMinor,
+      ],
     );
     query.limit = 1;
 
@@ -85,8 +88,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       throw InvalidStorageFormatException(connectionString, 'Database has no schema version');
     }
     Version databaseVersion = Version(
-      resultSet[0].getIntValue(MetadataTable.columnMajorVersion),
-      resultSet[0].getIntValue(MetadataTable.columnMinorVersion),
+      resultSet[0].getIntValue(DatabaseMetadataTable.columnSchemaVersionMajor),
+      resultSet[0].getIntValue(DatabaseMetadataTable.columnSchemaVersionMinor),
     );
     if (!databaseVersion.isCompatible(supportedSchemaVersion)) {
       throw IncompatibleStorageException(connectionString, databaseVersion, supportedSchemaVersion);
@@ -160,13 +163,13 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   @override
   Future<Summit> retrieveSummit(int summitDataId) async {
     Query query = Query.table(
-      SummitTable.tableName,
-      <String>[SummitTable.columnId, SummitTable.columnName],
+      SummitsTable.tableName,
+      <String>[SummitsTable.columnId, SummitsTable.columnSummitName],
     );
-    query.setWhereCondition('${SummitTable.columnId} = ?', <int>[summitDataId]);
+    query.setWhereCondition('${SummitsTable.columnId} = ?', <int>[summitDataId]);
     List<ResultRow> resultSet = await _repository.executeQuery(query);
-    int id = resultSet[0].getIntValue(SummitTable.columnId);
-    String name = resultSet[0].getStringValue(SummitTable.columnName);
+    int id = resultSet[0].getIntValue(SummitsTable.columnId);
+    String name = resultSet[0].getStringValue(SummitsTable.columnSummitName);
     return Summit(id, name);
   }
 
@@ -174,16 +177,16 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
     // Configure the query
     Query query = Query.table(
-      SummitTable.tableName,
-      <String>[SummitTable.columnId, SummitTable.columnName],
+      SummitsTable.tableName,
+      <String>[SummitsTable.columnId, SummitsTable.columnSummitName],
     );
     if (nameFilter != null) {
       _logger.debug('Retrieving filtered summit list for "$nameFilter"');
-      query.setWhereCondition('${SummitTable.columnName} LIKE ?', <String>['%$nameFilter%']);
+      query.setWhereCondition('${SummitsTable.columnSummitName} LIKE ?', <String>['%$nameFilter%']);
     } else {
       _logger.debug('Retrieving complete summit list');
     }
-    query.orderByColumns = <String>[SummitTable.columnName];
+    query.orderByColumns = <String>[SummitsTable.columnSummitName];
 
     // Run the database query
     List<ResultRow> resultSet = await _repository.executeQuery(query);
@@ -191,8 +194,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Summit> summits = <Summit>[];
     for (final ResultRow dataRow in resultSet) {
-      int id = dataRow.getIntValue(SummitTable.columnId);
-      String name = dataRow.getStringValue(SummitTable.columnName);
+      int id = dataRow.getIntValue(SummitsTable.columnId);
+      String name = dataRow.getStringValue(SummitsTable.columnSummitName);
       summits.add(Summit(id, name));
     }
     return summits;
@@ -209,28 +212,28 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     String orderByColumn;
     switch (sortCriterion) {
       case RoutesFilterMode.name:
-        orderByColumn = '${RoutesTable.columnName} ASC';
+        orderByColumn = '${RoutesTable.columnRouteName} ASC';
       case RoutesFilterMode.grade:
-        orderByColumn = '${RoutesTable.columnGrade} ASC';
+        orderByColumn = '${RoutesTable.columnRouteGrade} ASC';
       case RoutesFilterMode.rating:
         orderByColumn = '$averageRatingColumnName DESC';
     }
 
     Query query = Query.join(
       <String>[RoutesTable.tableName, PostsTable.tableName],
-      <String>['${RoutesTable.columnRouteId} = ${PostsTable.columnRouteId}'],
+      <String>['${RoutesTable.columnId} = ${PostsTable.columnId}'],
       <String>[
-        RoutesTable.columnRouteId,
-        RoutesTable.columnName,
-        RoutesTable.columnGrade,
+        RoutesTable.columnId,
+        RoutesTable.columnRouteName,
+        RoutesTable.columnRouteGrade,
         "AVG(${PostsTable.columnRating}) AS '$averageRatingColumnName'",
       ],
     );
     query.setWhereCondition('${RoutesTable.columnSummitId} = ?', <Object>[summitId]);
     query.groupByColumns = <String>[
-      RoutesTable.columnRouteId,
-      RoutesTable.columnName,
-      RoutesTable.columnGrade,
+      RoutesTable.columnId,
+      RoutesTable.columnRouteName,
+      RoutesTable.columnRouteGrade,
     ];
     query.orderByColumns = <String>[orderByColumn];
 
@@ -240,9 +243,9 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Route> routes = <Route>[];
     for (final ResultRow dataRow in resultSet) {
-      int routeId = dataRow.getIntValue(RoutesTable.columnRouteId);
-      String name = dataRow.getStringValue(RoutesTable.columnName);
-      String grade = dataRow.getStringValue(RoutesTable.columnGrade);
+      int routeId = dataRow.getIntValue(RoutesTable.columnId);
+      String name = dataRow.getStringValue(RoutesTable.columnRouteName);
+      String grade = dataRow.getStringValue(RoutesTable.columnRouteGrade);
       double rating = dataRow.getDoubleValue(averageRatingColumnName);
       routes.add(Route(routeId, name, grade, rating));
     }
@@ -253,15 +256,15 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   Future<Route> retrieveRoute(int routeDataId) async {
     Query query = Query.table(
       RoutesTable.tableName,
-      <String>[RoutesTable.columnRouteId, RoutesTable.columnName, RoutesTable.columnGrade],
+      <String>[RoutesTable.columnId, RoutesTable.columnRouteName, RoutesTable.columnRouteGrade],
     );
-    query.setWhereCondition('${RoutesTable.columnRouteId} = ?', <int>[routeDataId]);
+    query.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
 
     List<ResultRow> resultSet = await _repository.executeQuery(query);
 
-    int id = resultSet[0].getIntValue(RoutesTable.columnRouteId);
-    String name = resultSet[0].getStringValue(RoutesTable.columnName);
-    String grade = resultSet[0].getStringValue(RoutesTable.columnGrade);
+    int id = resultSet[0].getIntValue(RoutesTable.columnId);
+    String name = resultSet[0].getStringValue(RoutesTable.columnRouteName);
+    String grade = resultSet[0].getStringValue(RoutesTable.columnRouteGrade);
     return Route(id, name, grade, 0);
   }
 
@@ -273,7 +276,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     _logger.debug('Retrieving posts for route "$routeId", sorted by $sortCriterion');
 
     // Configure the query
-    String orderByColumn = '${PostsTable.columnTimestamp} ';
+    String orderByColumn = '${PostsTable.columnPostDate} ';
     if (sortCriterion == PostsFilterMode.newestFirst) {
       orderByColumn += 'DESC';
     } else {
@@ -283,9 +286,9 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     Query query = Query.table(
       PostsTable.tableName,
       <String>[
-        PostsTable.columnPostId,
-        PostsTable.columnName,
-        PostsTable.columnTimestamp,
+        PostsTable.columnId,
+        PostsTable.columnUserName,
+        PostsTable.columnPostDate,
         PostsTable.columnComment,
         PostsTable.columnRating,
       ],
@@ -299,8 +302,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Post> posts = <Post>[];
     for (final ResultRow dataRow in resultSet) {
-      String name = dataRow.getStringValue(PostsTable.columnName);
-      String timestamp = dataRow.getStringValue(PostsTable.columnTimestamp);
+      String name = dataRow.getStringValue(PostsTable.columnUserName);
+      String timestamp = dataRow.getStringValue(PostsTable.columnPostDate);
       String comment = dataRow.getStringValue(PostsTable.columnComment);
       int rating = dataRow.getIntValue(PostsTable.columnRating);
       DateTime postDate = DateTime.parse(timestamp);
