@@ -3,16 +3,8 @@ Definition of the SqlStatementCreator class.
 """
 
 from logging import getLogger
-from typing import assert_never
 
-from trad.adapters.boundaries.database.common import EntityName
 from trad.adapters.boundaries.database.query import InsertQuery, SelectQuery
-from trad.adapters.boundaries.database.structure import (
-    ColumnDefinition,
-    ColumnType,
-    CreateIndexQuery,
-    CreateTableQuery,
-)
 
 _logger = getLogger(__name__)
 
@@ -22,91 +14,6 @@ class SqlStatementCreator:
     Creates SQL statements from Query objects. All statement creation methods return a tuple of the
     SQL statement string and a collection of the corresponding query parameters.
     """
-
-    def create_table_creation_statement(
-        self, query: CreateTableQuery
-    ) -> tuple[str, tuple[object, ...]]:
-        """
-        Creates a CREATE TABLE (DDL) statement from the given table description. Returns the SQL
-        statement and an empty parameter tuple.
-        """
-        column_clause = ", ".join(
-            self._get_column_ddl_string(col, query.primary_key) for col in query.column_definition
-        )
-        fk_clause = self._get_foreign_keys_dll_string(query.column_definition)
-
-        # Generate the table DDL statement
-        sql_statement = f"CREATE TABLE IF NOT EXISTS {query.table_name} ({column_clause}"
-        if len(query.primary_key) > 1:
-            sql_statement += f", PRIMARY KEY({', '.join(query.primary_key)})"
-        for unique_columns in query.unique_constraints or []:
-            sql_statement += f", UNIQUE({', '.join(unique_columns)})"
-        if fk_clause:
-            sql_statement += f", {fk_clause}"
-        sql_statement += ")"
-
-        _logger.debug(sql_statement)
-        return sql_statement, ()
-
-    def _get_column_ddl_string(
-        self,
-        column: ColumnDefinition,
-        table_primary_keys: list[EntityName],
-    ) -> str:
-        """Returns the DDL for a single [column]."""
-        type_string = self._getcolumn_type_string(column.type)
-        nullable_string = "NULL" if column.nullable else "NOT NULL"
-        column_ddl = f"{column.name} {type_string} {nullable_string}"
-        if column.name in table_primary_keys and len(table_primary_keys) == 1:
-            column_ddl += " PRIMARY KEY"
-            if column.autoincrement:
-                column_ddl += " AUTOINCREMENT"
-        return column_ddl
-
-    def _get_foreign_keys_dll_string(self, column_definition: list[ColumnDefinition]) -> str:
-        """
-        Returns the SQL clause for creating all FOREIGN KEY constraints defined by
-        [column_definition]. Empty string if there are nor foreign keys.
-        """
-        fk_clauses: list[str] = [
-            (
-                f"FOREIGN KEY({column.name}) REFERENCES {column.reference.table_name}"
-                f"({column.reference.column_name}) ON DELETE {column.reference.delete_action}"
-            )
-            for column in column_definition
-            if column.reference is not None
-        ]
-        return ", ".join(fk_clauses)
-
-    def _getcolumn_type_string(self, column_type: ColumnType) -> str:
-        """Returns the SQL type name of the given [column_type]."""
-        match column_type:
-            case ColumnType.BOOLEAN:
-                return "BOOL"
-            case ColumnType.INTEGER:
-                return "INTEGER"
-            case ColumnType.STRING:
-                return "TEXT"
-            case ColumnType.FLOAT:
-                return "REAL"
-        assert_never(column_type)
-
-    def create_index_creation_statement(
-        self, query: CreateIndexQuery
-    ) -> tuple[str, tuple[object, ...]]:
-        """
-        Creates a CREATE INDEX (DDL) statement from the given [query]. Returns the SQL statement and
-        an empty parameter tuple.
-        """
-        column_names = ", ".join(query.index_definition.column_names)
-
-        # Generate the index DDL statement
-        sql_statement = (
-            f"CREATE INDEX {query.index_definition.name} ON {query.table_name} ({column_names})"
-        )
-
-        _logger.debug(sql_statement)
-        return sql_statement, ()
 
     def create_insert_statement(self, query: InsertQuery) -> tuple[str, tuple[object, ...]]:
         """

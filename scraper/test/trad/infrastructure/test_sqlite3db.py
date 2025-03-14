@@ -9,19 +9,8 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from trad.adapters.boundaries.database.query import (
-    DataRow,
-    InsertQuery,
-    SelectQuery,
-)
-from trad.adapters.boundaries.database.structure import (
-    ColumnDefinition,
-    ColumnType,
-    CreateIndexQuery,
-    CreateTableQuery,
-    IndexDefinition,
-    Reference,
-)
+from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
+from trad.adapters.boundaries.database.structure import RawDDLStatement
 from trad.infrastructure.sqlite3db import Sqlite3Database
 
 
@@ -121,94 +110,14 @@ class TestSqlite3Database:
         assert sqlite3_database.sqlite3_connection.close.call_count == (1 if is_connected else 0)
         assert not db.is_connected()
 
-    @pytest.mark.parametrize(
-        ("column_definition", "primary_key", "unique_constraints", "expected_sql"),
-        [
-            (  # Most simple possible table
-                [ColumnDefinition(name="id", type=ColumnType.INTEGER)],
-                ["id"],
-                None,
-                "CREATE TABLE IF NOT EXISTS simple_table (id INTEGER NULL PRIMARY KEY)",
-            ),
-            (  # Supporting "NOT NULL"
-                [ColumnDefinition(name="id", type=ColumnType.INTEGER, nullable=False)],
-                ["id"],
-                None,
-                "CREATE TABLE IF NOT EXISTS simple_table (id INTEGER NOT NULL PRIMARY KEY)",
-            ),
-            (  # Supporting combined primary keys
-                [
-                    ColumnDefinition(name="id1", type=ColumnType.INTEGER),
-                    ColumnDefinition(name="id2", type=ColumnType.INTEGER),
-                ],
-                ["id1", "id2"],
-                None,
-                "CREATE TABLE IF NOT EXISTS simple_table (id1 INTEGER NULL, id2 INTEGER NULL, PRIMARY KEY(id1, id2))",
-            ),
-            (  # Create a foreign key
-                [
-                    ColumnDefinition(name="local_id", type=ColumnType.INTEGER),
-                    ColumnDefinition(
-                        name="remote_id",
-                        type=ColumnType.INTEGER,
-                        reference=Reference("simple_table", "local_id"),
-                    ),
-                ],
-                ["local_id"],
-                None,
-                "CREATE TABLE IF NOT EXISTS simple_table ("
-                "local_id INTEGER NULL PRIMARY KEY, remote_id INTEGER NULL, "
-                "FOREIGN KEY(remote_id) REFERENCES simple_table(local_id) ON DELETE NO ACTION)",
-            ),
-        ],
-    )
-    def test_create_table(
+    def test_execute_raw_ddl(
         self,
         connected_sqlite3_database: Sqlite3Mock,
-        *,
-        column_definition: list[ColumnDefinition],
-        primary_key: list[str],
-        unique_constraints: list[list[str]] | None,
-        expected_sql: str,
     ) -> None:
-        connected_sqlite3_database.database.execute_create_table(
-            CreateTableQuery(
-                table_name="simple_table",
-                column_definition=column_definition,
-                primary_key=primary_key,
-                unique_constraints=unique_constraints,
-            )
-        )
-
-        connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
-            expected_sql, ()
-        )
-
-    @pytest.mark.parametrize(
-        ("index_query", "expected_sql"),
-        [
-            (
-                CreateIndexQuery(
-                    table_name="example",
-                    index_definition=IndexDefinition(
-                        name="idx_nam_rat", column_names=["name", "rating"]
-                    ),
-                ),
-                "CREATE INDEX idx_nam_rat ON example (name, rating)",
-            ),
-        ],
-    )
-    def test_create_index(
-        self,
-        index_query: CreateIndexQuery,
-        expected_sql: str,
-        connected_sqlite3_database: Sqlite3Mock,
-    ) -> None:
-        connected_sqlite3_database.database.execute_create_index(index_query)
-
-        connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
-            expected_sql, ()
-        )
+        raw_ddl_query = RawDDLStatement("Fake SQL statement")
+        connected_sqlite3_database.database.execute_raw_ddl(ddl_statement=raw_ddl_query)
+        connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(raw_ddl_query)
+        connected_sqlite3_database.sqlite3_connection.commit.assert_called_once()
 
     def test_execute_insert(
         self,

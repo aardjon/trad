@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
 from trad.adapters.boundaries.database.query import DataRowContainer, InsertQuery, SelectQuery
-from trad.adapters.boundaries.database.structure import CreateIndexQuery, CreateTableQuery
+from trad.adapters.boundaries.database.structure import RawDDLStatement
 
 
 class RelationalDatabaseBoundary(metaclass=ABCMeta):
@@ -43,15 +43,9 @@ class RelationalDatabaseBoundary(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def execute_create_table(self, query: CreateTableQuery) -> None:
+    def execute_raw_ddl(self, ddl_statement: RawDDLStatement) -> None:
         """
-        Executes the given [query] for creating a new table.
-        """
-
-    @abstractmethod
-    def execute_create_index(self, query: CreateIndexQuery) -> None:
-        """
-        Executes the given [query] for creating a new index.
+        Executes the given [ddl_statement] for creating a new database entity.
         """
 
     @abstractmethod

@@ -15,7 +15,7 @@ from trad.adapters.boundaries.database.query import (
     InsertQuery,
     SelectQuery,
 )
-from trad.adapters.boundaries.database.structure import CreateIndexQuery, CreateTableQuery
+from trad.adapters.boundaries.database.structure import RawDDLStatement
 from trad.crosscuttings.errors import InvalidStateError
 from trad.infrastructure.sqlite3db.statement_creator import SqlStatementCreator
 
@@ -85,19 +85,10 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         return self._db_handle is not None
 
     @override
-    def execute_create_table(self, query: CreateTableQuery) -> None:
+    def execute_raw_ddl(self, ddl_statement: RawDDLStatement) -> None:
         if self._db_handle is None:
             raise InvalidStateError("Please connect() to a database before querying it.")
-
-        self._db_handle.execute(*self._statement_creator.create_table_creation_statement(query))
-        self._db_handle.commit()
-
-    @override
-    def execute_create_index(self, query: CreateIndexQuery) -> None:
-        if self._db_handle is None:
-            raise InvalidStateError("Please connect() to a database before querying it.")
-
-        self._db_handle.execute(*self._statement_creator.create_index_creation_statement(query))
+        self._db_handle.execute(ddl_statement)
         self._db_handle.commit()
 
     @override
