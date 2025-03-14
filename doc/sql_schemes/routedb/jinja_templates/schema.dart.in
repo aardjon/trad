@@ -1,0 +1,26 @@
+///
+/// Contains information about the database schema, e.g. table and column names.
+///
+/// WARNING: This file has been generated, do not edit it manually because your changes may get
+/// lost! To re-generate, run `invoke generate-schema routedb` from the scraper environment.
+///
+library;
+
+import '../version.dart';
+
+/// The schema version currently supported (and required) by this app.
+final Version supportedSchemaVersion = Version({{metadata.schema_version_major}}, {{metadata.schema_version_minor}});
+{% for table in tables %}
+
+/// {{table.note|indent("/// ", blank=True)|replace("/// \n", "///\n")}}
+class {{table.name|replace("_", " ")|title|replace(" ", "")}}Table {
+  /// Name of the table.
+  static const String tableName = '{{table.name}}';
+  {% for column in table.columns %}
+
+  /// The name of the '{{column.name}}' {{column.type.upper()}} column:
+  /// {{column.note|indent("  /// ", blank=True)|replace("/// \n", "///\n")}}
+  static const String column{{column.name|replace("_", " ")|title|replace(" ", "")}} = '$tableName.{{column.name}}';
+  {% endfor %}
+}
+{% endfor %}

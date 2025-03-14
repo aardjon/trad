@@ -145,6 +145,13 @@ successfully before!
 The `format` script auto-formats the sources according to our coding style guidelines (by running
 `dart format` or `ruff format`).
 
+## generate-schema: Generate DB schema sources
+
+The `generate-schema` script (re-)creates all (including mobile app!) storage source files that can
+be generated from the database schema definition within the [`doc/sql_schemes/`](sql_schemes/)
+directory. The mandatory parameter `dbname` defines the storage schema to generate, for now the
+only possible value is "routedb". Existing files are overwritten.
+
 ## test: Run all unit tests
 
 The `test` script runs all unit tests and gathers code coverage information (i.e. creates lcov.info
