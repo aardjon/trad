@@ -1,0 +1,114 @@
+"""
+Contains information about the database schema, e.g. table structure and column names.
+
+WARNING: This file has been generated, do not edit it manually because your changes may get lost!
+To re-generate, run `invoke generate-schema routedb`.
+"""
+
+from collections.abc import Sequence
+from typing import Final, override
+
+from trad.adapters.boundaries.database.common import EntityName
+from trad.adapters.boundaries.database.structure import RawDDLStatement
+from trad.adapters.pipes.schemabase import TableSchema
+{% for table in tables %}
+
+
+class {{table.name|replace("_", " ")|title|replace(" ", "")}}Table(TableSchema):
+    """
+    {{table.note|indent(4)}}
+    """
+
+    TABLE_NAME = "{{table.name}}"
+    """ Name of the table. """
+    {% for column in table.columns %}
+
+    COLUMN_{{column.name.upper()}}: Final = "{{column.name}}"
+    """
+    The name of the '{{column.name}}' {{column.type.upper()}} column:
+    {{column.note|indent(4)}}
+    """
+    {% endfor %}
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def table_ddl(self) -> RawDDLStatement:
+        return RawDDLStatement("""
+        CREATE TABLE {{table.name}} (
+          {% for column in table.columns %}
+            "{{column.name}}" {{column.type.upper()}}
+              {{-" PRIMARY KEY" if column.primary_key}}
+              {{-" UNIQUE" if column.unique}}
+              {{-" NOT NULL" if not column.nullable}}
+              {{-" AUTOINCREMENT" if column.autoincrement}}
+              {{-"," if not loop.last or table.unique_constraints or table.references}}
+          {% endfor %}
+          {% for columns in table.unique_constraints %}
+            UNIQUE({{columns|join(", ")}})
+              {{- "," if not loop.last or table.references}}
+          {% endfor %}
+          {% for ref in table.references %}
+            FOREIGN KEY("{{ref.local_columns|join(", ")}}") REFERENCES "{{ref.table_name}}" ("{{ref.remote_columns|join(", ")}}")
+              {{-" ON DELETE {}".format(ref.delete_action) if ref.delete_action}}
+              {{-"," if not loop.last}}
+          {% endfor %}
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[RawDDLStatement]:
+        {% if table.indices %}
+        return [
+            {% for index in table.indices %}
+            RawDDLStatement(
+                'CREATE INDEX "{{index.name}}" ON "{{table.name}}" ({{index.column_names|join(", ")}});',
+            ),
+            {% endfor %}
+        ]
+        {% else %}
+        return []
+        {% endif %}
+{% endfor %}
+
+
+class DatabaseSchema:
+    """
+    Represents the whole database schema itself.
+    """
+
+    _MAJOR_VERSION: Final = {{metadata.schema_version_major}}
+    """
+    Major schema version.
+
+    To be incremented for incompatible schema changes, i.e. the mobile app needs to be adapted to
+    work with the new database. For example, the removal or renaming of column or tables.
+    When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
+    """
+
+    _MINOR_VERSION: Final = {{metadata.schema_version_minor}}
+    """
+    Minor schema version.
+
+    To be incremented for backward-compatible schema changes, i.e. the mobile app can use the new
+    database without adaptions (but may of course lack some new features/improvements). Examples:
+     - Adding a new table or column with additional data
+     - Adding a new index (improving performance)
+    """
+
+    def get_table_schemata(self) -> Sequence[TableSchema]:
+        """
+        Return all table definitions that are part of this schema version.
+        """
+        return (
+          {% for table in tables %}
+            {{table.name|replace("_", " ")|title|replace(" ", "")}}Table(),
+          {% endfor %}
+        )
+
+    def get_schema_version(self) -> tuple[int, int]:
+        """Returns the version of this database schema as a tuple of (major, minor)."""
+        return self._MAJOR_VERSION, self._MINOR_VERSION
+

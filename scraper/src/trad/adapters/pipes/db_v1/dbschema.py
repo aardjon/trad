@@ -1,303 +1,330 @@
 """
 Contains information about the database schema, e.g. table structure and column names.
+
+WARNING: This file has been generated, do not edit it manually because your changes may get lost!
+To re-generate, run `invoke generate-schema routedb`.
 """
 
-from abc import ABCMeta, abstractmethod
 from collections.abc import Sequence
 from typing import Final, override
 
 from trad.adapters.boundaries.database.common import EntityName
-from trad.adapters.boundaries.database.structure import (
-    ColumnDefinition,
-    ColumnType,
-    IndexDefinition,
-    Reference,
-)
+from trad.adapters.boundaries.database.structure import RawDDLStatement
+from trad.adapters.pipes.schemabase import TableSchema
 
 
-class TableSchema(metaclass=ABCMeta):
+class DatabaseMetadataTable(TableSchema):
     """
-    Base class and interface for the definition of a single database table.
-    Each derived class specifies all features of a physical table.
-    """
+    Table containing some static metadata about the database itself.
 
-    @abstractmethod
-    def table_name(self) -> EntityName:
-        """Name of the table."""
-
-    @abstractmethod
-    def column_specification(self) -> list[ColumnDefinition]:
-        """Definition of this table's columns."""
-
-    @abstractmethod
-    def indices(self) -> list[IndexDefinition]:
-        """
-        List of indices on this table. All columns within the index specification must of course be
-        defined within [column_specification()].
-        """
-
-    @abstractmethod
-    def primary_key(self) -> list[EntityName]:
-        """
-        List of all columns (names) that are part of the primary key (in that order). All columns
-        must be defined within [column_specification()], of course.
-        """
-
-    @abstractmethod
-    def unique_constraints(self) -> list[list[EntityName]]:
-        """
-        List of unique constraints for this table. Each item is a list of columns whose combined
-        values shall be unique. All columns must be defined within [column_specification()], of
-        course.
-        """
-
-
-class DbMetadataTable(TableSchema):
-    """
-    Represents the "database_metadata" table containing some static metadata. Contains exactly one
-    row only.
+    Must contain exactly one row.
     """
 
     TABLE_NAME = "database_metadata"
     """ Name of the table. """
 
     COLUMN_SCHEMA_VERSION_MAJOR: Final = "schema_version_major"
-    """ Name of the major schema version column. """
+    """
+    The name of the 'schema_version_major' INTEGER column:
+    Major part of the schema version (corresponding to incompatible changes).
+    """
 
     COLUMN_SCHEMA_VERSION_MINOR: Final = "schema_version_minor"
-    """ Name of the minor schema version column. """
+    """
+    The name of the 'schema_version_minor' INTEGER column:
+    Minor part of the schema version (corresponding to backward-compatible changes).
+    """
 
     COLUMN_COMPILE_TIME: Final = "compile_time"
-    """ Name of the compile time column. """
+    """
+    The name of the 'compile_time' TEXT column:
+    Date and time this database has been created.
 
-    COLUM_VENDOR: Final = "vendor"
-    """ Name of the vendor string column. """
+    This is an ISO 8601 string value (i.e. something like "YYYY-MM-DDTHH:MM:SS.ffffff+HH:MM")
+    and must include proper time zone information.
+    """
+
+    COLUMN_VENDOR: Final = "vendor"
+    """
+    The name of the 'vendor' TEXT column:
+    Vendor identification label of the database provider.
+    This is an arbitrary (even empty) display string to distinguish different database sources.
+    """
 
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
 
     @override
-    def column_specification(self) -> list[ColumnDefinition]:
-        return [
-            ColumnDefinition(self.COLUMN_SCHEMA_VERSION_MAJOR, ColumnType.INTEGER, nullable=False),
-            ColumnDefinition(self.COLUMN_SCHEMA_VERSION_MINOR, ColumnType.INTEGER, nullable=False),
-            ColumnDefinition(self.COLUMN_COMPILE_TIME, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUM_VENDOR, ColumnType.STRING, nullable=False),
-        ]
+    def table_ddl(self) -> RawDDLStatement:
+        return RawDDLStatement("""
+        CREATE TABLE database_metadata (
+            "schema_version_major" INTEGER NOT NULL,
+            "schema_version_minor" INTEGER NOT NULL,
+            "compile_time" TEXT NOT NULL,
+            "vendor" TEXT NOT NULL,
+            UNIQUE(schema_version_major, schema_version_minor, compile_time, vendor)
+        );
+        """)
 
     @override
-    def indices(self) -> list[IndexDefinition]:
-        return []
-
-    @override
-    def primary_key(self) -> list[EntityName]:
-        return []
-
-    @override
-    def unique_constraints(self) -> list[list[EntityName]]:
+    def index_ddl(self) -> list[RawDDLStatement]:
         return []
 
 
 class SummitsTable(TableSchema):
     """
-    Represents the `summits` table containing all summit data.
+    Table containing all summits.
 
-    The main purpose of this class is to provide a namespace with all structural information of
-    the summits table, as well as string constants for the column names. Always use these constants
-    when referring to this table or its columns to make future schema changes easier.
+    Summit data from different sources is usually merged based on the summit name. To store
+    geographical coordinate values as integer values, their decimal representation is multiplied by
+    10.000.000 to support the same precision as the OSM database (7 decimal places, ~1 cm). Positive
+    values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is stored as
+    (509170936, 141992389).
+
+    See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
     """
 
     TABLE_NAME = "summits"
     """ Name of the table. """
 
     COLUMN_ID: Final = "id"
-    """ Name of the ID column. """
+    """
+    The name of the 'id' INTEGER column:
+    Summit ID, unique within this database.
+    """
 
-    COLUMN_NAME: Final = "summit_name"
-    """ Name of the summit name column. """
+    COLUMN_SUMMIT_NAME: Final = "summit_name"
+    """
+    The name of the 'summit_name' TEXT column:
+    Official name of this summit. Names are unique.
+    """
 
     COLUMN_LATITUDE: Final = "latitude"
-    """ Name of the latitude column. """
+    """
+    The name of the 'latitude' INTEGER column:
+    The latitude value of the geographical position.
+    """
 
     COLUMN_LONGITUDE: Final = "longitude"
-    """ Name of the longitude column. """
+    """
+    The name of the 'longitude' INTEGER column:
+    The longitude value of the geographical position.
+    """
 
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
 
     @override
-    def column_specification(self) -> list[ColumnDefinition]:
+    def table_ddl(self) -> RawDDLStatement:
+        return RawDDLStatement("""
+        CREATE TABLE summits (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "summit_name" TEXT UNIQUE NOT NULL,
+            "latitude" INTEGER NOT NULL,
+            "longitude" INTEGER NOT NULL
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[RawDDLStatement]:
         return [
-            ColumnDefinition(
-                self.COLUMN_ID, ColumnType.INTEGER, nullable=False, autoincrement=True
+            RawDDLStatement(
+                'CREATE INDEX "IdxSummitName" ON "summits" (summit_name);',
             ),
-            ColumnDefinition(self.COLUMN_NAME, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUMN_LATITUDE, ColumnType.INTEGER, nullable=False),
-            ColumnDefinition(self.COLUMN_LONGITUDE, ColumnType.INTEGER, nullable=False),
         ]
-
-    @override
-    def indices(self) -> list[IndexDefinition]:
-        return [IndexDefinition(name="IdxSummitName", column_names=[self.COLUMN_NAME])]
-
-    @override
-    def primary_key(self) -> list[EntityName]:
-        return [self.COLUMN_ID]
-
-    @override
-    def unique_constraints(self) -> list[list[EntityName]]:
-        return [[self.COLUMN_NAME]]
 
 
 class RoutesTable(TableSchema):
     """
-    Represents the `routes` table containing all route data.
+    Table containing all routes.
 
-    The main purpose of this class is to provide a namespace with all structural information of
-    the routes table, as well as string constants for the column names. Always use these constants
-    when referring to this table or its columns to make future schema changes easier.
+    Route names are unique for each summit, therefore route data from different sources can be
+    merged based on the (summit, route name) combination.
+
+    Routes have several grades describing their difficulty, depending on the route characteristics
+    (e.g. does it include a jump?), the climbing style (e.g. "all free" or "redpoint") and also on
+    each other:
+     - A route without a jumping grade is usually climbed without having to jump
+     - A route with both grades contains a single jump within its climbing parts
+     - A route with only a jumping grade consists of a single jump only
+     - The AF/RP ratings of a route with OU grade require some additional support
+
+    Grades are represented by integer numbers, with 1 being the lowest (or "easiest") possible
+    rating and without an upper bound. Each step in the corresponding scale system increases the
+    value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
+    0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
     """
 
-    TABLE_NAME: Final = "routes"
+    TABLE_NAME = "routes"
     """ Name of the table. """
 
-    COLUMN_ROUTE_ID: Final = "id"
-    """ Name of the route ID column. """
+    COLUMN_ID: Final = "id"
+    """
+    The name of the 'id' INTEGER column:
+    Route ID, unique within this database.
+    """
 
     COLUMN_SUMMIT_ID: Final = "summit_id"
-    """ Name of the summit ID column (referencing the summit a route belongs to). """
+    """
+    The name of the 'summit_id' INTEGER column:
+    ID of the summit this route is assigned to. Foreign key to the summits table.
+    """
 
-    COLUMN_NAME: Final = "route_name"
-    """ Name of the route name column. """
+    COLUMN_ROUTE_NAME: Final = "route_name"
+    """
+    The name of the 'route_name' TEXT column:
+    Name of this route. Unique within this summit, but different summits may have routes with
+    identical names (e.g. "AW").
+    """
 
-    COLUMN_GRADE: Final = "route_grade"
-    """ Name of the grade name column (deprecated!). """
+    COLUMN_ROUTE_GRADE: Final = "route_grade"
+    """
+    The name of the 'route_grade' TEXT column:
+    Grade label. Deprecated, please use the more fine-grained grade columns instead.
+    """
 
     COLUMN_GRADE_AF: Final = "grade_af"
-    """ Name of the 'af' climbing grade column. """
+    """
+    The name of the 'grade_af' INTEGER column:
+    The grade that applies when climbing this route in the AF ("alles frei", i.e. "all free")
+    style, i.e. without any belaying (no rope, no abseiling). Set to 0 when it is just a single
+    jump.
+    """
 
     COLUMN_GRADE_RP: Final = "grade_rp"
-    """ Name of the 'rp' climbing grade column. """
+    """
+    The name of the 'grade_rp' INTEGER column:
+    The grade that applies when climbing this route in the RP ("Rotpunkt", i.e. "redpoint")
+    style. Set to 0 when it is just a single jump.
+    """
 
     COLUMN_GRADE_OU: Final = "grade_ou"
-    """ Name of the 'ou' climbing grade column. """
+    """
+    The name of the 'grade_ou' INTEGER column:
+    The grade that applies when climbing this route in the OU ("ohne Unterstützung", i.e.
+    "without support") style, i.e. without using the support considered in the AF style
+    grade. Set to 0 when the AF grade doesn't include any support.
+    """
 
     COLUMN_GRADE_JUMP: Final = "grade_jump"
-    """ Name of the jumping grade column. """
+    """
+    The name of the 'grade_jump' INTEGER column:
+    The grade of the jump within this route. Set to 0 when there is no need to jump.
+    """
 
     COLUMN_STARS: Final = "stars"
-    """ Name of the star count column. """
+    """
+    The name of the 'stars' INTEGER column:
+    The count of official stars assigend to this route. An increasing number of stars marks a
+    route as "more beautiful". 0 is the default for regular routes.
+    """
 
     COLUMN_DANGER: Final = "danger"
-    """ Name of the danger (exclamation) mark count column. """
+    """
+    The name of the 'danger' BOOLEAN column:
+    True if the route is officially marked as "dangerous", false if not.
+    """
 
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
 
     @override
-    def column_specification(self) -> list[ColumnDefinition]:
+    def table_ddl(self) -> RawDDLStatement:
+        return RawDDLStatement("""
+        CREATE TABLE routes (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "summit_id" INTEGER NOT NULL,
+            "route_name" TEXT NOT NULL,
+            "route_grade" TEXT NOT NULL,
+            "grade_af" INTEGER NOT NULL,
+            "grade_rp" INTEGER NOT NULL,
+            "grade_ou" INTEGER NOT NULL,
+            "grade_jump" INTEGER NOT NULL,
+            "stars" INTEGER NOT NULL,
+            "danger" BOOLEAN NOT NULL,
+            UNIQUE(summit_id, route_name, route_grade),
+            FOREIGN KEY("summit_id") REFERENCES "summits" ("id") ON DELETE CASCADE
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[RawDDLStatement]:
         return [
-            ColumnDefinition(
-                self.COLUMN_ROUTE_ID, ColumnType.INTEGER, nullable=False, autoincrement=True
+            RawDDLStatement(
+                'CREATE INDEX "IdxRouteName" ON "routes" (route_name);',
             ),
-            ColumnDefinition(
-                self.COLUMN_SUMMIT_ID,
-                ColumnType.INTEGER,
-                nullable=False,
-                reference=Reference(
-                    SummitsTable.TABLE_NAME, SummitsTable.COLUMN_ID, delete_action="CASCADE"
-                ),
-            ),
-            ColumnDefinition(self.COLUMN_NAME, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUMN_GRADE, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUMN_GRADE_AF, ColumnType.INTEGER, nullable=True),
-            ColumnDefinition(self.COLUMN_GRADE_RP, ColumnType.INTEGER, nullable=True),
-            ColumnDefinition(self.COLUMN_GRADE_OU, ColumnType.INTEGER, nullable=True),
-            ColumnDefinition(self.COLUMN_GRADE_JUMP, ColumnType.INTEGER, nullable=True),
-            ColumnDefinition(self.COLUMN_STARS, ColumnType.INTEGER, nullable=False),
-            ColumnDefinition(self.COLUMN_DANGER, ColumnType.BOOLEAN, nullable=False),
         ]
-
-    @override
-    def indices(self) -> list[IndexDefinition]:
-        return [IndexDefinition(name="IdxRouteName", column_names=[self.COLUMN_NAME])]
-
-    @override
-    def primary_key(self) -> list[EntityName]:
-        return [self.COLUMN_ROUTE_ID]
-
-    @override
-    def unique_constraints(self) -> list[list[EntityName]]:
-        return [[self.COLUMN_SUMMIT_ID, self.COLUMN_NAME, self.COLUMN_GRADE]]
 
 
 class PostsTable(TableSchema):
     """
-    Represents the `posts` table containing all post data.
-
-    The main purpose of this class is to provide a namespace with all structural information of
-    the posts table, as well as string constants for the column names. Always use these constants
-    when referring to this table or its columns to make future schema changes easier.
+    Table containing all posts that have been assigned to routes.
     """
 
-    TABLE_NAME: Final = "posts"
+    TABLE_NAME = "posts"
     """ Name of the table. """
 
-    COLUMN_POST_ID: Final = "id"
-    """ Name of the post ID column. """
+    COLUMN_ID: Final = "id"
+    """
+    The name of the 'id' INTEGER column:
+    Post ID, unique within this database.
+    """
 
     COLUMN_ROUTE_ID: Final = "route_id"
-    """ Name of the column referencing the route a post belongs to. """
+    """
+    The name of the 'route_id' INTEGER column:
+    ID of the route this post is assigned to. Foreign key to the routes table.
+    """
 
-    COLUMN_USERNAME: Final = "user_name"
-    """ Name of the user name column. """
+    COLUMN_USER_NAME: Final = "user_name"
+    """
+    The name of the 'user_name' TEXT column:
+    Name of the post's author.
+    """
 
-    COLUMN_TIMESTAMP: Final = "post_date"
-    """ Name of the timestamp column. """
+    COLUMN_POST_DATE: Final = "post_date"
+    """
+    The name of the 'post_date' TEXT column:
+    The date and time the post was published. ISO 8601 string value
+    ("YYYY-MM-DDTHH:MM:SS.ffffff+HH:MM").
+    """
 
     COLUMN_COMMENT: Final = "comment"
-    """ Name of the comment column. """
+    """
+    The name of the 'comment' TEXT column:
+    The comment.
+    """
 
     COLUMN_RATING: Final = "rating"
-    """ Name of the rating column. """
+    """
+    The name of the 'rating' INTEGER column:
+    The rating the author assigned to the route this post corresponds to. This is a signed integer
+    value in the range between -3 (extremely bad/dangerous) to 3 (extremely outstanding/great).
+    """
 
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
 
     @override
-    def column_specification(self) -> list[ColumnDefinition]:
-        return [
-            ColumnDefinition(
-                self.COLUMN_POST_ID, ColumnType.INTEGER, nullable=False, autoincrement=True
-            ),
-            ColumnDefinition(
-                self.COLUMN_ROUTE_ID,
-                ColumnType.INTEGER,
-                nullable=False,
-                reference=Reference(
-                    RoutesTable.TABLE_NAME, RoutesTable.COLUMN_ROUTE_ID, delete_action="CASCADE"
-                ),
-            ),
-            ColumnDefinition(self.COLUMN_USERNAME, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUMN_TIMESTAMP, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUMN_COMMENT, ColumnType.STRING, nullable=False),
-            ColumnDefinition(self.COLUMN_RATING, ColumnType.INTEGER, nullable=False),
-        ]
+    def table_ddl(self) -> RawDDLStatement:
+        return RawDDLStatement("""
+        CREATE TABLE posts (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "route_id" INTEGER NOT NULL,
+            "user_name" TEXT NOT NULL,
+            "post_date" TEXT NOT NULL,
+            "comment" TEXT NOT NULL,
+            "rating" INTEGER NOT NULL,
+            FOREIGN KEY("route_id") REFERENCES "routes" ("id") ON DELETE CASCADE
+        );
+        """)
 
     @override
-    def indices(self) -> list[IndexDefinition]:
-        return []
-
-    @override
-    def primary_key(self) -> list[EntityName]:
-        return [self.COLUMN_POST_ID]
-
-    @override
-    def unique_constraints(self) -> list[list[EntityName]]:
+    def index_ddl(self) -> list[RawDDLStatement]:
         return []
 
 
@@ -330,7 +357,7 @@ class DatabaseSchema:
         Return all table definitions that are part of this schema version.
         """
         return (
-            DbMetadataTable(),
+            DatabaseMetadataTable(),
             SummitsTable(),
             RoutesTable(),
             PostsTable(),

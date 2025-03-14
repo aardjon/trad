@@ -4,13 +4,13 @@
 #
 #    pip-compile --output-file=app-requirements.txt --strip-extras pyproject.toml
 #
-beautifulsoup4==4.12.3
+beautifulsoup4==4.13.3
     # via
     #   pandas
     #   trad_scraper (pyproject.toml)
-certifi==2024.8.30
+certifi==2025.1.31
     # via requests
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
 html5lib==1.1
     # via pandas
@@ -18,15 +18,15 @@ idna==3.10
     # via requests
 lidipy==0.3.1
     # via trad_scraper (pyproject.toml)
-lxml==5.3.0
+lxml==5.3.1
     # via pandas
-numpy==2.1.3
+numpy==2.2.3
     # via pandas
 pandas==2.2.3
     # via trad_scraper (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via pandas
-pytz==2024.2
+pytz==2025.1
     # via pandas
 requests==2.32.3
     # via trad_scraper (pyproject.toml)
@@ -36,9 +36,11 @@ six==1.17.0
     #   python-dateutil
 soupsieve==2.6
     # via beautifulsoup4
-tzdata==2024.2
+typing-extensions==4.12.2
+    # via beautifulsoup4
+tzdata==2025.1
     # via pandas
-urllib3==2.2.3
+urllib3==2.3.0
     # via requests
 webencodings==0.5.1
     # via html5lib

@@ -13,6 +13,9 @@ doc/**/*.bkp
 # Coverage analysis output
 **/coverage
 
+# Dinja code generation output
+doc/sql_schemes/*/generated/
+
 # Visual Studio Code
 .vscode/
 

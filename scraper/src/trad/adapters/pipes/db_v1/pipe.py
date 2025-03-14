@@ -9,10 +9,9 @@ from typing import Final, override
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
-from trad.adapters.boundaries.database.structure import CreateIndexQuery, CreateTableQuery
 from trad.adapters.pipes.db_v1.dbschema import (
+    DatabaseMetadataTable,
     DatabaseSchema,
-    DbMetadataTable,
     PostsTable,
     RoutesTable,
     SummitsTable,
@@ -56,35 +55,23 @@ class DbSchemaV1Pipe(Pipe):
         _logger.debug("Creating database schema")
         for table_definition in schema_definition.get_table_schemata():
             # Create the table
-            self.__database_boundary.execute_create_table(
-                CreateTableQuery(
-                    table_name=table_definition.table_name(),
-                    column_definition=table_definition.column_specification(),
-                    primary_key=table_definition.primary_key(),
-                    unique_constraints=table_definition.unique_constraints(),
-                )
-            )
+            self.__database_boundary.execute_raw_ddl(table_definition.table_ddl())
             # Create all indices for this table
-            for index in table_definition.indices():
-                self.__database_boundary.execute_create_index(
-                    CreateIndexQuery(
-                        table_name=table_definition.table_name(),
-                        index_definition=index,
-                    )
-                )
+            for index_creation_statement in table_definition.index_ddl():
+                self.__database_boundary.execute_raw_ddl(index_creation_statement)
 
     def _write_metadata(self, schema_definition: DatabaseSchema) -> None:
         _logger.debug("Writing database metadata")
         major, minor = schema_definition.get_schema_version()
         self.__database_boundary.execute_insert(
             InsertQuery(
-                table_name=DbMetadataTable.TABLE_NAME,
+                table_name=DatabaseMetadataTable.TABLE_NAME,
                 data_row=DataRow(
                     {
-                        DbMetadataTable.COLUMN_SCHEMA_VERSION_MAJOR: major,
-                        DbMetadataTable.COLUMN_SCHEMA_VERSION_MINOR: minor,
-                        DbMetadataTable.COLUM_VENDOR: "",
-                        DbMetadataTable.COLUMN_COMPILE_TIME: datetime.datetime.now(
+                        DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MAJOR: major,
+                        DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MINOR: minor,
+                        DatabaseMetadataTable.COLUMN_VENDOR: "",
+                        DatabaseMetadataTable.COLUMN_COMPILE_TIME: datetime.datetime.now(
                             tz=datetime.UTC
                         ).isoformat(),
                     }
@@ -107,7 +94,7 @@ class DbSchemaV1Pipe(Pipe):
                 table_name=SummitsTable.TABLE_NAME,
                 data_row=DataRow(
                     {
-                        SummitsTable.COLUMN_NAME: summit.name,
+                        SummitsTable.COLUMN_SUMMIT_NAME: summit.name,
                         SummitsTable.COLUMN_LATITUDE: 0,
                         SummitsTable.COLUMN_LONGITUDE: 0,
                     }
@@ -118,7 +105,7 @@ class DbSchemaV1Pipe(Pipe):
     @override
     def add_route_data(self, summit_name: str, route: Route) -> None:
         summit_query = SelectQuery(SummitsTable.TABLE_NAME, [SummitsTable.COLUMN_ID])
-        summit_query.set_where_condition(f"{SummitsTable.COLUMN_NAME} = ?", [summit_name])
+        summit_query.set_where_condition(f"{SummitsTable.COLUMN_SUMMIT_NAME} = ?", [summit_name])
         summit_query.limit = 1
         self.__database_boundary.execute_insert(
             InsertQuery(
@@ -126,8 +113,8 @@ class DbSchemaV1Pipe(Pipe):
                 data_row=DataRow(
                     {
                         RoutesTable.COLUMN_SUMMIT_ID: summit_query,
-                        RoutesTable.COLUMN_NAME: route.route_name,
-                        RoutesTable.COLUMN_GRADE: route.grade,
+                        RoutesTable.COLUMN_ROUTE_NAME: route.route_name,
+                        RoutesTable.COLUMN_ROUTE_GRADE: route.grade,
                         RoutesTable.COLUMN_GRADE_AF: route.grade_af,
                         RoutesTable.COLUMN_GRADE_RP: route.grade_rp,
                         RoutesTable.COLUMN_GRADE_OU: route.grade_ou,
@@ -142,12 +129,12 @@ class DbSchemaV1Pipe(Pipe):
     @override
     def add_post_data(self, summit_name: str, route_name: str, post: Post) -> None:
         summit_query = SelectQuery(SummitsTable.TABLE_NAME, [SummitsTable.COLUMN_ID])
-        summit_query.set_where_condition(f"{SummitsTable.COLUMN_NAME} = ?", [summit_name])
+        summit_query.set_where_condition(f"{SummitsTable.COLUMN_SUMMIT_NAME} = ?", [summit_name])
         summit_query.limit = 1
 
-        route_query = SelectQuery(RoutesTable.TABLE_NAME, [RoutesTable.COLUMN_ROUTE_ID])
+        route_query = SelectQuery(RoutesTable.TABLE_NAME, [RoutesTable.COLUMN_ID])
         route_query.set_where_condition(
-            f"{RoutesTable.COLUMN_SUMMIT_ID} = ? AND {RoutesTable.COLUMN_NAME} = ?",
+            f"{RoutesTable.COLUMN_SUMMIT_ID} = ? AND {RoutesTable.COLUMN_ROUTE_NAME} = ?",
             [summit_query, route_name],
         )
         route_query.limit = 1
@@ -158,9 +145,9 @@ class DbSchemaV1Pipe(Pipe):
                 data_row=DataRow(
                     {
                         PostsTable.COLUMN_ROUTE_ID: route_query,
-                        PostsTable.COLUMN_USERNAME: post.user_name,
+                        PostsTable.COLUMN_USER_NAME: post.user_name,
                         PostsTable.COLUMN_COMMENT: post.comment,
-                        PostsTable.COLUMN_TIMESTAMP: post.post_date.isoformat(),
+                        PostsTable.COLUMN_POST_DATE: post.post_date.isoformat(),
                         PostsTable.COLUMN_RATING: post.rating,
                     }
                 ),

@@ -6,7 +6,9 @@ this file.
 """
 
 import platform
+import shutil
 from pathlib import Path
+from typing import Literal
 
 from invoke import task
 from invoke.context import Context
@@ -73,13 +75,7 @@ def bootstrap(context: Context) -> None:
         context.run(f"pip install -U {_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}")
     else:
         context.run(f"pip install -U '{_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}'")
-    context.run(
-        "pip-compile "
-        "-q "
-        "--strip-extras "
-        "--output-file=app-requirements.txt "
-        "pyproject.toml"
-    )
+    context.run("pip-compile -q --strip-extras --output-file=app-requirements.txt pyproject.toml")
     context.run(
         "pip-compile "
         "-q "
@@ -110,6 +106,26 @@ def autoformat(context: Context) -> None:
     context.run("python -m ruff check --select I --fix .")
     # Format all sources
     context.run("python -m ruff format .")
+
+
+@task
+def generate_schema(context: Context, dbname: Literal["routedb"]) -> None:
+    """
+    (Re-)Generate all files that are generated from the DBML definition.
+    Files are generated for both the scraper and the mobile app. Existing files are overwritten.
+    """
+    dbmlfile = Path(f"../doc/sql_schemes/{dbname}/dbdiagram.io")
+    template_dir = Path(f"../doc/sql_schemes/{dbname}/jinja_templates/")
+    output_dir = Path(f"../doc/sql_schemes/{dbname}/generated/")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    context.run(f"dinja {dbmlfile} {template_dir} {output_dir}")
+
+    scraper = next(f for f in output_dir.iterdir() if f.suffix == ".py")
+    shutil.copy(scraper, Path("src/trad/adapters/pipes/db_v1/"))
+
+    mobileapp = next(f for f in output_dir.iterdir() if f.suffix == ".dart")
+    shutil.copy(mobileapp, Path("../mobileapp/adapters/lib/src/storage/routedb/"))
 
 
 @task
@@ -175,12 +191,7 @@ def upgrade(context: Context) -> None:
     """
     print("Upgrading app requirements...")
     context.run(
-        "pip-compile "
-        "-q "
-        "--strip-extras "
-        "--upgrade "
-        "--output-file=app-requirements.txt "
-        "pyproject.toml"
+        "pip-compile -q --strip-extras --upgrade --output-file=app-requirements.txt pyproject.toml"
     )
     print("Upgrading dev requirements...")
     context.run(
