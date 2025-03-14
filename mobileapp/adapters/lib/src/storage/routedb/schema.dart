@@ -1,6 +1,9 @@
 ///
 /// Contains information about the database schema, e.g. table and column names.
 ///
+/// WARNING: This file has been generated, do not edit it manually because your changes may get
+/// lost! To re-generate, run `invoke generate-schema routedb` from the scraper environment.
+///
 library;
 
 import '../version.dart';
@@ -8,111 +11,161 @@ import '../version.dart';
 /// The schema version currently supported (and required) by this app.
 final Version supportedSchemaVersion = Version(1, 0);
 
-/// Contains some static metadata about the database itself. Contains exactly one row only which
-/// never changes.
-class MetadataTable {
+/// Table containing some static metadata about the database itself.
+///
+/// Must contain exactly one row.
+class DatabaseMetadataTable {
   /// Name of the table.
   static const String tableName = 'database_metadata';
 
-  /// Name of the major schema version column.
-  static const String columnMajorVersion = '$tableName.schema_version_major';
+  /// The name of the 'schema_version_major' INTEGER column:
+  /// Major part of the schema version (corresponding to incompatible changes).
+  static const String columnSchemaVersionMajor = '$tableName.schema_version_major';
 
-  /// Name of the minor schema version column.
-  static const String columnMinorVersion = '$tableName.schema_version_minor';
+  /// The name of the 'schema_version_minor' INTEGER column:
+  /// Minor part of the schema version (corresponding to backward-compatible changes).
+  static const String columnSchemaVersionMinor = '$tableName.schema_version_minor';
 
-  /// Name of the compile time column.
+  /// The name of the 'compile_time' TEXT column:
+  /// Date and time this database has been created.
+  ///
+  /// This is an ISO 8601 string value (i.e. something like "YYYY-MM-DDTHH:MM:SS.ffffff+HH:MM")
+  /// and must include proper time zone information.
   static const String columnCompileTime = '$tableName.compile_time';
 
-  /// Name of the vendor column.
+  /// The name of the 'vendor' TEXT column:
+  /// Vendor identification label of the database provider.
+  /// This is an arbitrary (even empty) display string to distinguish different database sources.
   static const String columnVendor = '$tableName.vendor';
 }
 
-/// Represents the `summits` table containing all summit data.
+/// Table containing all summits.
 ///
-/// The main purpose of this class is to provide a namespace with all string constants corresponding
-/// to the summits table. Always use these constants when referring to this table or its columns
-/// to make future schema changes easier.
-class SummitTable {
+/// Summit data from different sources is usually merged based on the summit name. To store
+/// geographical coordinate values as integer values, their decimal representation is multiplied by
+/// 10.000.000 to support the same precision as the OSM database (7 decimal places, ~1 cm). Positive
+/// values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is stored as
+/// (509170936, 141992389).
+///
+/// See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
+class SummitsTable {
   /// Name of the table.
   static const String tableName = 'summits';
 
-  /// Name of the ID column.
+  /// The name of the 'id' INTEGER column:
+  /// Summit ID, unique within this database.
   static const String columnId = '$tableName.id';
 
-  /// Name of the summit name column.
-  static const String columnName = '$tableName.summit_name';
+  /// The name of the 'summit_name' TEXT column:
+  /// Official name of this summit. Names are unique.
+  static const String columnSummitName = '$tableName.summit_name';
 
-  /// Name of the latitude column.
+  /// The name of the 'latitude' INTEGER column:
+  /// The latitude value of the geographical position.
   static const String columnLatitude = '$tableName.latitude';
 
-  /// Name of the longitude column.
+  /// The name of the 'longitude' INTEGER column:
+  /// The longitude value of the geographical position.
   static const String columnLongitude = '$tableName.longitude';
 }
 
-/// Represents the `routes` table containing all route data.
+/// Table containing all routes.
 ///
-/// The main purpose of this class is to provide a namespace with all string constants corresponding
-/// to the routes table. Always use these constants when referring to this table or its columns
-/// to make future schema changes easier.
+/// Route names are unique for each summit, therefore route data from different sources can be
+/// merged based on the (summit, route name) combination.
+///
+/// Routes have several grades describing their difficulty, depending on the route characteristics
+/// (e.g. does it include a jump?), the climbing style (e.g. "all free" or "redpoint") and also on
+/// each other:
+///  - A route without a jumping grade is usually climbed without having to jump
+///  - A route with both grades contains a single jump within its climbing parts
+///  - A route with only a jumping grade consists of a single jump only
+///  - The AF/RP ratings of a route with OU grade require some additional support
+///
+/// Grades are represented by integer numbers, with 1 being the lowest (or "easiest") possible
+/// rating and without an upper bound. Each step in the corresponding scale system increases the
+/// value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
+/// 0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
 class RoutesTable {
   /// Name of the table.
   static const String tableName = 'routes';
 
-  /// Name of the route ID column.
-  static const String columnRouteId = '$tableName.id';
+  /// The name of the 'id' INTEGER column:
+  /// Route ID, unique within this database.
+  static const String columnId = '$tableName.id';
 
-  /// Name of the summit ID column (referencing the summit a route belongs to).
+  /// The name of the 'summit_id' INTEGER column:
+  /// ID of the summit this route is assigned to. Foreign key to the summits table.
   static const String columnSummitId = '$tableName.summit_id';
 
-  /// Name of the route name column.
-  static const String columnName = '$tableName.route_name';
+  /// The name of the 'route_name' TEXT column:
+  /// Name of this route. Unique within this summit, but different summits may have routes with
+  /// identical names (e.g. "AW").
+  static const String columnRouteName = '$tableName.route_name';
 
-  /// Name of the grade name column (deprecated!).
-  static const String columnGrade = '$tableName.route_grade';
+  /// The name of the 'route_grade' TEXT column:
+  /// Grade label. Deprecated, please use the more fine-grained grade columns instead.
+  static const String columnRouteGrade = '$tableName.route_grade';
 
-  /// Name of the "af" climbing grade column.
+  /// The name of the 'grade_af' INTEGER column:
+  /// The grade that applies when climbing this route in the AF ("alles frei", i.e. "all free")
+  /// style, i.e. without any belaying (no rope, no abseiling). Set to 0 when it is just a single
+  /// jump.
   static const String columnGradeAf = '$tableName.grade_af';
 
-  /// Name of the "ou" climbing grade column.
-  static const String columnGradeOu = '$tableName.grade_ou';
-
-  /// Name of the "rp" climbing grade column.
+  /// The name of the 'grade_rp' INTEGER column:
+  /// The grade that applies when climbing this route in the RP ("Rotpunkt", i.e. "redpoint")
+  /// style. Set to 0 when it is just a single jump.
   static const String columnGradeRp = '$tableName.grade_rp';
 
-  /// Name of the jumping grade column.
-  static const String columnJumpGrade = '$tableName.grade_jump';
+  /// The name of the 'grade_ou' INTEGER column:
+  /// The grade that applies when climbing this route in the OU ("ohne Unterstützung", i.e.
+  /// "without support") style, i.e. without using the support considered in the AF style
+  /// grade. Set to 0 when the AF grade doesn't include any support.
+  static const String columnGradeOu = '$tableName.grade_ou';
 
-  /// Name of the star count column.
-  static const String columnGradeStars = '$tableName.grade_stars';
+  /// The name of the 'grade_jump' INTEGER column:
+  /// The grade of the jump within this route. Set to 0 when there is no need to jump.
+  static const String columnGradeJump = '$tableName.grade_jump';
 
-  /// Name of the danger (exclamation) mark count column.
-  static const String columnGradeDanger = '$tableName.grade_danger';
+  /// The name of the 'stars' INTEGER column:
+  /// The count of official stars assigend to this route. An increasing number of stars marks a
+  /// route as "more beautiful". 0 is the default for regular routes.
+  static const String columnStars = '$tableName.stars';
+
+  /// The name of the 'danger' BOOLEAN column:
+  /// True if the route is officially marked as "dangerous", false if not.
+  static const String columnDanger = '$tableName.danger';
 }
 
-/// Represents the `posts` table containing all post data.
-///
-/// The main purpose of this class is to provide a namespace with all string constants corresponding
-/// to the posts table. Always use these constants when referring to this table or its columns
-/// to make future schema changes easier.
+/// Table containing all posts that have been assigned to routes.
 class PostsTable {
   /// Name of the table.
   static const String tableName = 'posts';
 
-  /// Name of the post ID column
-  static const String columnPostId = '$tableName.id';
+  /// The name of the 'id' INTEGER column:
+  /// Post ID, unique within this database.
+  static const String columnId = '$tableName.id';
 
-  /// Name of the route ID column (referencing the route a post belongs to).
+  /// The name of the 'route_id' INTEGER column:
+  /// ID of the route this post is assigned to. Foreign key to the routes table.
   static const String columnRouteId = '$tableName.route_id';
 
-  /// Name of the user name column.
-  static const String columnName = '$tableName.user_name';
+  /// The name of the 'user_name' TEXT column:
+  /// Name of the post's author.
+  static const String columnUserName = '$tableName.user_name';
 
-  /// Name of the timestamp column.
-  static const String columnTimestamp = '$tableName.post_date';
+  /// The name of the 'post_date' TEXT column:
+  /// The date and time the post was published. ISO 8601 string value
+  /// ("YYYY-MM-DDTHH:MM:SS.ffffff+HH:MM").
+  static const String columnPostDate = '$tableName.post_date';
 
-  /// Name of the comment column.
+  /// The name of the 'comment' TEXT column:
+  /// The comment.
   static const String columnComment = '$tableName.comment';
 
-  /// Name of the user rating column.
+  /// The name of the 'rating' INTEGER column:
+  /// The rating the author assigned to the route this post corresponds to. This is a signed integer
+  /// value in the range between -3 (extremely bad/dangerous) to 3 (extremely outstanding/great).
   static const String columnRating = '$tableName.rating';
 }

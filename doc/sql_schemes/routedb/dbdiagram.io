@@ -4,11 +4,26 @@ Project RouteDb {
 
   The route database is a single SQLite file with the schema documented here. You can create a
   graphical view of the database schema from this document at: https://dbdiagram.io
-
-  Schema Version: 1.0
-
-  The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
   '''
+
+  // The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
+  schema_version: "1.0"
+
+  // Unique constraints that stretch over multiple columns are not supported by DBML yet
+  // (https://github.com/holistics/dbml/issues/68). So we use this workaround instead: The property
+  // with this special name is a JSON dictionary mapping a list of constraints (each being the list
+  // of column names) to the table name.
+  composite_unique_constraints:
+    '''
+    {
+        "routes": [
+            ["summit_id", "route_name", "route_grade"]
+        ],
+        "database_metadata": [
+            ["schema_version_major", "schema_version_minor", "compile_time", "vendor"]
+        ]
+    }
+    '''
 }
 
 
@@ -181,9 +196,6 @@ Table routes {
   indexes {
     route_name [name: 'IdxRouteName']
   }
-  
-  // Unique constraint which I don't know how to define here yet:
-  // UNIQUE(summit_id, route_name, route_grade)
 }
 // Foreign key routes -> summits
 Ref: summits.id < routes.summit_id [delete: cascade]
