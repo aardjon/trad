@@ -657,6 +657,21 @@ For unit testing, file system operations can be mocked with the in-memory implem
 [file](https://pub.dev/packages/file) package (only available for tests, not in a release build).
 
 
+## 8.6. Synchronizing the route database schema
+
+The schema of the route database must be known to both the mobile app (for reading) and the scraper
+(for writing). When changing the schema, the database adapter of both parts must be updated. To
+make this simpler and less error-prone, the database schema is defined in a single place only: The
+[dbdiagram.io](sql_schemes/routedb/dbdiagram.io) DBML file. Python and Dart source files for
+accessing concrete DB entities are generated from [templates](sql_schemes/routedb/jinja_templates)
+using [a tool](devtools.md#generate-schema-generate-db-schema-sources), to avoid accidential
+mismatches between both parts. The adapter code then still needs a lot of knowledge about the
+schema, but any incompatibilities will usually cause obvious errors.
+
+So the generated source files must never be edited directly, but only ever by the code generator.
+To change the schema, update the DBML file. To modify the generated files, modify their templates.
+
+
 # 9. Architecture Decisions
 
 ## 9.1 ADR-1: How to integrate Flutter into the architecture?
