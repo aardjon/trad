@@ -1,3 +1,7 @@
 # Python/pip related
 **/__pycache__
 src/*.egg-info
+
+# Dev Tools
+/.mypy_cache/
+
