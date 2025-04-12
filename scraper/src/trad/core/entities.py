@@ -4,10 +4,83 @@ Provides all the business/core data types.
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Final
+from typing import Final, Self
 
 NO_GRADE: Final = 0
 """ Special value to mark a missing or no grade. """
+
+
+class GeoPosition:
+    """
+    A single geographical point in the WGS 84 geodetic system. It provides a maximum precision of
+    geographic coordinates of about 1 cm (7 decimal places), which is the same as used by OSM.
+
+    The coordinate values can be provided either as normal decimal degree values (float) or as
+    integer values. Both provide the same precision, but the integer values multiplied by
+    10.000.000 to provide the same precision without the drawbacks of the floating point
+    representation. The integer representation is the same as in the route database, to avoid
+    unnecessary conversions.
+    """
+
+    _COORDINATE_PRECISION: Final = 10000000
+
+    def __init__(self, latitude: int, longitude: int):
+        """
+        Create a new instance with the given (integer) coordinate values. Raises [ValueError] if
+        invalid values are given.
+        """
+        if abs(latitude) > 90 * self._COORDINATE_PRECISION:
+            raise ValueError("Latitude value must be within [-90, 90]")
+        if abs(longitude) > 180 * self._COORDINATE_PRECISION:
+            raise ValueError("Longitude value must be within [-180, 180]")
+
+        self._latitude = latitude
+        self._longitude = longitude
+
+    @classmethod
+    def from_decimal_degree(cls, latitude: float, longitude: float) -> Self:
+        """
+        Create a new GeoPosition instance from the given decimal degree values.
+        """
+        return cls(
+            latitude=int(latitude * cls._COORDINATE_PRECISION),
+            longitude=int(longitude * cls._COORDINATE_PRECISION),
+        )
+
+    @property
+    def latitude_int(self) -> int:
+        """
+        The latitude value as integer within [-900000000, 900000000].
+        """
+        return self._latitude
+
+    @property
+    def longitude_int(self) -> int:
+        """
+        The longitude value as integer within [-1800000000, 1800000000]
+        """
+        return self._longitude
+
+    @property
+    def latitude_decimal_degree(self) -> float:
+        """
+        The latitude value as decimal degree.
+        """
+        return float(self._latitude) / self._COORDINATE_PRECISION
+
+    @property
+    def longitude_decimal_degree(self) -> float:
+        """
+        The longitude value as decimal degree.
+        """
+        return float(self._longitude) / self._COORDINATE_PRECISION
+
+    def __str__(self) -> str:
+        hemisphere_lat = "N" if self._latitude >= 0 else "S"
+        hemisphere_lon = "E" if self._longitude >= 0 else "W"
+        lat_str = f"{abs(self.latitude_decimal_degree):.7f}".rstrip("0").rstrip(".")
+        lon_str = f"{abs(self.longitude_decimal_degree):.7f}".rstrip("0").rstrip(".")
+        return f"{lat_str}°{hemisphere_lat} {lon_str}°{hemisphere_lon}"
 
 
 @dataclass
