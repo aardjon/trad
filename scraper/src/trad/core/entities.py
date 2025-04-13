@@ -83,6 +83,18 @@ class GeoPosition:
         return f"{lat_str}°{hemisphere_lat} {lon_str}°{hemisphere_lon}"
 
 
+UNDEFINED_GEOPOSITION: Final = GeoPosition(0, 0)
+"""
+Special value representing an "undefined" GeoPosition instance. Used when the position information
+is missing but we still want valid (but useless) data so that the application can continue normally
+without having to check for this case over and over again (Null Object Pattern).
+
+Please note that this geographical position is not *invalid*, it is just a point somewhere in the
+Atlantic Ocean where we do not expect a climbing rock. It may be changed if a new island is
+discovered there, of course ;)
+"""
+
+
 @dataclass
 class Summit:
     """
@@ -94,6 +106,9 @@ class Summit:
 
     name: str
     """ The name of this summit. """
+
+    position: GeoPosition = UNDEFINED_GEOPOSITION
+    """ Geographical position of this summit. """
 
 
 @dataclass
