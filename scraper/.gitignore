@@ -4,4 +4,4 @@ src/*.egg-info
 
 # Dev Tools
 /.mypy_cache/
-
+/.pytest_cache/
