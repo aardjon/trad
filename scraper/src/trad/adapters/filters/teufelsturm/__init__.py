@@ -26,10 +26,12 @@ class TeufelsturmDataFilter(Filter):
     _ROUTE_LIST_URL: Final = _BASE_URL + "suche.php?start={start}&anzahl={count}"
     _ROUTE_DETAILS_URL: Final = _BASE_URL + "bewertungen/anzeige.php?wegnr={}"
 
+    @override
     def __init__(self, dependency_provider: DependencyProvider) -> None:
         """
         Constructor.
         """
+        super().__init__(dependency_provider)
         self._http_boundary = dependency_provider.provide(HttpNetworkingBoundary)
 
     @staticmethod
