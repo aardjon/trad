@@ -4,6 +4,12 @@ Allows to easily mock all network access in unit tests.
 """
 
 from abc import ABCMeta, abstractmethod
+from typing import NewType
+
+JsonData = NewType("JsonData", str)
+"""
+Represents a string of arbitrary JSON data.
+"""
 
 
 class HttpNetworkingBoundary(metaclass=ABCMeta):
@@ -23,4 +29,22 @@ class HttpNetworkingBoundary(metaclass=ABCMeta):
          - Connection timeout
          - Resource not available
          - Not a text resource
+        """
+
+    @abstractmethod
+    def retrieve_json_resource(
+        self,
+        url: str,
+        query_params: dict[str, str | int],
+        query_content: str | None = None,
+    ) -> JsonData:
+        """
+        Retrieve and return the (binary) JSON content of the resource at the requested [url].
+        [url_params] are additional parameters to be sent as part of the URL, and will be appended
+        (and encoded) appropriately, while [query_content] is sent as the request body as-is.
+
+        Raises in case of problems, such as:
+         - Connection problem
+         - Connection timeout
+         - Resource not available
         """
