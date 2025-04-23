@@ -20,9 +20,14 @@ class RequestsHttp(HttpNetworkingBoundary):
     """ The HTTP request timeout in seconds. """
 
     @override
-    def retrieve_text_resource(self, url: str) -> str:
+    def retrieve_text_resource(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None = None,
+    ) -> str:
         page = requests_get(
             url=url,
+            params=url_params,
             headers={"User-Agent": "Thunder Client (https://www.thunderclient.com)"},
             timeout=self._REQUEST_TIMEOUT,
         )
@@ -32,12 +37,12 @@ class RequestsHttp(HttpNetworkingBoundary):
     def retrieve_json_resource(
         self,
         url: str,
-        query_params: dict[str, str | int],
+        url_params: dict[str, str | int] | None = None,
         query_content: str | None = None,
     ) -> JsonData:
         response = requests_get(
             url=url,
-            params=query_params,
+            params=url_params,
             headers={"User-Agent": "trad routedb scraper", "Accept": "application/json"},
             data=query_content,
             timeout=self._REQUEST_TIMEOUT,

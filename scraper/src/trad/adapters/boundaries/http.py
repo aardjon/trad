@@ -19,9 +19,15 @@ class HttpNetworkingBoundary(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def retrieve_text_resource(self, url: str) -> str:
+    def retrieve_text_resource(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None = None,
+    ) -> str:
         """
         Retrieve and return the text content of the resource at the requested [url].
+        [url_params] are additional parameters to be sent as part of the URL, and will be appended
+        (and encoded) appropriately.
 
         If the resource is available in different formats, the one best matching "text" is chosen.
         Raises in case of problems, such as:
@@ -35,7 +41,7 @@ class HttpNetworkingBoundary(metaclass=ABCMeta):
     def retrieve_json_resource(
         self,
         url: str,
-        query_params: dict[str, str | int],
+        url_params: dict[str, str | int] | None = None,
         query_content: str | None = None,
     ) -> JsonData:
         """
