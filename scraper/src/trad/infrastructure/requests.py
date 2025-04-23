@@ -4,7 +4,7 @@ Implementation of a generic HTTP networking component.
 
 from typing import Final, override
 
-import requests
+from requests import get as requests_get
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary, JsonData
 
@@ -21,7 +21,7 @@ class RequestsHttp(HttpNetworkingBoundary):
 
     @override
     def retrieve_text_resource(self, url: str) -> str:
-        page = requests.get(
+        page = requests_get(
             url=url,
             headers={"User-Agent": "Thunder Client (https://www.thunderclient.com)"},
             timeout=self._REQUEST_TIMEOUT,
@@ -35,7 +35,7 @@ class RequestsHttp(HttpNetworkingBoundary):
         query_params: dict[str, str | int],
         query_content: str | None = None,
     ) -> JsonData:
-        response = requests.get(
+        response = requests_get(
             url=url,
             params=query_params,
             headers={"User-Agent": "trad routedb scraper", "Accept": "application/json"},
