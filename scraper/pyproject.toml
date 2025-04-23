@@ -18,6 +18,7 @@ dependencies = [
   "beautifulsoup4",
   "lidipy",
   "pandas[html]",
+  "pydantic",
   "requests",
 ]
 
@@ -62,6 +63,7 @@ directory = "coverage/report"
 mypy_path = "src"
 explicit_package_bases = true
 namespace_packages = true
+plugins = ["pydantic.mypy"]
 
 # The following settings configure the rules checked by MyPy. As with other linters, the basic idea
 # is to first enable everything and only disable single errors we don't want. Further reasoning for
@@ -83,8 +85,15 @@ disable_error_code = "type-abstract"
 # type-abstract: Disabled because it prohibits returning abstract instances of a given abstract type
 #   from functions (what we heavily do when using `trad.crosscuttings.di.DependencyProvider`) due to
 #   a MyPy error: https://github.com/python/mypy/issues/4717
-#   May be re-enabled once this issues is fixed.
+#   May be re-enabled once this issue is fixed.
 
+[tool.pydantic-mypy]
+init_forbid_extra = true
+# Disabled because we usually want to instantiate Pydantic models with a generic JSON structure like
+# 'dict[str, object]' to be validated and deserialized, and don't want MyPy warnings every time.
+init_typed = false
+# Disabled because it requires 'init_typed' and 'init_forbid_extra' being enabled
+warn_required_dynamic_aliases = false
 
 # Override some settings for external packages to avoid issues from them
 [[tool.mypy.overrides]]

@@ -21,11 +21,12 @@ class PipeOptimizingFilter(Filter):
     It does not add any further data.
     """
 
+    @override
     def __init__(self, dependency_provider: DependencyProvider) -> None:
         """
         Constructor.
         """
-        super().__init__()
+        super().__init__(dependency_provider)
         self._application_settings = dependency_provider.provide(SettingsBoundary)
 
     @staticmethod

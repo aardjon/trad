@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum, auto
 
 from trad.core.boundaries.pipes import Pipe
+from trad.crosscuttings.di import DependencyProvider
 
 
 class FilterStage(Enum):
@@ -50,6 +51,13 @@ class Filter(metaclass=ABCMeta):
     individual instance is only executed once, but it shall be possible to run different instances
     on the same pipe in parallel. Each Filter must be assigned to a certain stage to run in.
     """
+
+    @abstractmethod
+    def __init__(self, dependency_provider: DependencyProvider) -> None:
+        """
+        Create a new Filter instance which may depend on other components as provided.
+        """
+        super().__init__()
 
     @staticmethod
     @abstractmethod

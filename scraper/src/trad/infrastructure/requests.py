@@ -6,7 +6,7 @@ from typing import Final, override
 
 import requests
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary
+from trad.adapters.boundaries.http import HttpNetworkingBoundary, JsonData
 
 
 class RequestsHttp(HttpNetworkingBoundary):
@@ -27,3 +27,19 @@ class RequestsHttp(HttpNetworkingBoundary):
             timeout=self._REQUEST_TIMEOUT,
         )
         return page.text
+
+    @override
+    def retrieve_json_resource(
+        self,
+        url: str,
+        query_params: dict[str, str | int],
+        query_content: str | None = None,
+    ) -> JsonData:
+        response = requests.get(
+            url=url,
+            params=query_params,
+            headers={"User-Agent": "trad routedb scraper", "Accept": "application/json"},
+            data=query_content,
+            timeout=self._REQUEST_TIMEOUT,
+        )
+        return JsonData(response.text)

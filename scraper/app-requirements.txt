@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=app-requirements.txt --strip-extras pyproject.toml
 #
+annotated-types==0.7.0
+    # via pydantic
 beautifulsoup4==4.13.3
     # via
     #   pandas
@@ -24,6 +26,10 @@ numpy==2.2.4
     # via pandas
 pandas==2.2.3
     # via trad_scraper (pyproject.toml)
+pydantic==2.11.3
+    # via trad_scraper (pyproject.toml)
+pydantic-core==2.33.1
+    # via pydantic
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2025.2
@@ -37,7 +43,13 @@ six==1.17.0
 soupsieve==2.6
     # via beautifulsoup4
 typing-extensions==4.13.2
-    # via beautifulsoup4
+    # via
+    #   beautifulsoup4
+    #   pydantic
+    #   pydantic-core
+    #   typing-inspection
+typing-inspection==0.4.0
+    # via pydantic
 tzdata==2025.2
     # via pandas
 urllib3==2.4.0

@@ -173,4 +173,80 @@ Advantages:
   + Very lightweight
   + Pure Python, no further dependencies
 (Possible) Disadvantages:
-  - Unclear how well it is maintained in the future (until now: 4 version in 2 years)
+  - Unclear how well it is maintained in the future (until now: 4 versions in 2 years)
+
+## 2.2 Infrastructure
+
+### 2.2.1 Querying the OpenStreetMap database
+
+The scraper has to retrieve data from both the Nominatim and the Overpass API (unlike the OSM API,
+Overpass is optimized for read-only access and filtering). The use cases are:
+ - Resolve area ID by name (using Nominatim)
+ - Retrieve all POI with certain tags (summits) from that area
+ - Retrieve data (name, geo position, tags) from those POI
+ 
+The following tools have been considered for requesting OSM:
+ 1. Manually request the APIs with [requests](https://pypi.org/project/requests)
+ 2. [OSMPythonTools](https://pypi.org/project/OSMPythonTools)
+ 3. [osmrx](https://pypi.org/project/osmrx)
+ 4. [osmnx](https://pypi.org/project/osmnx)
+ 5. [overpy](https://pypi.org/project/overpy)
+ 6. [geopy](https://pypi.org/project/geopy)
+ 7. [overpass](https://pypi.org/project/overpass)
+ 8. [aio-overpass](https://pypi.org/project/aio-overpass)
+
+Unfortunately, most of them seem to be outdated, introduce a lot of additional dependencies, or
+provide a lot of features that we do not need for our simple use cases. The only maintained
+packages (`osmrx`, #2 and `aio-overpass`, #8) do not support all of our needs.
+
+At the end, we decided to request the APIs manually using the `requests` package (#1), because none
+of the available libraries fits all of our needs, and we actually do only two quite simple OSM
+requests at all.
+
+### JSON deserialisation
+
+For deserializing JSON input data (from external sources) into Python objects, the following
+tools have been considered:
+ 1. [Builtin json module](https://docs.python.org/3/library/json.html)
+ 2. [jsonschema](https://pypi.org/project/jsonschema)
+ 3. [marshmallow](https://pypi.org/project/marshmallow)
+ 4. [pydantic](https://pypi.org/project/pydantic)
+
+We finally decided to use `pydantic`(#4), because it is the only one with full type safety that
+provides a simple and straight-forward API and supports automatic data conversion.
+
+#### Builtin json module
+
+Advantages: 
+  + No additional dependency
+Disadvantages:
+  - No automatic validation
+  - No type safety
+  - No automatic conversion
+
+#### jsonschema
+
+Advantages: 
+  + Content validation against a given schema
+Disadvantages:
+  - No type safety, i.e. type hints or casts are required
+  - No automatic conversion into Python objects
+
+#### marshmallow
+
+Advantages: 
+  + Content validation against a given schema
+  + Nice API for manual data conversion
+Disadvantages:
+  - Annotates all JSON data with `Any`, i.e. disabling all type checks
+  - No automatic conversion into Python objects
+
+#### pydantic
+
+Advantages: 
+  + Content validation against a given schema
+  + Automatic conversion into Python object
+  + Type safety with real types
+  + It's said to be fast because of a *Rust* core
+(Possible) Disadvantages:
+  - Needs `rustc` for building

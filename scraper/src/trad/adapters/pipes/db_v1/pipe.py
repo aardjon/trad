@@ -95,8 +95,8 @@ class DbSchemaV1Pipe(Pipe):
                 data_row=DataRow(
                     {
                         SummitsTable.COLUMN_SUMMIT_NAME: summit.name,
-                        SummitsTable.COLUMN_LATITUDE: 0,
-                        SummitsTable.COLUMN_LONGITUDE: 0,
+                        SummitsTable.COLUMN_LATITUDE: summit.position.latitude_int,
+                        SummitsTable.COLUMN_LONGITUDE: summit.position.longitude_int,
                     }
                 ),
             )
