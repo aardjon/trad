@@ -1,5 +1,5 @@
 """
-Unit tests for the trad.infrastructure.sqlite3db.database module.
+Unit tests for the trad.infrastructure.sqlite3db module.
 """
 
 from dataclasses import dataclass
