@@ -16,6 +16,12 @@ class RequestsHttp(HttpNetworkingBoundary):
     Library documentation: https://docs.python-requests.org/en/latest/index.html
     """
 
+    _USER_AGENT_HEADER: Final = {"User-Agent": "TradRouteDbScraper/NONE"}
+    """
+    The user agent string to send with HTTP requests.
+    TODO(aardjon): We need a real version number to use here...
+    """
+
     _REQUEST_TIMEOUT: Final = 60
     """ The HTTP request timeout in seconds. """
 
@@ -28,7 +34,7 @@ class RequestsHttp(HttpNetworkingBoundary):
         page = requests_get(
             url=url,
             params=url_params,
-            headers={"User-Agent": "Thunder Client (https://www.thunderclient.com)"},
+            headers=self._USER_AGENT_HEADER,
             timeout=self._REQUEST_TIMEOUT,
         )
         return page.text
@@ -43,7 +49,7 @@ class RequestsHttp(HttpNetworkingBoundary):
         response = requests_get(
             url=url,
             params=url_params,
-            headers={"User-Agent": "trad routedb scraper", "Accept": "application/json"},
+            headers=self._USER_AGENT_HEADER | {"Accept": "application/json"},
             data=query_content,
             timeout=self._REQUEST_TIMEOUT,
         )
