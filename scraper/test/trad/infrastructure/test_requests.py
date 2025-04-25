@@ -2,12 +2,16 @@
 Unit tests for the trad.infrastructure.requests module.
 """
 
+from collections.abc import Callable
 from typing import Final
 from unittest.mock import ANY, Mock, patch
 
 import pytest
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import HTTPError, Timeout
 from requests.models import Response
 
+from trad.adapters.boundaries.http import HttpRequestError
 from trad.infrastructure.requests import RequestsHttp
 
 
@@ -60,7 +64,7 @@ class TestRequestsHttp:
          - The URL and their parameters must be forwarded correctly
          - The response content is returned as-is
         """
-        mocked_requests_get.return_value = Mock(Response, status=200, text=response_data)
+        mocked_requests_get.return_value = Mock(Response, status_code=200, text=response_data)
         http_component = RequestsHttp()
         response = http_component.retrieve_text_resource(
             url=self._TEST_BASE_URL,
@@ -137,7 +141,7 @@ class TestRequestsHttp:
          - The URL, their parameters and the query content must be forwarded correctly
          - The response content is returned as-is (no matter if it is valid JSON or not)
         """
-        mocked_requests_get.return_value = Mock(Response, status=200, text=response_data)
+        mocked_requests_get.return_value = Mock(Response, status_code=200, text=response_data)
         http_component = RequestsHttp()
         response = http_component.retrieve_json_resource(
             url=self._TEST_BASE_URL,
@@ -162,3 +166,46 @@ class TestRequestsHttp:
         assert headers.get("User-Agent") == self._EXPECTED_USER_AGENT
         assert headers.get("Accept") == "application/json"
 
+    @pytest.mark.parametrize(
+        "send_request",
+        [
+            lambda component, url: component.retrieve_text_resource(url=url),
+            lambda component, url: component.retrieve_json_resource(url=url),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "response_code_or_exception",
+        [
+            # Possible network problems
+            RequestsConnectionError(),
+            Timeout(),
+            HTTPError(),
+            # HTTP status codes that trigger an error
+            102,
+            204,
+            208,
+            301,
+            400,
+            401,
+            500,
+            503,
+        ],
+    )
+    def test_retrieve_resource_errors(
+        self,
+        mocked_requests_get: Mock,
+        response_code_or_exception: int | Exception,
+        send_request: Callable[[RequestsHttp, str], str],
+    ) -> None:
+        """
+        Ensures that the retrieve_*_resource() methods raise an HttpRequestError in case of request
+        or HTTP errors.
+        """
+        mocked_requests_get.side_effect = (
+            [Mock(Response, status_code=response_code_or_exception, reason="Fake Failure")]
+            if isinstance(response_code_or_exception, int)
+            else response_code_or_exception
+        )
+        http_component = RequestsHttp()
+        with pytest.raises(HttpRequestError):
+            send_request(http_component, self._TEST_BASE_URL)

@@ -4,9 +4,11 @@ Implementation of a generic HTTP networking component.
 
 from typing import Final, override
 
+from requests import codes
 from requests import get as requests_get
+from requests.exceptions import RequestException
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary, JsonData
+from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
 
 
 class RequestsHttp(HttpNetworkingBoundary):
@@ -31,13 +33,22 @@ class RequestsHttp(HttpNetworkingBoundary):
         url: str,
         url_params: dict[str, str | int] | None = None,
     ) -> str:
-        page = requests_get(
-            url=url,
-            params=url_params,
-            headers=self._USER_AGENT_HEADER,
-            timeout=self._REQUEST_TIMEOUT,
-        )
-        return page.text
+        try:
+            response = requests_get(
+                url=url,
+                params=url_params,
+                headers=self._USER_AGENT_HEADER,
+                timeout=self._REQUEST_TIMEOUT,
+            )
+        except RequestException as e:
+            raise HttpRequestError("HTTP request failed") from e
+        if not response.ok:
+            raise HttpRequestError(f"HTTP error {response.status_code}: {response.reason}")
+        if response.status_code != codes.ok:
+            raise HttpRequestError(
+                f"Unexpected HTTP repsonse {response.status_code}: {response.reason}"
+            )
+        return response.text
 
     @override
     def retrieve_json_resource(
@@ -46,11 +57,20 @@ class RequestsHttp(HttpNetworkingBoundary):
         url_params: dict[str, str | int] | None = None,
         query_content: str | None = None,
     ) -> JsonData:
-        response = requests_get(
-            url=url,
-            params=url_params,
-            headers=self._USER_AGENT_HEADER | {"Accept": "application/json"},
-            data=query_content,
-            timeout=self._REQUEST_TIMEOUT,
-        )
+        try:
+            response = requests_get(
+                url=url,
+                params=url_params,
+                headers=self._USER_AGENT_HEADER | {"Accept": "application/json"},
+                data=query_content,
+                timeout=self._REQUEST_TIMEOUT,
+            )
+        except RequestException as e:
+            raise HttpRequestError("HTTP request failed") from e
+        if not response.ok:
+            raise HttpRequestError(f"HTTP error {response.status_code}: {response.reason}")
+        if response.status_code != codes.ok:
+            raise HttpRequestError(
+                f"Unexpected HTTP repsonse {response.status_code}: {response.reason}"
+            )
         return JsonData(response.text)
