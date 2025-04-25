@@ -15,7 +15,7 @@ from trad.adapters.boundaries.http import HttpRequestError
 from trad.infrastructure.requests import RequestsHttp
 
 
-@patch("trad.infrastructure.requests.requests_get")
+@patch("trad.infrastructure.requests.requests.get")
 class TestRequestsHttp:
     """
     Unit tests for the RequestsHttp component class.

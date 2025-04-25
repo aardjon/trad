@@ -1,12 +1,14 @@
 """
 Implementation of a generic HTTP networking component.
 """
+# Disable the "no-member" pylint message in this file because it causes too many false positives for
+# the dynamic attributes and imports of the 'requests' library. The basic/static cases are still
+# checked by Mypy, so it's not turned off completely.
+# pylint: disable=no-member
 
 from typing import Final, override
 
-from requests import codes
-from requests import get as requests_get
-from requests.exceptions import RequestException
+import requests
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
 
@@ -34,17 +36,17 @@ class RequestsHttp(HttpNetworkingBoundary):
         url_params: dict[str, str | int] | None = None,
     ) -> str:
         try:
-            response = requests_get(
+            response = requests.get(
                 url=url,
                 params=url_params,
                 headers=self._USER_AGENT_HEADER,
                 timeout=self._REQUEST_TIMEOUT,
             )
-        except RequestException as e:
+        except requests.RequestException as e:
             raise HttpRequestError("HTTP request failed") from e
         if not response.ok:
             raise HttpRequestError(f"HTTP error {response.status_code}: {response.reason}")
-        if response.status_code != codes.ok:
+        if response.status_code != requests.codes.ok:
             raise HttpRequestError(
                 f"Unexpected HTTP repsonse {response.status_code}: {response.reason}"
             )
@@ -58,18 +60,18 @@ class RequestsHttp(HttpNetworkingBoundary):
         query_content: str | None = None,
     ) -> JsonData:
         try:
-            response = requests_get(
+            response = requests.get(
                 url=url,
                 params=url_params,
                 headers=self._USER_AGENT_HEADER | {"Accept": "application/json"},
                 data=query_content,
                 timeout=self._REQUEST_TIMEOUT,
             )
-        except RequestException as e:
+        except requests.RequestException as e:
             raise HttpRequestError("HTTP request failed") from e
         if not response.ok:
             raise HttpRequestError(f"HTTP error {response.status_code}: {response.reason}")
-        if response.status_code != codes.ok:
+        if response.status_code != requests.codes.ok:
             raise HttpRequestError(
                 f"Unexpected HTTP repsonse {response.status_code}: {response.reason}"
             )
