@@ -12,6 +12,13 @@ Represents a string of arbitrary JSON data.
 """
 
 
+class HttpRequestError(IOError):
+    """
+    Raised when an HTTP request fails. This can be caused by e.g. network problems, address
+    resolution failures or HTTP errors.
+    """
+
+
 class HttpNetworkingBoundary(metaclass=ABCMeta):
     """
     Interface of a generic networking interface that allows to access remote resources by their URL
@@ -29,12 +36,10 @@ class HttpNetworkingBoundary(metaclass=ABCMeta):
         [url_params] are additional parameters to be sent as part of the URL, and will be appended
         (and encoded) appropriately.
 
-        If the resource is available in different formats, the one best matching "text" is chosen.
-        Raises in case of problems, such as:
+        Raises HttpRequestError in case of problems, such as:
          - Connection problem
          - Connection timeout
          - Resource not available
-         - Not a text resource
         """
 
     @abstractmethod
@@ -47,9 +52,9 @@ class HttpNetworkingBoundary(metaclass=ABCMeta):
         """
         Retrieve and return the (binary) JSON content of the resource at the requested [url].
         [url_params] are additional parameters to be sent as part of the URL, and will be appended
-        (and encoded) appropriately, while [query_content] is sent as the request body as-is.
+        (and encoded) appropriately, while [query_content] is sent as the request body.
 
-        Raises in case of problems, such as:
+        Raises HttpRequestError in case of problems, such as:
          - Connection problem
          - Connection timeout
          - Resource not available

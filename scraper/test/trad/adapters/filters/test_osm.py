@@ -9,7 +9,7 @@ from unittest.mock import ANY, Mock, NonCallableMock
 
 import pytest
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary
+from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.adapters.filters.osm import OsmSummitDataFilter
 from trad.core.boundaries.filters import FilterStage
 from trad.core.boundaries.pipes import Pipe
@@ -48,7 +48,7 @@ class TestOsmSummitDataFilter:
         ("nominatim_response", "expected_exception"),
         [
             (  # Network error
-                Exception("Fake network error"),
+                HttpRequestError("Fake network error"),
                 DataRetrievalError,
             ),
             (  # Empty response
@@ -86,7 +86,7 @@ class TestOsmSummitDataFilter:
         ("overpass_response", "expected_exception"),
         [
             (  # Network Error
-                Exception("Fake network error"),
+                HttpRequestError("Fake network error"),
                 DataRetrievalError,
             ),
             (  # Empty JSON response
