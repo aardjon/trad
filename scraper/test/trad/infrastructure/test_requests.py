@@ -78,6 +78,7 @@ class TestRequestsHttp:
         mocked_requests_get.assert_called_once_with(
             url=self._TEST_BASE_URL,
             params=url_params,
+            data=None,
             headers=ANY,
             timeout=self._EXPECTED_REQUEST_TIMEOUT,
         )
