@@ -8,8 +8,7 @@ To re-generate, run `invoke generate-schema routedb`.
 from collections.abc import Sequence
 from typing import Final, override
 
-from trad.adapters.boundaries.database.common import EntityName
-from trad.adapters.boundaries.database.structure import RawDDLStatement
+from trad.adapters.boundaries.database import EntityName, RawDDLStatement
 from trad.adapters.pipes.schemabase import TableSchema
 
 

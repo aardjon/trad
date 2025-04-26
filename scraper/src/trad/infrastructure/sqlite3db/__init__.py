@@ -8,14 +8,14 @@ from logging import getLogger
 from pathlib import Path
 from typing import override
 
-from trad.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.adapters.boundaries.database.query import (
+from trad.adapters.boundaries.database import (
     DataRow,
     DataRowContainer,
     InsertQuery,
+    RawDDLStatement,
+    RelationalDatabaseBoundary,
     SelectQuery,
 )
-from trad.adapters.boundaries.database.structure import RawDDLStatement
 from trad.crosscuttings.errors import InvalidStateError
 from trad.infrastructure.sqlite3db.statement_creator import SqlStatementCreator
 

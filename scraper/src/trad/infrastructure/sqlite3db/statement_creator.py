@@ -4,7 +4,7 @@ Definition of the SqlStatementCreator class.
 
 from logging import getLogger
 
-from trad.adapters.boundaries.database.query import InsertQuery, SelectQuery
+from trad.adapters.boundaries.database import InsertQuery, SelectQuery
 
 _logger = getLogger(__name__)
 

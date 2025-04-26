@@ -7,8 +7,12 @@ from logging import getLogger
 from pathlib import Path
 from typing import Final, override
 
-from trad.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
+from trad.adapters.boundaries.database import (
+    DataRow,
+    InsertQuery,
+    RelationalDatabaseBoundary,
+    SelectQuery,
+)
 from trad.adapters.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,

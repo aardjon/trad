@@ -9,8 +9,7 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from trad.adapters.boundaries.database.query import DataRow, InsertQuery, SelectQuery
-from trad.adapters.boundaries.database.structure import RawDDLStatement
+from trad.adapters.boundaries.database import DataRow, InsertQuery, RawDDLStatement, SelectQuery
 from trad.infrastructure.sqlite3db import Sqlite3Database
 
 
