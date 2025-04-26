@@ -167,7 +167,7 @@ class Route:
 
     star_count: int = 0
     """
-    The count of official stars assigend to this route. An increasing number of stars marks a route
+    The count of official stars assigned to this route. An increasing number of stars marks a route
     as "more beautiful". A value of zero doesn't mean that a route is bad, but that it is just a
     regular one.
     """
@@ -189,10 +189,13 @@ class Post:
 
     user_name: str
     """ Name of the post's author. """
+
     post_date: datetime
     """ The time the post was published. """
+
     comment: str
     """ The comment. """
+
     rating: int
     """
     The rating the author assigned to the entity this post corresponds to. This is a signed integer
