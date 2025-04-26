@@ -11,7 +11,7 @@ from pydantic.config import ConfigDict
 from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary, JsonData
+from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
 from trad.core.boundaries.filters import Filter, FilterStage
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import GeoPosition, Summit
@@ -74,9 +74,9 @@ class OsmSummitDataFilter(Filter):
         try:
             response_json = self._http_boundary.retrieve_json_resource(
                 url=self._NOMINATIM_API_ENDPOINT,
-                query_params={"q": area_name, "limit": 1, "format": "jsonv2"},
+                url_params={"q": area_name, "limit": 1, "format": "jsonv2"},
             )
-        except Exception as e:
+        except HttpRequestError as e:
             raise DataRetrievalError("Nominatim request failed") from e
         return response_json
 
@@ -108,10 +108,10 @@ class OsmSummitDataFilter(Filter):
         try:
             return self._http_boundary.retrieve_json_resource(
                 url=self._OVERPASS_API_ENDPOINT,
-                query_params={},
+                url_params={},
                 query_content=f"data={query}",
             )
-        except Exception as e:
+        except HttpRequestError as e:
             raise DataRetrievalError("Overpass request failed") from e
 
     def __process_overpass_response(self, json_data: JsonData) -> Iterator[Summit]:

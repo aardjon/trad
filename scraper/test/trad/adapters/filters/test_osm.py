@@ -9,7 +9,7 @@ from unittest.mock import ANY, Mock, NonCallableMock
 
 import pytest
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary
+from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.adapters.filters.osm import OsmSummitDataFilter
 from trad.core.boundaries.filters import FilterStage
 from trad.core.boundaries.pipes import Pipe
@@ -48,7 +48,7 @@ class TestOsmSummitDataFilter:
         ("nominatim_response", "expected_exception"),
         [
             (  # Network error
-                Exception("Fake network error"),
+                HttpRequestError("Fake network error"),
                 DataRetrievalError,
             ),
             (  # Empty response
@@ -86,7 +86,7 @@ class TestOsmSummitDataFilter:
         ("overpass_response", "expected_exception"),
         [
             (  # Network Error
-                Exception("Fake network error"),
+                HttpRequestError("Fake network error"),
                 DataRetrievalError,
             ),
             (  # Empty JSON response
@@ -208,12 +208,12 @@ class TestOsmSummitDataFilter:
         # Check the Nominatim request parameters
         mocked_network_boundary.retrieve_json_resource.assert_any_call(
             url="https://nominatim.openstreetmap.org/search",
-            query_params={"q": "Sächsische Schweiz", "limit": 1, "format": "jsonv2"},
+            url_params={"q": "Sächsische Schweiz", "limit": 1, "format": "jsonv2"},
         )
         # Check the Overpass request parameters (this was the most recent request)
         mocked_network_boundary.retrieve_json_resource.assert_called_with(
             url="https://overpass-api.de/api/interpreter",
-            query_params={},
+            url_params={},
             query_content=ANY,
         )
         # Do some checks on the query content (i.e. the OverpassQL string):
