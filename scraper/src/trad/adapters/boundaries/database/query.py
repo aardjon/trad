@@ -4,27 +4,37 @@ implementation (`infrastructure` ring). This module provides the data structures
 and manipulating data.
 """
 
-from collections.abc import Collection
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from trad.adapters.boundaries.database.common import EntityName, Query
+
+if TYPE_CHECKING:
+    from collections.abc import Collection, Mapping
 
 
 class DataRow:
     """
-    A single row within a database table, either for inserting or as part of a result result.
+    A single row within a database table, either for inserting or as part of a result set.
+
+    For inserting data, the "value" of a field can also be a [SelectQuery] instance, which is then
+    executed as a subquery to the actual value. This case can never happen in a query result set, of
+    course.
 
     An instance of this class doesn't necessarily contain all columns that are physically available
     in the table, they may be limited by the corresponding query. The available cell values are
     accessed based on their column name.
     """
 
-    def __init__(self, raw_data: dict[EntityName, object]):
+    def __init__(self, raw_data: Mapping[EntityName, str | int | SelectQuery | None]):
         """
         Initializes a new row from the given raw data.
 
-        [raw_data] is a dict assigning single values to column names.
+        [raw_data] is a dict assigning single values to column names. Instead of a value, a
+        [SelectQuery] instance can be provided to retrieve a value from the database as necessary.
         """
-        self._raw_data = raw_data
+        self._raw_data: Mapping[EntityName, object] = raw_data
         """ Raw column data. """
 
     def get_column_names(self) -> Collection[EntityName]:
@@ -37,7 +47,7 @@ class DataRow:
 
         Exceptions (usually programming errors):
          - KeyError: The requested column doesn't exist in this row
-         - TypeError: he requested column is of a different type
+         - TypeError: The requested column is of a different type
         """
         value = self.__get_value(column_name)
         if not isinstance(value, int | None):
@@ -50,7 +60,7 @@ class DataRow:
 
         Exceptions (usually programming errors):
          - KeyError: The requested column doesn't exist in this row
-         - TypeError: he requested column is of a different type
+         - TypeError: The requested column is of a different type
         """
         value = self.__get_value(column_name)
         if not isinstance(value, str | None):
@@ -87,7 +97,8 @@ DataRowContainer = list[DataRow]
 
 class InsertQuery(Query):
     """
-    Query for inserting a new data row into a table.
+    Query for inserting a new data row into a table. If a [SelectQuery] is provided as a field value
+    within the data row it is executed as a subquery to retrieve the actual value for that field.
     """
 
     def __init__(self, table_name: EntityName, data_row: DataRow):
@@ -95,10 +106,12 @@ class InsertQuery(Query):
         Create a new query for inserting the given [data_row] into [table_name].
         """
         super().__init__(table_name)
+
         self.data_row = data_row
         """
         Data to be inserted. The dict keys are column names that must of course be available on that
-        table. Also, the table must represent a valid table row.
+        table. Also, the table must represent a valid table row. Values may either be concrete
+        values or [SelectQuery] objects to run for retrieving a value.
         """
 
 
@@ -116,8 +129,10 @@ class FilteringQuery(Query):
 
         self._where_condition: str | None = None
         """ The SQL WHERE condition. """
+
         self._where_parameters: list[object] = []
         """ Parameter values referenced by [_where_condition]. """
+
         self.limit: int | None = None
         """ Number of rows the result set shall be limited to, or None to return all results. """
 
@@ -128,7 +143,10 @@ class FilteringQuery(Query):
 
     @property
     def where_parameters(self) -> list[object]:
-        """Parameter values referenced by [where_condition]."""
+        """
+        Parameter values referenced by [where_condition]. May contain [SelectQuery] instances
+        instead of actual values, to use the query result.
+        """
         return self._where_parameters
 
     def set_where_condition(self, where_condition: str, where_parameters: list[object]) -> None:
@@ -138,9 +156,10 @@ class FilteringQuery(Query):
 
         [where_condition] is a regular SQL WHERE clause without the WHERE keyword. All non-static
         parameter values should be provided in the [where_parameters] list and only referenced by
-        '?' within [where_condition] to avoid SQL injection errors. Of course, the number of given
-        parameters must match the number of references, otherwise the query will fail upon
-        execution.
+        '?' within [where_condition] to avoid SQL injection errors. The [where_parameters] list may
+        also contain [SelectQuery] instances to retrieve the actual values from the database. Of
+        course, the number of given parameters must match the number of references, otherwise the
+        query will fail upon execution.
         """
         self._where_condition = where_condition
         self._where_parameters = where_parameters
@@ -173,6 +192,6 @@ class EntityNotFoundError(Exception):
     """
     Raised when an entity the operation depends on is missing in the database (e.g. trying to add a
     route to a non-existing summit). In many cases these are programming errors that can be fixed by
-    adjusting adding the missing entity first. In general, the end user cannot do much about it when
-    it happens unexpectedly at runtime.
+    adding the missing entity first. In general, the end user cannot do much about it when it
+    happens unexpectedly at runtime.
     """
