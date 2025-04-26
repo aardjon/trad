@@ -77,10 +77,10 @@ class TeufelsturmDataFilter(Filter):
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text)
             if post_data.peak:
-                pipe.add_summit_data(post_data.peak)
-                pipe.add_route_data(summit_name=post_data.peak.name, route=post_data.route)
+                pipe.add_or_enrich_summit(post_data.peak)
+                pipe.add_or_enrich_route(summit_name=post_data.peak.name, route=post_data.route)
                 for post in post_data.posts:
-                    pipe.add_post_data(
+                    pipe.add_post(
                         summit_name=post_data.peak.name,
                         route_name=post_data.route.route_name,
                         post=post,

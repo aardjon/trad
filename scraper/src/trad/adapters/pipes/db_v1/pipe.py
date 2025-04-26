@@ -88,7 +88,7 @@ class DbSchemaV1Pipe(Pipe):
         self.__database_boundary.run_vacuum()
 
     @override
-    def add_summit_data(self, summit: Summit) -> None:
+    def add_or_enrich_summit(self, summit: Summit) -> None:
         self.__database_boundary.execute_insert(
             InsertQuery(
                 table_name=SummitsTable.TABLE_NAME,
@@ -103,7 +103,7 @@ class DbSchemaV1Pipe(Pipe):
         )
 
     @override
-    def add_route_data(self, summit_name: str, route: Route) -> None:
+    def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
         summit_query = SelectQuery(SummitsTable.TABLE_NAME, [SummitsTable.COLUMN_ID])
         summit_query.set_where_condition(f"{SummitsTable.COLUMN_SUMMIT_NAME} = ?", [summit_name])
         summit_query.limit = 1
@@ -127,7 +127,7 @@ class DbSchemaV1Pipe(Pipe):
         )
 
     @override
-    def add_post_data(self, summit_name: str, route_name: str, post: Post) -> None:
+    def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         summit_query = SelectQuery(SummitsTable.TABLE_NAME, [SummitsTable.COLUMN_ID])
         summit_query.set_where_condition(f"{SummitsTable.COLUMN_SUMMIT_NAME} = ?", [summit_name])
         summit_query.limit = 1

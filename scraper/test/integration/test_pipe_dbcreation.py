@@ -22,9 +22,9 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
 
     pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
     pipe.initialize_pipe()
-    pipe.add_summit_data(Summit(name="Falkenturm"))
-    pipe.add_route_data(summit_name="Falkenturm", route=Route(route_name="AW", grade="II"))
-    pipe.add_post_data(
+    pipe.add_or_enrich_summit(Summit(name="Falkenturm"))
+    pipe.add_or_enrich_route(summit_name="Falkenturm", route=Route(route_name="AW", grade="II"))
+    pipe.add_post(
         summit_name="Falkenturm",
         route_name="AW",
         post=Post(

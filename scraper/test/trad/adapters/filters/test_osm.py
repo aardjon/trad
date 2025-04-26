@@ -229,10 +229,10 @@ class TestOsmSummitDataFilter:
         assert '["climbing:trad"="yes"]' in actual_query_content
 
         # Make sure that the expected number of summits has been sent to the Pipe
-        assert mocked_pipe.add_summit_data.call_count == len(expected_summits)
+        assert mocked_pipe.add_or_enrich_summit.call_count == len(expected_summits)
         # Make sure all sent summit data matches our expectation
         stored_summits: list[Summit] = sorted(
-            (call.args[0] for call in mocked_pipe.add_summit_data.call_args_list),
+            (call.args[0] for call in mocked_pipe.add_or_enrich_summit.call_args_list),
             key=lambda s: s.name,
         )
         assert all(

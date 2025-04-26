@@ -126,7 +126,7 @@ class OsmSummitDataFilter(Filter):
 
     def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:
         for summit in summits:
-            pipe.add_summit_data(summit)
+            pipe.add_or_enrich_summit(summit)
 
 
 class _ReadOnlyPydanticModel(BaseModel):
