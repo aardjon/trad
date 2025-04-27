@@ -534,6 +534,9 @@ ignore = [
   # very unlike) future changes to the default values and doesn't cause any harm.
   "UP015",  # Unnecessary open mode parameters
 
+  # Disabled because we don't want ruff to complain about TODO comments
+  "FIX002",
+
   # The following rules conflict with the ruff/black formatting style, so they must be disabled as
   # recommended by https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
   "W191",  # tab-indentation
