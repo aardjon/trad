@@ -192,17 +192,6 @@ jobs:
           path: mobileapp/coverage/report/*
           retention-days: 1
 
-      - name: Publish HTML coverage report
-        if: github.ref == 'refs/heads/main'
-        uses: sebastianpopp/ftp-action@releases/v2
-        with:
-          host: ${{ secrets.REPORT_FTP_HOST }}
-          user: ${{ secrets.REPORT_FTP_USER }}
-          password: ${{ secrets.REPORT_FTP_PW }}
-          localDir: "mobileapp/coverage/report/"
-          remoteDir: "${{ env.CI_REF_NAME }}/mobileapp"
-          options: "--delete"
-
   test-windows:
     runs-on: windows-latest
     defaults:
