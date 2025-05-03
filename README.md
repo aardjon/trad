@@ -22,5 +22,5 @@ python scraper.py output_directory
 ```
 
 The new route database file is written into `output_directory`. Depending on your network speed,
-running the scraper may take up an hour or even longer. Provide `-v` to enable some more verbose
+running the scraper may take up to an hour or even longer. Provide `-v` to enable some more verbose
 debug log, which will give you some kind of progress feedback.
