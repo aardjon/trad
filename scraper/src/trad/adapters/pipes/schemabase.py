@@ -4,7 +4,7 @@ Abstract interface for describing the database schema (e.g. table structure and 
 
 from abc import ABCMeta, abstractmethod
 
-from trad.adapters.boundaries.database import EntityName, RawDDLStatement
+from trad.adapters.boundaries.database import EntityName, SqlStatement
 
 
 class TableSchema(metaclass=ABCMeta):
@@ -18,13 +18,13 @@ class TableSchema(metaclass=ABCMeta):
         """Name of the table."""
 
     @abstractmethod
-    def table_ddl(self) -> RawDDLStatement:
+    def table_ddl(self) -> SqlStatement:
         """
         Returns the raw SQL (DDL) statement for newly creating this table.
         """
 
     @abstractmethod
-    def index_ddl(self) -> list[RawDDLStatement]:
+    def index_ddl(self) -> list[SqlStatement]:
         """
         Returns a list of raw SQL (DDL) statements for newly creating all indices of this table.
         """

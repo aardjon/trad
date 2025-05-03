@@ -8,7 +8,7 @@ To re-generate, run `invoke generate-schema routedb`.
 from collections.abc import Sequence
 from typing import Final, override
 
-from trad.adapters.boundaries.database import EntityName, RawDDLStatement
+from trad.adapters.boundaries.database import EntityName, SqlStatement
 from trad.adapters.pipes.schemabase import TableSchema
 
 
@@ -55,8 +55,8 @@ class DatabaseMetadataTable(TableSchema):
         return self.TABLE_NAME
 
     @override
-    def table_ddl(self) -> RawDDLStatement:
-        return RawDDLStatement("""
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
         CREATE TABLE database_metadata (
             "schema_version_major" INTEGER NOT NULL,
             "schema_version_minor" INTEGER NOT NULL,
@@ -67,7 +67,7 @@ class DatabaseMetadataTable(TableSchema):
         """)
 
     @override
-    def index_ddl(self) -> list[RawDDLStatement]:
+    def index_ddl(self) -> list[SqlStatement]:
         return []
 
 
@@ -116,8 +116,8 @@ class SummitsTable(TableSchema):
         return self.TABLE_NAME
 
     @override
-    def table_ddl(self) -> RawDDLStatement:
-        return RawDDLStatement("""
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
         CREATE TABLE summits (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "summit_name" TEXT UNIQUE NOT NULL,
@@ -127,9 +127,9 @@ class SummitsTable(TableSchema):
         """)
 
     @override
-    def index_ddl(self) -> list[RawDDLStatement]:
+    def index_ddl(self) -> list[SqlStatement]:
         return [
-            RawDDLStatement(
+            SqlStatement(
                 'CREATE INDEX "IdxSummitName" ON "summits" (summit_name);',
             ),
         ]
@@ -231,8 +231,8 @@ class RoutesTable(TableSchema):
         return self.TABLE_NAME
 
     @override
-    def table_ddl(self) -> RawDDLStatement:
-        return RawDDLStatement("""
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
         CREATE TABLE routes (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "summit_id" INTEGER NOT NULL,
@@ -250,9 +250,9 @@ class RoutesTable(TableSchema):
         """)
 
     @override
-    def index_ddl(self) -> list[RawDDLStatement]:
+    def index_ddl(self) -> list[SqlStatement]:
         return [
-            RawDDLStatement(
+            SqlStatement(
                 'CREATE INDEX "IdxRouteName" ON "routes" (route_name);',
             ),
         ]
@@ -309,8 +309,8 @@ class PostsTable(TableSchema):
         return self.TABLE_NAME
 
     @override
-    def table_ddl(self) -> RawDDLStatement:
-        return RawDDLStatement("""
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
         CREATE TABLE posts (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "route_id" INTEGER NOT NULL,
@@ -323,7 +323,7 @@ class PostsTable(TableSchema):
         """)
 
     @override
-    def index_ddl(self) -> list[RawDDLStatement]:
+    def index_ddl(self) -> list[SqlStatement]:
         return []
 
 

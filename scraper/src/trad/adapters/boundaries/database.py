@@ -1,12 +1,13 @@
 """
-Definition of the boundary between pipes (`adapters` ring) and a concrete DBMS implementation
-(`infrastructure` ring).
+Definition of the boundary between pipes (`adapters` ring) and a concrete DBMS access library
+(`infrastructure` ring). The purpose of this inteface is not to hide the database itself but the
+library for accessing it. This allows for mocking the real database in unit tests, and also makes
+future changes/adaption to the lib interface easier.
 """
 
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, NewType
 
 if TYPE_CHECKING:
@@ -19,26 +20,26 @@ Name of a single entity within a relational database. These entities can be tabl
 indices, for example.
 """
 
+SqlStatement = NewType("SqlStatement", str)
+"""
+SQL statement string that can be executed on a database.
+"""
+
 
 class DataRow:
     """
     A single row within a database table, either for inserting or as part of a result set.
 
-    For inserting data, the "value" of a field can also be a [SelectQuery] instance, which is then
-    executed as a subquery to the actual value. This case can never happen in a query result set, of
-    course.
-
-    An instance of this class doesn't necessarily contain all columns that are physically available
+    An instance of this class doesn't necesarily contain all columns that are physically available
     in the table, they may be limited by the corresponding query. The available cell values are
     accessed based on their column name.
     """
 
-    def __init__(self, raw_data: Mapping[EntityName, str | int | SelectQuery | None]):
+    def __init__(self, raw_data: Mapping[EntityName, object]):
         """
         Initializes a new row from the given raw data.
 
-        [raw_data] is a dict assigning single values to column names. Instead of a value, a
-        [SelectQuery] instance can be provided to retrieve a value from the database as necessary.
+        [raw_data] is a dict assigning single values to column names.
         """
         self._raw_data: Mapping[EntityName, object] = raw_data
         """ Raw column data. """
@@ -101,121 +102,6 @@ DataRowContainer = list[DataRow]
 """ The result set returned by a table query. """
 
 
-@dataclass
-class Query:
-    """
-    Common base class for all queries that can be executed on a database.
-
-    Query classes are merely for transporting and representing queries, they don't do much
-    validation. They can be executed by handing it to one of [RelationalDatabaseBoundary]s execution
-    methods, which will cause an error if the query is in any way invalid.
-    """
-
-    table_name: EntityName
-    """ Table name to query. """
-
-
-RawDDLStatement = NewType("RawDDLStatement", str)
-"""
-Raw SQL DDL statement string for creating a database entity.
-
-This is usually a CREATE statement, e.g. to create tables or indices.
-"""
-
-
-class InsertQuery(Query):
-    """
-    Query for inserting a new data row into a table. If a [SelectQuery] is provided as a field value
-    within the data row it is executed as a subquery to retrieve the actual value for that field.
-    """
-
-    def __init__(self, table_name: EntityName, data_row: DataRow):
-        """
-        Create a new query for inserting the given [data_row] into [table_name].
-        """
-        super().__init__(table_name)
-
-        self.data_row = data_row
-        """
-        Data to be inserted. The dict keys are column names that must of course be available on that
-        table. Also, the table must represent a valid table row. Values may either be concrete
-        values or [SelectQuery] objects to run for retrieving a value.
-        """
-
-
-class FilteringQuery(Query):
-    """
-    Base class for queries that can limit or filter table content, as done e.g. for selecting or
-    updating.
-    """
-
-    def __init__(self, table_name: EntityName):
-        """
-        Create a query for a single database table with the name [table_name].
-        """
-        super().__init__(table_name)
-
-        self._where_condition: str | None = None
-        """ The SQL WHERE condition. """
-
-        self._where_parameters: list[object] = []
-        """ Parameter values referenced by [_where_condition]. """
-
-        self.limit: int | None = None
-        """ Number of rows the result set shall be limited to, or None to return all results. """
-
-    @property
-    def where_condition(self) -> str | None:
-        """The SQL WHERE condition to filter by (without the WHERE keyword)."""
-        return self._where_condition
-
-    @property
-    def where_parameters(self) -> list[object]:
-        """
-        Parameter values referenced by [where_condition]. May contain [SelectQuery] instances
-        instead of actual values, to use the query result.
-        """
-        return self._where_parameters
-
-    def set_where_condition(self, where_condition: str, where_parameters: list[object]) -> None:
-        """
-        Defines a condition to filter for, setting the `where_condition` and `where_parameters`
-        properties to the provided values.
-
-        [where_condition] is a regular SQL WHERE clause without the WHERE keyword. All non-static
-        parameter values should be provided in the [where_parameters] list and only referenced by
-        '?' within [where_condition] to avoid SQL injection errors. The [where_parameters] list may
-        also contain [SelectQuery] instances to retrieve the actual values from the database. Of
-        course, the number of given parameters must match the number of references, otherwise the
-        query will fail upon execution.
-        """
-        self._where_condition = where_condition
-        self._where_parameters = where_parameters
-
-
-class SelectQuery(FilteringQuery):
-    """
-    Query for retrieving data from the database.
-
-    [SelectQuery] instances can be provided in places like [FilteringQuery.set_where_condition()] or
-    [InsertQuery.data_row]. The corresponding placeholder is then replaced with a subquery statement
-    representing this query instance. The query must return an appropriate result set for this to
-    work, though.
-    """
-
-    def __init__(self, table_name: EntityName, column_names: list[EntityName]):
-        """
-        Create a query that retrieves [column_names] from the table with the name [table_name].
-        """
-        super().__init__(table_name)
-
-        self.column_names = column_names
-        """ The names of the columns to retrieve. """
-
-        self.order_by_columns: list[EntityName] = []
-        """ Specifies the names of the columns the result rows are ordered by. """
-
-
 class EntityNotFoundError(Exception):
     """
     Raised when an entity the operation depends on is missing in the database (e.g. trying to add a
@@ -258,24 +144,40 @@ class RelationalDatabaseBoundary(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def execute_raw_ddl(self, ddl_statement: RawDDLStatement) -> None:
+    def execute_write(
+        self,
+        query: SqlStatement,
+        query_parameters: Collection[object] | None = None,
+    ) -> None:
         """
-        Executes the given [ddl_statement] for creating a new database entity.
+        Executes the given [query] to manipulate (e.g. add or update) data in the database.
+
+        All non-static parameter values for the query (e.g. within a WHERE clause) should be
+        provided in the [query_parameters] list and only referenced by '?' within [query] to avoid
+        SQL injection errors. Of course, the number of given parameters must match the number of
+        references.
+
+        If the provided statement string is in any way invalid or the query cannot succeed for some
+        reason, an exception is raised.
         """
 
     @abstractmethod
-    def execute_insert(self, query: InsertQuery) -> None:
+    def execute_read(
+        self,
+        query: SqlStatement,
+        query_parameters: Collection[object] | None = None,
+    ) -> DataRowContainer:
         """
-        Executes the given [query] to insert data into a table.
-        """
+        Executes the given [query] to read and return data from the database.
 
-    @abstractmethod
-    def execute_select(self, query: SelectQuery) -> DataRowContainer:
-        """
-        Executes the given [query] and returns the result set.
+        All non-static parameter values for the query (e.g. within a WHERE clause) should be
+        provided in the [query_parameters] list and only referenced by '?' within [query] to avoid
+        SQL injection errors. Of course, the number of given parameters must match the number of
+        references.
 
-        If the provided query is in any way invalid, an exception is raised. If the query doesn't
-        return any results, the returned result row list is empty.
+        If the provided statement string is in any way invalid or the query cannot succeed for some
+        reason, an exception is raised. If the query doesn't return any results, the returned result
+        row list is empty.
         """
 
     @abstractmethod

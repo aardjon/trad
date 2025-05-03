@@ -3,7 +3,7 @@ Sqlite3 implementation of the relation database component.
 """
 
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from logging import getLogger
 from pathlib import Path
 from typing import override
@@ -11,13 +11,10 @@ from typing import override
 from trad.adapters.boundaries.database import (
     DataRow,
     DataRowContainer,
-    InsertQuery,
-    RawDDLStatement,
     RelationalDatabaseBoundary,
-    SelectQuery,
+    SqlStatement,
 )
 from trad.crosscuttings.errors import InvalidStateError
-from trad.infrastructure.sqlite3db.statement_creator import SqlStatementCreator
 
 _logger = getLogger(__name__)
 
@@ -54,9 +51,6 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         self._db_handle: sqlite3.Connection | None = None
         """ Handle to the currently opened database, or `None` if no database has been opened. """
 
-        self._statement_creator = SqlStatementCreator()
-        """ Delegate for creating SQL statements from Query instances. """
-
     @override
     def connect(self, destination_file: Path, *, overwrite: bool = False) -> None:
         if overwrite:
@@ -85,29 +79,30 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         return self._db_handle is not None
 
     @override
-    def execute_raw_ddl(self, ddl_statement: RawDDLStatement) -> None:
+    def execute_write(
+        self,
+        query: SqlStatement,
+        query_parameters: Collection[object] | None = None,
+    ) -> None:
         if self._db_handle is None:
             raise InvalidStateError("Please connect() to a database before querying it.")
-        self._db_handle.execute(ddl_statement)
+        self._db_handle.execute(query, tuple(query_parameters) if query_parameters else ())
         self._db_handle.commit()
 
     @override
-    def execute_select(self, query: SelectQuery) -> DataRowContainer:
+    def execute_read(
+        self,
+        query: SqlStatement,
+        query_parameters: Collection[object] | None = None,
+    ) -> DataRowContainer:
         if self._db_handle is None:
             raise InvalidStateError("Please connect() to a database before querying it.")
 
         result_set = self._db_handle.execute(
-            *self._statement_creator.create_select_statement(query)
+            query, tuple(query_parameters) if query_parameters else ()
         )
-        return [DataRow(dict(zip(query.column_names, row, strict=True))) for row in result_set]
-
-    @override
-    def execute_insert(self, query: InsertQuery) -> None:
-        if self._db_handle is None:
-            raise InvalidStateError("Please connect() to a database before querying it.")
-
-        self._db_handle.execute(*self._statement_creator.create_insert_statement(query))
-        self._db_handle.commit()
+        column_names = [col[0] for col in result_set.description]
+        return [DataRow(dict(zip(column_names, row, strict=True))) for row in result_set]
 
     @override
     def run_analyze(self) -> None:

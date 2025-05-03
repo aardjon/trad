@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from trad.adapters.boundaries.database import DataRow, InsertQuery, RawDDLStatement, SelectQuery
+from trad.adapters.boundaries.database import SqlStatement
 from trad.infrastructure.sqlite3db import Sqlite3Database
 
 
@@ -48,18 +48,6 @@ def connected_sqlite3_database(sqlite3_database: Sqlite3Mock) -> Sqlite3Mock:
         return_value=sqlite3_database.sqlite3_connection
     )
     return sqlite3_database
-
-
-def create_select_query(
-    table_name: str,
-    column_names: list[str],
-    where_condition: str,
-    where_parameters: list[object],
-) -> SelectQuery:
-    query = SelectQuery(table_name, column_names)
-    if where_condition:
-        query.set_where_condition(where_condition, where_parameters)
-    return query
 
 
 class TestSqlite3Database:
@@ -109,93 +97,51 @@ class TestSqlite3Database:
         assert sqlite3_database.sqlite3_connection.close.call_count == (1 if is_connected else 0)
         assert not db.is_connected()
 
-    def test_execute_raw_ddl(
-        self,
-        connected_sqlite3_database: Sqlite3Mock,
-    ) -> None:
-        raw_ddl_query = RawDDLStatement("Fake SQL statement")
-        connected_sqlite3_database.database.execute_raw_ddl(ddl_statement=raw_ddl_query)
-        connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(raw_ddl_query)
-        connected_sqlite3_database.sqlite3_connection.commit.assert_called_once()
-
-    def test_execute_insert(
-        self,
-        connected_sqlite3_database: Sqlite3Mock,
-    ) -> None:
-        connected_sqlite3_database.database.execute_insert(
-            InsertQuery(
-                table_name="example",
-                data_row=DataRow(raw_data={"name": "bla", "count": 42}),
-            )
-        )
-
-        connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
-            "INSERT OR IGNORE INTO example (name, count) VALUES (?, ?)",
-            ("bla", 42),
-        )
-
     @pytest.mark.parametrize(
-        ("query", "expected_statement", "expected_parameters"),
+        ("query_statement", "query_parameters"),
         [
             (
-                create_select_query(
-                    table_name="example",
-                    column_names=["*"],
-                    where_condition="",
-                    where_parameters=[],
-                ),
-                "SELECT * FROM example",
-                (),
+                "Fake SQL statement without parameters",
+                None,
             ),
             (
-                create_select_query(
-                    table_name="example",
-                    column_names=["id"],
-                    where_condition="name = ?",
-                    where_parameters=["Test"],
-                ),
-                "SELECT id FROM example WHERE name = ?",
-                ("Test",),
-            ),
-            (
-                create_select_query(
-                    table_name="example",
-                    column_names=["name"],
-                    where_condition="rating = ? AND cat = ?",
-                    where_parameters=[42, "good"],
-                ),
-                "SELECT name FROM example WHERE rating = ? AND cat = ?",
-                (42, "good"),
-            ),
-            (
-                create_select_query(
-                    table_name="main",
-                    column_names=["name"],
-                    where_condition="cat_id = ?",
-                    where_parameters=[
-                        create_select_query(
-                            table_name="sub",
-                            column_names=["id"],
-                            where_condition="category = ?",
-                            where_parameters=["test"],
-                        )
-                    ],
-                ),
-                "SELECT name FROM main WHERE cat_id = (SELECT id FROM sub WHERE category = ?)",
-                ("test",),
+                "Fake SQL statement with ? parameters ?",
+                [42, "11"],
             ),
         ],
     )
-    def test_execute_select(
+    def test_execute_write(
         self,
-        query: SelectQuery,
-        expected_statement: str,
-        expected_parameters: tuple[object, ...],
+        query_statement: str,
+        query_parameters: list[object] | None,
         connected_sqlite3_database: Sqlite3Mock,
     ) -> None:
-        connected_sqlite3_database.database.execute_select(query)
-
+        connected_sqlite3_database.database.execute_write(
+            query=SqlStatement(query_statement), query_parameters=query_parameters
+        )
         connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
-            expected_statement,
-            expected_parameters,
+            query_statement, tuple(query_parameters or ())
+        )
+        connected_sqlite3_database.sqlite3_connection.commit.assert_called_once()
+
+    def test_execute_read(
+        self,
+        connected_sqlite3_database: Sqlite3Mock,
+    ) -> None:
+        result_data = [1, 2, 3]
+        query_statement = SqlStatement("Fake SQL statement with ? parameters ?")
+        query_parameters = [47, "11"]
+
+        mocked_result_set = MagicMock(
+            description=[("id", None, None, None, None, None, None, None)]
+        )
+        mocked_result_set.__iter__.return_value = [(v,) for v in result_data]
+        connected_sqlite3_database.sqlite3_connection.execute.return_value = mocked_result_set
+
+        result = connected_sqlite3_database.database.execute_read(
+            query=query_statement, query_parameters=query_parameters
+        )
+        assert [row.get_object_value("id") for row in result] == result_data
+        connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
+            query_statement, tuple(query_parameters)
         )

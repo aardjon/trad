@@ -7,12 +7,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import Final, override
 
-from trad.adapters.boundaries.database import (
-    DataRow,
-    InsertQuery,
-    RelationalDatabaseBoundary,
-    SelectQuery,
-)
+from trad.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
 from trad.adapters.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
@@ -59,28 +54,36 @@ class DbSchemaV1Pipe(Pipe):
         _logger.debug("Creating database schema")
         for table_definition in schema_definition.get_table_schemata():
             # Create the table
-            self.__database_boundary.execute_raw_ddl(table_definition.table_ddl())
+            self.__database_boundary.execute_write(query=table_definition.table_ddl())
             # Create all indices for this table
             for index_creation_statement in table_definition.index_ddl():
-                self.__database_boundary.execute_raw_ddl(index_creation_statement)
+                self.__database_boundary.execute_write(query=index_creation_statement)
 
     def _write_metadata(self, schema_definition: DatabaseSchema) -> None:
         _logger.debug("Writing database metadata")
+        column_list = [
+            DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MAJOR,
+            DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MINOR,
+            DatabaseMetadataTable.COLUMN_VENDOR,
+            DatabaseMetadataTable.COLUMN_COMPILE_TIME,
+        ]
+        column_names = ", ".join(column_list)
+        value_placeholders = self._get_value_placeholders(len(column_list))
+
+        insert_statement = SqlStatement(
+            f"INSERT OR IGNORE INTO {DatabaseMetadataTable.TABLE_NAME} ({column_names}) "
+            f"VALUES ({value_placeholders})"
+        )
+
         major, minor = schema_definition.get_schema_version()
-        self.__database_boundary.execute_insert(
-            InsertQuery(
-                table_name=DatabaseMetadataTable.TABLE_NAME,
-                data_row=DataRow(
-                    {
-                        DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MAJOR: major,
-                        DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MINOR: minor,
-                        DatabaseMetadataTable.COLUMN_VENDOR: "",
-                        DatabaseMetadataTable.COLUMN_COMPILE_TIME: datetime.datetime.now(
-                            tz=datetime.UTC
-                        ).isoformat(),
-                    }
-                ),
-            )
+        self.__database_boundary.execute_write(
+            query=insert_statement,
+            query_parameters=[
+                major,
+                minor,
+                "",
+                datetime.datetime.now(tz=datetime.UTC).isoformat(),
+            ],
         )
 
     @override
@@ -93,67 +96,106 @@ class DbSchemaV1Pipe(Pipe):
 
     @override
     def add_or_enrich_summit(self, summit: Summit) -> None:
-        self.__database_boundary.execute_insert(
-            InsertQuery(
-                table_name=SummitsTable.TABLE_NAME,
-                data_row=DataRow(
-                    {
-                        SummitsTable.COLUMN_SUMMIT_NAME: summit.name,
-                        SummitsTable.COLUMN_LATITUDE: summit.position.latitude_int,
-                        SummitsTable.COLUMN_LONGITUDE: summit.position.longitude_int,
-                    }
-                ),
-            )
+        column_list = [
+            SummitsTable.COLUMN_SUMMIT_NAME,
+            SummitsTable.COLUMN_LATITUDE,
+            SummitsTable.COLUMN_LONGITUDE,
+        ]
+        column_names = ", ".join(column_list)
+        value_placeholders = self._get_value_placeholders(len(column_list))
+
+        sql_statement = SqlStatement(
+            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ({column_names}) "
+            f"VALUES ({value_placeholders})"
+        )
+
+        self.__database_boundary.execute_write(
+            query=sql_statement,
+            query_parameters=[
+                summit.name,
+                summit.position.latitude_int,
+                summit.position.longitude_int,
+            ],
         )
 
     @override
     def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
-        summit_query = SelectQuery(SummitsTable.TABLE_NAME, [SummitsTable.COLUMN_ID])
-        summit_query.set_where_condition(f"{SummitsTable.COLUMN_SUMMIT_NAME} = ?", [summit_name])
-        summit_query.limit = 1
-        self.__database_boundary.execute_insert(
-            InsertQuery(
-                table_name=RoutesTable.TABLE_NAME,
-                data_row=DataRow(
-                    {
-                        RoutesTable.COLUMN_SUMMIT_ID: summit_query,
-                        RoutesTable.COLUMN_ROUTE_NAME: route.route_name,
-                        RoutesTable.COLUMN_ROUTE_GRADE: route.grade,
-                        RoutesTable.COLUMN_GRADE_AF: route.grade_af,
-                        RoutesTable.COLUMN_GRADE_RP: route.grade_rp,
-                        RoutesTable.COLUMN_GRADE_OU: route.grade_ou,
-                        RoutesTable.COLUMN_GRADE_JUMP: route.grade_jump,
-                        RoutesTable.COLUMN_STARS: route.star_count,
-                        RoutesTable.COLUMN_DANGER: route.dangerous,
-                    }
-                ),
-            )
+        select_summit = (
+            f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
+            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME} = ? LIMIT 1"
+        )
+
+        column_list = [
+            RoutesTable.COLUMN_SUMMIT_ID,
+            RoutesTable.COLUMN_ROUTE_NAME,
+            RoutesTable.COLUMN_ROUTE_GRADE,
+            RoutesTable.COLUMN_GRADE_AF,
+            RoutesTable.COLUMN_GRADE_RP,
+            RoutesTable.COLUMN_GRADE_OU,
+            RoutesTable.COLUMN_GRADE_JUMP,
+            RoutesTable.COLUMN_STARS,
+            RoutesTable.COLUMN_DANGER,
+        ]
+        column_names = ", ".join(column_list)
+        value_placeholders = self._get_value_placeholders(len(column_list) - 1)
+        insert_statement = SqlStatement(
+            f"INSERT OR IGNORE INTO {RoutesTable.TABLE_NAME} ({column_names}) "
+            f"VALUES (({select_summit}), {value_placeholders})"
+        )
+        self.__database_boundary.execute_write(
+            query=insert_statement,
+            query_parameters=[
+                summit_name,
+                route.route_name,
+                route.grade,
+                route.grade_af,
+                route.grade_rp,
+                route.grade_ou,
+                route.grade_jump,
+                route.star_count,
+                route.dangerous,
+            ],
         )
 
     @override
     def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
-        summit_query = SelectQuery(SummitsTable.TABLE_NAME, [SummitsTable.COLUMN_ID])
-        summit_query.set_where_condition(f"{SummitsTable.COLUMN_SUMMIT_NAME} = ?", [summit_name])
-        summit_query.limit = 1
-
-        route_query = SelectQuery(RoutesTable.TABLE_NAME, [RoutesTable.COLUMN_ID])
-        route_query.set_where_condition(
-            f"{RoutesTable.COLUMN_SUMMIT_ID} = ? AND {RoutesTable.COLUMN_ROUTE_NAME} = ?",
-            [summit_query, route_name],
+        select_summit = (
+            f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
+            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME} = ? LIMIT 1"
         )
-        route_query.limit = 1
-
-        self.__database_boundary.execute_insert(
-            InsertQuery(
-                table_name=PostsTable.TABLE_NAME,
-                data_row=DataRow(
-                    {
-                        PostsTable.COLUMN_ROUTE_ID: route_query,
-                        PostsTable.COLUMN_USER_NAME: post.user_name,
-                        PostsTable.COLUMN_COMMENT: post.comment,
-                        PostsTable.COLUMN_POST_DATE: post.post_date.isoformat(),
-                        PostsTable.COLUMN_RATING: post.rating,
-                    }
-                ),
-            )
+        select_route = (
+            f"SELECT {RoutesTable.COLUMN_ID} FROM {RoutesTable.TABLE_NAME} "
+            f"WHERE {RoutesTable.COLUMN_SUMMIT_ID} = ({select_summit}) "
+            f"AND {RoutesTable.COLUMN_ROUTE_NAME} = ? "
+            f"LIMIT 1"
         )
+
+        column_list = [
+            PostsTable.COLUMN_ROUTE_ID,
+            PostsTable.COLUMN_USER_NAME,
+            PostsTable.COLUMN_COMMENT,
+            PostsTable.COLUMN_POST_DATE,
+            PostsTable.COLUMN_RATING,
+        ]
+        column_names = ", ".join(column_list)
+        value_placeholders = self._get_value_placeholders(len(column_list) - 1)
+
+        insert_statement = SqlStatement(
+            f"INSERT OR IGNORE INTO {PostsTable.TABLE_NAME} ({column_names}) "
+            f"VALUES (({select_route}), {value_placeholders})"
+        )
+
+        self.__database_boundary.execute_write(
+            query=insert_statement,
+            query_parameters=[
+                summit_name,
+                route_name,
+                post.user_name,
+                post.comment,
+                post.post_date.isoformat(),
+                post.rating,
+            ],
+        )
+
+    def _get_value_placeholders(self, value_count: int) -> str:
+        return ", ".join(["?"] * value_count)
