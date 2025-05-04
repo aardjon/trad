@@ -16,7 +16,7 @@ from trad.adapters.pipes.db_v1.dbschema import (
     SummitsTable,
 )
 from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import Post, Route, Summit
+from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 
 _logger = getLogger(__name__)
 
@@ -103,10 +103,13 @@ class DbSchemaV1Pipe(Pipe):
         ]
         column_names = ", ".join(column_list)
         value_placeholders = self._get_value_placeholders(len(column_list))
+        column_updates = ", ".join(f"{col}=excluded.{col}" for col in column_list)
 
         sql_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ({column_names}) "
-            f"VALUES ({value_placeholders})"
+            f"INSERT INTO {SummitsTable.TABLE_NAME} ({column_names}) "
+            f"VALUES ({value_placeholders}) ON CONFLICT DO UPDATE SET {column_updates} "
+            f"WHERE {SummitsTable.COLUMN_LATITUDE}={UNDEFINED_GEOPOSITION.latitude_int} "
+            f"AND {SummitsTable.COLUMN_LONGITUDE}={UNDEFINED_GEOPOSITION.longitude_int}"
         )
 
         self.__database_boundary.execute_write(
@@ -122,7 +125,7 @@ class DbSchemaV1Pipe(Pipe):
     def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
         select_summit = (
             f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
-            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME} = ? LIMIT 1"
+            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME}=? LIMIT 1"
         )
 
         column_list = [
@@ -161,12 +164,12 @@ class DbSchemaV1Pipe(Pipe):
     def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         select_summit = (
             f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
-            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME} = ? LIMIT 1"
+            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME}=? LIMIT 1"
         )
         select_route = (
             f"SELECT {RoutesTable.COLUMN_ID} FROM {RoutesTable.TABLE_NAME} "
-            f"WHERE {RoutesTable.COLUMN_SUMMIT_ID} = ({select_summit}) "
-            f"AND {RoutesTable.COLUMN_ROUTE_NAME} = ? "
+            f"WHERE {RoutesTable.COLUMN_SUMMIT_ID}=({select_summit}) "
+            f"AND {RoutesTable.COLUMN_ROUTE_NAME}=? "
             f"LIMIT 1"
         )
 
