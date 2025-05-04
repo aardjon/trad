@@ -1,19 +1,38 @@
 """
 Integration test for the database creation via the V1 pipe and the underlying database
-infrastructure.
+infrastructure. This is testing the creation of a real database (no mocking) and thus can be a bit
+slower than other tests.
 """
 
 import datetime
+from collections.abc import Iterator
 from pathlib import Path
 from sqlite3 import connect
 from typing import Final
 
+import pytest
+
 from trad.adapters.pipes.db_v1.pipe import DbSchemaV1Pipe
-from trad.core.entities import Post, Route, Summit
+from trad.core.boundaries.pipes import Pipe
+from trad.core.entities import GeoPosition, Post, Route, Summit
 from trad.infrastructure.sqlite3db import Sqlite3Database
 
 
+@pytest.fixture
+def pipe_v1(tmp_path: Path) -> Iterator[Pipe]:
+    database = Sqlite3Database()
+    pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=database)
+    pipe.initialize_pipe()
+    yield pipe
+    database.disconnect()  # TODO(aardjon): Provide this on the Pipe!
+
+
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
+    """
+    Ensures the correct creation of a real, full (though very small) route database:
+     - A summit, a route and a post are added
+     - The correct amount of indices is created
+    """
     post_date: Final = datetime.datetime.now(tz=datetime.UTC)
     post_rating: Final = 2
     expected_index_count: Final = (
@@ -100,3 +119,28 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
     compile_time = datetime.datetime.fromisoformat(result_set[0][2])
     max_allowed_difference: Final = 30
     assert (current_time - compile_time).total_seconds() < max_allowed_difference
+
+
+def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
+    """
+    Ensures that existing data is correctly enriched (updated) by several subsequent
+    `add_or_enrich()` calls.
+    """
+    summit1 = Summit(name="Beispielturm")
+    summit2 = Summit(name="Beispielturm", position=GeoPosition(470000000, 110000000))
+    summit3 = Summit(name="Beispielturm", position=GeoPosition(130000000, 370000000))
+
+    # Insert Summit data without geographical coordinates
+    pipe_v1.add_or_enrich_summit(summit1)
+    # Enrich this Summit with a position
+    pipe_v1.add_or_enrich_summit(summit2)
+    # Try to update the already set position (should be ignored)
+    pipe_v1.add_or_enrich_summit(summit3)
+
+    expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
+    assert expected_db_file.exists()
+
+    # Ensure that the Summit exists with the coordinates from the second call
+    connection = connect(str(expected_db_file))
+    result_set = list(connection.execute("SELECT summit_name, latitude, longitude FROM summits"))
+    assert result_set == [("Beispielturm", 470000000, 110000000)]
