@@ -6,6 +6,7 @@ from typing import Final, override
 
 from trad.adapters.filters.initialization import PipeInitializingFilter
 from trad.adapters.filters.optimization import PipeOptimizingFilter
+from trad.adapters.filters.osm import OsmSummitDataFilter
 from trad.adapters.filters.teufelsturm import TeufelsturmDataFilter
 from trad.core.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.crosscuttings.di import DependencyProvider
@@ -28,13 +29,14 @@ class AllFiltersFactory(FilterFactory):
     def create_filters(self, stage: FilterStage) -> list[Filter]:
         filter_classes: Final = [
             PipeInitializingFilter,
+            OsmSummitDataFilter,
             TeufelsturmDataFilter,
             PipeOptimizingFilter,
         ]
         return [
             # Ignoring the MyPy warning "Cannot instantiate abstract class" here because it is a
             # known False Positive which will hopefully go away in some future version.
-            # See also: https://github.com/python/mypy/issues/15554 type: ignore[abstract]
+            # See also: https://github.com/python/mypy/issues/15554
             filter_class(self.__dependency_provider)  # type: ignore[abstract]
             for filter_class in filter_classes
             if filter_class.get_stage() == stage
