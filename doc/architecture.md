@@ -118,7 +118,8 @@ our quality goals (mainly QREQ-2), but we are optimistic that the scraper will s
 and that we can compensate it.
 
 We are using [Git](https://github.com/Headbucket/trad) for version control, all software parts are
-stored in a single [Github repository](https://github.com/Headbucket/trad) (monorepo).
+stored in a single [Github repository](https://github.com/Headbucket/trad) (monorepo). The reasons
+for choosing certain external packages are documented in [External Package Evaluations](../external_packages.md).
 
 ## 4.1 Flexibility, Maintainability, Testability (QREQ-1, QREQ-2, QREQ-3, QREQ-6)
 
@@ -155,7 +156,7 @@ data (e.g. route data, journal) is replicated to/stored within the local device.
 works on this local copy only.
 
 By separating the actual route data source access into a separate scraper application (see also
-[ADR-3](#93-adr-3-decouple-the-mobile-app-from-external-route-data-services), the mobile app
+[ADR-3](#93-adr-3-decouple-the-mobile-app-from-external-route-data-services)), the mobile app
 becomes independent from any external problems or changes, increasing both reliability and
 usability.
 
@@ -196,14 +197,19 @@ framework on the mobile app part for GUI and hardware abstraction because it all
 transfer the app to different platforms. However, Flutter itself shall be kept an implementation
 detail and therefore only be used within the `infrastructure` ring.
 
+To decouple the mobile app from interface changes on the external data sources, a separate
+`scraper` application access them and prepares the data for the app (see also
+[ADR-3](#93-adr-3-decouple-the-mobile-app-from-external-route-data-services)). The scraper is
+implemented in Python to make it easy to run it on different platforms.
+
 ## 4.6 Security (QREQ-11)
 
-To prevent against data loss or corruption in case of errors or power-loss, some
-transaction-based system shall be used for storing the journal data. The UI must make it very
-clear to the user before deleting any data from the journal (e.g. by an explicit confirmation).
-To prevent against data loss when uninstalling the app or removing the app data, it is also
-possible to export the journal data for a backup. But the data must not be exported
-automatically without the users knowledge (see [4.4 Compliance, Security](#44-compliance-security-qreq-5-qreq-10-qreq-12)).
+To prevent against data loss or corruption in case of errors or power-loss, the mobile app uses
+some transaction-based system for storing the journal data. The UI must make it very clear to the
+user before deleting any data from the journal (e.g. by an explicit confirmation). To prevent
+against data loss when uninstalling the app or removing the app data, it is also possible to export
+the journal data for a backup. But the data must not be exported automatically without the users
+knowledge (see [4.4 Compliance, Security](#44-compliance-security-qreq-5-qreq-10-qreq-12)).
 
 When connecting to any external site (e.g. for route data upgrade), its identity shall be
 validated before loading data (e.g. by using HTTPS) to reduce the risk of MITM attacks. There will
@@ -261,8 +267,8 @@ both separated into at least the following three sub systems:
 - infrastructure
 
 As an example, the following diagram provides an overview of the mobile app architecture, which
-shows the basic concept of rings but is refined and explained more detailled in the following
-sections. Arrows are source code dependencies.
+shows the basic concept of rings but is refined and explained more detailled in separate documents.
+Arrows are source code dependencies.
 
 ![Architectural overview](architecture/sysarc-overview.png)
 
@@ -323,7 +329,6 @@ Implementation Rules:
  - No technical details (independent from specific hardware or certain implementation details)
  - No direct dependencies to external interfaces of any kind (IO, UI)
  - One adapter implementation may access more than one infrastructure boundary to retrieve data
- - For file system access, please see [Accessing the file system](#85-accessing-the-file-system)
 
 #### `infrastructure`
 
@@ -338,7 +343,7 @@ Examples:
 ----------|--------------------------------
   ✔️ | Everything that requires *Flutter*
   ✔️ | A package requiring `dart:io` imports
-  ✔️ | Generating and executing SQL statements
+  ✔️ | Actually executing SQL statements
   ✔️ | Generic, SQLite specific database repository (schema agnostic)
   ✔️ | Platform specific code or hardware abstraction
   ✖️ (`adapters`) | Display strings/i18n
@@ -364,171 +369,11 @@ Implementation rules:
  - External dependencies must be completely encapsulated to make it easy to update/replace them if necessary
 
  
-## 5.3 Level 2: Mobile App
-
-![Refinement of the first mobile app level](architecture/mobileapp/bbview_level2.png)
-
-### 5.3.1 Motivation
-
-In addition to the three common parts described in [section 5.2.3](#523-common-system-parts), the
-`infrastructure` ring is split into a *flutter* and a *vanilla* part, containing all flutter and
-all non-flutter dependent `infrastructure` components, respectively - see also
-[ADR-1](#91-adr-1-how-to-integrate-flutter-into-the-architecture).
-
-### 5.3.2 Source Locations
-
- - `adapters`: [mobileapp/adapters](../mobileapp/adapters)
- - `core`: [mobileapp/core](../mobileapp/core)
- - `crosscuttings`: [mobileapp/crosscuttings](../mobileapp/crosscuttings)
- - `infrastructure`, *flutter* part: [mobileapp/infrastructure_flutter](../mobileapp/infrastructure_flutter)
- - `infrastructure`, *vanilla* part: [mobileapp/infrastructure_vanilla](../mobileapp/infrastructure_vanilla)
-
-### 5.3.3 Interface Documentation
-
-Interface name | Source location
-------------|--------------------------------------------------------
-core.boundaries.presentation | [core.boundaries.presentation](../mobileapp/core/lib/boundaries/presentation.dart)
-core.boundaries.data_exchange | TODO
-core.boundaries.storage | [core.boundaries.storage](../mobileapp/core/lib/boundaries/storage)
-core.boundaries.positioning | TODO
-adapters.boundaries.ui | [adapters.boundaries.ui](../mobileapp/adapters/lib/boundaries/ui.dart)
-adapters.boundaries.repositories | [adapters.boundaries.repositories](../mobileapp/adapters/lib/boundaries/repositories)
-adapters.boundaries.positioning | TODO
-
-
-## 5.4 Level 2: Scraper
-
-![Refinement of the first scraper level](architecture/scraper/bbview_level2.png)
-
-### 5.4.1 Motivation
-
-The scraper part is split into the four "rings" as described in [section 5.2.3](#523-common-system-parts).
-
-### 5.4.2 Source Locations
-
- - `adapters`: [scraper/src/trad/adapters](../scraper/src/trad/adapters)
- - `core`: [scraper/src/trad/core](../scraper/src/trad/core)
- - `crosscuttings`: [scraper/src/trad/crosscuttings](../scraper/src/trad/crosscuttings)
- - `infrastructure`: [scraper/src/trad/infrastructure](../scraper/src/trad/infrastructure)
-
-### 5.4.3 Interface Documentation
-
-Interface name | Source location
-------------|--------------------------------------------------------
-core.boundaries.filters | [core.boundaries.filters](../scraper/src/trad/core/boundaries/filters.py)
-core.boundaries.pipes | [core.boundaries.pipes](../scraper/src/trad/core/boundaries/pipes.py)
-core.boundaries.settings | [core.boundaries.settings](../scraper/src/trad/core/boundaries/settings.py)
-adapters.boundaries.database | [adapters.boundaries.database](../scraper/src/trad/adapters/boundaries/database/__init__.py)
-adapters.boundaries.http | [adapters.boundaries.http](../scraper/src/trad/adapters/boundaries/http.py)
-
-
-## 5.5 Level 3: Mobile App
-
-### 5.5.1 `core`
-
-![Refinement of the `core`](architecture/mobileapp/bbview_level3_core.png)
-
-#### `core.entities`
-
-Contains the basic data model (types and data structures) of the application. Must not depend on anything else, but every other component is allowed to depend on it.
-
-Source location: [mobileapp/core/lib/entities](../mobileapp/core/lib/entities)
-
-#### `core.boundaries`
-
-Defines the interfaces (no implementations!) to the `adapters` ring. Separated into specific sub systems like storage or presentation. Interfaces may only depend on `entities`, not on each other.
-
-Source location: [mobileapp/core/lib/boundaries](../mobileapp/core/lib/boundaries)
-
-#### `core.usecases`
-
-Implementation of all use cases. Further separated into the different application domains. Each use case may depend on other use cases and on all core boundaries.
-
-Source location: [mobileapp/core/lib/usecases](../mobileapp/core/lib/usecases)
-
-
-### 5.5.2 `adapters`
-
-![Refinement of the `adapters`](architecture/mobileapp/bbview_level3_adapters.png)
-
-#### `adapters.boundaries`
-
-Defines the interfaces (no implementations!) to the `infrastructure` ring. Separated into specific sub systems like `repositories` or `presentation`. These interfaces shall neither depend on any `core` structures (not even `core.entities`) nor on each other.
-
-Source location: [mobileapp/adapters/lib/boundaries](../mobileapp/adapters/lib/boundaries)
-
-
-### 5.5.3 `infrastructure`
-
-![Refinement of the `infrastructure`](architecture/mobileapp/bbview_level3_infrastructure.png)
-
-The `infrastructure` ring is split into the `flutter` and the `vanilla` variant, which do not depend on each
-other. However, if it is useful for some reason, the `infrastructure.flutter` part may depend on the
-`infrastructure.vanilla` part (but not vice-versa).
-
-
-## 5.6 Level 3: Scraper
-
-### 5.6.1 `core`
-
-![Refinement of the `core`](architecture/scraper/bbview_level3_core.png)
-
-
-### 5.6.2 `adapters`
-
-![Refinement of the `adapters`](architecture/scraper/bbview_level3_adapters.png)
-
-Besides smaller components like the application settings, the `adapters` ring is split into two
-main parts that are a bit special: `filters` and `pipes`, utilizing the *Pipes and Filters*
-architectural pattern.
-
-*Filters* read data from a *Pipe*, process, restructure or enrich it and write it back to the
-same pipe. We implement a filter for each external data source (which imports route data from
-that site) and also additional ones for e.g. optimizing the written database. There is one pipe
-for each result file format (e.g. different routedb schema versions). Filters and Pipes must not
-depend on each other: Filters must not have any knowledge about the concrete route database
-structure, and pipes must not have any knowledge about concrete data sources.
-
-By means of the higher-level Clean Architecture, filters and pipes are still regular adapters
-connecting the `core` to the `infrastructure`, so basically the same rules apply to them. The
-`adapters` ring defines the interfaces (no implementations!) to the `infrastructure` ring, which
-shall neither depend on any `core` structures (not even `core.entities`) nor on each other.
-
-
-#### `filters`
-
-Encapsulates all knowledge about the concrete data sources (e.g. data structure and how to obtain
-it). Must not contain any knowledge about the destination data format.
-
-![Refinement of the `filters` component](architecture/scraper/bbview_level4_filters.png)
-
-There is one filter implementation for each external data source, allowing us to easily add, remove
-or maintain data sources independent from each other.
-
-In addition to the general `adapter` rules, third party libs are allowed for filters if:
- - they are only needed by a single filter
- - they are not doing (e.g. network) IO with external systems
- - there is no need to mock them in unit tests
-
-Source location: [scraper/src/trad/adapters/filters](../scraper/src/trad/adapters/filters)
-
-#### `pipes`
-
-Encapsulates all knowledge about the routedb structure(s) (e.g. the database schema) to create. Must
-not contain any knowledge about the external data sources.
-
-![Refinement of the `pipes` component](architecture/scraper/bbview_level4_pipes.png)
-
-There can be different pipe implementations for different database variants (e.g.schema versions),
-allowing us to easily maintain old, backward-compatible versions while implementing new features.
-
-Source location: [scraper/src/trad/adapters/pipes](../scraper/src/trad/adapters/pipes)
-
-
-### 5.6.3 `infrastructure`
-
-![Refinement of the `infrastructure`](architecture/scraper/bbview_level3_infrastructure.png)
-
+## 5.3 Further Refinement
+
+The further refinement of the two first-level system parts is documented in separate places:
+ - [Mobile App](architecture/mobileapp.md)
+ - [Scraper](architecture/scraper.md)
 
 
 # 6. Runtime View
@@ -543,15 +388,16 @@ The following diagram shows an example control flow for adding a new journal ent
 ![Control Flow: Adding new journal entry](architecture/rtview_level1_newjournal.png)
 
 
-# 8. Crosscutting Concepts
+# 8. Concepts
 
 ## 8.1 Dependency Injection (DI)
 
 Provides the central mechanism for mapping interfaces (e.g. boundaries) to their concrete
 implementations.
 
-The source code is located at [crosscuttings/lib/di.dart](../mobileapp/crosscuttings/lib/di.dart).
-The reasons for choosing certain external packages are documented in
+The source code is located at [crosscuttings/lib/di.dart](../mobileapp/crosscuttings/lib/di.dart)
+(Dart) and [trad/crosscuttings/di.py](../scraper/src/trad/crosscuttings/di.py) (Python). The
+reasons for choosing certain external packages are documented in
 [External Package Evaluations](external_packages.md#crosscutting_concepts).
 
 ### 8.1.1 Use Cases
@@ -565,99 +411,7 @@ The reasons for choosing certain external packages are documented in
 ![Public interface of the Dependency Injection component](architecture/crosscuttings_di.png)
 
 
-## 8.2 Logging (Dart only)
-
-Provides a unified mechanism to record log messages to configured destinations (e.g. a log
-file). This is only relevant in Dart code (`mobileapp` part), because Python comes with a
-[built-in logging system](https://docs.python.org/3/library/logging.html) which meets all our
-requirements and just needs to be configured.
-
-The public interface is located at [crosscuttings/lib/logging](../mobileapp/crosscuttings/lib/logging),
-the internal implementation at [crosscuttings/lib/src/logging](../mobileapp/crosscuttings/lib/src/logging).
-The reasons for choosing certain external packages are documented in
-[External Package Evaluations](external_packages.md#crosscutting_concepts).
-
-### 8.1.1 Use Cases
-
- - Write a log message to a specified channel and level
- - Configure the log destination and the logging level
- - Support for at least stdout and file logging
- - Support for (or at least easy extension of) lazy parameter evaluation/message string formatting
- - Possibility for more advanced file logging, like size limitation or rotation
- - Synchronized file logging to make sure the last messages have already been written when a problem occurs
-
-### 8.1.2 Component Interface
-
-The following diagram shows the public interface of the `logging` component:
-
-![Public interface of the Logging component](architecture/crosscuttings_logging.png)
-
-When using the `Logger` class, it is important to use a useful channel name. The name must start
-with `trad` (to not mix up with external libraries accidentially), reflect the architectural
-(and thus, also directory) position of the current source module/library and use dots as
-delimeters, e.g. `trad.core.usecases.journal`. This schema allows to easily filter log files for
-messages from certain system parts later on.
-
-## 8.3 Knowledge Base
-
-The knowledge base domain is implemented in a simple, generic way (similar to a wiki): It basically consists
-of a storage providing *documents*, and a UI widget for displaying a single *document*. Each such *document*
-represents a single knowledge base article. Index/ToC pages are also *documents* (containing lists of links).
-The *documents* are Markdown text files stored and deployed as application assets.
-
-This approach clearly separates data from code and allows to add, remove or modify documents very easily
-(i.e. without any source code knowledge).
-
-Please see [Knowledge Base Documentation](knowledgebase.md) for further documentation of this application
-domain.
-
-## 8.4 UI
-
-The UI implementation is split into the presentation layer (`adapters` ring) and the concrete
-Flutter implementation (`infrastructure` ring). Besides being the biggest and most complex of the
-"outer ring" components, the constraints, guidelines and rules described in sections
-[4](#4-solution-strategy) and [5](#5-building-block-view) apply normally: The
-`adapters.presentation` component finally decides *what exactly to display*, while the
-`infrastructure.flutter.ui` component is responsible for deciding *where* and (technically) *how*.
-The Flutter UI itself must be "as dumb as possible" and must not maintain any state that is visible
-externally.
-
-The communication works as follows:
- - `adapters.presentation.presenters` notifies `infrastructure.flutter.ui` about modified data via the `adapters.boundaries.ui` interface
- - `infrastructure.flutter.ui` directly notifies `adapters.presentation.controllers` about user actions
-
-![Interactions between presenters, controllers and the UI](architecture/crosscuttings_ui_interaction.png)
-
-Please see [Flutter UI Documentation](ui-flutter.md) for further documentation of the Flutter UI
-implementation.
-
-## 8.5 Accessing the file system
-
-File system operations in general are allowed from within the `infrastructure` and the `adapters` rings.
-Since `dart:io` is part of the Dart standard library, there is no need to replace it by a different library
-in the future, so it's not necessary to completely decouple the `dart:io` library. However, to improve
-testability, we have to be able to replace the real file system operations. Furthermore, we have to support
-different path styles (e.g. `\` VS. `/` separater) on different platforms. For these reasons, a special
-`filesystem` boundary is responsible for creating entity objects like `dart.io.File` and for manipulating
-directory paths. That means, every `infrastructure` and `adapters` part except the single component
-implementing this boundary:
-- shall preferably use `File` or `Directory` to identify certain file system locations/entities
-- must use the `filesystem` component to manipulate path strings
-- must never create e.g. `File` or `Directory` instances directly but get them from the `filesystem` component
-- must never use any static methods of the `dart:io` library or its provided classes (such as `Directory.current`)
-
-It's okay to do everything offered by the `FileSystemEntity` derived objects provided by the `filesystem`
-component, though. Runtime information about the concrete platform or the running application instance (e.g.
-the current working directory) can be retrieved via the `sysenv` boundary.
-
-Within the `core` ring, no direct file system operations are allowed at all. File system entities are
-identified by simple (platform dependent) strings (containing paths) there.
-
-For unit testing, file system operations can be mocked with the in-memory implementation provided by the
-[file](https://pub.dev/packages/file) package (only available for tests, not in a release build).
-
-
-## 8.6. Synchronizing the route database schema
+## 8.2. Synchronizing the route database schema
 
 The schema of the route database must be known to both the mobile app (for reading) and the scraper
 (for writing). When changing the schema, the database adapter of both parts must be updated. To
