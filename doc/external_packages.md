@@ -155,11 +155,7 @@ Disadvantages:
 
 # 2 Python (Scraper Application)
 
-## 2.1 Crosscutting Concepts
-
-External libraries used by crosscutting concept implementations (`trad.crosscuttings`).
-
-### 2.1.1 Dependency Injection
+## 2.1 Dependency Injection
 
 There are a lot of dependency injection frameworks for Python, many of them providing advanced
 features like file-based configuration and/or some kind of automagic implementation mapping. In the
@@ -172,12 +168,11 @@ Advantages:
   + Simple interface fitting very well into the trad architecture
   + Very lightweight
   + Pure Python, no further dependencies
+
 (Possible) Disadvantages:
   - Unclear how well it is maintained in the future (until now: 4 versions in 2 years)
 
-## 2.2 Infrastructure
-
-### 2.2.1 Querying the OpenStreetMap database
+## 2.2 Querying the OpenStreetMap database
 
 The scraper has to retrieve data from both the Nominatim and the Overpass API (unlike the OSM API,
 Overpass is optimized for read-only access and filtering). The use cases are:
@@ -203,7 +198,7 @@ At the end, we decided to request the APIs manually using the `requests` package
 of the available libraries fits all of our needs, and we actually do only two quite simple OSM
 requests at all.
 
-### JSON deserialisation
+## 2.3 JSON deserialisation
 
 For deserializing JSON input data (from external sources) into Python objects, the following
 tools have been considered:
@@ -215,38 +210,42 @@ tools have been considered:
 We finally decided to use `pydantic`(#4), because it is the only one with full type safety that
 provides a simple and straight-forward API and supports automatic data conversion.
 
-#### Builtin json module
+### Builtin json module
 
 Advantages: 
   + No additional dependency
+
 Disadvantages:
   - No automatic validation
   - No type safety
   - No automatic conversion
 
-#### jsonschema
+### jsonschema
 
 Advantages: 
   + Content validation against a given schema
+
 Disadvantages:
   - No type safety, i.e. type hints or casts are required
   - No automatic conversion into Python objects
 
-#### marshmallow
+### marshmallow
 
 Advantages: 
   + Content validation against a given schema
   + Nice API for manual data conversion
+
 Disadvantages:
   - Annotates all JSON data with `Any`, i.e. disabling all type checks
   - No automatic conversion into Python objects
 
-#### pydantic
+### pydantic
 
 Advantages: 
   + Content validation against a given schema
   + Automatic conversion into Python object
   + Type safety with real types
   + It's said to be fast because of a *Rust* core
+
 (Possible) Disadvantages:
   - Needs `rustc` for building
