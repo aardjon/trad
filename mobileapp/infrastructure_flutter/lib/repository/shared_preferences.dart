@@ -96,11 +96,10 @@ class SharedPreferencesRepository implements KeyValueStoreBoundary {
   }
 
   static T? _tryStringToEnum<T extends Enum>(String value, List<T> enumValues) {
-    try {
+    if (enumValues.contains(value)) {
       return enumValues.byName(value);
-    } catch (e) {
-      return null;
     }
+    return null;
   }
 
   /// Checks whether this instance has been initialized (by calling [initialize] prior to this

@@ -47,14 +47,14 @@ class RouteDbUseCases {
     }
     try {
       await _storageBoundary.importRouteDbFile(filePath);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       _logger.warning('Unable to import database file due to', error, stackTrace);
       // TODO(aardjon): Request the UI to show an error
     }
 
     // TODO(aardjon): This is a code duplication with the startApplication() use case, eliminate!
     try {
-      // Start again with the defautl database. If the import failed, this is the previous one
+      // Start again with the default database. If the import failed, this is the previous one
       await _storageBoundary.startStorage();
       DateTime routeDbDate = await _storageBoundary.getCreationDate();
       _presentationBoundary.updateRouteDbStatus(routeDbDate);

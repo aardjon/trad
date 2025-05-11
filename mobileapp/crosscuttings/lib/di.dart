@@ -31,7 +31,7 @@ class DependencyProvider {
   /// Any previous implementation registration for [T] is discarded.
   ///
   /// The [instanceFactory] is a functor that must return a new instance of [T]. It is called once
-  /// for each [provide<T>()] call, creating (and thus, providing) a new implementation instance
+  /// for each [provide()] call, creating (and thus, providing) a new implementation instance
   /// each time.
   ///
   /// Registration should be done only once during start up from within `trad.main`.
@@ -45,7 +45,7 @@ class DependencyProvider {
   ///
   /// The [instanceFactory] is a functor that must return a new instance of [T]. It is called at any
   /// time but exactly once, at the latest when the implementation is requested for the first time.
-  /// Each [provide<T>()] call returns the same implementation instance.
+  /// Each [provide()] call returns the same implementation instance.
   ///
   /// Registration should be done only once during start up from within `trad.main`.
   void registerSingleton<T extends Object>(T Function() instanceFactory) {

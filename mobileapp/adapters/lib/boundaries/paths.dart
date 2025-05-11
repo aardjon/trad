@@ -1,6 +1,6 @@
 ///
 /// Definition of the boundary between the system environment adapter and a concrete system
-/// implementation (`adapters` ring <-> `infrastructure` ring).
+/// implementation (`adapters` ring and `infrastructure` ring).
 ///
 library;
 
