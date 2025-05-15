@@ -15,7 +15,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.24.x
+          flutter-version: 3.29.x
 
       - name: Setup environment
         run: |
@@ -51,7 +51,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.24.x
+          flutter-version: 3.29.x
 
       - name: Setup environment
         run: |
@@ -85,7 +85,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.24.x
+          flutter-version: 3.29.x
 
       - name: Setup environment
         run: |
@@ -136,7 +136,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.24.x
+          flutter-version: 3.29.x
 
       - name: Setup environment
         run: |
@@ -164,7 +164,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.24.x
+          flutter-version: 3.29.x
 
       - name: Setup environment
         run: |
@@ -204,7 +204,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.24.x
+          flutter-version: 3.29.x
 
       - name: Setup environment
         run: |
