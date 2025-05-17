@@ -89,10 +89,7 @@ class SummitDetailsView extends StatelessWidget {
         ),
       );
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: menuItems,
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: menuItems);
   }
 
   Widget _listView(RouteListNotifier state, BuildContext context) {
@@ -112,10 +109,7 @@ class SummitDetailsView extends StatelessWidget {
     );
   }
 
-  void _onOrderingChanged(
-    ItemDataId summitDataId,
-    ItemDataId sortMenuItemId,
-  ) {
+  void _onOrderingChanged(ItemDataId summitDataId, ItemDataId sortMenuItemId) {
     RouteDbController controller = RouteDbController();
     controller.requestRouteListSorting(summitDataId, sortMenuItemId);
   }

@@ -50,11 +50,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   static final PostListNotifier _postListState = PostListNotifier();
 
   @override
-  void initializeUserInterface(
-    String appName,
-    String splashString,
-    MainMenuModel menuModel,
-  ) {
+  void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel) {
     runApp(
       MainWidget(
         appName,
@@ -151,10 +147,10 @@ class ApplicationUI implements ApplicationUiBoundary {
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         unawaited(
-          _uiState
-              .getNavigatorKey()
-              .currentState!
-              .pushNamed(routeString, arguments: routeArguments),
+          _uiState.getNavigatorKey().currentState!.pushNamed(
+            routeString,
+            arguments: routeArguments,
+          ),
         );
       });
     }

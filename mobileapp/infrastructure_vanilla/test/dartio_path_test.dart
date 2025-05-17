@@ -13,12 +13,7 @@ import 'package:infrastructure_vanilla/repositories/dartio_path.dart';
 /// $2: The platform name ("Windows" or "Posix")
 /// $3: Platform specific, absolute base path
 /// $4: Platform specific, absolute expected result path
-typedef _PlatformPathTestParameters = (
-  Context,
-  String,
-  String,
-  String,
-);
+typedef _PlatformPathTestParameters = (Context, String, String, String);
 
 /// Unit tests for the infrastructure_vanilla.dartio_path.DartIoFileSystem class.
 void main() {

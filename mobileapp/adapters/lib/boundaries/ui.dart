@@ -163,14 +163,7 @@ class ListViewItem {
   ItemDataId? itemId;
 
   /// Constructor for directly initializing all members.
-  ListViewItem(
-    this.mainTitle, {
-    this.subTitle,
-    this.icon,
-    this.endIcon,
-    this.content,
-    this.itemId,
-  });
+  ListViewItem(this.mainTitle, {this.subTitle, this.icon, this.endIcon, this.content, this.itemId});
 }
 
 /// Model that provides all static data needed to display the summit details page to the UI.
@@ -185,10 +178,7 @@ class SummitDetailsModel {
   final String pageTitle;
 
   /// Constructor for directly initializing all members.
-  SummitDetailsModel(
-    this.summitDataId,
-    this.pageTitle,
-  );
+  SummitDetailsModel(this.summitDataId, this.pageTitle);
 }
 
 /// Model that provides all static data needed to display the route details page to the UI.
@@ -206,11 +196,7 @@ class RouteDetailsModel {
   final String pageSubTitle;
 
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(
-    this.routeDataId,
-    this.pageTitle,
-    this.pageSubTitle,
-  );
+  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle);
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.
@@ -250,11 +236,7 @@ abstract interface class ApplicationUiBoundary {
   /// The provided [appName] can be displayed e.g. in some title or header bar, the [splashString]
   /// is displayed during the startup phase before the UI is ready to for user interactions. The
   /// [menuModel] are used e.g. for the main navigation menu.
-  void initializeUserInterface(
-    String appName,
-    String splashString,
-    MainMenuModel menuModel,
-  );
+  void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel);
 
   /// Notify the UI about changed route database status.
   ///

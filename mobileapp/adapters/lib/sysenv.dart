@@ -22,7 +22,7 @@ class SystemEnvironment implements SystemEnvironmentBoundary {
   /// Constructor for using the dependency provider given as [di] to obtain dependencies from other
   /// rings.
   SystemEnvironment(DependencyProvider di)
-      : _pathProviderBoundary = di.provide<PathProviderBoundary>();
+    : _pathProviderBoundary = di.provide<PathProviderBoundary>();
 
   @override
   Future<String> getAppDataPath() async {

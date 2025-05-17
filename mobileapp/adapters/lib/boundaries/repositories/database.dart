@@ -96,9 +96,9 @@ class Query {
   /// and [_columnNames]. The column names specified here are used to retrieve the resulting values
   /// from [ResultRow] objects after the query has run.
   Query.table(String tableName, this._columnNames)
-      : _tableNames = <String>[tableName],
-        _joinConditions = null,
-        assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
+    : _tableNames = <String>[tableName],
+      _joinConditions = null,
+      assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
 
   /// Defines a query on a (left) join between the specified tables.
   ///
@@ -110,13 +110,13 @@ class Query {
   /// specified here are used to retrieve the resulting values from [ResultRow] objects after the
   /// query has run.
   Query.join(this._tableNames, List<String> joinConditions, this._columnNames)
-      : assert(_tableNames.length > 1, 'Joining requires at least two table names.'),
-        assert(
-          joinConditions.length == _tableNames.length - 1,
-          "Joining requires 'table count - 1' join conditions.",
-        ),
-        _joinConditions = joinConditions,
-        assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
+    : assert(_tableNames.length > 1, 'Joining requires at least two table names.'),
+      assert(
+        joinConditions.length == _tableNames.length - 1,
+        "Joining requires 'table count - 1' join conditions.",
+      ),
+      _joinConditions = joinConditions,
+      assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
 
   /// Defines a condition to filter the result set for.
   ///

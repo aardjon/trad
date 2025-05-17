@@ -30,10 +30,7 @@ class SummitListView extends StatelessWidget {
       appBar: _appBar(model),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _searchBar(model.searchBarHint),
-          _listView(),
-        ],
+        children: <Widget>[_searchBar(model.searchBarHint), _listView()],
       ),
       drawer: _appDrawer,
     );
@@ -81,11 +78,7 @@ class SummitListView extends StatelessWidget {
       margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
       decoration: BoxDecoration(
         boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.11),
-            blurRadius: 40,
-            spreadRadius: 0,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.11), blurRadius: 40, spreadRadius: 0),
         ],
       ),
       child: TextField(
@@ -96,10 +89,7 @@ class SummitListView extends StatelessWidget {
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(15),
           hintText: searchBarHint,
-          prefixIcon: const Padding(
-            padding: EdgeInsets.all(12),
-            child: Icon(Icons.search),
-          ),
+          prefixIcon: const Padding(padding: EdgeInsets.all(12), child: Icon(Icons.search)),
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () {

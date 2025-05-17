@@ -25,8 +25,8 @@ class KnowledgebaseUseCases {
 
   /// Constructor for creating a new KnowledgebaseUseCases instance.
   KnowledgebaseUseCases(DependencyProvider di)
-      : _presentationBoundary = di.provide<PresentationBoundary>(),
-        _storageBoundary = di.provide<KnowledgebaseStorageBoundary>();
+    : _presentationBoundary = di.provide<PresentationBoundary>(),
+      _storageBoundary = di.provide<KnowledgebaseStorageBoundary>();
 
   /// Use Case: Switching to the home document of the knowledge base domain.
   Future<void> showHomePage() async {
