@@ -47,7 +47,6 @@ linter:
     type_literal_in_constant_pattern: true
     unreachable_from_main: true
     unnecessary_null_aware_operator_on_extension_on_nullable: true
-    unsafe_html: true
 
 # Change the severity of some rules (e.g. from "hint" to "error") because we consider them more
 # important.
