@@ -31,12 +31,9 @@ void main() {
   test('infrastructure_vanilla.sqlite3.Sqlite3Database.testDisconnectedState', () {
     Sqlite3Database database = Sqlite3Database();
 
-    expect(
-      () async {
-        await database.executeQuery(Query.table('dummyTable', <String>['dummy']));
-      },
-      throwsStateError,
-    );
+    expect(() async {
+      await database.executeQuery(Query.table('dummyTable', <String>['dummy']));
+    }, throwsStateError);
   });
 
   String dummySqliteFilePath = '/some/file/path.sqlite';
@@ -113,23 +110,21 @@ void main() {
         "SELECT id AS 'id', table.name AS 'table.name' FROM 'table'",
       ),
       // Leave explicit AS columns as they are
-      (
-        () => Query.table('table', <String>['name AS blubb']),
-        "SELECT name AS blubb FROM 'table'",
-      ),
+      (() => Query.table('table', <String>['name AS blubb']), "SELECT name AS blubb FROM 'table'"),
       // Joins are also supported
       (
         () => Query.join(
-              <String>['table1', 'table2'],
-              <String>['table1.id = table2.tab1_id'],
-              <String>['table1.id'],
-            ),
+          <String>['table1', 'table2'],
+          <String>['table1.id = table2.tab1_id'],
+          <String>['table1.id'],
+        ),
         "SELECT table1.id AS 'table1.id' FROM 'table1' LEFT JOIN 'table2' ON table1.id = table2.tab1_id",
       ),
       // Ensure WHERE clauses work
       (
-        () => Query.table('table', <String>['name', 'city'])
-          ..setWhereCondition('city = ?', <Object?>['Springfield']),
+        () =>
+            Query.table('table', <String>['name', 'city'])
+              ..setWhereCondition('city = ?', <Object?>['Springfield']),
         "SELECT name AS 'name', city AS 'city' FROM 'table' WHERE city = ?",
       ),
       // Ensure ORDER BY works
@@ -157,8 +152,9 @@ void main() {
         final _SqliteApiMock sqliteMock = _SqliteApiMock();
         final _DatabaseMock sqliteDbMock = _DatabaseMock();
         when(() => sqliteMock.open(any(), mode: any(named: 'mode'))).thenReturn(sqliteDbMock);
-        when(() => sqliteDbMock.select(any(), any()))
-            .thenReturn(ResultSet(<String>[], <String>[], <List<Object?>>[]));
+        when(
+          () => sqliteDbMock.select(any(), any()),
+        ).thenReturn(ResultSet(<String>[], <String>[], <List<Object?>>[]));
         Sqlite3Database database = Sqlite3Database(extLibApi: sqliteMock);
         database.connect(dummySqliteFilePath);
 

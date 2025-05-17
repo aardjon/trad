@@ -40,9 +40,9 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
   RouteDbStorage(DependencyProvider dependencyProvider)
-      : _pathProviderBoundary = dependencyProvider.provide<PathProviderBoundary>(),
-        _fileSystemBoundary = dependencyProvider.provide<FileSystemBoundary>(),
-        _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
+    : _pathProviderBoundary = dependencyProvider.provide<PathProviderBoundary>(),
+      _fileSystemBoundary = dependencyProvider.provide<FileSystemBoundary>(),
+      _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();
 
   @override
   Future<void> startStorage() async {
@@ -69,13 +69,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   /// Checks if the (already connected) database with the [connectionString] has a compatible schema
   /// version. Throws [StorageStartingException] if it doesn't.
   Future<void> _checkSchemaVersion(String connectionString) async {
-    Query query = Query.table(
-      DatabaseMetadataTable.tableName,
-      <String>[
-        DatabaseMetadataTable.columnSchemaVersionMajor,
-        DatabaseMetadataTable.columnSchemaVersionMinor,
-      ],
-    );
+    Query query = Query.table(DatabaseMetadataTable.tableName, <String>[
+      DatabaseMetadataTable.columnSchemaVersionMajor,
+      DatabaseMetadataTable.columnSchemaVersionMinor,
+    ]);
     query.limit = 1;
 
     ResultRows resultSet = <ResultRow>[];
@@ -162,10 +159,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Summit> retrieveSummit(int summitDataId) async {
-    Query query = Query.table(
-      SummitsTable.tableName,
-      <String>[SummitsTable.columnId, SummitsTable.columnSummitName],
-    );
+    Query query = Query.table(SummitsTable.tableName, <String>[
+      SummitsTable.columnId,
+      SummitsTable.columnSummitName,
+    ]);
     query.setWhereCondition('${SummitsTable.columnId} = ?', <int>[summitDataId]);
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     int id = resultSet[0].getIntValue(SummitsTable.columnId);
@@ -176,10 +173,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   @override
   Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
     // Configure the query
-    Query query = Query.table(
-      SummitsTable.tableName,
-      <String>[SummitsTable.columnId, SummitsTable.columnSummitName],
-    );
+    Query query = Query.table(SummitsTable.tableName, <String>[
+      SummitsTable.columnId,
+      SummitsTable.columnSummitName,
+    ]);
     if (nameFilter != null) {
       _logger.debug('Retrieving filtered summit list for "$nameFilter"');
       query.setWhereCondition('${SummitsTable.columnSummitName} LIKE ?', <String>['%$nameFilter%']);
@@ -202,10 +199,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   }
 
   @override
-  Future<List<Route>> retrieveRoutesOfSummit(
-    int summitId,
-    RoutesFilterMode sortCriterion,
-  ) async {
+  Future<List<Route>> retrieveRoutesOfSummit(int summitId, RoutesFilterMode sortCriterion) async {
     const String averageRatingColumnName = 'rating'; // Name of the virtual column from the join
 
     /// Configure the query
@@ -254,10 +248,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Route> retrieveRoute(int routeDataId) async {
-    Query query = Query.table(
-      RoutesTable.tableName,
-      <String>[RoutesTable.columnId, RoutesTable.columnRouteName, RoutesTable.columnRouteGrade],
-    );
+    Query query = Query.table(RoutesTable.tableName, <String>[
+      RoutesTable.columnId,
+      RoutesTable.columnRouteName,
+      RoutesTable.columnRouteGrade,
+    ]);
     query.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
 
     List<ResultRow> resultSet = await _repository.executeQuery(query);
@@ -269,10 +264,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   }
 
   @override
-  Future<List<Post>> retrievePostsOfRoute(
-    int routeId,
-    PostsFilterMode sortCriterion,
-  ) async {
+  Future<List<Post>> retrievePostsOfRoute(int routeId, PostsFilterMode sortCriterion) async {
     _logger.debug('Retrieving posts for route "$routeId", sorted by $sortCriterion');
 
     // Configure the query
@@ -283,16 +275,13 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       orderByColumn += 'ASC';
     }
 
-    Query query = Query.table(
-      PostsTable.tableName,
-      <String>[
-        PostsTable.columnId,
-        PostsTable.columnUserName,
-        PostsTable.columnPostDate,
-        PostsTable.columnComment,
-        PostsTable.columnRating,
-      ],
-    );
+    Query query = Query.table(PostsTable.tableName, <String>[
+      PostsTable.columnId,
+      PostsTable.columnUserName,
+      PostsTable.columnPostDate,
+      PostsTable.columnComment,
+      PostsTable.columnRating,
+    ]);
     query.setWhereCondition('${PostsTable.columnRouteId} = ?', <int>[routeId]);
     query.orderByColumns = <String>[orderByColumn];
 

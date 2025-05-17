@@ -111,8 +111,6 @@ class RouteDbController {
   /// criterion identified by [sortMenuItemId].
   void requestPostListSorting(ItemDataId routeDataId, ItemDataId sortMenuItemId) {
     _logger.debug('UI request: Sort post list of $routeDataId by $sortMenuItemId');
-    unawaited(
-      _routeDbUseCases.sortPostList(routeDataId, PostsFilterMode.values[sortMenuItemId]),
-    );
+    unawaited(_routeDbUseCases.sortPostList(routeDataId, PostsFilterMode.values[sortMenuItemId]));
   }
 }

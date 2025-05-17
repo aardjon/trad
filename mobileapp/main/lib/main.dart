@@ -97,8 +97,9 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<RouteDbStorageBoundary>(
       () => RouteDbStorage(_dependencyProvider),
     );
-    _dependencyProvider
-        .registerFactory<AppPreferencesBoundary>(() => PreferencesStorage(_dependencyProvider));
+    _dependencyProvider.registerFactory<AppPreferencesBoundary>(
+      () => PreferencesStorage(_dependencyProvider),
+    );
 
     // infrastructure components
     _dependencyProvider.registerFactory<ApplicationUiBoundary>(ApplicationUI.new);

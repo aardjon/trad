@@ -148,8 +148,9 @@ void main() {
     ///  - The sorted route list provided by the storage must be sent to the UI (updateRouteList())
     test('sortRouteList() use case', () async {
       // Setup the storage mocks
-      when(() => preferencesBoundaryMock.setInitialRoutesSortCriterion(any()))
-          .thenAnswer((_) async {});
+      when(
+        () => preferencesBoundaryMock.setInitialRoutesSortCriterion(any()),
+      ).thenAnswer((_) async {});
       when(() => storageBoundaryMock.retrieveRoutesOfSummit(any(), any())).thenAnswer((_) async {
         return routeList;
       });
@@ -219,8 +220,9 @@ void main() {
     ///  - The sorted post list provided by the storage must be sent to the UI (updateRouteList())
     test('sortPostList() use case', () async {
       // Setup the storage mocks
-      when(() => preferencesBoundaryMock.setInitialPostsSortCriterion(any()))
-          .thenAnswer((_) async {});
+      when(
+        () => preferencesBoundaryMock.setInitialPostsSortCriterion(any()),
+      ).thenAnswer((_) async {});
       when(() => storageBoundaryMock.retrievePostsOfRoute(any(), any())).thenAnswer((_) async {
         return postList;
       });

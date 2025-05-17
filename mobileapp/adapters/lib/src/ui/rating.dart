@@ -26,9 +26,10 @@ class RatingIconFactory {
   /// Create the IconDefinition describing the given [rating] value.
   IconDefinition getIntRatingIcon(int rating) {
     final Glyph glyph = _glyphMapping[rating.clamp(-3, 3).abs()]!;
-    final ColorHint color = rating == 0
-        ? ColorHint.neutral
-        : rating > 0
+    final ColorHint color =
+        rating == 0
+            ? ColorHint.neutral
+            : rating > 0
             ? ColorHint.greenPositive
             : ColorHint.redNegative;
 

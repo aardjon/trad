@@ -35,9 +35,9 @@ class RouteDbUseCases {
 
   /// Constructor for creating a new RouteDbUseCases instance.
   RouteDbUseCases(DependencyProvider di)
-      : _presentationBoundary = di.provide<PresentationBoundary>(),
-        _storageBoundary = di.provide<RouteDbStorageBoundary>(),
-        _preferencesBoundary = di.provide<AppPreferencesBoundary>();
+    : _presentationBoundary = di.provide<PresentationBoundary>(),
+      _storageBoundary = di.provide<RouteDbStorageBoundary>(),
+      _preferencesBoundary = di.provide<AppPreferencesBoundary>();
 
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
@@ -86,14 +86,8 @@ class RouteDbUseCases {
     RoutesFilterMode sortCriterion = await _preferencesBoundary.getInitialRoutesSortCriterion();
     Summit selectedSummit = await _storageBoundary.retrieveSummit(summitId);
     _presentationBoundary.showSummitDetails(selectedSummit);
-    List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(
-      summitId,
-      sortCriterion,
-    );
-    _presentationBoundary.updateRouteList(
-      routeList,
-      sortCriterion,
-    );
+    List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(summitId, sortCriterion);
+    _presentationBoundary.updateRouteList(routeList, sortCriterion);
   }
 
   /// Use Case: Sort the route list by a certain criterion
@@ -110,14 +104,8 @@ class RouteDbUseCases {
     PostsFilterMode sortCriterion = await _preferencesBoundary.getInitialPostsSortCriterion();
     Route selectedRoute = await _storageBoundary.retrieveRoute(routeId);
     _presentationBoundary.showRouteDetails(selectedRoute);
-    List<Post> postList = await _storageBoundary.retrievePostsOfRoute(
-      routeId,
-      sortCriterion,
-    );
-    _presentationBoundary.updatePostList(
-      postList,
-      sortCriterion,
-    );
+    List<Post> postList = await _storageBoundary.retrievePostsOfRoute(routeId, sortCriterion);
+    _presentationBoundary.updatePostList(postList, sortCriterion);
   }
 
   /// Use Case: Sort the post list by a certain criterion.

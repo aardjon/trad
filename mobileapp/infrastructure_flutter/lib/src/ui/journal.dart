@@ -28,11 +28,7 @@ class JournalPage extends StatelessWidget {
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'This is the Journal Page',
-            ),
-          ],
+          children: <Widget>[Text('This is the Journal Page')],
         ),
       ),
       drawer: _appDrawer,

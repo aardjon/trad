@@ -61,19 +61,15 @@ class MainWidget extends StatelessWidget {
     RouteListNotifier routeListState,
     PostListNotifier postListState, {
     super.key,
-  })  : _appName = appName,
-        _splashMessage = splashMessage,
-        _menuModel = menuModel,
-        _appDrawerFactory = TradDrawerFactory(
-          menuModel,
-          settingsState,
-          controller,
-        ),
-        _guiState = guiState,
-        _settingsState = settingsState,
-        _summitListState = summitListState,
-        _routeListState = routeListState,
-        _postListState = postListState;
+  }) : _appName = appName,
+       _splashMessage = splashMessage,
+       _menuModel = menuModel,
+       _appDrawerFactory = TradDrawerFactory(menuModel, settingsState, controller),
+       _guiState = guiState,
+       _settingsState = settingsState,
+       _summitListState = summitListState,
+       _routeListState = routeListState,
+       _postListState = postListState;
 
   @override
   Widget build(BuildContext context) {
@@ -85,28 +81,16 @@ class MainWidget extends StatelessWidget {
       ),
       routes: <String, WidgetBuilder>{
         UiRoute.journal.toRouteString(): (BuildContext context) {
-          return JournalPage(
-            _appDrawerFactory.create(context),
-            _menuModel.journalItem.mainTitle,
-          );
+          return JournalPage(_appDrawerFactory.create(context), _menuModel.journalItem.mainTitle);
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
-          return SummitListView(
-            _appDrawerFactory.create(context),
-            _summitListState,
-          );
+          return SummitListView(_appDrawerFactory.create(context), _summitListState);
         },
         UiRoute.summitdetails.toRouteString(): (BuildContext context) {
-          return SummitDetailsView(
-            _appDrawerFactory.create(context),
-            _routeListState,
-          );
+          return SummitDetailsView(_appDrawerFactory.create(context), _routeListState);
         },
         UiRoute.routedetails.toRouteString(): (BuildContext context) {
-          return RouteDetailsView(
-            _appDrawerFactory.create(context),
-            _postListState,
-          );
+          return RouteDetailsView(_appDrawerFactory.create(context), _postListState);
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
           return KnowledgebaseView(_appDrawerFactory.create(context));
@@ -145,11 +129,7 @@ class _SplashPage extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              _message,
-            ),
-          ],
+          children: <Widget>[Text(_message)],
         ),
       ),
     );

@@ -228,13 +228,10 @@ void main() {
     /// Test for logging with the Console destination.
     /// Ensures that the sent message is really print()ed,
     void testConsoleHandler() {
-      expect(
-        () {
-          Logger logger = configureLogging(ConsoleLogDestination());
-          logger.warning(exampleMessage);
-        },
-        prints(contains(exampleMessage)),
-      );
+      expect(() {
+        Logger logger = configureLogging(ConsoleLogDestination());
+        logger.warning(exampleMessage);
+      }, prints(contains(exampleMessage)));
     }
 
     // Run all the defined test cases
@@ -251,12 +248,9 @@ void main() {
     /// providing a corresponding [LogHandler] implementation.
     test('UnknownLogDestination', () {
       final LogConfiguration logConfig = LogConfiguration();
-      expect(
-        () {
-          logConfig.destination = _UnknownLogDestination();
-        },
-        throwsArgumentError,
-      );
+      expect(() {
+        logConfig.destination = _UnknownLogDestination();
+      }, throwsArgumentError);
     });
   });
 }

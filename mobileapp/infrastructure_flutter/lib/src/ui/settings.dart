@@ -28,7 +28,7 @@ class SettingsPage extends StatelessWidget {
 
   /// Constructor for directly initializing all members.
   SettingsPage(this._appDrawer, this._title, this._settingsState, {super.key})
-      : _routeDbController = RouteDbController();
+    : _routeDbController = RouteDbController();
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +43,7 @@ class SettingsPage extends StatelessWidget {
         value: _settingsState,
         child: Consumer<SettingsNotifier>(
           builder: (BuildContext context, SettingsNotifier state, Widget? child) {
-            List<Widget> widgetList = <Widget>[
-              const SizedBox(height: 10),
-            ];
+            List<Widget> widgetList = <Widget>[const SizedBox(height: 10)];
             if (state.getRouteDbAvailabilityMessage() != null) {
               widgetList.addAll(<Widget>[
                 Card(
@@ -79,10 +77,7 @@ class SettingsPage extends StatelessWidget {
               ),
             ]);
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: widgetList,
-              ),
+              child: Column(mainAxisAlignment: MainAxisAlignment.start, children: widgetList),
             );
           },
         ),

@@ -43,11 +43,11 @@ linter:
     prefer_double_quotes: false
     prefer_relative_imports: true
     prefer_single_quotes: true
+    require_trailing_commas: false
     sort_constructors_first: false
     type_literal_in_constant_pattern: true
     unreachable_from_main: true
     unnecessary_null_aware_operator_on_extension_on_nullable: true
-    unsafe_html: true
 
 # Change the severity of some rules (e.g. from "hint" to "error") because we consider them more
 # important.
@@ -106,6 +106,9 @@ analyzer:
 
 # prefer_single_quote: Enabled because this is the way we want to do it consistently (it's just
 #   a matter of personal preference).
+
+# require_trailing_commas: Disabled because this rule conflicts with Dart's auto-formatter (see also
+#   https://github.com/dart-lang/sdk/issues/60119).
 
 # sort_constructors_first: Disabled because we want to be able to put class members first (so that
 #   they are easy to find).

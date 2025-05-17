@@ -8,16 +8,9 @@ import 'package:test/test.dart';
 
 import 'package:infrastructure_flutter/repository/shared_preferences.dart';
 
-enum DummyEnum1 {
-  item1,
-  item2,
-}
+enum DummyEnum1 { item1, item2 }
 
-enum DummyEnum2 {
-  item3,
-  item4,
-  item5,
-}
+enum DummyEnum2 { item3, item4, item5 }
 
 /// Unit tests for the repository.shared_preferences.SharedPreferencesRepository infrastructure
 /// component, which implements the key_value_store interface as local application preferences.
@@ -33,79 +26,43 @@ void main() {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       SharedPreferencesRepository repository = SharedPreferencesRepository();
 
-      expect(
-        () async {
-          await repository.getBool('key');
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.getInt('key');
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.getDouble('key');
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.getString('key');
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.getStringList('key');
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.getEnum<DummyEnum1>('key', DummyEnum1.values);
-        },
-        throwsStateError,
-      );
+      expect(() async {
+        await repository.getBool('key');
+      }, throwsStateError);
+      expect(() async {
+        await repository.getInt('key');
+      }, throwsStateError);
+      expect(() async {
+        await repository.getDouble('key');
+      }, throwsStateError);
+      expect(() async {
+        await repository.getString('key');
+      }, throwsStateError);
+      expect(() async {
+        await repository.getStringList('key');
+      }, throwsStateError);
+      expect(() async {
+        await repository.getEnum<DummyEnum1>('key', DummyEnum1.values);
+      }, throwsStateError);
 
-      expect(
-        () async {
-          await repository.setBool(key: 'key', value: true);
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.setInt(key: 'key', value: 42);
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.setDouble(key: 'key', value: 13.37);
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.setString(key: 'key', value: 'value');
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.setStringList(key: 'key', value: <String>[]);
-        },
-        throwsStateError,
-      );
-      expect(
-        () async {
-          await repository.setEnum(key: 'key', value: DummyEnum1.item1);
-        },
-        throwsStateError,
-      );
+      expect(() async {
+        await repository.setBool(key: 'key', value: true);
+      }, throwsStateError);
+      expect(() async {
+        await repository.setInt(key: 'key', value: 42);
+      }, throwsStateError);
+      expect(() async {
+        await repository.setDouble(key: 'key', value: 13.37);
+      }, throwsStateError);
+      expect(() async {
+        await repository.setString(key: 'key', value: 'value');
+      }, throwsStateError);
+      expect(() async {
+        await repository.setStringList(key: 'key', value: <String>[]);
+      }, throwsStateError);
+      expect(() async {
+        await repository.setEnum(key: 'key', value: DummyEnum1.item1);
+      }, throwsStateError);
     });
 
     /// Ensures that null is returned for keys that have not been stored before
@@ -170,48 +127,27 @@ void main() {
       SharedPreferencesRepository repository = SharedPreferencesRepository();
       await repository.initialize();
 
-      expect(
-        () async {
-          return repository.getBool('string_key');
-        },
-        throwsA(isA<TypeError>()),
-      );
-      expect(
-        () async {
-          return repository.getInt('bool_key');
-        },
-        throwsA(isA<TypeError>()),
-      );
-      expect(
-        () async {
-          return repository.getDouble('int_key');
-        },
-        throwsA(isA<TypeError>()),
-      );
-      expect(
-        () async {
-          return repository.getString('double_key');
-        },
-        throwsA(isA<TypeError>()),
-      );
-      expect(
-        () async {
-          return repository.getStringList('string_key');
-        },
-        throwsA(isA<TypeError>()),
-      );
-      expect(
-        () async {
-          return repository.getEnum<DummyEnum1>('bool_key', DummyEnum1.values);
-        },
-        throwsA(isA<TypeError>()),
-      );
+      expect(() async {
+        return repository.getBool('string_key');
+      }, throwsA(isA<TypeError>()));
+      expect(() async {
+        return repository.getInt('bool_key');
+      }, throwsA(isA<TypeError>()));
+      expect(() async {
+        return repository.getDouble('int_key');
+      }, throwsA(isA<TypeError>()));
+      expect(() async {
+        return repository.getString('double_key');
+      }, throwsA(isA<TypeError>()));
+      expect(() async {
+        return repository.getStringList('string_key');
+      }, throwsA(isA<TypeError>()));
+      expect(() async {
+        return repository.getEnum<DummyEnum1>('bool_key', DummyEnum1.values);
+      }, throwsA(isA<TypeError>()));
 
       // Special case: Unmappable enum value
-      expect(
-        await repository.getEnum<DummyEnum2>('enum_key', DummyEnum2.values),
-        equals(null),
-      );
+      expect(await repository.getEnum<DummyEnum2>('enum_key', DummyEnum2.values), equals(null));
     });
   });
 }

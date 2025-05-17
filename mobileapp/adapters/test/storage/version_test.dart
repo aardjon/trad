@@ -12,12 +12,7 @@ void main() {
   /// Test cases for the class constructor
   group('construction', () {
     /// Checks the construction with some valid values.
-    List<(int, int)> validVersionConstructions = <(int, int)>[
-      (1, 0),
-      (1, 999),
-      (1000, 1),
-      (0, 0),
-    ];
+    List<(int, int)> validVersionConstructions = <(int, int)>[(1, 0), (1, 999), (1000, 1), (0, 0)];
 
     for (final (int, int) versionParams in validVersionConstructions) {
       test('valid values: ${versionParams.$1}, ${versionParams.$2}', () {
@@ -30,18 +25,11 @@ void main() {
     /// Ensures that invalid values are rejected:
     ///  - Negative value for one or both parameters
     ///  - Minor part of 1000 or higher
-    List<(int, int)> invalidValues = <(int, int)>[
-      (-1, 0),
-      (1, -1),
-      (1, 1000),
-    ];
+    List<(int, int)> invalidValues = <(int, int)>[(-1, 0), (1, -1), (1, 1000)];
 
     for (final (int, int) versionParams in invalidValues) {
       test('invalid values: ${versionParams.$1}, ${versionParams.$2}', () {
-        expect(
-          () => Version(versionParams.$1, versionParams.$2),
-          throwsArgumentError,
-        );
+        expect(() => Version(versionParams.$1, versionParams.$2), throwsArgumentError);
       });
     }
   });

@@ -36,7 +36,7 @@ enum LogLevel {
   trace,
 
   /// Special level to enable really *all* log messages.
-  all;
+  all,
 }
 
 /// Base class for defining where logs shall finally go to.

@@ -45,8 +45,11 @@ void main() {
     ///  - The document returned by the storage must be sent to the UI (showKnowledgebaseDocument())
     test('showDocumentPage() use case', () async {
       KnowledgebaseDocumentId testedDocumentId = 'dummyId';
-      KnowledgebaseDocument testedDocument =
-          KnowledgebaseDocument(testedDocumentId, 'title', 'content');
+      KnowledgebaseDocument testedDocument = KnowledgebaseDocument(
+        testedDocumentId,
+        'title',
+        'content',
+      );
       // Setup the storage mock
       when(() => storageBoundaryMock.loadDocument(any())).thenAnswer((_) async {
         return testedDocument;
@@ -68,8 +71,11 @@ void main() {
     ///  - The document returned by the storage must be sent to the UI (showKnowledgebaseDocument())
     test('showHomePage() use case', () async {
       KnowledgebaseDocumentId homeDocumentId = 'indexId';
-      KnowledgebaseDocument homeDocument =
-          KnowledgebaseDocument(homeDocumentId, 'Home', 'Page index');
+      KnowledgebaseDocument homeDocument = KnowledgebaseDocument(
+        homeDocumentId,
+        'Home',
+        'Page index',
+      );
       // Setup the storage mock
       when(storageBoundaryMock.getHomeIdentifier).thenReturn(homeDocumentId);
       when(() => storageBoundaryMock.loadDocument(any())).thenAnswer((_) async {

@@ -88,12 +88,9 @@ void main() {
 
       // Run the test case
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.importRouteDbFile('/does/not/matter.sqlite');
-        },
-        throwsStateError,
-      );
+      expect(() async {
+        await storage.importRouteDbFile('/does/not/matter.sqlite');
+      }, throwsStateError);
     });
   });
 
@@ -126,17 +123,14 @@ void main() {
     /// (e.g. file not found, permission error, not an SQLite file etc.): An
     /// InaccessibleStorageException shall be thrown.
     test('unable to open DB file', () async {
-      when(() => rdbMock.connect(any(), readOnly: any(named: 'readOnly'))).thenThrow(
-        const PathAccessException('Fake permission failure', OSError()),
-      );
+      when(
+        () => rdbMock.connect(any(), readOnly: any(named: 'readOnly')),
+      ).thenThrow(const PathAccessException('Fake permission failure', OSError()));
 
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.startStorage();
-        },
-        throwsA(isA<InaccessibleStorageException>()),
-      );
+      expect(() async {
+        await storage.startStorage();
+      }, throwsA(isA<InaccessibleStorageException>()));
     });
 
     /// Ensures the correct behaviour in case the database file is a valid SQLite database but is of
@@ -146,12 +140,9 @@ void main() {
       when(() => rdbMock.executeQuery(any())).thenThrow(Exception('Fake SQL query failure'));
 
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.startStorage();
-        },
-        throwsA(isA<InvalidStorageFormatException>()),
-      );
+      expect(() async {
+        await storage.startStorage();
+      }, throwsA(isA<InvalidStorageFormatException>()));
     });
 
     test('empty metadata table', () async {
@@ -160,12 +151,9 @@ void main() {
       });
 
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.startStorage();
-        },
-        throwsA(isA<InvalidStorageFormatException>()),
-      );
+      expect(() async {
+        await storage.startStorage();
+      }, throwsA(isA<InvalidStorageFormatException>()));
     });
 
     /// Ensures that an IncompatibleStorageException is thrown if the database schema is of an
@@ -175,22 +163,17 @@ void main() {
     test('unsupported schema version', () async {
       when(() => rdbMock.executeQuery(any())).thenAnswer((_) async {
         return <ResultRow>[
-          ResultRow(
-            <String, Object?>{
-              DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major + 1,
-              DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
-            },
-          ),
+          ResultRow(<String, Object?>{
+            DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major + 1,
+            DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
+          }),
         ];
       });
 
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.startStorage();
-        },
-        throwsA(isA<IncompatibleStorageException>()),
-      );
+      expect(() async {
+        await storage.startStorage();
+      }, throwsA(isA<IncompatibleStorageException>()));
     });
   });
 
@@ -204,12 +187,9 @@ void main() {
       when(rdbMock.isConnected).thenReturn(false); // The storage is STOPPED
       RouteDbStorage storage = RouteDbStorage(di);
 
-      expect(
-        () async {
-          await storage.importRouteDbFile('/file/not/found.sqlite');
-        },
-        throwsA(isA<PathNotFoundException>()),
-      );
+      expect(() async {
+        await storage.importRouteDbFile('/file/not/found.sqlite');
+      }, throwsA(isA<PathNotFoundException>()));
     });
 
     /// Ensures that importing works if there is no previous database to be replaced:
@@ -304,20 +284,17 @@ void main() {
     /// Ensures the correct behaviour in case the file to import exists but cannot be read
     test('source file not readable', () async {
       when(rdbMock.isConnected).thenReturn(false); // The storage is STOPPED
-      when(() => rdbMock.connect(any(), readOnly: any(named: 'readOnly'))).thenThrow(
-        const PathAccessException('Fake permission failure', OSError()),
-      );
+      when(
+        () => rdbMock.connect(any(), readOnly: any(named: 'readOnly')),
+      ).thenThrow(const PathAccessException('Fake permission failure', OSError()));
       // Create the database file to import
       String filePathToImport = '${userDownloadDir.path}trad-routedb-4711.sqlite';
 
       // Run the test case
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.importRouteDbFile(filePathToImport);
-        },
-        throwsA(isA<InaccessibleStorageException>()),
-      );
+      expect(() async {
+        await storage.importRouteDbFile(filePathToImport);
+      }, throwsA(isA<InaccessibleStorageException>()));
     });
 
     /// Ensures the correct behaviour in case the file to import is of an unknown format
@@ -329,12 +306,9 @@ void main() {
 
       // Run the test case
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.importRouteDbFile(filePathToImport);
-        },
-        throwsA(isA<InvalidStorageFormatException>()),
-      );
+      expect(() async {
+        await storage.importRouteDbFile(filePathToImport);
+      }, throwsA(isA<InvalidStorageFormatException>()));
     });
 
     /// Ensures the correct behaviour in case the file to import has an incompatible schema
@@ -342,12 +316,10 @@ void main() {
       when(rdbMock.isConnected).thenReturn(false); // The storage is STOPPED
       when(() => rdbMock.executeQuery(any())).thenAnswer((_) async {
         return <ResultRow>[
-          ResultRow(
-            <String, Object?>{
-              DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major + 1,
-              DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
-            },
-          ),
+          ResultRow(<String, Object?>{
+            DatabaseMetadataTable.columnSchemaVersionMajor: supportedSchemaVersion.major + 1,
+            DatabaseMetadataTable.columnSchemaVersionMinor: supportedSchemaVersion.minor,
+          }),
         ];
       });
       // Create the database file to import
@@ -355,12 +327,9 @@ void main() {
 
       // Run the test case
       RouteDbStorage storage = RouteDbStorage(di);
-      expect(
-        () async {
-          await storage.importRouteDbFile(filePathToImport);
-        },
-        throwsA(isA<IncompatibleStorageException>()),
-      );
+      expect(() async {
+        await storage.importRouteDbFile(filePathToImport);
+      }, throwsA(isA<IncompatibleStorageException>()));
     });
   });
 }

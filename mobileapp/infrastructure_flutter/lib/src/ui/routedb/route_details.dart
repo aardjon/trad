@@ -36,10 +36,7 @@ class _PostItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(
-                  post.mainTitle,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+                Text(post.mainTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                 _iconFactory.getIconWidget(post.endIcon),
               ],
             ),
@@ -91,22 +88,12 @@ class RouteDetailsView extends StatelessWidget {
     );
   }
 
-  AppBar _appBar(
-    RouteDetailsModel model,
-    PostListNotifier state,
-    BuildContext context,
-  ) {
+  AppBar _appBar(RouteDetailsModel model, PostListNotifier state, BuildContext context) {
     return AppBar(
       title: Column(
         children: <Widget>[
-          Text(
-            model.pageTitle,
-            style: const TextStyle(fontSize: 20),
-          ),
-          Text(
-            model.pageSubTitle,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(model.pageTitle, style: const TextStyle(fontSize: 20)),
+          Text(model.pageSubTitle, style: const TextStyle(fontSize: 14)),
         ],
       ),
       centerTitle: true,
@@ -127,11 +114,7 @@ class RouteDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _createFilterMenu(
-    RouteDetailsModel model,
-    PostListNotifier state,
-    BuildContext context,
-  ) {
+  Widget _createFilterMenu(RouteDetailsModel model, PostListNotifier state, BuildContext context) {
     List<ListTile> menuItems = <ListTile>[];
     for (final ListViewItem item in state.getSortMenuItems()) {
       menuItems.add(
@@ -145,10 +128,7 @@ class RouteDetailsView extends StatelessWidget {
         ),
       );
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: menuItems,
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: menuItems);
   }
 
   Widget _listView(PostListNotifier state, BuildContext context) {
@@ -161,10 +141,7 @@ class RouteDetailsView extends StatelessWidget {
     );
   }
 
-  void _onOrderingChanged(
-    ItemDataId routeDataId,
-    ItemDataId sortMenuItemId,
-  ) {
+  void _onOrderingChanged(ItemDataId routeDataId, ItemDataId sortMenuItemId) {
     RouteDbController controller = RouteDbController();
     controller.requestPostListSorting(routeDataId, sortMenuItemId);
   }

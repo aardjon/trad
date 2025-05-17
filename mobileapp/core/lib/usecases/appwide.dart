@@ -29,9 +29,9 @@ class ApplicationWideUseCases {
   ///
   /// Expects a reference to the (fully configured) [DependencyProvider] to initialize all members.
   ApplicationWideUseCases(DependencyProvider di)
-      : _presentationBoundary = di.provide<PresentationBoundary>(),
-        _routeDbBoundary = di.provide<RouteDbStorageBoundary>(),
-        _preferencesBoundary = di.provide<AppPreferencesBoundary>();
+    : _presentationBoundary = di.provide<PresentationBoundary>(),
+      _routeDbBoundary = di.provide<RouteDbStorageBoundary>(),
+      _preferencesBoundary = di.provide<AppPreferencesBoundary>();
 
   /// Use case of starting the trad application as a whole.
   ///

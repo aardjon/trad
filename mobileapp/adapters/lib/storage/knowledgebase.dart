@@ -23,14 +23,14 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
   KnowledgebaseStorage(DependencyProvider dependencyProvider)
-      : _repository = dependencyProvider.provide<AssetRepositoryBoundary>();
+    : _repository = dependencyProvider.provide<AssetRepositoryBoundary>();
 
   @override
   KnowledgebaseDocumentId getHomeIdentifier() {
     _logger.debug('Retrieving home document ID');
     AssetNamespace knowledgebaseNamespace = _repository.getAllNamespaces().firstWhere(
-          (AssetNamespace element) => element.contains('knowledgebase'),
-        );
+      (AssetNamespace element) => element.contains('knowledgebase'),
+    );
     return _repository.getMetadataAssetId(knowledgebaseNamespace);
   }
 
