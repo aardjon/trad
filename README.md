@@ -1,4 +1,4 @@
-# trad - The ultimate app for climbing in Saxony
+# <img src="mobileapp/infrastructure_flutter/assets/logo.png?raw=true" width="28" /> trad - The ultimate app for climbing in Saxony
 
 A utility for climbing in the Saxon Switzerland area providing the following main features:
  - Personal climbing journal
