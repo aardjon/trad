@@ -1,9 +1,11 @@
 # <img src="mobileapp/infrastructure_flutter/assets/logo.png?raw=true" width="28" /> trad - The ultimate app for climbing in Saxony
 
-A utility for climbing in the Saxon Switzerland area providing the following main features:
- - Personal climbing journal
- - Climbing guide
- - Small knowledge base with useful information
+A free utility for climbing in the Saxon Switzerland area providing the following main features:
+ - Personal climbing journal (not yet implemented)
+ - Climbing guide, aggregating publicly available data from various sources:
+   - OpenStreetMap
+   - [Teufelsturm](https://www.teufelsturm.de)
+ - Small knowledge base with useful information (not yet available)
  - Ability to work completely offline
 
 ## Setup & Running
@@ -24,3 +26,7 @@ python scraper.py output_directory
 The new route database file is written into `output_directory`. Depending on your network speed,
 running the scraper may take up to an hour or even longer. Provide `-v` to enable some more verbose
 debug log, which will give you some kind of progress feedback.
+
+## Similar tools
+
+A possible alternative is [YacGuide](https://github.com/YacGroup/yacguide) which also provides a personal climbing journal and works offline but is solely based on (and optimized for) [sandsteinklettern.de](http://www.sandsteinklettern.de).
