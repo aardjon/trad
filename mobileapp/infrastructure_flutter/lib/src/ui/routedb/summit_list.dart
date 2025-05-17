@@ -78,7 +78,7 @@ class SummitListView extends StatelessWidget {
       margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
       decoration: BoxDecoration(
         boxShadow: <BoxShadow>[
-          BoxShadow(color: Colors.black.withOpacity(0.11), blurRadius: 40, spreadRadius: 0),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.11), blurRadius: 40, spreadRadius: 0),
         ],
       ),
       child: TextField(
