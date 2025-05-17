@@ -25,15 +25,20 @@ if (flutterVersionName == null) {
 android {
     namespace "com.example.main"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    // Originally, the ndkVersion was taken from Flutter (i.e. use the Flutter default one):
+    // ndkVersion flutter.ndkVersion
+    // However, this used to be an old, incompatible version and I didn't find out how to change
+    // the default NDK version in Flutter. So I just override it for this app instead.
+    // Improvements are welcome!
+    ndkVersion "28.1.13356709"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
