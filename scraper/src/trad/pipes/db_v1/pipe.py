@@ -8,15 +8,15 @@ from pathlib import Path
 from typing import Final, override
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
-from trad.adapters.pipes.db_v1.dbschema import (
+from trad.core.boundaries.pipes import Pipe
+from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
+from trad.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
     PostsTable,
     RoutesTable,
     SummitsTable,
 )
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 
 _logger = getLogger(__name__)
 

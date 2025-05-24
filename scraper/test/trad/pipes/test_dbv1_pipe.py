@@ -1,5 +1,5 @@
 """
-Unit tests for the `trad.adapters.pipes.db_v1.pipe` module.
+Unit tests for the `trad.pipes.db_v1.pipe` module.
 """
 
 from datetime import datetime
@@ -7,9 +7,9 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.adapters.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitsTable
-from trad.adapters.pipes.db_v1.pipe import DbSchemaV1Pipe
 from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
+from trad.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitsTable
+from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
 
 class TestDbSchemaV1Pipe:

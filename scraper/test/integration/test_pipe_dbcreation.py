@@ -12,10 +12,10 @@ from typing import Final
 
 import pytest
 
-from trad.adapters.pipes.db_v1.pipe import DbSchemaV1Pipe
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import GeoPosition, Post, Route, Summit
 from trad.infrastructure.sqlite3db import Sqlite3Database
+from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
 
 @pytest.fixture

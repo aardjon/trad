@@ -10,7 +10,8 @@ import pandas as pd
 import pytest
 import pytz
 
-from trad.adapters.filters.teufelsturm.parser import (
+from trad.core.entities import Post
+from trad.filters.teufelsturm.parser import (
     parse_page,
     parse_post,
     parse_posts,
@@ -18,7 +19,6 @@ from trad.adapters.filters.teufelsturm.parser import (
     parse_route_list,
     parse_user_name,
 )
-from trad.core.entities import Post
 
 posts_test_dict: Final = {
     0: {

@@ -5,10 +5,10 @@ Implementation of the PipeFactory component.
 from typing import override
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.adapters.pipes.db_v1.pipe import DbSchemaV1Pipe
 from trad.core.boundaries.pipes import Pipe, PipeFactory
 from trad.core.boundaries.settings import SettingsBoundary
 from trad.crosscuttings.di import DependencyProvider
+from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
 
 class AllPipesFactory(PipeFactory):
