@@ -49,7 +49,7 @@ adapters.boundaries.repositories | [adapters.boundaries.repositories](../../mobi
 adapters.boundaries.positioning | TODO
 
 
-## 3.2 Level 3
+## 3.2 Level 2
 
 ### 3.2.1 `core`
 
