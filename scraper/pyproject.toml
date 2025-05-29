@@ -426,18 +426,18 @@ max-attributes=10
 restricted-import-recurse=true
 
 # Colon/semicolon-delimited sets of names that determine what modules are
-# allowed to be imported from another module
+# not allowed to be imported from another module
 # "trad.a:trad.r1;trad.r2" means: trad.a must not import trad.r1 or trad.r2"
 restricted-imports=[
   # Restrictions derived from the Clean Architecture Pattern:
-  "trad.crosscuttings:trad.core;trad.adapters;trad.infrastructure;trad.main",
-  "trad.core:trad.adapters;trad.infrastructure;trad.main",
-  "trad.adapters:trad.infrastructure;trad.main",
+  "trad.crosscuttings:trad.core;trad.adapters;trad.filters;trad.pipes;trad.infrastructure;trad.main",
+  "trad.core:trad.adapters;trad.filters;trad.pipes;trad.infrastructure;trad.main",
+  "trad.adapters:trad.infrastructure;trad.main;trad.filters;trad.pipes",
   "trad.infrastructure:trad.main;trad.core",
 
-  # Restrictions derived from the Pipes-and-Filters Pattern within trad.adapters:
-  "trad.adapters.filters:trad.adapters.pipes",
-  "trad.adapters.pipes:trad.adapters.filters",
+  # Restrictions derived from the Pipes-and-Filters Pattern:
+  "trad.filters:trad.pipes",
+  "trad.pipes:trad.filters",
 ]
 
 
