@@ -4,12 +4,12 @@ Implementation of the FilterFactory component.
 
 from typing import Final, override
 
-from trad.adapters.filters.initialization import PipeInitializingFilter
-from trad.adapters.filters.optimization import PipeOptimizingFilter
-from trad.adapters.filters.osm import OsmSummitDataFilter
-from trad.adapters.filters.teufelsturm import TeufelsturmDataFilter
 from trad.core.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.crosscuttings.di import DependencyProvider
+from trad.filters.initialization import PipeInitializingFilter
+from trad.filters.optimization import PipeOptimizingFilter
+from trad.filters.osm import OsmSummitDataFilter
+from trad.filters.teufelsturm import TeufelsturmDataFilter
 
 
 class AllFiltersFactory(FilterFactory):

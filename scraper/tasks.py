@@ -122,7 +122,7 @@ def generate_schema(context: Context, dbname: Literal["routedb"]) -> None:
     context.run(f"dinja {dbmlfile} {template_dir} {output_dir}")
 
     scraper = next(f for f in output_dir.iterdir() if f.suffix == ".py")
-    shutil.copy(scraper, Path("src/trad/adapters/pipes/db_v1/"))
+    shutil.copy(scraper, Path("src/trad/pipes/db_v1/"))
 
     mobileapp = next(f for f in output_dir.iterdir() if f.suffix == ".dart")
     shutil.copy(mobileapp, Path("../mobileapp/adapters/lib/src/storage/routedb/"))

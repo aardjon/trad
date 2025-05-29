@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from typing import Final, override
 
 from trad.adapters.boundaries.database import EntityName, SqlStatement
-from trad.adapters.pipes.schemabase import TableSchema
+from trad.pipes.schemabase import TableSchema
 
 
 class DatabaseMetadataTable(TableSchema):

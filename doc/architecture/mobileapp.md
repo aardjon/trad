@@ -13,6 +13,8 @@ The mobile app is the application actually running on mobile devices, and the ma
 
 # 3. Building Block View
 
+![Overview of the Mobile App architecture](mobileapp/sysarc_overview.png)
+
 ## 3.1 Level 1
 
 ![Refinement of the first mobile app level](mobileapp/bbview_level2.png)
@@ -49,7 +51,7 @@ adapters.boundaries.repositories | [adapters.boundaries.repositories](../../mobi
 adapters.boundaries.positioning | TODO
 
 
-## 3.2 Level 3
+## 3.2 Level 2
 
 ### 3.2.1 `core`
 
