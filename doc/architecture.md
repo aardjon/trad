@@ -270,7 +270,7 @@ As an example, the following diagram provides an overview of the mobile app arch
 shows the basic concept of rings but is refined and explained more detailled in separate documents.
 Arrows are source code dependencies.
 
-![Architectural overview](architecture/sysarc-overview.png)
+![Architectural overview](architecture/mobileapp/sysarc_overview.png)
 
 The general rules for source code dependencies are:
  - The most important and most abstract code is inner most

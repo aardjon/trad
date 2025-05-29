@@ -28,6 +28,8 @@ absolute minimum, though.
 
 # 3. Building Block View
 
+![Overview of the Scraper architecture](scraper/sysarc_overview.png)
+
 ## 3.1 Level 1
 
 ![Refinement of the first scraper level](scraper/bbview_level2.png)
