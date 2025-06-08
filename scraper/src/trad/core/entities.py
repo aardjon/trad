@@ -2,6 +2,7 @@
 Provides all the business/core data types.
 """
 
+import string
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Final, Self
@@ -109,6 +110,24 @@ class Summit:
 
     position: GeoPosition = UNDEFINED_GEOPOSITION
     """ Geographical position of this summit. """
+
+    @property
+    def unique_identifier(self) -> str:
+        """
+        A unique identifier of this summit, unique within the current route database. It is not
+        meant to be displayed to users.
+
+        The identifier is based on the summit's name and can be used to map slightly different name
+        variants (e.g. different punctuation or permutations) to each other. It does not work for
+        completely different names, though.
+        """
+        identifier = self.name.lower()
+        # Remove non-ASCII characters
+        identifier = "".join(c for c in identifier if c in string.printable)
+        # Replace punctuation characters with spaces
+        identifier = "".join(c if c not in string.punctuation else " " for c in identifier)
+        # Order the single segments alphabetically, and rejoin them with single underscores
+        return "_".join(sorted(identifier.split()))
 
 
 @dataclass

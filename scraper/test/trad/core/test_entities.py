@@ -4,7 +4,7 @@ Unit tests for the core.entities module.
 
 import pytest
 
-from trad.core.entities import GeoPosition
+from trad.core.entities import GeoPosition, Summit
 
 
 class TestGeoPosition:
@@ -99,3 +99,37 @@ class TestGeoPosition:
 
         with pytest.raises(ValueError, match="value must be within"):
             GeoPosition(latlon_int[0], latlon_int[1])
+
+
+class TestSummit:
+    """
+    Unit tests for the Summit class.
+    """
+
+    @pytest.mark.parametrize(
+        ("summit_name", "expected_identifier"),
+        [
+            ("AbCDe", "abcde"),  # Lower-case the name
+            ("aäböcüdße", "abcde"),  # Remove german umlauts
+            ("ab cd,ef-gh", "ab_cd_ef_gh"),  # Split at space and punctuation
+            ("ef cd ab", "ab_cd_ef"),  # Order the segments correctly
+            # Some real-world examples from Sächsische Schweiz, combining conversions
+            ("Gamrigkegel", "gamrigkegel"),
+            ("Müllerstein", "mllerstein"),
+            ("Berggießhübler Turm, Westlicher", "berggiehbler_turm_westlicher"),
+            ("Zerborstener Turm, Erster", "erster_turm_zerborstener"),
+            ("Erster zerborstener Turm", "erster_turm_zerborstener"),
+            ("Glück-Auf-Turm", "auf_glck_turm"),
+            ("Glück Auf Turm", "auf_glck_turm"),
+            ("Liebespaar, Südturm", "liebespaar_sdturm"),
+            ("Liebespaar Südturm", "liebespaar_sdturm"),
+            ("Lokomotive - Esse", "esse_lokomotive"),
+            ("Lokomotive-Esse", "esse_lokomotive"),
+        ],
+    )
+    def test_unique_identifier(self, summit_name: str, expected_identifier: str) -> None:
+        """
+        Tests the correct generation of the unique identifier.
+        """
+        summit = Summit(name=summit_name)
+        assert summit.unique_identifier == expected_identifier
