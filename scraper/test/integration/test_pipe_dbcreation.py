@@ -11,6 +11,7 @@ from sqlite3 import connect
 from typing import Final
 
 import pytest
+
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import GeoPosition, Post, Route, Summit
 from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
