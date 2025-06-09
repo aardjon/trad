@@ -10,6 +10,7 @@ from typing import Final, override
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
+from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
@@ -81,7 +82,7 @@ class DbSchemaV1Pipe(Pipe):
             query_parameters=[
                 major,
                 minor,
-                "",
+                f"{APPLICATION_NAME} {APPLICATION_VERSION}",
                 datetime.datetime.now(tz=datetime.UTC).isoformat(),
             ],
         )

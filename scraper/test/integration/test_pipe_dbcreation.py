@@ -11,9 +11,9 @@ from sqlite3 import connect
 from typing import Final
 
 import pytest
-
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import GeoPosition, Post, Route, Summit
+from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
@@ -110,7 +110,7 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
     assert result_set[0][1] == 0
 
     # Check vendor string
-    assert result_set[0][3] == ""
+    assert result_set[0][3] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
 
     # Compare the creation time. Since the test takes a small amount of time, we cannot simply check
     # for equality. Instead, check that the time difference is not too big instead, assuming that

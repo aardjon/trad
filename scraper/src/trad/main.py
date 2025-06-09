@@ -14,6 +14,7 @@ from trad.core.boundaries.filters import FilterFactory
 from trad.core.boundaries.pipes import PipeFactory
 from trad.core.boundaries.settings import SettingsBoundary
 from trad.core.usecases import ScraperUseCases
+from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.crosscuttings.di import DependencyProvider
 from trad.crosscuttings.logging import configure_logging
 from trad.filters.factory import AllFiltersFactory
@@ -52,7 +53,9 @@ class ApplicationBootstrap:
         """
         self.__configure_application()
         self.__setup_logging()
-        _logger.info("Initializing the trad scraper application...")
+        _logger.info(
+            "Initializing the %s application version %s...", APPLICATION_NAME, APPLICATION_VERSION
+        )
         self.__setup_dependencies()
 
     def __configure_application(self) -> None:
@@ -98,9 +101,9 @@ class ApplicationBootstrap:
         """
         Runs the application, must be called after init_application().
         """
-        _logger.info("Running the scraper application...")
+        _logger.info("Running the %s application...", APPLICATION_NAME)
         usecase = ScraperUseCases(self.__dependency_provider)
         usecase.produce_routedb()
 
-        _logger.info("Scraper run has finished, terminating gracefully...")
+        _logger.info("The %s application has finished, terminating gracefully...", APPLICATION_NAME)
         self.__dependency_provider.shutdown()
