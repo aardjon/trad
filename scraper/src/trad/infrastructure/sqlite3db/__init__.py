@@ -6,7 +6,8 @@ import sqlite3
 from collections.abc import Callable, Collection
 from logging import getLogger
 from pathlib import Path
-from typing import override
+from types import TracebackType
+from typing import Literal, Self, override
 
 from trad.adapters.boundaries.database import (
     DataRow,
@@ -39,6 +40,7 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         sqlite3.Connection implementation) can be injected by providing it as [sqlite3_connect]. In
         normal/productive cases always use the default parameter value.
         """
+        super().__init__()
         self._sqlite3_connect = sqlite3_connect
         """
         Function to use for connecting to a Sqlite3 database.
@@ -52,6 +54,29 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         """ Handle to the currently opened database, or `None` if no database has been opened. """
 
     @override
+    def __enter__(self) -> Self:
+        if self._db_handle is None:
+            raise InvalidStateError("Please connect() to a database before querying it.")
+        self._db_handle.execute("BEGIN TRANSACTION")
+        return self
+
+    @override
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> Literal[False]:
+        if self._db_handle is None:
+            raise InvalidStateError("Please connect() to a database before querying it.")
+
+        if exc_type is None:
+            self._db_handle.execute("COMMIT TRANSACTION")
+        else:
+            self._db_handle.execute("ROLLBACK TRANSACTION")
+        return False
+
+    @override
     def connect(self, destination_file: Path, *, overwrite: bool = False) -> None:
         if overwrite:
             destination_file.unlink(missing_ok=True)
@@ -60,7 +85,7 @@ class Sqlite3Database(RelationalDatabaseBoundary):
             error.filename = str(destination_file)
             raise error
 
-        self._db_handle = self._sqlite3_connect(str(destination_file))
+        self._db_handle = self._sqlite3_connect(str(destination_file), autocommit=True)
         self._db_handle.execute("PRAGMA foreign_keys=true;")
 
     @override
@@ -87,7 +112,6 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         if self._db_handle is None:
             raise InvalidStateError("Please connect() to a database before querying it.")
         self._db_handle.execute(query, tuple(query_parameters) if query_parameters else ())
-        self._db_handle.commit()
 
     @override
     def execute_read(

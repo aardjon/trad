@@ -2,9 +2,11 @@
 Unit tests for the trad.infrastructure.sqlite3db module.
 """
 
+import contextlib
 from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
+from typing import Final
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -66,7 +68,7 @@ class TestSqlite3Database:
 
         assert not db.is_connected()
         db.connect(Path("test.sqlite"))
-        sqlite3_connect_mock.assert_called_once_with("test.sqlite")
+        sqlite3_connect_mock.assert_called_once_with("test.sqlite", autocommit=True)
         assert db.is_connected()
         sqlite3_connection_mock.execute.assert_called_once_with("PRAGMA foreign_keys=true;")
 
@@ -122,7 +124,6 @@ class TestSqlite3Database:
         connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
             query_statement, tuple(query_parameters or ())
         )
-        connected_sqlite3_database.sqlite3_connection.commit.assert_called_once()
 
     def test_execute_read(
         self,
@@ -145,3 +146,46 @@ class TestSqlite3Database:
         connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
             query_statement, tuple(query_parameters)
         )
+
+    @pytest.mark.parametrize(
+        ("transaction_fails", "expected_final_statement"),
+        [
+            (False, "COMMIT TRANSACTION"),  # Transaction succeeds (no exception)
+            (True, "ROLLBACK TRANSACTION"),  # Transaction fails (raised an exception)
+        ],
+    )
+    def test_transaction(
+        self,
+        *,
+        transaction_fails: bool,
+        expected_final_statement: str,
+        connected_sqlite3_database: Sqlite3Mock,
+    ) -> None:
+        """
+        Ensures that using the database as a context manager correctly startds and ends transations:
+         - Entering the context BEGINs a transaction
+         - Leaving the context normally does a COMMIT
+         - Leaving the context with an exception does a ROLLBACK
+        """
+
+        class FakeDbOperationError(Exception):
+            """
+            Fake exception to simulate a failing database operation. Using a dedicated type here to
+            surely distinguish it from any other (possibly unwanted) errors.
+            """
+
+        expected_db_calls: Final = 2  # Expected number of DB calls during this test
+
+        # The failing transaction context raises a FakeDbOperationFailure. To be able to check for
+        # the proper rollback later, we need to suppress this exception (but still propagate any
+        # others!)
+        with contextlib.suppress(FakeDbOperationError), connected_sqlite3_database.database:
+            connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
+                "BEGIN TRANSACTION"
+            )
+            if transaction_fails:
+                raise FakeDbOperationError
+        connected_sqlite3_database.sqlite3_connection.execute.assert_called_with(
+            expected_final_statement
+        )
+        assert connected_sqlite3_database.sqlite3_connection.execute.call_count == expected_db_calls
