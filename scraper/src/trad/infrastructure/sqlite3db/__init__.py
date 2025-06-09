@@ -60,7 +60,7 @@ class Sqlite3Database(RelationalDatabaseBoundary):
             error.filename = str(destination_file)
             raise error
 
-        self._db_handle = self._sqlite3_connect(str(destination_file))
+        self._db_handle = self._sqlite3_connect(str(destination_file), autocommit=True)
         self._db_handle.execute("PRAGMA foreign_keys=true;")
 
     @override
@@ -87,7 +87,6 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         if self._db_handle is None:
             raise InvalidStateError("Please connect() to a database before querying it.")
         self._db_handle.execute(query, tuple(query_parameters) if query_parameters else ())
-        self._db_handle.commit()
 
     @override
     def execute_read(

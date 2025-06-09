@@ -66,7 +66,7 @@ class TestSqlite3Database:
 
         assert not db.is_connected()
         db.connect(Path("test.sqlite"))
-        sqlite3_connect_mock.assert_called_once_with("test.sqlite")
+        sqlite3_connect_mock.assert_called_once_with("test.sqlite", autocommit=True)
         assert db.is_connected()
         sqlite3_connection_mock.execute.assert_called_once_with("PRAGMA foreign_keys=true;")
 
@@ -122,7 +122,6 @@ class TestSqlite3Database:
         connected_sqlite3_database.sqlite3_connection.execute.assert_called_once_with(
             query_statement, tuple(query_parameters or ())
         )
-        connected_sqlite3_database.sqlite3_connection.commit.assert_called_once()
 
     def test_execute_read(
         self,
