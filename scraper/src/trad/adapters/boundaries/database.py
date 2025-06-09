@@ -7,8 +7,9 @@ future changes/adaption to the lib interface easier.
 
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, NewType
+from abc import abstractmethod
+from contextlib import AbstractContextManager
+from typing import TYPE_CHECKING, Literal, NewType
 
 if TYPE_CHECKING:
     from collections.abc import Collection, Mapping
@@ -111,7 +112,9 @@ class EntityNotFoundError(Exception):
     """
 
 
-class RelationalDatabaseBoundary(metaclass=ABCMeta):
+class RelationalDatabaseBoundary(
+    AbstractContextManager["RelationalDatabaseBoundary", Literal[False]]
+):
     """
     Boundary interface to a relational database.
 
@@ -125,7 +128,9 @@ class RelationalDatabaseBoundary(metaclass=ABCMeta):
     The database can be either `connected` or `disconnected`. Most of its methods only work after
     [connect()]ing to a database.
 
-    All database operations are blocking, thread-safe and atomic.
+    All database operations are blocking, thread-safe and atomic. However, the databse can be used
+    as a contect manager to embrace several operations into a single transaction and make them
+    blocking and atomic as a whole.
     """
 
     @abstractmethod
