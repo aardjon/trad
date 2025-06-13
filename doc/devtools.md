@@ -152,10 +152,17 @@ be generated from the database schema definition within the [`doc/sql_schemes/`]
 directory. The mandatory parameter `dbname` defines the storage schema to generate, for now the
 only possible value is "routedb". Existing files are overwritten.
 
+This script is is only available in the scraper environment.
+
 ## test: Run all unit tests
 
 The `test` script runs all unit tests and gathers code coverage information (i.e. creates lcov.info
 files).
+
+## run: Execute the Scraper application
+
+The `run` script executes the Scraper application with the default settings also used when creating
+the official routedb. It is only available in the scraper environment.
 
 ## upgrade: Upgrade all dependencies
 

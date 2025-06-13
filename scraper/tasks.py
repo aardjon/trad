@@ -157,8 +157,9 @@ def run(context: Context) -> None:
     """
     Run the scraper application.
     """
+    Path("routedb").mkdir(parents=True)
     with context.cd("src"):
-        context.run("python app.py")
+        context.run("python scraper.py ../routedb")
 
 
 @task
