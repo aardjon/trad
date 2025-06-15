@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trad_scraper"
-dynamic = ["version"]
+version = "0.0.0"
 description = "Route data scraper for the trad mobile application."
 authors = [
   {name = "Karsten Wesenigk"},

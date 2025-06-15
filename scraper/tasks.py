@@ -5,6 +5,7 @@ The `invoke` command must be invoked from the scraper source root directory, i.e
 this file.
 """
 
+import fileinput
 import platform
 import shutil
 from pathlib import Path
@@ -207,3 +208,35 @@ def upgrade(context: Context) -> None:
     )
     print("Syncing environment...")
     context.run("pip-sync dev-requirements.txt")
+
+
+@task
+def version(context: Context, version: str) -> None:
+    """
+    Set the scraper application version to be `version`, which should be of the format
+    "MAJOR.MINOR.PATCH" (e.g. "1.2.3") and must match the Python Software Version Specification
+    (https://packaging.python.org/en/latest/specifications/version-specifiers/#version-specifiers)
+    """
+
+    def replace_line_in_file(file: Path, line_head: str, replacement: str) -> None:
+        """
+        Replace all lines starting with `line_head` with `replacement` within the given `file`.
+        """
+        for line in fileinput.input(file, inplace=True):
+            if line.startswith(line_head):
+                print(replacement)
+            else:
+                print(line, end="")
+
+    # Update appmeta.py (source code)
+    replace_line_in_file(
+        Path("src", "trad", "crosscuttings", "appmeta.py"),
+        "APPLICATION_VERSION: Final = ",
+        f'APPLICATION_VERSION: Final = "{version}"',
+    )
+    # Update pyproject.toml (meta data)
+    replace_line_in_file(
+        Path("pyproject.toml"),
+        "version = ",
+        f'version = "{version}"',
+    )

@@ -12,4 +12,5 @@ APPLICATION_VERSION: Final = "0.0.0"
 The current version of the scraper application.
 If not on a tag (i.e. "development mode"), this is usually the version number that was included in
 the last tag.
+Please do not edit the version value manually here but use the `invoke version` command instead.
 """

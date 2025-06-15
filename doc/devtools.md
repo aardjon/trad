@@ -169,6 +169,13 @@ the official routedb. It is only available in the scraper environment.
 The `upgrade` script upgrades all dependencies to the most current versions that are allowed by the
 constraints in the corresponding project configuration.
 
+## version: Create a new application version number
+
+The `version` script creates (and sets) the application to the given version number, e.g. in
+preparation of the next release. Must be done independently for both applications. For the Scraper,
+this is a MAJOR.MINOR.BUGFIX version number which must follow the
+[Python Software Distribution Version Specification](https://packaging.python.org/en/latest/specifications/version-specifiers/#version-specifiers).
+
 
 # CI workflows
 
