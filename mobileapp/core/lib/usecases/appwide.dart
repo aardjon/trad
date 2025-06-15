@@ -9,6 +9,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
+import 'routedb.dart';
 
 /// Logger to be used in this library file.
 final Logger _logger = Logger('trad.core.usecases.appwide');
@@ -25,13 +26,17 @@ class ApplicationWideUseCases {
   /// settings.
   final AppPreferencesBoundary _preferencesBoundary;
 
+  /// Dependency provider for retrieving additional dependencies as necessary.
+  final DependencyProvider _di;
+
   /// Constructor.
   ///
   /// Expects a reference to the (fully configured) [DependencyProvider] to initialize all members.
   ApplicationWideUseCases(DependencyProvider di)
     : _presentationBoundary = di.provide<PresentationBoundary>(),
       _routeDbBoundary = di.provide<RouteDbStorageBoundary>(),
-      _preferencesBoundary = di.provide<AppPreferencesBoundary>();
+      _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
+      _di = di;
 
   /// Use case of starting the trad application as a whole.
   ///
@@ -40,7 +45,7 @@ class ApplicationWideUseCases {
   Future<void> startApplication() async {
     // Function that switches the UI to the desired starting domain. By default we start with the
     // Journal, but this may change due to startup problems.
-    void Function() switchToInitialDomain = switchToJournal;
+    void Function() switchToInitialDomain = switchToRouteDb;
     // Initialize the UI
     _logger.info('Running use case startApplication()');
     _presentationBoundary.initUserInterface();
@@ -63,6 +68,13 @@ class ApplicationWideUseCases {
   void switchToJournal() {
     _logger.info('Running use case switchToJournal()');
     _presentationBoundary.switchToJournal();
+  }
+
+  /// Change the active domain to the "route db" domain.
+  Future<void> switchToRouteDb() async {
+    _logger.info('Running use case switchToRouteDb()');
+    RouteDbUseCases rdbUseCases = RouteDbUseCases(_di);
+    await rdbUseCases.showSummitListPage();
   }
 
   /// Change the active domain to the "Settings" domain.

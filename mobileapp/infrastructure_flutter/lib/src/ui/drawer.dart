@@ -44,22 +44,22 @@ class TradDrawerFactory {
                     ],
                   ),
                 ),
-                ListTile(
+                /*ListTile(
                   leading: _iconFactory.getIconWidget(_model.journalItem.icon),
                   title: Text(_model.journalItem.mainTitle),
                   onTap: _controller.requestSwitchToJournal,
-                ),
+                ),*/
                 ListTile(
                   enabled: _settingsState.isRouteDbAavailable(),
                   leading: _iconFactory.getIconWidget(_model.routedbItem.icon),
                   title: Text(_model.routedbItem.mainTitle),
                   onTap: _controller.requestSwitchToRouteDb,
                 ),
-                ListTile(
+                /*ListTile(
                   leading: _iconFactory.getIconWidget(_model.knowledgebaseItem.icon),
                   title: Text(_model.knowledgebaseItem.mainTitle),
                   onTap: _controller.requestSwitchToKnowledgebase,
-                ),
+                ),*/
                 const Divider(),
                 ListTile(
                   leading: _iconFactory.getIconWidget(_model.settingsItem.icon),
