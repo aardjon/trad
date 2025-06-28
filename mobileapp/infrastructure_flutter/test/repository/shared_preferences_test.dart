@@ -81,7 +81,7 @@ void main() {
       expect(await repository.getEnum<DummyEnum1>('enum_key', DummyEnum1.values), equals(null));
     });
 
-    /// Ensures that values can be stored retrieved again
+    /// Ensures that values can be stored and retrieved again
     test('store-read roundtrip', () async {
       // Create and initialize the repository instance, mocking the shared_preferences Flutter
       // plugin.
