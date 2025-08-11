@@ -8,7 +8,7 @@ annotated-types==0.7.0
     # via
     #   -c app-requirements.txt
     #   pydantic
-astroid==3.3.10
+astroid==3.3.11
     # via
     #   pylint
     #   pylint-restricted-imports
@@ -17,15 +17,15 @@ beautifulsoup4==4.13.4
     #   -c app-requirements.txt
     #   pandas
     #   trad_scraper (pyproject.toml)
-certifi==2025.4.26
+certifi==2025.8.3
     # via
     #   -c app-requirements.txt
     #   requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via
     #   -c app-requirements.txt
     #   requests
-coverage==7.8.2
+coverage==7.10.3
     # via trad_scraper (pyproject.toml)
 dill==0.4.0
     # via pylint
@@ -51,7 +51,7 @@ lidipy==0.3.1
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-lxml==5.4.0
+lxml==6.0.0
     # via
     #   -c app-requirements.txt
     #   pandas
@@ -59,22 +59,22 @@ markupsafe==3.0.2
     # via jinja2
 mccabe==0.7.0
     # via pylint
-mypy==1.16.0
+mypy==1.17.1
     # via trad_scraper (pyproject.toml)
 mypy-extensions==1.1.0
     # via mypy
-numpy==2.2.6
+numpy==2.3.2
     # via
     #   -c app-requirements.txt
     #   pandas
     #   pandas-stubs
 packaging==25.0
     # via pytest
-pandas==2.3.0
+pandas==2.3.1
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-pandas-stubs==2.2.3.250527
+pandas-stubs==2.3.0.250703
     # via trad_scraper (pyproject.toml)
 pathspec==0.12.1
     # via mypy
@@ -82,7 +82,7 @@ platformdirs==4.3.8
     # via pylint
 pluggy==1.6.0
     # via pytest
-pydantic==2.11.5
+pydantic==2.11.7
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
@@ -92,7 +92,7 @@ pydantic-core==2.33.2
     #   pydantic
 pydbml==1.2.0
     # via dinja-tool
-pylint==3.3.7
+pylint==3.3.8
     # via
     #   pylint-pytest
     #   pylint-restricted-imports
@@ -115,11 +115,11 @@ pytz==2025.2
     # via
     #   -c app-requirements.txt
     #   pandas
-requests==2.32.3
+requests==2.32.4
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-ruff==0.11.13
+ruff==0.12.8
     # via trad_scraper (pyproject.toml)
 six==1.17.0
     # via
@@ -134,13 +134,13 @@ tomlkit==0.13.3
     # via pylint
 types-beautifulsoup4==4.12.0.20250516
     # via trad_scraper (pyproject.toml)
-types-html5lib==1.1.11.20250516
+types-html5lib==1.1.11.20250809
     # via types-beautifulsoup4
-types-pytz==2025.2.0.20250516
+types-pytz==2025.2.0.20250809
     # via pandas-stubs
-types-requests==2.32.0.20250602
+types-requests==2.32.4.20250809
     # via trad_scraper (pyproject.toml)
-typing-extensions==4.14.0
+typing-extensions==4.14.1
     # via
     #   -c app-requirements.txt
     #   beautifulsoup4
@@ -156,7 +156,7 @@ tzdata==2025.2
     # via
     #   -c app-requirements.txt
     #   pandas
-urllib3==2.4.0
+urllib3==2.5.0
     # via
     #   -c app-requirements.txt
     #   requests

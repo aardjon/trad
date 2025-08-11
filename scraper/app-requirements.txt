@@ -10,9 +10,9 @@ beautifulsoup4==4.13.4
     # via
     #   pandas
     #   trad_scraper (pyproject.toml)
-certifi==2025.4.26
+certifi==2025.8.3
     # via requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 html5lib==1.1
     # via pandas
@@ -20,13 +20,13 @@ idna==3.10
     # via requests
 lidipy==0.3.1
     # via trad_scraper (pyproject.toml)
-lxml==5.4.0
+lxml==6.0.0
     # via pandas
-numpy==2.2.6
+numpy==2.3.2
     # via pandas
-pandas==2.3.0
+pandas==2.3.1
     # via trad_scraper (pyproject.toml)
-pydantic==2.11.5
+pydantic==2.11.7
     # via trad_scraper (pyproject.toml)
 pydantic-core==2.33.2
     # via pydantic
@@ -34,7 +34,7 @@ python-dateutil==2.9.0.post0
     # via pandas
 pytz==2025.2
     # via pandas
-requests==2.32.3
+requests==2.32.4
     # via trad_scraper (pyproject.toml)
 six==1.17.0
     # via
@@ -42,7 +42,7 @@ six==1.17.0
     #   python-dateutil
 soupsieve==2.7
     # via beautifulsoup4
-typing-extensions==4.14.0
+typing-extensions==4.14.1
     # via
     #   beautifulsoup4
     #   pydantic
@@ -52,7 +52,7 @@ typing-inspection==0.4.1
     # via pydantic
 tzdata==2025.2
     # via pandas
-urllib3==2.4.0
+urllib3==2.5.0
     # via requests
 webencodings==0.5.1
     # via html5lib
