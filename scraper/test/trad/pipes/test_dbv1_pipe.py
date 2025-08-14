@@ -4,7 +4,7 @@ Unit tests for the `trad.pipes.db_v1.pipe` module.
 
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
@@ -131,20 +131,20 @@ class TestDbSchemaV1Pipe:
             ],
         )
 
-    def test_collect_statistics(self, tmp_path: Path) -> None:
+    def test_finalize_pipe(self, tmp_path: Path) -> None:
         """
-        Ensures that collect_statistics() calls the expected boundary method exactly once.
+        Ensures that finalize_pipe() executes the expected SQL commands and disconnects the
+        database.
         """
-        fake_db_boundary = Mock(RelationalDatabaseBoundary)
-        pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
-        pipe.collect_statistics()
-        fake_db_boundary.run_analyze.assert_called_once()
+        expected_sql_commands = ["ANALYZE", "VACUUM"]
 
-    def test_shrink(self, tmp_path: Path) -> None:
-        """
-        Ensures that shrink() calls the expected boundary method exactly once.
-        """
         fake_db_boundary = Mock(RelationalDatabaseBoundary)
         pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
-        pipe.shrink()
-        fake_db_boundary.run_vacuum.assert_called_once()
+        pipe.finalize_pipe()
+
+        assert fake_db_boundary.execute_write.call_count == len(expected_sql_commands)
+        fake_db_boundary.execute_write.assert_has_calls(
+            [call(command) for command in expected_sql_commands],
+            any_order=False,
+        )
+        fake_db_boundary.disconnect.assert_called_once()

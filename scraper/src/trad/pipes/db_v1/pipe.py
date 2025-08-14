@@ -88,12 +88,11 @@ class DbSchemaV1Pipe(Pipe):
         )
 
     @override
-    def collect_statistics(self) -> None:
-        self.__database_boundary.run_analyze()
-
-    @override
-    def shrink(self) -> None:
-        self.__database_boundary.run_vacuum()
+    def finalize_pipe(self) -> None:
+        _logger.debug("Finalizing routedb pipe")
+        self.__database_boundary.execute_write(SqlStatement("ANALYZE"))
+        self.__database_boundary.execute_write(SqlStatement("VACUUM"))
+        self.__database_boundary.disconnect()
 
     @override
     def add_or_enrich_summit(self, summit: Summit) -> None:

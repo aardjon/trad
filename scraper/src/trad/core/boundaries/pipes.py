@@ -19,9 +19,9 @@ class Pipe(metaclass=ABCMeta):
     Because there is only one Pipe and Filters may run in parallel, all pipe operations must be
     thread-safe.
 
-    The pipe has an internal state: It must be initialized (by calling initialize_pipe()) before any
-    other operation is allowed. If any method is called in the wrong state, it throws an
-    InvalidStateError.
+    The pipe has an internal state: It must be initialized (by calling `initialize_pipe()`) before
+    any other operation is allowed, and finalized (by calling `finalize_pipe()`) after everything
+    else is done. If any method is called in the wrong state, it throws an InvalidStateError.
     """
 
     @abstractmethod
@@ -33,17 +33,12 @@ class Pipe(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def collect_statistics(self) -> None:
+    def finalize_pipe(self) -> None:
         """
-        Analyzes the storage content and collects and stores some statistical information to improve
-        the performance of future data query.
-        """
+        Finalizes the creation of a new route database, closing the pipe.
 
-    @abstractmethod
-    def shrink(self) -> None:
-        """
-        Shrinks the current route database result file to the necessary minimum, without deleting
-        or compressing any data.
+        Must be called exactly once after all other operations are done. The Pipe is not usable
+        anymore afterwards.
         """
 
     @abstractmethod
