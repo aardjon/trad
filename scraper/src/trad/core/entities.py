@@ -96,6 +96,47 @@ discovered there, of course ;)
 """
 
 
+class UniqueIdentifier:
+    """
+    A unique identifier of a single physical object (i.e. a summit or a route on a summit), unique
+    within the current route database. It is not meant to be displayed to users. Objects of this
+    class can be compared (but not ordered) and hashed (e.g. to use them as dict keys).
+
+    The unique identifier is a normalization of the input strings and is used to map slightly
+    different object name variants (e.g. different punctuation or permutations) to each other. It
+    does not work for completely different names, though.
+    """
+
+    def __init__(self, object_name: str):
+        """
+        Create a new identifier object form the given `object_name`.
+        """
+        self._identifier = self.__create_identifier(object_name)
+        """ The normalized, unique identifier string. """
+
+    @staticmethod
+    def __create_identifier(object_name: str) -> str:
+        """Does the actual identifier normalization."""
+        identifier = object_name.lower()
+        # Remove non-ASCII characters
+        identifier = "".join(c for c in identifier if c in string.printable)
+        # Replace punctuation characters with spaces
+        identifier = "".join(c if c not in string.punctuation else " " for c in identifier)
+        # Order the single segments alphabetically, and rejoin them with single underscores
+        return "_".join(sorted(identifier.split()))
+
+    def __str__(self) -> str:
+        return self._identifier
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UniqueIdentifier):
+            return NotImplemented
+        return self._identifier == other._identifier
+
+    def __hash__(self) -> int:
+        return hash(self._identifier)
+
+
 @dataclass
 class Summit:
     """
@@ -112,22 +153,12 @@ class Summit:
     """ Geographical position of this summit. """
 
     @property
-    def unique_identifier(self) -> str:
+    def unique_identifier(self) -> UniqueIdentifier:
         """
         A unique identifier of this summit, unique within the current route database. It is not
         meant to be displayed to users.
-
-        The identifier is based on the summit's name and can be used to map slightly different name
-        variants (e.g. different punctuation or permutations) to each other. It does not work for
-        completely different names, though.
         """
-        identifier = self.name.lower()
-        # Remove non-ASCII characters
-        identifier = "".join(c for c in identifier if c in string.printable)
-        # Replace punctuation characters with spaces
-        identifier = "".join(c if c not in string.punctuation else " " for c in identifier)
-        # Order the single segments alphabetically, and rejoin them with single underscores
-        return "_".join(sorted(identifier.split()))
+        return UniqueIdentifier(self.name)
 
 
 @dataclass

@@ -4,7 +4,7 @@ Unit tests for the core.entities module.
 
 import pytest
 
-from trad.core.entities import GeoPosition, Summit
+from trad.core.entities import GeoPosition, Summit, UniqueIdentifier
 
 
 class TestGeoPosition:
@@ -101,13 +101,13 @@ class TestGeoPosition:
             GeoPosition(latlon_int[0], latlon_int[1])
 
 
-class TestSummit:
+class TestUniqueIdentifier:
     """
-    Unit tests for the Summit class.
+    Unit tests for the UniqueIdentifer class.
     """
 
     @pytest.mark.parametrize(
-        ("summit_name", "expected_identifier"),
+        ("object_name", "expected_identifier"),
         [
             ("AbCDe", "abcde"),  # Lower-case the name
             ("aäböcüdße", "abcde"),  # Remove german umlauts
@@ -127,9 +127,56 @@ class TestSummit:
             ("Lokomotive-Esse", "esse_lokomotive"),
         ],
     )
-    def test_unique_identifier(self, summit_name: str, expected_identifier: str) -> None:
+    def test_creation(self, object_name: str, expected_identifier: str) -> None:
         """
-        Tests the correct generation of the unique identifier.
+        Tests the correct generation of the unique identifier str and the string representation.
         """
-        summit = Summit(name=summit_name)
-        assert summit.unique_identifier == expected_identifier
+        identifier = UniqueIdentifier(object_name)
+        assert str(identifier) == expected_identifier
+
+    @pytest.mark.parametrize(
+        ("a", "b", "expect_equality"),
+        [
+            (UniqueIdentifier("qwertz"), UniqueIdentifier("qwertz"), True),
+            (UniqueIdentifier("qwertz"), UniqueIdentifier("QwErTz"), True),
+            (UniqueIdentifier("qwertz"), UniqueIdentifier("qwarks"), False),
+        ],
+    )
+    def test_comparison(
+        self, a: UniqueIdentifier, b: UniqueIdentifier, *, expect_equality: bool
+    ) -> None:
+        """
+        Ensures that the equality comparison of unique identifiers works as expected.
+        """
+        assert (a == b) is expect_equality
+        assert (a != b) is not expect_equality
+
+    def test_dict_support(self) -> None:
+        """
+        Ensures that UniqueIdentifier objects can be used as dict keys.
+        """
+        ident1 = UniqueIdentifier("test1")
+        ident2 = UniqueIdentifier("test2")
+
+        id_dict = {ident1: "A", ident2: "B"}
+        assert len(id_dict) == 2  # noqa: PLR2004
+        assert ident1 in id_dict
+        assert ident2 in id_dict
+        assert id_dict[ident1] == "A"
+        assert id_dict[ident2] == "B"
+        assert id_dict[UniqueIdentifier("TesT1")] == "A"
+        assert id_dict[UniqueIdentifier("TesT2")] == "B"
+
+
+class TestSummit:
+    """
+    Unit tests for the Summit class.
+    """
+
+    def test_unique_identifier(self) -> None:
+        """
+        Tests the generation of the unique identifier.
+        """
+        dummy_summit_name = "Test Summit"
+        summit = Summit(name=dummy_summit_name)
+        assert summit.unique_identifier == UniqueIdentifier(dummy_summit_name)
