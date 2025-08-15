@@ -184,15 +184,3 @@ class RelationalDatabaseBoundary(
         reason, an exception is raised. If the query doesn't return any results, the returned result
         row list is empty.
         """
-
-    @abstractmethod
-    def run_analyze(self) -> None:
-        """
-        Executes the ANALYZE command to gather statistics for improving future query plans.
-        """
-
-    @abstractmethod
-    def run_vacuum(self) -> None:
-        """
-        Executes the VACUUM command to rebuild the database into a minimal amount of disk space.
-        """

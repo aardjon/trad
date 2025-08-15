@@ -127,15 +127,3 @@ class Sqlite3Database(RelationalDatabaseBoundary):
         )
         column_names = [col[0] for col in result_set.description]
         return [DataRow(dict(zip(column_names, row, strict=True))) for row in result_set]
-
-    @override
-    def run_analyze(self) -> None:
-        if self._db_handle is None:
-            raise InvalidStateError("Please connect() to a database before querying it.")
-        self._db_handle.execute("ANALYZE")
-
-    @override
-    def run_vacuum(self) -> None:
-        if self._db_handle is None:
-            raise InvalidStateError("Please connect() to a database before querying it.")
-        self._db_handle.execute("VACUUM")
