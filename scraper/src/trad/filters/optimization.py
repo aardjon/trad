@@ -41,6 +41,4 @@ class PipeOptimizingFilter(Filter):
     @override
     def execute_filter(self, pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
-        pipe.collect_statistics()
-        pipe.shrink()
         _logger.debug("'%s' filter finished", self.get_name())
