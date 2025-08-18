@@ -15,7 +15,7 @@ from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestErr
 from trad.core.boundaries.filters import Filter, FilterStage
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import GeoPosition, Summit
-from trad.core.errors import DataProcessingError, DataRetrievalError
+from trad.core.errors import DataProcessingError, DataRetrievalError, MergeConflictError
 from trad.crosscuttings.di import DependencyProvider
 
 _logger = getLogger(__name__)
@@ -126,7 +126,10 @@ class OsmSummitDataFilter(Filter):
 
     def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:
         for summit in summits:
-            pipe.add_or_enrich_summit(summit)
+            try:
+                pipe.add_or_enrich_summit(summit)
+            except MergeConflictError as e:
+                _logger.warning(e)
 
 
 class _ReadOnlyPydanticModel(BaseModel):
