@@ -132,6 +132,7 @@ class TestMergingPipeDecorator:
         """
         inner_pipe = Mock(Pipe)
         proxy_pipe = MergingPipeDecorator(inner_pipe)
+        proxy_pipe.add_or_enrich_summit(Summit("Summit"))
         dummy_route = Route(route_name="Example Trail", grade="I")
 
         proxy_pipe.add_or_enrich_route("Summit", dummy_route)
@@ -144,6 +145,8 @@ class TestMergingPipeDecorator:
         """
         inner_pipe = Mock(Pipe)
         proxy_pipe = MergingPipeDecorator(inner_pipe)
+        proxy_pipe.add_or_enrich_summit(Summit("Summit"))
+        proxy_pipe.add_or_enrich_route("Summit", Route(route_name="Route", grade="III"))
         dummy_post = Post(
             user_name="johndoe",
             comment="",

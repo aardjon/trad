@@ -103,15 +103,6 @@ DataRowContainer = list[DataRow]
 """ The result set returned by a table query. """
 
 
-class EntityNotFoundError(Exception):
-    """
-    Raised when an entity the operation depends on is missing in the database (e.g. trying to add a
-    route to a non-existing summit). In many cases these are programming errors that can be fixed by
-    adding the missing entity first. In general, the end user cannot do much about it when it
-    happens unexpectedly at runtime.
-    """
-
-
 class RelationalDatabaseBoundary(
     AbstractContextManager["RelationalDatabaseBoundary", Literal[False]]
 ):

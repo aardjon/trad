@@ -9,7 +9,7 @@ from typing import override
 
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit, UniqueIdentifier
-from trad.core.errors import MergeConflictError
+from trad.core.errors import EntityNotFoundError, MergeConflictError
 
 _logger = getLogger(__name__)
 
@@ -77,11 +77,22 @@ class MergingPipeDecorator(Pipe):
 
     @override
     def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
-        self._routes.setdefault(UniqueIdentifier(summit_name), []).append(route)
+        self._routes.setdefault(self._get_summit_id(summit_name), []).append(route)
 
     @override
     def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
-        self._posts.append((UniqueIdentifier(summit_name), route_name, post))
+        self._posts.append((self._get_summit_id(summit_name), route_name, post))
+
+    def _get_summit_id(self, summit_name: str) -> UniqueIdentifier:
+        """
+        Return the unique ID the of summit with the given `summit_name`. Raises EntityNotFoundError
+        if no such summit can be found.
+        """
+        summit_id = UniqueIdentifier(summit_name)
+        try:
+            return self._summits[summit_id].unique_identifier
+        except KeyError:
+            raise EntityNotFoundError(summit_name) from None
 
     def get_collected_summits(self) -> Collection[Summit]:
         """

@@ -30,6 +30,25 @@ class PipeDataError(Exception):
     """
 
 
+class EntityNotFoundError(PipeDataError):
+    """
+    Raised when an entity the operation depends on is missing in the pipe (e.g. trying to add a
+    route to a non-existing summit). In many cases these are programming errors that can be fixed by
+    adding the missing entity first. In general, the end user cannot do much about it when it
+    happens unexpectedly at runtime.
+    """
+
+    def __init__(self, object_name: str):
+        """
+        Creates a new Exception notifying about a missing object named `object_name`.
+        """
+        super().__init__()
+        self._object_name = object_name
+
+    def __str__(self) -> str:
+        return f"Referenced object '{self._object_name}' not found. Did you forget to add it?"
+
+
 class MergeConflictError(PipeDataError):
     """
     Raised when a value cannot be added to a Pipe because it already contains a different
