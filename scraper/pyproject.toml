@@ -157,6 +157,10 @@ confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFIN
 # categories.
 disable = [
 
+  # Disabled because it doesn't necessarily improve readabily, so we don't want to enforce this
+  # style. It's still allowed to use assignment expressions, of course!
+  "consider-using-assignment-expr",
+
   # Disabled because a class (even with only one member) is often more flexible
   # for future extension (i.e., if a second method is needed, the class can simply be extended while
   # a function needs to be refactored). But of course it's also not forbidden to simply use a
