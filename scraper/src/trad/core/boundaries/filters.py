@@ -37,8 +37,8 @@ class FilterStage(Enum):
     FINALIZATION = auto()
     """
     The storage data has its final state and is ready to be used, but may still need some
-    finalization to be published. Normally, only one filter should run in this stage (e.g. exporting
-    the storage to the final destination).
+    finalization to be published (e.g. writing the storage to its final destination). Normally, only
+    one filter should run in this stage.
     """
 
 
