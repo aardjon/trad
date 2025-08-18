@@ -7,6 +7,7 @@ from typing import override
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.core.boundaries.pipes import Pipe, PipeFactory
 from trad.core.boundaries.settings import SettingsBoundary
+from trad.core.pipe_decorators.merge import MergingPipeDecorator
 from trad.crosscuttings.di import DependencyProvider
 from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
@@ -24,4 +25,4 @@ class AllPipesFactory(PipeFactory):
     @override
     def create_pipe(self) -> Pipe:
         destination_path = self.__settings.get_output_dir()
-        return DbSchemaV1Pipe(destination_path, self.__database_boundary)
+        return MergingPipeDecorator(DbSchemaV1Pipe(destination_path, self.__database_boundary))
