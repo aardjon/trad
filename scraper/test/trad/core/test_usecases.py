@@ -43,15 +43,15 @@ class TestScraperUseCases:
         )
         mocked_pipe_factory = NonCallableMock(PipeFactory)
         mocked_pipe = Mock(Pipe)
-        mocked_pipe_factory.create_pipes.return_value = [mocked_pipe]
+        mocked_pipe_factory.create_pipe.return_value = mocked_pipe
         dependency_provider.register_singleton(FilterFactory, lambda: mocked_filter_factory)
         dependency_provider.register_singleton(PipeFactory, lambda: mocked_pipe_factory)
 
         usecases = ScraperUseCases(dependency_provider)
         usecases.produce_routedb()
 
-        # Ensure that the pipes have been created
-        mocked_pipe_factory.create_pipes.assert_called_once()
+        # Ensure that the pipe has been created
+        mocked_pipe_factory.create_pipe.assert_called_once()
 
         # Ensure that all filters for all stages are retrieved
         assert mocked_filter_factory.create_filters.call_count == len(FilterStage)

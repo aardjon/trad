@@ -29,11 +29,11 @@ class ScraperUseCases:
         freshly retrieved external data.
         """
         _logger.info("Now running usecase 'produce_routedb'")
-        pipes = self.__pipe_factory.create_pipes()
+        pipe = self.__pipe_factory.create_pipe()
         for stage in FilterStage:
             self.__run_filters_of_stage(
                 stage,
-                pipes[0],
+                pipe,
             )
 
     def __run_filters_of_stage(self, stage: FilterStage, pipe: Pipe) -> None:

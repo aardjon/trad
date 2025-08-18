@@ -73,10 +73,7 @@ class PipeFactory(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def create_pipes(self) -> list[Pipe]:
+    def create_pipe(self) -> Pipe:
         """
-        Creates and returns all available pipes.
-
-        Multiple pipes are e.g. configured to create several databases with different schema
-        versions in one run.
+        Creates and returns the pipe to be used, according to the global application settings.
         """

@@ -22,6 +22,6 @@ class AllPipesFactory(PipeFactory):
         self.__database_boundary = dependency_provider.provide(RelationalDatabaseBoundary)
 
     @override
-    def create_pipes(self) -> list[Pipe]:
+    def create_pipe(self) -> Pipe:
         destination_path = self.__settings.get_output_dir()
-        return [DbSchemaV1Pipe(destination_path, self.__database_boundary)]
+        return DbSchemaV1Pipe(destination_path, self.__database_boundary)
