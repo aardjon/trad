@@ -42,7 +42,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
 
     pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
     pipe.initialize_pipe()
-    pipe.add_or_enrich_summit(Summit(name="Falkenturm"))
+    pipe.add_or_enrich_summit(Summit(official_name="Falkenturm"))
     pipe.add_or_enrich_route(summit_name="Falkenturm", route=Route(route_name="AW", grade="II"))
     pipe.add_post(
         summit_name="Falkenturm",
@@ -127,9 +127,9 @@ def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
     Ensures that existing data is correctly enriched (updated) by several subsequent
     `add_or_enrich()` calls.
     """
-    summit1 = Summit(name="Beispielturm")
-    summit2 = Summit(name="Beispielturm", position=GeoPosition(470000000, 110000000))
-    summit3 = Summit(name="Beispielturm", position=GeoPosition(130000000, 370000000))
+    summit1 = Summit(official_name="Beispielturm")
+    summit2 = Summit(official_name="Beispielturm", position=GeoPosition(470000000, 110000000))
+    summit3 = Summit(official_name="Beispielturm", position=GeoPosition(130000000, 370000000))
 
     # Insert Summit data without geographical coordinates
     pipe_v1.add_or_enrich_summit(summit1)

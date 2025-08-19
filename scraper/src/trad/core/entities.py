@@ -3,7 +3,7 @@ Provides all the business/core data types.
 """
 
 import string
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Final, Self
 
@@ -17,7 +17,7 @@ class GeoPosition:
     geographic coordinates of about 1 cm (7 decimal places), which is the same as used by OSM.
 
     The coordinate values can be provided either as normal decimal degree values (float) or as
-    integer values. Both provide the same precision, but the integer values multiplied by
+    integer values. Both provide the same precision, but the integer values are multiplied by
     10.000.000 to provide the same precision without the drawbacks of the floating point
     representation. The integer representation is the same as in the route database, to avoid
     unnecessary conversions.
@@ -144,13 +144,55 @@ class Summit:
 
     A summit is a single rock or mountain that can be climbed onto. There are usually several routes
     to the top.
+
+    A summit can have several different names for different usages, but it must always have at least
+    one.
     """
 
-    name: str
-    """ The name of this summit. """
+    official_name: str | None = None
+    """
+    The official, default name of this summit.
+    """
+
+    alternate_names: list[str] = field(default_factory=list)
+    """
+    List of alternate names for this summit. Alternate names can be completely different (like
+    historic or local) names as well as common names in different languages - basically everything
+    a user may want to search for.
+    """
+
+    unspecified_names: list[str] = field(default_factory=list)
+    """
+    List of names whose usage is not specified, i.e. teh source doesn't say whether they are
+    official. These names do not end up in the created route database.
+    """
 
     position: GeoPosition = UNDEFINED_GEOPOSITION
     """ Geographical position of this summit. """
+
+    def __post_init__(self) -> None:
+        # Make sure that at least one name has been provided
+        if not self.official_name and not self.alternate_names and not self.unspecified_names:
+            raise ValueError("Cannot create Summit without a name.")
+
+    @property
+    def name(self) -> str:
+        """
+        Returns a name for this summit.
+
+        The returned name is the first one that can be found from official, alternate, unspecified
+        names (searching in that order). This may be useful if you just need any identifying name,
+        e.g. to display it to the user. If you need certainty about the name usage, use one of the
+        specialized properties instead.
+        """
+        # Note that there must always be at least one name must always somewhere, even though it is
+        # not ensured (yet?)
+        name = self.official_name
+        if not name:
+            name = next(iter(self.alternate_names), None)
+        if not name:
+            name = next(iter(self.unspecified_names))
+        return name
 
     @property
     def unique_identifier(self) -> UniqueIdentifier:

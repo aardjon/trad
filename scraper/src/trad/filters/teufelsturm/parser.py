@@ -108,7 +108,14 @@ def parse_page(page_text: str) -> PageData:
     )  # this parses all the tables in webpages to a list
     posts_table = df_list[3]
     posts = parse_posts(posts_table)
-    return PageData(peak=Summit(name=peak), route=Route(route_name=route, grade=grade), posts=posts)
+
+    # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
+    # 'unspecified'.
+    return PageData(
+        peak=Summit(unspecified_names=[peak]),
+        route=Route(route_name=route, grade=grade),
+        posts=posts,
+    )
 
 
 def parse_route_list(page_text: str) -> set[int]:

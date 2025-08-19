@@ -173,10 +173,45 @@ class TestSummit:
     Unit tests for the Summit class.
     """
 
-    def test_unique_identifier(self) -> None:
+    @pytest.mark.parametrize(
+        ("summit", "expected_return_value"),
+        [
+            # Single names
+            (Summit(official_name="Official"), "Official"),
+            (Summit(alternate_names=["Alternate"]), "Alternate"),
+            (Summit(unspecified_names=["Unspecified"]), "Unspecified"),
+            # From lists, choose the first one
+            (Summit(alternate_names=["A2", "A1"]), "A2"),
+            (Summit(unspecified_names=["U3", "U5"]), "U3"),
+            # From several usages, choose the highest priority
+            (Summit(official_name="O", alternate_names=["A"], unspecified_names=["U"]), "O"),
+            (Summit(alternate_names=["A"], unspecified_names=["U"]), "A"),
+        ],
+    )
+    def test_name(self, summit: Summit, expected_return_value: str) -> None:
         """
-        Tests the generation of the unique identifier.
+        Tests the `name` property, i.e. that the correct one of all available names is selected.
         """
-        dummy_summit_name = "Test Summit"
-        summit = Summit(name=dummy_summit_name)
-        assert summit.unique_identifier == UniqueIdentifier(dummy_summit_name)
+        assert summit.name == expected_return_value
+
+    @pytest.mark.parametrize(
+        ("summit", "expected_id_base"),
+        [
+            # Single names
+            (Summit(official_name="Official"), "Official"),
+            (Summit(alternate_names=["Alternate"]), "Alternate"),
+            (Summit(unspecified_names=["Unspecified"]), "Unspecified"),
+            # From lists, choose the first one
+            (Summit(alternate_names=["A2", "A1"]), "A2"),
+            (Summit(unspecified_names=["U3", "U5"]), "U3"),
+            # From several usages, choose the highest priority
+            (Summit(official_name="O", alternate_names=["A"], unspecified_names=["U"]), "O"),
+            (Summit(alternate_names=["A"], unspecified_names=["U"]), "A"),
+        ],
+    )
+    def test_unique_identifier(self, summit: Summit, expected_id_base: str) -> None:
+        """
+        Tests the generation of the unique identifier. `expected_id_base` is the name string from
+        which the identifier is expected to be created, `summit` is the Summit object to test.
+        """
+        assert summit.unique_identifier == UniqueIdentifier(expected_id_base)
