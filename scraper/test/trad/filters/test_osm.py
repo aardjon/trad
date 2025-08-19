@@ -141,7 +141,7 @@ class TestOsmSummitDataFilter:
             (  # Single summit (minimal data)
                 lambda area_id: [{"osm_id": area_id}],
                 {"elements": [{"lat": 13.37, "lon": 47.11, "tags": {"name": "Mt Mock"}}]},
-                [Summit("Mt Mock", GeoPosition.from_decimal_degree(13.37, 47.11))],
+                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
             ),
             (  # Single summit with additional data
                 lambda area_id: [{"osm_id": area_id}],
@@ -157,7 +157,7 @@ class TestOsmSummitDataFilter:
                     ],
                     "osm3s": {"copyright": "OSM constributors"},
                 },
-                [Summit("Mt Mock", GeoPosition.from_decimal_degree(13.37, 47.11))],
+                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
             ),
             (  # Multiple summits
                 lambda area_id: [{"osm_id": area_id}],
@@ -169,9 +169,58 @@ class TestOsmSummitDataFilter:
                     ]
                 },
                 [
-                    Summit("Einserspitze", GeoPosition.from_decimal_degree(12.34, 9.87)),
-                    Summit("Zweierturm", GeoPosition.from_decimal_degree(56.78, 65.43)),
-                    Summit("Dreierwand", GeoPosition.from_decimal_degree(90.00, 21.10)),
+                    Summit("Einserspitze", position=GeoPosition.from_decimal_degree(12.34, 9.87)),
+                    Summit("Zweierturm", position=GeoPosition.from_decimal_degree(56.78, 65.43)),
+                    Summit("Dreierwand", position=GeoPosition.from_decimal_degree(90.00, 21.10)),
+                ],
+            ),
+            # Summits with multiple names (in different variants)
+            (
+                lambda area_id: [{"osm_id": area_id}],
+                {
+                    "elements": [
+                        {
+                            "lat": 13.37,
+                            "lon": 47.11,
+                            "tags": {
+                                "name": "name",
+                                "alt_name": "alt",
+                                "official_name": "official",
+                                "nickname": "nick",
+                                "short_name": "short",
+                                "loc_name": "loc",
+                            },
+                        },
+                    ]
+                },
+                [
+                    Summit(
+                        official_name="name",
+                        alternate_names=["alt", "official", "nick", "short", "loc"],
+                        position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                    )
+                ],
+            ),
+            (
+                lambda area_id: [{"osm_id": area_id}],
+                {
+                    "elements": [
+                        {
+                            "lat": 13.37,
+                            "lon": 47.11,
+                            "tags": {
+                                "name": "name",
+                                "alt_name": "alt1; alt2 ; alt3",
+                            },
+                        },
+                    ]
+                },
+                [
+                    Summit(
+                        official_name="name",
+                        alternate_names=["alt1", "alt2", "alt3"],
+                        position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                    )
                 ],
             ),
         ],
@@ -187,6 +236,7 @@ class TestOsmSummitDataFilter:
         Ensure the correct bevahiour if no errors occur:
          - All network boundary calls get the expected parameters
          - The correct number of summits is sent to the Pipe
+         - The Summit data is correctly parsed and forwarded
         """
         dummy_area_id: Final = 1337
         expected_network_request_count: Final = 2
@@ -249,7 +299,9 @@ class TestOsmSummitDataFilter:
         This compares by value, i.e. two different instances with the same values are equal.
         """
         return (
-            summit1.name == summit2.name
+            summit1.official_name == summit2.official_name
+            and sorted(summit1.alternate_names) == sorted(summit2.alternate_names)
+            and sorted(summit1.unspecified_names) == sorted(summit2.unspecified_names)
             and summit1.position.latitude_int == summit2.position.latitude_int
             and summit1.position.longitude_int == summit2.position.longitude_int
         )
