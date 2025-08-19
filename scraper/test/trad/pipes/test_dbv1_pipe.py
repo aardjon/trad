@@ -22,7 +22,7 @@ class TestDbSchemaV1Pipe:
         pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
 
         pipe.add_or_enrich_summit(
-            Summit(name="Foobar Rock", position=GeoPosition.from_decimal_degree(13, 37))
+            Summit(official_name="Foobar Rock", position=GeoPosition.from_decimal_degree(13, 37))
         )
 
         expected_sql_statement = (

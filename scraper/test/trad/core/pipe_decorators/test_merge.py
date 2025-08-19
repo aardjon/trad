@@ -41,56 +41,60 @@ class TestMergingPipeDecorator:
             # Merge position data into an existing summit
             (
                 [Summit("Summit 1")],
-                Summit("Summit 1", GeoPosition(504620000, 147390000)),
-                [Summit("Summit 1", GeoPosition(504620000, 147390000))],
+                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
+                [Summit("Summit 1", position=GeoPosition(504620000, 147390000))],
                 nullcontext(),
             ),
             # Merge different name variants
             (
                 [Summit("Mons Permuta")],
-                Summit("Permuta, Mons", GeoPosition(504620000, 147390000)),
-                [Summit("Mons Permuta", GeoPosition(504620000, 147390000))],
+                Summit("Permuta, Mons", position=GeoPosition(504620000, 147390000)),
+                [Summit("Mons Permuta", position=GeoPosition(504620000, 147390000))],
                 nullcontext(),
             ),
             # Don't change other existing summits
             (
-                [Summit("S1"), Summit("S2", GeoPosition(404620000, 247390000))],
-                Summit("S3", GeoPosition(504620000, 147390000)),
+                [Summit("S1"), Summit("S2", position=GeoPosition(404620000, 247390000))],
+                Summit("S3", position=GeoPosition(504620000, 147390000)),
                 [
                     Summit("S1"),
-                    Summit("S2", GeoPosition(404620000, 247390000)),
-                    Summit("S3", GeoPosition(504620000, 147390000)),
+                    Summit("S2", position=GeoPosition(404620000, 247390000)),
+                    Summit("S3", position=GeoPosition(504620000, 147390000)),
                 ],
                 nullcontext(),
             ),
             (
-                [Summit("S1"), Summit("S2"), Summit("S3", GeoPosition(404620000, 247390000))],
-                Summit("S2", GeoPosition(504620000, 147390000)),
                 [
                     Summit("S1"),
-                    Summit("S2", GeoPosition(504620000, 147390000)),
-                    Summit("S3", GeoPosition(404620000, 247390000)),
+                    Summit("S2"),
+                    Summit("S3", position=GeoPosition(404620000, 247390000)),
+                ],
+                Summit("S2", position=GeoPosition(504620000, 147390000)),
+                [
+                    Summit("S1"),
+                    Summit("S2", position=GeoPosition(504620000, 147390000)),
+                    Summit("S3", position=GeoPosition(404620000, 247390000)),
                 ],
                 nullcontext(),
             ),
             # Error case: Conflicting position data, existing data must not be changed!
             (
-                [Summit("Summit", GeoPosition(504620000, 147390000))],
-                Summit("Summit", GeoPosition(404620000, 247390000)),
-                [Summit("Summit", GeoPosition(504620000, 147390000))],
+                [Summit("Summit", position=GeoPosition(504620000, 147390000))],
+                Summit("Summit", position=GeoPosition(404620000, 247390000)),
+                [Summit("Summit", position=GeoPosition(504620000, 147390000))],
                 pytest.raises(MergeConflictError),
             ),
             (
                 [
                     Summit("S1"),
-                    Summit("S2", GeoPosition(304620000, 547390000)),
-                    Summit("S3", GeoPosition(404620000, 247390000)),
+                    Summit("S2", position=GeoPosition(304620000, 547390000)),
+                    Summit("S3", position=GeoPosition(404620000, 247390000)),
                 ],
-                Summit("S2", GeoPosition(504620000, 147390000)),
+                Summit("S2", position=GeoPosition(504620000, 147390000)),
                 [
                     Summit("S1"),
-                    Summit("S2", GeoPosition(304620000, 547390000)),
-                    Summit("S3", GeoPosition(404620000, 247390000)),
+                    Summit("S2", position=GeoPosition(304620000, 547390000)),
+                    Summit("S3", position=GeoPosition(404620000, 247390000)),
                 ],
                 pytest.raises(MergeConflictError),
             ),
