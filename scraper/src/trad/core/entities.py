@@ -3,9 +3,12 @@ Provides all the business/core data types.
 """
 
 import string
+from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Final, Self
+
+from trad.core.errors import MergeConflictError
 
 NO_GRADE: Final = 0
 """ Special value to mark a missing or no grade. """
@@ -158,12 +161,12 @@ class Summit:
     """
     List of alternate names for this summit. Alternate names can be completely different (like
     historic or local) names as well as common names in different languages - basically everything
-    a user may want to search for.
+    a user may want to search for. Never contains the `official_name`
     """
 
     unspecified_names: list[str] = field(default_factory=list)
     """
-    List of names whose usage is not specified, i.e. teh source doesn't say whether they are
+    List of names whose usage is not specified, i.e. the source doesn't say whether they are
     official. These names do not end up in the created route database.
     """
 
@@ -197,10 +200,63 @@ class Summit:
     @property
     def unique_identifier(self) -> UniqueIdentifier:
         """
-        A unique identifier of this summit, unique within the current route database. It is not
-        meant to be displayed to users.
+        The default unique identifier of this summit, unique within the current route database. It
+        is not meant to be displayed to users.
         """
         return UniqueIdentifier(self.name)
+
+    def get_all_possible_identifiers(self) -> list[UniqueIdentifier]:
+        """
+        Return all known unique identifiers that refer to this object.
+        """
+        off_name = [self.official_name] if self.official_name else []
+        return [
+            UniqueIdentifier(name)
+            for name in off_name + self.alternate_names + self.unspecified_names
+        ]
+
+    def enrich(self, other: Self) -> None:
+        """
+        Enrich (merge) this Summit instance with the data from `other` (making it the union of
+        `self` and `other`). Raises `MergeConflictError` if some data cannot bt merged because of an
+        unresolvable conflict.
+        """
+        self._enrich_official_name(other)
+        self._enrich_alternate_names(other)
+        self._enrich_unspecified_names(other)
+        self._enrich_position(other)
+
+    def _enrich_official_name(self, other: Self) -> None:
+        if not other.official_name:
+            return
+
+        if not self.official_name:
+            self.official_name = other.official_name
+            return
+
+        if UniqueIdentifier(other.official_name) == UniqueIdentifier(self.official_name):
+            return
+        raise MergeConflictError("summit", other.name, "official name")
+
+    def _enrich_alternate_names(self, other: Self) -> None:
+        if other.alternate_names:
+            self.alternate_names = list(dict.fromkeys(self.alternate_names + other.alternate_names))
+        # Make sure the official name is not contained in the alternate list
+        if self.official_name:
+            with suppress(ValueError):
+                self.alternate_names.remove(self.official_name)
+
+    def _enrich_unspecified_names(self, other: Self) -> None:
+        if other.unspecified_names:
+            self.unspecified_names = list(
+                dict.fromkeys(self.unspecified_names + other.unspecified_names)
+            )
+
+    def _enrich_position(self, other: Self) -> None:
+        if self.position == UNDEFINED_GEOPOSITION:
+            self.position = other.position
+        elif other.position != UNDEFINED_GEOPOSITION:
+            raise MergeConflictError("summit", other.name, "position")
 
 
 @dataclass

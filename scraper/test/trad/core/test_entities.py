@@ -2,9 +2,12 @@
 Unit tests for the core.entities module.
 """
 
+from contextlib import AbstractContextManager, nullcontext
+
 import pytest
 
 from trad.core.entities import GeoPosition, Summit, UniqueIdentifier
+from trad.core.errors import MergeConflictError
 
 
 class TestGeoPosition:
@@ -215,3 +218,74 @@ class TestSummit:
         which the identifier is expected to be created, `summit` is the Summit object to test.
         """
         assert summit.unique_identifier == UniqueIdentifier(expected_id_base)
+
+    @pytest.mark.parametrize(
+        ("existing_summit", "summit_to_merge", "expected_summit", "failure_context"),
+        [
+            # Merge position data into an existing summit
+            (
+                Summit("Summit 1"),
+                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            # Merge multiple names in various variants
+            (
+                Summit(official_name="Official", alternate_names=["Alt1", "Alt2"]),
+                Summit(official_name="Official", alternate_names=["Alt3"]),
+                Summit(official_name="Official", alternate_names=["Alt1", "Alt2", "Alt3"]),
+                nullcontext(),
+            ),
+            (
+                Summit(official_name="Official", alternate_names=["Alt2"]),
+                Summit(alternate_names=["Official", "Alt3"]),
+                Summit(official_name="Official", alternate_names=["Alt2", "Alt3"]),
+                nullcontext(),
+            ),
+            (
+                Summit(unspecified_names=["Unspec"]),
+                Summit(official_name="Name", alternate_names=["Alt1", "Alt2"]),
+                Summit(
+                    official_name="Name",
+                    alternate_names=["Alt1", "Alt2"],
+                    unspecified_names=["Unspec"],
+                ),
+                nullcontext(),
+            ),
+            # Error Cases
+            (
+                Summit("Summit", position=GeoPosition(504620000, 147390000)),
+                Summit("Summit", position=GeoPosition(404620000, 247390000)),
+                Summit("Summit", position=GeoPosition(504620000, 147390000)),
+                pytest.raises(MergeConflictError),
+            ),
+        ],
+    )
+    def test_enrich(
+        self,
+        existing_summit: Summit,
+        summit_to_merge: Summit,
+        expected_summit: Summit,
+        failure_context: AbstractContextManager[None],
+    ) -> None:
+        """
+        Tests the enrichment ("merge") of an existing Summit object with data from another one:
+
+        - Position data is added if there is none already
+        - The official name is set if it is not already
+        - All alternate and unspecified names are added to the existing Summit
+        - The official name must not be included in the alternate names list
+        - Unresolvable merge conflicts raise a MergeConflictError (preserving existing data)
+        """
+        with failure_context:
+            existing_summit.enrich(summit_to_merge)
+
+            assert existing_summit.official_name == expected_summit.official_name
+            assert sorted(existing_summit.alternate_names) == sorted(
+                expected_summit.alternate_names
+            )
+            assert sorted(existing_summit.unspecified_names) == sorted(
+                expected_summit.unspecified_names
+            )
+            assert existing_summit.position.latitude_int == expected_summit.position.latitude_int
+            assert existing_summit.position.longitude_int == expected_summit.position.longitude_int
