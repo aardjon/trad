@@ -38,11 +38,20 @@ class TestMergingPipeDecorator:
         [
             # Simple adding of a new summit
             ([], Summit("Summit"), [Summit("Summit")], nullcontext()),
-            # Merge position data into an existing summit
+            # Don't create double entries within a list
             (
-                [Summit("Summit 1")],
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
-                [Summit("Summit 1", position=GeoPosition(504620000, 147390000))],
+                [
+                    Summit(
+                        alternate_names=["Alt1", "Alt2"], unspecified_names=["Unspec1", "Unspec2"]
+                    )
+                ],
+                Summit(alternate_names=["Alt2", "Alt3"], unspecified_names=["Unspec2", "Unspec3"]),
+                [
+                    Summit(
+                        alternate_names=["Alt1", "Alt2", "Alt3"],
+                        unspecified_names=["Unspec1", "Unspec2", "Unspec3"],
+                    )
+                ],
                 nullcontext(),
             ),
             # Merge different name variants
@@ -50,6 +59,19 @@ class TestMergingPipeDecorator:
                 [Summit("Mons Permuta")],
                 Summit("Permuta, Mons", position=GeoPosition(504620000, 147390000)),
                 [Summit("Mons Permuta", position=GeoPosition(504620000, 147390000))],
+                nullcontext(),
+            ),
+            # Merge multiple Summits into one if new information reveals that this is necessary
+            (
+                [Summit(unspecified_names=["Name1"]), Summit(unspecified_names=["Name2"])],
+                Summit(official_name="Name1", alternate_names=["Name2"]),
+                [
+                    Summit(
+                        official_name="Name1",
+                        alternate_names=["Name2"],
+                        unspecified_names=["Name1", "Name2"],
+                    )
+                ],
                 nullcontext(),
             ),
             # Don't change other existing summits
@@ -79,12 +101,6 @@ class TestMergingPipeDecorator:
             ),
             # Error case: Conflicting position data, existing data must not be changed!
             (
-                [Summit("Summit", position=GeoPosition(504620000, 147390000))],
-                Summit("Summit", position=GeoPosition(404620000, 247390000)),
-                [Summit("Summit", position=GeoPosition(504620000, 147390000))],
-                pytest.raises(MergeConflictError),
-            ),
-            (
                 [
                     Summit("S1"),
                     Summit("S2", position=GeoPosition(304620000, 547390000)),
@@ -108,7 +124,19 @@ class TestMergingPipeDecorator:
         failure_context: AbstractContextManager[None],
     ) -> None:
         """
-        Ensures that add_or_enrich_summit() collects and merges Summit data properly.
+        Ensures that add_or_enrich_summit() collects and merges Summit data properly:
+         - A Summit not already available is simply added
+         - An existing Summit's data is enriched
+         - Unrelated existing Summits must not be changed
+         - When adding additional names, several existing Summits may have to be merged into one
+         - Unsolvable merge conflicts raise a MergeConflictError (preserving existing data)
+
+        :param existing_summits: List of Summits that are already stored in the Pipe.
+        :param add_summit: The Summit object to add to the Pipe.
+        :param expected_summit_list: List of Summits expected to be stored in the Pipe after the add
+            operation.
+        :param failure_context: Exception context the adding is done within, can be used to expect a
+            certain exception to be raised.
         """
         inner_pipe = Mock(Pipe)
 
@@ -126,7 +154,9 @@ class TestMergingPipeDecorator:
             expected_summit_list,
             strict=True,
         ):
-            assert real.name == expected.name
+            assert real.official_name == expected.official_name
+            assert sorted(real.alternate_names) == sorted(expected.alternate_names)
+            assert sorted(real.unspecified_names) == sorted(expected.unspecified_names)
             assert real.position.latitude_int == expected.position.latitude_int
             assert real.position.longitude_int == expected.position.longitude_int
 

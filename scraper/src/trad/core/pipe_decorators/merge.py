@@ -8,8 +8,8 @@ from logging import getLogger
 from typing import override
 
 from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit, UniqueIdentifier
-from trad.core.errors import EntityNotFoundError, MergeConflictError
+from trad.core.entities import Post, Route, Summit, UniqueIdentifier
+from trad.core.errors import EntityNotFoundError
 
 _logger = getLogger(__name__)
 
@@ -29,7 +29,7 @@ class MergingPipeDecorator(Pipe):
         """
         super().__init__()
         self._delegate = delegate_pipe
-        self._summits: dict[UniqueIdentifier, Summit] = {}
+        self._summit_name_lookup_map: dict[UniqueIdentifier, Summit] = {}
         self._routes: dict[UniqueIdentifier, list[Route]] = {}
         self._posts: list[tuple[UniqueIdentifier, str, Post]] = []
 
@@ -40,23 +40,26 @@ class MergingPipeDecorator(Pipe):
     @override
     def finalize_pipe(self) -> None:
         # Finally, write all collected data into the delegate pipe
-        _logger.debug("Writing %s summits...", len(self._summits))
-        for summit in self._summits.values():
-            self._delegate.add_or_enrich_summit(summit)
+        _logger.debug("Writing summits with %s names...", len(self._summit_name_lookup_map))
+        seen_summit_ids: set[int] = set()
+        for summit in self._summit_name_lookup_map.values():
+            if id(summit) not in seen_summit_ids:
+                self._delegate.add_or_enrich_summit(summit)
+                seen_summit_ids.add(id(summit))
 
         for summit_id, routes in self._routes.items():
-            summit = self._summits[summit_id]
+            summit = self._summit_name_lookup_map[summit_id]
             _logger.debug("Writing %s routes for summit '%s'...", len(routes), summit.name)
             for route in routes:
                 self._delegate.add_or_enrich_route(summit.name, route)
 
         _logger.debug("Writing %s posts...", len(self._posts))
         for summit_id, route_name, post in self._posts:
-            summit = self._summits[summit_id]
+            summit = self._summit_name_lookup_map[summit_id]
             self._delegate.add_post(summit.name, route_name, post)
 
         # Delete all in-memory data
-        self._summits.clear()
+        self._summit_name_lookup_map.clear()
         self._routes.clear()
         self._posts.clear()
 
@@ -65,15 +68,27 @@ class MergingPipeDecorator(Pipe):
 
     @override
     def add_or_enrich_summit(self, summit: Summit) -> None:
-        existing_summit = self._summits.get(summit.unique_identifier)
-        if existing_summit is None:
-            self._summits[summit.unique_identifier] = summit
-            return
+        # Find all Summit objects that are physically the same as the new one (i.e. share a name)
+        existing_summits_to_merge: dict[int, Summit] = {}
+        for identifier in summit.get_all_possible_identifiers():
+            existing_summit = self._summit_name_lookup_map.get(identifier, None)
+            if existing_summit is not None:
+                existing_summits_to_merge[id(existing_summit)] = existing_summit
+        summits_to_merge = [*existing_summits_to_merge.values(), summit]
 
-        if existing_summit.position == UNDEFINED_GEOPOSITION:
-            existing_summit.position = summit.position
-        elif summit.position != UNDEFINED_GEOPOSITION:
-            raise MergeConflictError("summit", summit.name, "position")
+        # Merge all found summits into the first one
+        destination_summit = summits_to_merge[0]
+        for merge_summit in summits_to_merge[1:]:
+            destination_summit.enrich(merge_summit)
+
+        # Make sure that the corresponding _summit_name_lookup_map entries refer to the destination
+        # object, by (re-)assing all (possibly extended) identifiers.
+        for identifier in destination_summit.get_all_possible_identifiers():
+            self._summit_name_lookup_map[identifier] = destination_summit
+
+        # TODO(aardjon): Existing routes need to be merged, too! Not necessary with only Teufelsturm
+        #                and OSM data being merged, though, because we don't gather route data from
+        #                OSM.
 
     @override
     def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
@@ -90,7 +105,7 @@ class MergingPipeDecorator(Pipe):
         """
         summit_id = UniqueIdentifier(summit_name)
         try:
-            return self._summits[summit_id].unique_identifier
+            return self._summit_name_lookup_map[summit_id].unique_identifier
         except KeyError:
             raise EntityNotFoundError(summit_name) from None
 
@@ -99,7 +114,13 @@ class MergingPipeDecorator(Pipe):
         Return all Summits that have been collected and merged so far. This is meant to be used by
         unit tests only, don't use it in production code.
         """
-        return self._summits.values()
+        all_summits = []
+        seen_summit_ids = []
+        for summit in self._summit_name_lookup_map.values():
+            if id(summit) not in seen_summit_ids:
+                seen_summit_ids.append(id(summit))
+                all_summits.append(summit)
+        return all_summits
 
     def get_collected_routes(self, summit_name: str) -> Collection[Route]:
         """
