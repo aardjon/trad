@@ -188,8 +188,8 @@ class Summit:
         e.g. to display it to the user. If you need certainty about the name usage, use one of the
         specialized properties instead.
         """
-        # Note that there must always be at least one name must always somewhere, even though it is
-        # not ensured (yet?)
+        # Note that there must always be at least one name somewhere, even though it is not ensured
+        # (yet?)
         name = self.official_name
         if not name:
             name = next(iter(self.alternate_names), None)
