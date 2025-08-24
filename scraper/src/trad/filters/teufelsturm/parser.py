@@ -109,6 +109,9 @@ def parse_page(page_text: str) -> PageData:
     posts_table = df_list[3]
     posts = parse_posts(posts_table)
 
+    # Replace the summit name if it is wrong
+    peak = _fix_erroneous_name(peak)
+
     # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
     # 'unspecified'.
     return PageData(
@@ -116,6 +119,36 @@ def parse_page(page_text: str) -> PageData:
         route=Route(route_name=route, grade=grade),
         posts=posts,
     )
+
+
+def _fix_erroneous_name(summit_name: str) -> str:
+    """
+    Checks if the given `summit_name` is erroneous, and returns the fixed version (if it is) or the
+    unchanged `summit_name` (if it is not).
+
+    Background: Some summit names on Teufelsturm are simply wrong and therefore cannot be easily
+    mapped automatically. "Wrong" means things like e.g.:
+     - Typing mistakes
+     - Spelling differs from the official name (e.g. using "1." or "I." instead of "First")
+
+    Theyare just hard-coded here and replaced with the correct (official) name variant. Some (or
+    even all) of the translations may be replaced by more generic approaches in the future.
+    """
+    known_name_errors = {
+        "Amboß": "Amboss",
+        "Burgener Turm": "Burgenerturm",
+        "Lehnsteigturm, Dritter": "III. Lehnsteigturm",
+        "Lehnsteigturm, Zweiter": "II. Lehnsteigturm",
+        "Zerborstener Turm, Erster": "1. Zerborstener Turm",
+        "Zerborstener Turm, Zweiter": "2. Zerborstener Turm",
+        # TODO (aardjon): The following names are special, because they are indeed the correct,
+        # official variant (which uses an abbreviation) while OSM uses (according to its rules) the
+        # unabbreviated name. We will probably have to face many similar cases when merging routes.
+        # A generic solution would be good here.
+        "Gralsburg, NO-Zinne": "Gralsburg Nordost-Zinne",
+        "Gralsburg, SW-Zinne": "Gralsburg Südwest-Zinne",
+    }
+    return known_name_errors.get(summit_name, summit_name)
 
 
 def parse_route_list(page_text: str) -> set[int]:
