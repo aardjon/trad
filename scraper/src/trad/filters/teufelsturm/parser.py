@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Final
 import pandas as pd
 import pytz
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from trad.core.entities import Post, Route, Summit
 from trad.core.errors import DataProcessingError
@@ -80,27 +81,33 @@ def parse_post(post: Series[Any] | DataFrame) -> Post:
 
 def parse_page(page_text: str) -> PageData:
     """Parses the given HTML [page_text] and returns the extracted data."""
-    title_field_count: Final = 2
+    route_field_count: Final = 2
     grade_field_count: Final = 1
 
     soup = BeautifulSoup(page_text, "html.parser")
-
-    title_result = re.search(
-        r"(.*) - (.*)",
-        soup.title.string if soup.title and soup.title.string else "",
-    )
-    if not title_result or len(title_result.groups()) != title_field_count:
-        raise DataProcessingError("Page has no valid title.")
-
-    peak = title_result.group(1)
-    route = title_result.group(2)
-
     paragraph_elements = soup.find("p")
-    paragraphs = paragraph_elements.getText() if paragraph_elements else ""
-    grade_result = re.search(r".*?\[(.*?)\].*", paragraphs)
+    if not isinstance(paragraph_elements, Tag) or not paragraph_elements.contents:
+        raise DataProcessingError(f"Page '{soup.title}' has no valid route and summit data")
+    try:
+        route_name_element = next(p for p in paragraph_elements.contents if isinstance(p, Tag))
+        route_elements = [tag for tag in route_name_element.contents if isinstance(tag, Tag)]
+    except Exception as e:
+        raise DataProcessingError(
+            f"Cannot find route and summit name on page '{soup.title}'"
+        ) from e
+    if len(route_elements) != route_field_count:
+        raise DataProcessingError(f"Found unexpected name parts on page {soup.title}")
+
+    route = route_elements[0].get_text().strip()
+
+    peak_element = route_elements[1].find("a")
+    if not peak_element:
+        raise DataProcessingError(f"Page '{soup.title}' has no valid route name")
+    peak = peak_element.get_text().strip()
+
+    grade_result = re.search(r".*?\[(.*?)\].*", route_elements[1].get_text())
     if not grade_result or len(grade_result.groups()) != grade_field_count:
         raise DataProcessingError("Page has no valid grade.")
-
     grade = grade_result.group(1).strip()
 
     df_list = pd.read_html(
