@@ -73,7 +73,9 @@ class TeufelsturmDataFilter(Filter):
     def _perform_scan(self, pipe: Pipe, page_ids: list[int]) -> None:
         count: Final = len(page_ids)
         for idx, page_id in enumerate(page_ids):
-            _logger.debug("Importing route %d of %d", idx + 1, count)
+            if (idx + 1) % 25 == 0:
+                # Don't log every single route index
+                _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text)
             if post_data.peak:
