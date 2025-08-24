@@ -8,6 +8,7 @@ from typing import Final, override
 from trad.adapters.boundaries.http import HttpNetworkingBoundary
 from trad.core.boundaries.filters import Filter, FilterStage
 from trad.core.boundaries.pipes import Pipe
+from trad.core.entities import Summit
 from trad.crosscuttings.di import DependencyProvider
 from trad.filters.teufelsturm.parser import parse_page, parse_route_list
 
@@ -78,7 +79,7 @@ class TeufelsturmDataFilter(Filter):
                 _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text)
-            if post_data.peak:
+            if post_data.peak and not self._is_forbidden(post_data.peak):
                 pipe.add_or_enrich_summit(post_data.peak)
                 pipe.add_or_enrich_route(summit_name=post_data.peak.name, route=post_data.route)
                 for post in post_data.posts:
@@ -92,3 +93,27 @@ class TeufelsturmDataFilter(Filter):
         """Returns the (text) content of the details page for the route with ID [route_id]."""
         url = self._ROUTE_DETAILS_URL.format(route_id)
         return self._http_boundary.retrieve_text_resource(url)
+
+    def _is_forbidden(self, summit: Summit) -> bool:
+        """
+        Return True if climbing is completely forbidden on the given summit, otherwise False.
+        Teufelsturm contains data for summits that were accessible in the past but have been closed
+        in the meantime, and we don't want to include them.
+
+        TODO(aardjon): This information can probably be taken from OSM, so it's probably better to
+                       take it from there instead of using this hard-coded list.
+        """
+        forbidden_summit_names: Final = {
+            "Adlerlochturm",
+            "Hirschsuhlenturm",
+            "Kleiner Turm",
+            "Litfaßsäule",
+            "Schwarze Spitze",
+            "Schwarzschlüchteturm",
+            "Slawe",
+            "Wobstspitze",
+        }
+        if summit.name in forbidden_summit_names:
+            _logger.debug("Ignoring forbidden summit %s", summit.name)
+            return True
+        return False
