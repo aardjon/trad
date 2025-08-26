@@ -444,6 +444,10 @@ restricted-imports=[
   "trad.pipes:trad.filters",
 ]
 
+[tool.pylint.broad_try_clause]
+# Allow more than one statements within a try: block because this can sometimes make the code more
+# readable.
+max-try-statements = 2
 
 
 [tool.ruff]
