@@ -252,6 +252,21 @@ class TestSummit:
                 ),
                 nullcontext(),
             ),
+            # Merging equal position datá must not raise an error
+            (
+                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    position=GeoPosition(504620000, 147390000),
+                ),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    position=GeoPosition(504620000, 147390000),
+                ),
+                nullcontext(),
+            ),
             # Error Cases
             (
                 Summit("Summit", position=GeoPosition(504620000, 147390000)),

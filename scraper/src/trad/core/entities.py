@@ -218,7 +218,7 @@ class Summit:
     def enrich(self, other: Self) -> None:
         """
         Enrich (merge) this Summit instance with the data from `other` (making it the union of
-        `self` and `other`). Raises `MergeConflictError` if some data cannot bt merged because of an
+        `self` and `other`). Raises `MergeConflictError` if some data cannot be merged because of an
         unresolvable conflict.
         """
         self._enrich_official_name(other)
@@ -255,7 +255,10 @@ class Summit:
     def _enrich_position(self, other: Self) -> None:
         if self.position == UNDEFINED_GEOPOSITION:
             self.position = other.position
-        elif other.position != UNDEFINED_GEOPOSITION:
+        elif other.position != UNDEFINED_GEOPOSITION and (
+            self.position.latitude_int != other.position.latitude_int
+            or self.position.longitude_int != other.position.longitude_int
+        ):
             raise MergeConflictError("summit", other.name, "position")
 
 
