@@ -21,6 +21,84 @@ from trad.crosscuttings.di import DependencyProvider
 _logger = getLogger(__name__)
 
 
+class _ReadOnlyPydanticModel(BaseModel):
+    """
+    Base class for Pydantic models that cannot be manipulated. This is the case for all data
+    retrieved from some remote service.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+
+class _NominatimArea(_ReadOnlyPydanticModel):
+    osm_id: int
+
+
+class _OverpassTag(_ReadOnlyPydanticModel):
+    """
+    Deserialized representation of the tags of a single OSM "peak" node. See the OSM wiki for tag
+    documentation: Possible name keys: https://wiki.openstreetmap.org/wiki/Names#Name_keys
+
+    Some of the most important points:
+     - The 'name' is the most-common, usual name, i.e. the one with the highest priority
+     - 'official_name' can be used for somewhat uncommon or long offical names that are not used
+       that often
+     - 'name' should be exactly one single name
+     - At least 'alt_name' may be a ; separated list with several names
+    """
+
+    name: str  # The default and most important name to use
+    official_name: str | None = None  # If the official name is not very common
+    alt_name: str | None = None
+    loc_name: str | None = None
+    nickname: str | None = None
+    short_name: str | None = None
+
+    def split_name_list(self, tag_value: str | None) -> list[str]:
+        """
+        Return all names from the given tag value as a list.
+
+        Although regular strings, some tag values may contain a list of several names, which can be
+        split using this method.
+        """
+        if not tag_value:
+            return []
+        return [name.strip() for name in tag_value.split(";")]
+
+
+class _OverpassNode(_ReadOnlyPydanticModel):
+    lat: float
+    lon: float
+    tags: _OverpassTag
+
+    def create_summit(self) -> Summit:
+        """
+        Create a new Summit object from this JSON data set.
+        """
+        return Summit(
+            official_name=self.tags.name,
+            alternate_names=self._get_alternate_names(),
+            position=GeoPosition.from_decimal_degree(self.lat, self.lon),
+        )
+
+    def _get_alternate_names(self) -> list[str]:
+        names = []
+        for tag_value in (
+            self.tags.alt_name,
+            self.tags.official_name,
+            self.tags.loc_name,
+            self.tags.short_name,
+            self.tags.nickname,
+        ):
+            if tag_value:
+                names.extend(self.tags.split_name_list(tag_value))
+        return names
+
+
+class _OverpassResponse(_ReadOnlyPydanticModel):
+    elements: list[_OverpassNode]
+
+
 class OsmSummitDataFilter(Filter):
     """
     Filter for importing summit data from the OpenStreetMap database.
@@ -130,81 +208,3 @@ class OsmSummitDataFilter(Filter):
                 pipe.add_or_enrich_summit(summit)
             except MergeConflictError as e:
                 _logger.warning(e)
-
-
-class _ReadOnlyPydanticModel(BaseModel):
-    """
-    Base class for Pydantic models that cannot be manipulated. This is the case for all data
-    retrieved from some remote service.
-    """
-
-    model_config = ConfigDict(frozen=True)
-
-
-class _NominatimArea(_ReadOnlyPydanticModel):
-    osm_id: int
-
-
-class _OverpassTag(_ReadOnlyPydanticModel):
-    """
-    Deserialized representation of the tags of a single OSM "peak" node. See the OSM wiki for tag
-    documentation: Possible name keys: https://wiki.openstreetmap.org/wiki/Names#Name_keys
-
-    Some of the most important points:
-     - The 'name' is the most-common, usual name, i.e. the one with the highest priority
-     - 'official_name' can be used for somewhat uncommon or long offical names that are not used
-       that often
-     - 'name' should be exactly one single name
-     - At least 'alt_name' may be a ; separated list with several names
-    """
-
-    name: str  # The default and most important name to use
-    official_name: str | None = None  # If the official name is not very common
-    alt_name: str | None = None
-    loc_name: str | None = None
-    nickname: str | None = None
-    short_name: str | None = None
-
-    def split_name_list(self, tag_value: str | None) -> list[str]:
-        """
-        Return all names from the given tag value as a list.
-
-        Although regular strings, some tag values may contain a list of several names, which can be
-        split using this method.
-        """
-        if not tag_value:
-            return []
-        return [name.strip() for name in tag_value.split(";")]
-
-
-class _OverpassNode(_ReadOnlyPydanticModel):
-    lat: float
-    lon: float
-    tags: _OverpassTag
-
-    def create_summit(self) -> Summit:
-        """
-        Create a new Summit object from this JSON data set.
-        """
-        return Summit(
-            official_name=self.tags.name,
-            alternate_names=self._get_alternate_names(),
-            position=GeoPosition.from_decimal_degree(self.lat, self.lon),
-        )
-
-    def _get_alternate_names(self) -> list[str]:
-        names = []
-        for tag_value in (
-            self.tags.alt_name,
-            self.tags.official_name,
-            self.tags.loc_name,
-            self.tags.short_name,
-            self.tags.nickname,
-        ):
-            if tag_value:
-                names.extend(self.tags.split_name_list(tag_value))
-        return names
-
-
-class _OverpassResponse(_ReadOnlyPydanticModel):
-    elements: list[_OverpassNode]
