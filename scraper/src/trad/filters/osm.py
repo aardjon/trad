@@ -3,22 +3,37 @@ Filter for importing OSM data.
 """
 
 from collections.abc import Iterable, Iterator
+from enum import StrEnum
 from logging import getLogger
-from typing import Final, override
+from typing import Annotated, Final, Literal, override
 
 from pydantic import ValidationError
 from pydantic.config import ConfigDict
+from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
 from trad.core.boundaries.filters import Filter, FilterStage
 from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import GeoPosition, Summit
+from trad.core.entities import Summit
 from trad.core.errors import DataProcessingError, DataRetrievalError, MergeConflictError
 from trad.crosscuttings.di import DependencyProvider
 
 _logger = getLogger(__name__)
+
+
+class _OsmObjectTypes(StrEnum):
+    """
+    The supported types of OSM objects. The string values are the values Overpass/OSM sends as the
+    `type` field JSON value.
+    """
+
+    node = "node"
+    """ A single point. """
+
+    relation = "relation"
+    """ An arbitrary collection of several other objects. """
 
 
 class _ReadOnlyPydanticModel(BaseModel):
@@ -34,10 +49,12 @@ class _NominatimArea(_ReadOnlyPydanticModel):
     osm_id: int
 
 
-class _OverpassTag(_ReadOnlyPydanticModel):
+class _OverpassTags(_ReadOnlyPydanticModel):
     """
-    Deserialized representation of the tags of a single OSM "peak" node. See the OSM wiki for tag
-    documentation: Possible name keys: https://wiki.openstreetmap.org/wiki/Names#Name_keys
+    Deserialized representation of the tags of a single OSM object. Currently we are mainly
+    interested in the names, but this may change in the future.
+    See the OSM wiki for tag documentation:
+     - Possible name keys: https://wiki.openstreetmap.org/wiki/Names#Name_keys
 
     Some of the most important points:
      - The 'name' is the most-common, usual name, i.e. the one with the highest priority
@@ -47,55 +64,82 @@ class _OverpassTag(_ReadOnlyPydanticModel):
      - At least 'alt_name' may be a ; separated list with several names
     """
 
-    name: str  # The default and most important name to use
-    official_name: str | None = None  # If the official name is not very common
+    name: str
+    """ The default and most important name to use. """
+    official_name: str | None = None
+    """ If the official name is not very common. """
     alt_name: str | None = None
     loc_name: str | None = None
     nickname: str | None = None
     short_name: str | None = None
 
-    def split_name_list(self, tag_value: str | None) -> list[str]:
+    def get_alternate_names(self) -> list[str]:
         """
-        Return all names from the given tag value as a list.
+        Return a list of all "alternate" (i.e. non-official) names assigned to this object.
+        """
+        names = []
+        for tag_value in (
+            self.alt_name,
+            self.official_name,
+            self.loc_name,
+            self.short_name,
+            self.nickname,
+        ):
+            if tag_value:
+                names.extend(self.split_value_list(tag_value))
+        return names
 
-        Although regular strings, some tag values may contain a list of several names, which can be
-        split using this method.
+    def split_value_list(self, tag_value: str | None) -> list[str]:
+        """
+        Return all single values from the given tag value as a list.
+
+        Although regular strings, some tags may contain a list of several valie, which can be split
+        using this method.
         """
         if not tag_value:
             return []
-        return [name.strip() for name in tag_value.split(";")]
+        return [value.strip() for value in tag_value.split(";")]
 
 
 class _OverpassNode(_ReadOnlyPydanticModel):
+    type: Literal[_OsmObjectTypes.node]
+    id: int
     lat: float
     lon: float
-    tags: _OverpassTag
+    tags: _OverpassTags
 
-    def create_summit(self) -> Summit:
+
+class _OverpassRelationMember(_ReadOnlyPydanticModel):
+    type: str
+    ref: int
+
+
+class _OverpassRelation(_ReadOnlyPydanticModel):
+    type: Literal[_OsmObjectTypes.relation]
+    members: list[_OverpassRelationMember]
+    tags: _OverpassTags
+
+    def iter_members(self, type_filter: str) -> Iterator[_OverpassRelationMember]:
         """
-        Create a new Summit object from this JSON data set.
+        Iterate over all relation members of the type requested by `type_filter` (ignoring all
+        others).
         """
-        return Summit(
-            official_name=self.tags.name,
-            alternate_names=self._get_alternate_names(),
-            position=GeoPosition.from_decimal_degree(self.lat, self.lon),
-        )
-
-    def _get_alternate_names(self) -> list[str]:
-        names = []
-        for tag_value in (
-            self.tags.alt_name,
-            self.tags.official_name,
-            self.tags.loc_name,
-            self.tags.short_name,
-            self.tags.nickname,
-        ):
-            if tag_value:
-                names.extend(self.tags.split_name_list(tag_value))
-        return names
+        for item in self.members:
+            if item.type == type_filter:
+                yield item
 
 
-class _OverpassResponse(_ReadOnlyPydanticModel):
+_OverpassElement = Annotated[_OverpassNode | _OverpassRelation, Field(discriminator="type")]
+"""
+A single item of an Overpass response's 'elements' list: Can be either a node or a relation.
+"""
+
+
+class _OverpassElementsResponse(_ReadOnlyPydanticModel):
+    elements: list[_OverpassElement]
+
+
+class _OverpassNodesResponse(_ReadOnlyPydanticModel):
     elements: list[_OverpassNode]
 
 

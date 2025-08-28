@@ -140,7 +140,17 @@ class TestOsmSummitDataFilter:
             ),
             (  # Single summit (minimal data)
                 lambda area_id: [{"osm_id": area_id}],
-                {"elements": [{"lat": 13.37, "lon": 47.11, "tags": {"name": "Mt Mock"}}]},
+                {
+                    "elements": [
+                        {
+                            "id": 42,
+                            "type": "node",
+                            "lat": 13.37,
+                            "lon": 47.11,
+                            "tags": {"name": "Mt Mock"},
+                        }
+                    ]
+                },
                 [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
             ),
             (  # Single summit with additional data
@@ -148,6 +158,7 @@ class TestOsmSummitDataFilter:
                 {
                     "elements": [
                         {
+                            "type": "node",
                             "lat": 13.37,
                             "lon": 47.11,
                             "id": 42,
@@ -163,9 +174,27 @@ class TestOsmSummitDataFilter:
                 lambda area_id: [{"osm_id": area_id}],
                 {
                     "elements": [
-                        {"lat": 12.34, "lon": 9.87, "tags": {"name": "Einserspitze"}},
-                        {"lat": 56.78, "lon": 65.43, "tags": {"name": "Zweierturm"}},
-                        {"lat": 90.00, "lon": 21.10, "tags": {"name": "Dreierwand"}},
+                        {
+                            "id": 1,
+                            "type": "node",
+                            "lat": 12.34,
+                            "lon": 9.87,
+                            "tags": {"name": "Einserspitze"},
+                        },
+                        {
+                            "id": 2,
+                            "type": "node",
+                            "lat": 56.78,
+                            "lon": 65.43,
+                            "tags": {"name": "Zweierturm"},
+                        },
+                        {
+                            "id": 3,
+                            "type": "node",
+                            "lat": 90.00,
+                            "lon": 21.10,
+                            "tags": {"name": "Dreierwand"},
+                        },
                     ]
                 },
                 [
@@ -180,6 +209,8 @@ class TestOsmSummitDataFilter:
                 {
                     "elements": [
                         {
+                            "id": 11,
+                            "type": "node",
                             "lat": 13.37,
                             "lon": 47.11,
                             "tags": {
@@ -206,6 +237,8 @@ class TestOsmSummitDataFilter:
                 {
                     "elements": [
                         {
+                            "id": 22,
+                            "type": "node",
                             "lat": 13.37,
                             "lon": 47.11,
                             "tags": {
