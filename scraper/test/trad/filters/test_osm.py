@@ -126,48 +126,134 @@ class TestOsmSummitDataFilter:
         )
 
     @pytest.mark.parametrize(
-        ("nominatim_response_factory", "overpass_response", "expected_summits"),
+        ("nominatim_response_factory", "overpass_responses", "expected_summits"),
         [
             (  # Minimal valid response data, no summits at all
                 lambda area_id: [{"osm_id": area_id}],
-                {"elements": []},
+                [{"elements": []}],
                 [],
             ),
             (  # Nominatim response contains additional fields
                 lambda area_id: [{"copyright": "OSM contributors", "osm_id": area_id}],
-                {"elements": []},
+                [{"elements": []}],
                 [],
             ),
-            (  # Single summit (minimal data)
+            # Single summit (minimal data)
+            (
                 lambda area_id: [{"osm_id": area_id}],
-                {"elements": [{"lat": 13.37, "lon": 47.11, "tags": {"name": "Mt Mock"}}]},
+                [
+                    {
+                        "elements": [
+                            {
+                                "id": 42,
+                                "type": "node",
+                                "lat": 13.37,
+                                "lon": 47.11,
+                                "tags": {"name": "Mt Mock"},
+                            }
+                        ]
+                    },
+                ],
+                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
+            ),
+            (
+                lambda area_id: [{"osm_id": area_id}],
+                [
+                    {
+                        "elements": [
+                            {
+                                "id": 42,
+                                "type": "relation",
+                                "tags": {"name": "Mt Mock"},
+                                "members": [{"type": "node", "ref": 1}],
+                            }
+                        ]
+                    },
+                    {
+                        "elements": [
+                            {
+                                "id": 1,
+                                "type": "node",
+                                "lat": 13.37,
+                                "lon": 47.11,
+                                "tags": {"name": "Mt Mock"},
+                            }
+                        ]
+                    },
+                ],
+                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
+            ),
+            (  # Relation summit for which the referenced node is already available
+                lambda area_id: [{"osm_id": area_id}],
+                [
+                    {
+                        "elements": [
+                            {
+                                "id": 42,
+                                "type": "relation",
+                                "tags": {"name": "Mt Mock"},
+                                "members": [{"type": "node", "ref": 43}],
+                            },
+                            {
+                                "id": 43,
+                                "type": "node",
+                                "lat": 13.37,
+                                "lon": 47.11,
+                                "tags": {"name": "Mt Mock"},
+                            },
+                        ]
+                    },
+                ],
                 [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
             ),
             (  # Single summit with additional data
                 lambda area_id: [{"osm_id": area_id}],
-                {
-                    "elements": [
-                        {
-                            "lat": 13.37,
-                            "lon": 47.11,
-                            "id": 42,
-                            "user": "nobody",
-                            "tags": {"name": "Mt Mock", "climbing:summit_log": "yes"},
-                        }
-                    ],
-                    "osm3s": {"copyright": "OSM constributors"},
-                },
+                [
+                    {
+                        "elements": [
+                            {
+                                "type": "node",
+                                "lat": 13.37,
+                                "lon": 47.11,
+                                "id": 42,
+                                "user": "nobody",
+                                "tags": {"name": "Mt Mock", "climbing:summit_log": "yes"},
+                            }
+                        ],
+                        "osm3s": {"copyright": "OSM constributors"},
+                    },
+                ],
                 [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
             ),
             (  # Multiple summits
                 lambda area_id: [{"osm_id": area_id}],
-                {
-                    "elements": [
-                        {"lat": 12.34, "lon": 9.87, "tags": {"name": "Einserspitze"}},
-                        {"lat": 56.78, "lon": 65.43, "tags": {"name": "Zweierturm"}},
-                        {"lat": 90.00, "lon": 21.10, "tags": {"name": "Dreierwand"}},
-                    ]
-                },
+                [
+                    {
+                        "elements": [
+                            {
+                                "id": 1,
+                                "type": "node",
+                                "lat": 12.34,
+                                "lon": 9.87,
+                                "tags": {"name": "Einserspitze"},
+                            },
+                            {
+                                "id": 2,
+                                "type": "node",
+                                "lat": 56.78,
+                                "lon": 65.43,
+                                "tags": {"name": "Zweierturm"},
+                            },
+                            {
+                                "id": 3,
+                                "type": "node",
+                                "lat": 90.00,
+                                "lon": 21.10,
+                                "tags": {"name": "Dreierwand"},
+                            },
+                        ]
+                    },
+                ],
                 [
                     Summit("Einserspitze", position=GeoPosition.from_decimal_degree(12.34, 9.87)),
                     Summit("Zweierturm", position=GeoPosition.from_decimal_degree(56.78, 65.43)),
@@ -177,22 +263,26 @@ class TestOsmSummitDataFilter:
             # Summits with multiple names (in different variants)
             (
                 lambda area_id: [{"osm_id": area_id}],
-                {
-                    "elements": [
-                        {
-                            "lat": 13.37,
-                            "lon": 47.11,
-                            "tags": {
-                                "name": "name",
-                                "alt_name": "alt",
-                                "official_name": "official",
-                                "nickname": "nick",
-                                "short_name": "short",
-                                "loc_name": "loc",
+                [
+                    {
+                        "elements": [
+                            {
+                                "id": 11,
+                                "type": "node",
+                                "lat": 13.37,
+                                "lon": 47.11,
+                                "tags": {
+                                    "name": "name",
+                                    "alt_name": "alt",
+                                    "official_name": "official",
+                                    "nickname": "nick",
+                                    "short_name": "short",
+                                    "loc_name": "loc",
+                                },
                             },
-                        },
-                    ]
-                },
+                        ]
+                    },
+                ],
                 [
                     Summit(
                         official_name="name",
@@ -203,18 +293,22 @@ class TestOsmSummitDataFilter:
             ),
             (
                 lambda area_id: [{"osm_id": area_id}],
-                {
-                    "elements": [
-                        {
-                            "lat": 13.37,
-                            "lon": 47.11,
-                            "tags": {
-                                "name": "name",
-                                "alt_name": "alt1; alt2 ; alt3",
+                [
+                    {
+                        "elements": [
+                            {
+                                "id": 22,
+                                "type": "node",
+                                "lat": 13.37,
+                                "lon": 47.11,
+                                "tags": {
+                                    "name": "name",
+                                    "alt_name": "alt1; alt2 ; alt3",
+                                },
                             },
-                        },
-                    ]
-                },
+                        ]
+                    },
+                ],
                 [
                     Summit(
                         official_name="name",
@@ -228,24 +322,31 @@ class TestOsmSummitDataFilter:
     def test_normal_execution(
         self,
         nominatim_response_factory: Callable[[int], list[dict[str, object]]],
-        overpass_response: dict[str, object],
+        overpass_responses: list[dict[str, object]],
         expected_summits: list[Summit],
         mocked_network_boundary: Mock,
     ) -> None:
         """
-        Ensure the correct bevahiour if no errors occur:
+        Ensure the correct behaviour if no errors occur:
          - All network boundary calls get the expected parameters
          - The correct number of summits is sent to the Pipe
          - The Summit data is correctly parsed and forwarded
+         - It must work with nodes, with relations, and both
         """
         dummy_area_id: Final = 1337
-        expected_network_request_count: Final = 2
+        expected_network_request_count: Final = len(overpass_responses) + 1
 
         mocked_pipe = Mock(Pipe)
-        mocked_network_boundary.retrieve_json_resource.side_effect = [
+        retrieve_json_resource_side_effects = [
             json.dumps(nominatim_response_factory(dummy_area_id)),  # Nominatim response
-            json.dumps(overpass_response),  # Overpass response
+            json.dumps(overpass_responses[0]),  # Response of the Overpass area query
         ]
+        if len(overpass_responses) > 1:
+            # Response of the Overpass node ID query, if any
+            retrieve_json_resource_side_effects.append(json.dumps(overpass_responses[1]))
+        mocked_network_boundary.retrieve_json_resource.side_effect = (
+            retrieve_json_resource_side_effects
+        )
 
         osm_filter = OsmSummitDataFilter(DependencyProvider())
         osm_filter.execute_filter(pipe=mocked_pipe)
@@ -260,23 +361,40 @@ class TestOsmSummitDataFilter:
             url="https://nominatim.openstreetmap.org/search",
             url_params={"q": "Sächsische Schweiz", "limit": 1, "format": "jsonv2"},
         )
-        # Check the Overpass request parameters (this was the most recent request)
+        # Check the Overpass requests parameters
         mocked_network_boundary.retrieve_json_resource.assert_called_with(
             url="https://overpass-api.de/api/interpreter",
             url_params={},
             query_content=ANY,
         )
-        # Do some checks on the query content (i.e. the OverpassQL string):
-        actual_query_content = mocked_network_boundary.retrieve_json_resource.call_args_list[
-            -1
+
+        # Do some checks on the query contents (i.e. the OverpassQL strings)
+        area_query_content = mocked_network_boundary.retrieve_json_resource.call_args_list[
+            1
         ].kwargs["query_content"]
         # The body must start with "data="
-        assert actual_query_content.startswith("data=")
+        assert area_query_content.startswith("data=")
         # The query must request the area ID provided by Nominatim
-        assert f"area({dummy_area_id})->.searchArea;" in actual_query_content
+        assert f"area({dummy_area_id})->.searchArea;" in area_query_content
+        # The query must contain the requested element types
+        assert "node" in area_query_content
+        assert "relation" in area_query_content
         # The query must contain the necessary tag filters
-        assert '["natural"="peak"]' in actual_query_content
-        assert '["climbing:trad"="yes"]' in actual_query_content
+        assert '["natural"="peak"]' in area_query_content
+        assert '["type"="site"]' in area_query_content
+        assert '["climbing:trad"="yes"]' in area_query_content
+        assert '["sport"="climbing"]' in area_query_content
+
+        if len(overpass_responses) > 1:
+            id_query_content = mocked_network_boundary.retrieve_json_resource.call_args_list[
+                2
+            ].kwargs["query_content"]
+            # The body must start with "data="
+            assert id_query_content.startswith("data=")
+            # The query must contain the requested element type
+            assert "node" in id_query_content
+            # The query must contain the necessary tag filters
+            assert '["natural"="peak"]' in id_query_content
 
         # Make sure that the expected number of summits has been sent to the Pipe
         assert mocked_pipe.add_or_enrich_summit.call_count == len(expected_summits)
