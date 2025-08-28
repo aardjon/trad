@@ -11,6 +11,7 @@ For further information about the JSON format sent by the Overpass API, please r
 
 from collections.abc import Collection, Iterable, Iterator
 from enum import StrEnum
+from itertools import chain
 from logging import getLogger
 from typing import Annotated, Final, Literal, override
 
@@ -190,16 +191,29 @@ class OsmSummitDataFilter(Filter):
         _logger.debug("'%s' filter started", self.get_name())
         area_id = self.__get_area_id()
 
-        # Get all OSM nodes for that area
+        # Get all OSM nodes and relations for that area
         osm_elements = self.__get_osm_summit_elements(area_id)
         _logger.debug("Retrieved %d OSM elements", len(osm_elements))
 
-        # Create Summit objects
-        summits_from_nodes = self.__create_summits_from_nodes(osm_elements)
+        # Separate nodes and relations
+        osm_nodes, osm_relations = self.__separate_elements_by_type(osm_elements)
+
+        # Retrieve all missing peak nodes (relation members)
+        self.__retrieve_missing_nodes(osm_nodes, osm_relations)
+        _logger.debug("Retrieved referenced OSM peak nodes")
+
+        # Create Summit objects for all relations
+        # This removes all processed nodes from osm_nodes because we don't want to create another
+        # Summit object for them later.
+        summits_from_relations = self.__create_summits_from_relations(osm_nodes, osm_relations)
+        # Create Summit objects for all left-over peak nodes (which do not belong to any relation)
+        summits_from_nodes = self.__create_summits_from_nodes(osm_nodes.values())
 
         # Send all summits to the pipe
-        self.__store_summits(pipe, summits_from_nodes)
-        _logger.debug("Processed summits from %d nodes", len(osm_elements))
+        self.__store_summits(pipe, chain(summits_from_relations, summits_from_nodes))
+        _logger.debug(
+            "Processed summits from %d relations and %d nodes", len(osm_relations), len(osm_nodes)
+        )
         _logger.debug("'%s' filter finished", self.get_name())
 
     def __get_area_id(self) -> int:
@@ -210,8 +224,95 @@ class OsmSummitDataFilter(Filter):
         common_tags: Final = {"sport": "climbing", "climbing:trad": "yes"}
         element_filter: Final = {
             _OsmObjectTypes.node: self._OVERPASS_PEAK_NODE_TAGS | common_tags,
+            _OsmObjectTypes.relation: {"type": "site", "climbing": "crag"} | common_tags,
         }
         return self._osm_api_receiver.retrieve_elements_from_area(area_id, element_filter)
+
+    def __separate_elements_by_type(
+        self, osm_elements: Collection[_OverpassElement]
+    ) -> tuple[dict[int, _OverpassNode], list[_OverpassRelation]]:
+        """
+        Extracts all nodes and relations from `osm_element` into two separate collections, because
+        they have to be handled differently. Returns a tuple of all nodes and all relations:
+         - First: Dict of node IDs and OSM node elements
+         - Second: List of OSM relation elements
+        """
+        osm_nodes = {elem.id: elem for elem in osm_elements if isinstance(elem, _OverpassNode)}
+        osm_relations = [elem for elem in osm_elements if isinstance(elem, _OverpassRelation)]
+        if (len(osm_nodes) + len(osm_relations)) < len(osm_elements):
+            _logger.warning(
+                "Retrieved %d unexpected elements from OSM, they will be ignored",
+                len(osm_elements) - len(osm_nodes) - len(osm_relations),
+            )
+        return osm_nodes, osm_relations
+
+    def __retrieve_missing_nodes(
+        self, osm_nodes: dict[int, _OverpassNode], osm_relations: Collection[_OverpassRelation]
+    ) -> None:
+        """
+        Retrieves all peak node elements that are referenced by the relations within `osm_relations`
+        and adds them into `osm_nodes`. Does only one OSM request, and does not re-retrieve nodes
+        that are already there.
+        """
+        # Get all relation member node IDs that are not already available.
+        missing_nodes = [
+            item.ref
+            for relation in osm_relations
+            for item in relation.iter_members(_OsmObjectTypes.node)
+            if item.ref not in osm_nodes
+        ]
+        # Retrieve all missing nodes (should be one per relation at the most)
+        osm_nodes.update(
+            {
+                node.id: node
+                for node in self._osm_api_receiver.retrieve_nodes_by_ids(
+                    osm_ids=missing_nodes,
+                    node_filter=self._OVERPASS_PEAK_NODE_TAGS,
+                )
+            }
+            if missing_nodes
+            else {}
+        )
+
+    def __create_summits_from_relations(
+        self, osm_nodes: dict[int, _OverpassNode], osm_relations: Collection[_OverpassRelation]
+    ) -> Iterator[Summit]:
+        """
+        Creates (and yields) a Summit object for each relation in `osm_relations`. The node elements
+        that correspond to the processed relations are removed from `osm_nodes`.
+        """
+        # Create Summit objects for all relations
+        for relation in osm_relations:
+            # Find the peak node member of this relations, should be exactly one
+            found_peak_nodes = [
+                item.ref
+                for item in relation.iter_members(_OsmObjectTypes.node)
+                if item.ref in osm_nodes
+            ]
+            if not found_peak_nodes:
+                # The relation doesn't reference a "peak" node. This means we cannot get a position
+                # for it, which is bad.
+                raise DataProcessingError(
+                    f"No peak node can be loaded for relation '{relation.tags.name}'. Does it "
+                    "contain one at all?",
+                )
+            if len(found_peak_nodes) > 1:
+                # Not sure what this means, maybe we have to choose the correct one in the future?
+                # For now, just log a warning to find some examples.
+                _logger.warning(
+                    "Summit relation '%s' has multiple peak nodes (%d), using only the first one.",
+                    relation.tags.name,
+                    len(found_peak_nodes),
+                )
+            peak_node = osm_nodes[found_peak_nodes[0]]
+
+            yield Summit(
+                official_name=relation.tags.name,
+                alternate_names=relation.tags.get_alternate_names(),
+                position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
+            )
+            # Remove this peak node from osm_nodes because it is not needed anymore
+            osm_nodes.pop(peak_node.id)
 
     def __create_summits_from_nodes(self, osm_nodes: Iterable[_OverpassNode]) -> Iterator[Summit]:
         """
