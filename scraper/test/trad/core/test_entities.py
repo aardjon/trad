@@ -103,6 +103,46 @@ class TestGeoPosition:
         with pytest.raises(ValueError, match="value must be within"):
             GeoPosition(latlon_int[0], latlon_int[1])
 
+    @pytest.mark.parametrize(
+        ("point1", "point2", "distance", "expected_result"),
+        [
+            (  # Distance of the two points is between 39 and 40 meters
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),  # Rhombus
+                GeoPosition.from_decimal_degree(50.9421666, 14.0399232),  # Bärensteinscheibe
+                40.0,
+                True,
+            ),
+            (  # Distance of the two points is between 39 and 40 meters
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),  # Rhombus
+                GeoPosition.from_decimal_degree(50.9421666, 14.0399232),  # Bärensteinscheibe
+                39.1,
+                False,
+            ),
+            (  # Both points are the same
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                0.5,
+                True,
+            ),
+        ],
+    )
+    def test_is_within_radius(
+        self,
+        *,
+        point1: GeoPosition,
+        point2: GeoPosition,
+        distance: float,
+        expected_result: bool,
+    ) -> None:
+        """
+        Checks that the `is_within_radius()` method works as expected:
+         - Distance calculation is correct with a precision of about one meter
+         - The operands can be swapped
+         - Also works for equal points
+        """
+        assert point1.is_within_radius(point2, distance) == expected_result
+        assert point2.is_within_radius(point1, distance) == expected_result
+
 
 class TestUniqueIdentifier:
     """

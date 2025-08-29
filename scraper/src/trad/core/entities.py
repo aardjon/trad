@@ -6,6 +6,7 @@ import string
 from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
+from math import cos, pi, sqrt
 from typing import Final, Self
 
 from trad.core.errors import MergeConflictError
@@ -78,6 +79,30 @@ class GeoPosition:
         The longitude value as decimal degree.
         """
         return float(self._longitude) / self._COORDINATE_PRECISION
+
+    def is_within_radius(self, other: Self, max_distance: float) -> bool:
+        """
+        Return True if the distance between `self` and `other` is smaller (or equal) `max_distance`
+        meters, False if not. "Distance" means a direct, straight line - terrain and earth's
+        curvature are ignored, so this check becomes less accurate as max_distance increases. Also,
+        due to the involved floating point operations, the distance calculation may not be too
+        precise in some cases.
+        """
+        # This simple distance calculation uses the Pythagorean theorem but improves it by
+        # estimating the distance between two latitudes. This is good enough for the smaller
+        # distances in the scale of hundreds of meters we are expecting in this application.
+        # For more information and a detailled explanation, please have a look at
+        # https://en.kompf.de/gps/distcalc.html (we are using the "Improved method" here).
+        longitude_distance: Final = 111.3 * 1000  # We want the distance in meters
+        average_lat = (self.latitude_decimal_degree + other.latitude_decimal_degree) / 2 * pi / 180
+        dlat = longitude_distance * (self.latitude_decimal_degree - other.latitude_decimal_degree)
+        dlon = (
+            longitude_distance
+            * cos(average_lat)
+            * (self.longitude_decimal_degree - other.longitude_decimal_degree)
+        )
+        dist = sqrt(dlat * dlat + dlon * dlon)
+        return dist <= max_distance
 
     def __str__(self) -> str:
         hemisphere_lat = "N" if self._latitude >= 0 else "S"
