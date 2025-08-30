@@ -309,7 +309,7 @@ class OsmSummitDataFilter(Filter):
             yield Summit(
                 official_name=relation.tags.name,
                 alternate_names=relation.tags.get_alternate_names(),
-                position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
+                high_grade_position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
             )
             # Remove this peak node from osm_nodes because it is not needed anymore
             osm_nodes.pop(peak_node.id)
@@ -322,7 +322,9 @@ class OsmSummitDataFilter(Filter):
             yield Summit(
                 official_name=summit_element.tags.name,
                 alternate_names=summit_element.tags.get_alternate_names(),
-                position=GeoPosition.from_decimal_degree(summit_element.lat, summit_element.lon),
+                high_grade_position=GeoPosition.from_decimal_degree(
+                    summit_element.lat, summit_element.lon
+                ),
             )
 
     def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:

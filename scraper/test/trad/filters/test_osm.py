@@ -154,7 +154,11 @@ class TestOsmSummitDataFilter:
                         ]
                     },
                 ],
-                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
+                [
+                    Summit(
+                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                    )
+                ],
             ),
             (
                 lambda area_id: [{"osm_id": area_id}],
@@ -181,7 +185,11 @@ class TestOsmSummitDataFilter:
                         ]
                     },
                 ],
-                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
+                [
+                    Summit(
+                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                    )
+                ],
             ),
             (  # Relation summit for which the referenced node is already available
                 lambda area_id: [{"osm_id": area_id}],
@@ -204,7 +212,11 @@ class TestOsmSummitDataFilter:
                         ]
                     },
                 ],
-                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
+                [
+                    Summit(
+                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                    )
+                ],
             ),
             (  # Single summit with additional data
                 lambda area_id: [{"osm_id": area_id}],
@@ -223,7 +235,11 @@ class TestOsmSummitDataFilter:
                         "osm3s": {"copyright": "OSM constributors"},
                     },
                 ],
-                [Summit("Mt Mock", position=GeoPosition.from_decimal_degree(13.37, 47.11))],
+                [
+                    Summit(
+                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                    )
+                ],
             ),
             (  # Multiple summits
                 lambda area_id: [{"osm_id": area_id}],
@@ -255,9 +271,18 @@ class TestOsmSummitDataFilter:
                     },
                 ],
                 [
-                    Summit("Einserspitze", position=GeoPosition.from_decimal_degree(12.34, 9.87)),
-                    Summit("Zweierturm", position=GeoPosition.from_decimal_degree(56.78, 65.43)),
-                    Summit("Dreierwand", position=GeoPosition.from_decimal_degree(90.00, 21.10)),
+                    Summit(
+                        "Einserspitze",
+                        high_grade_position=GeoPosition.from_decimal_degree(12.34, 9.87),
+                    ),
+                    Summit(
+                        "Zweierturm",
+                        high_grade_position=GeoPosition.from_decimal_degree(56.78, 65.43),
+                    ),
+                    Summit(
+                        "Dreierwand",
+                        high_grade_position=GeoPosition.from_decimal_degree(90.00, 21.10),
+                    ),
                 ],
             ),
             # Summits with multiple names (in different variants)
@@ -287,7 +312,7 @@ class TestOsmSummitDataFilter:
                     Summit(
                         official_name="name",
                         alternate_names=["alt", "official", "nick", "short", "loc"],
-                        position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
                     )
                 ],
             ),
@@ -313,7 +338,7 @@ class TestOsmSummitDataFilter:
                     Summit(
                         official_name="name",
                         alternate_names=["alt1", "alt2", "alt3"],
-                        position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
                     )
                 ],
             ),
@@ -420,6 +445,9 @@ class TestOsmSummitDataFilter:
             summit1.official_name == summit2.official_name
             and sorted(summit1.alternate_names) == sorted(summit2.alternate_names)
             and sorted(summit1.unspecified_names) == sorted(summit2.unspecified_names)
-            and summit1.position.latitude_int == summit2.position.latitude_int
-            and summit1.position.longitude_int == summit2.position.longitude_int
+            and summit1.high_grade_position.latitude_int == summit2.high_grade_position.latitude_int
+            and summit1.high_grade_position.longitude_int
+            == summit2.high_grade_position.longitude_int
+            and summit1.low_grade_position.latitude_int == summit2.low_grade_position.latitude_int
+            and summit1.low_grade_position.longitude_int == summit2.low_grade_position.longitude_int
         )

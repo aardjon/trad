@@ -57,8 +57,8 @@ class TestMergingPipeDecorator:
             # Merge different name variants
             (
                 [Summit("Mons Permuta")],
-                Summit("Permuta, Mons", position=GeoPosition(504620000, 147390000)),
-                [Summit("Mons Permuta", position=GeoPosition(504620000, 147390000))],
+                Summit("Permuta, Mons", high_grade_position=GeoPosition(504620000, 147390000)),
+                [Summit("Mons Permuta", high_grade_position=GeoPosition(504620000, 147390000))],
                 nullcontext(),
             ),
             # Merge multiple Summits into one if new information reveals that this is necessary
@@ -76,12 +76,12 @@ class TestMergingPipeDecorator:
             ),
             # Don't change other existing summits
             (
-                [Summit("S1"), Summit("S2", position=GeoPosition(404620000, 247390000))],
-                Summit("S3", position=GeoPosition(504620000, 147390000)),
+                [Summit("S1"), Summit("S2", high_grade_position=GeoPosition(404620000, 247390000))],
+                Summit("S3", high_grade_position=GeoPosition(504620000, 147390000)),
                 [
                     Summit("S1"),
-                    Summit("S2", position=GeoPosition(404620000, 247390000)),
-                    Summit("S3", position=GeoPosition(504620000, 147390000)),
+                    Summit("S2", high_grade_position=GeoPosition(404620000, 247390000)),
+                    Summit("S3", high_grade_position=GeoPosition(504620000, 147390000)),
                 ],
                 nullcontext(),
             ),
@@ -89,13 +89,13 @@ class TestMergingPipeDecorator:
                 [
                     Summit("S1"),
                     Summit("S2"),
-                    Summit("S3", position=GeoPosition(404620000, 247390000)),
+                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
-                Summit("S2", position=GeoPosition(504620000, 147390000)),
+                Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
                 [
                     Summit("S1"),
-                    Summit("S2", position=GeoPosition(504620000, 147390000)),
-                    Summit("S3", position=GeoPosition(404620000, 247390000)),
+                    Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
+                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
                 nullcontext(),
             ),
@@ -103,14 +103,14 @@ class TestMergingPipeDecorator:
             (
                 [
                     Summit("S1"),
-                    Summit("S2", position=GeoPosition(304620000, 547390000)),
-                    Summit("S3", position=GeoPosition(404620000, 247390000)),
+                    Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
+                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
-                Summit("S2", position=GeoPosition(504620000, 147390000)),
+                Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
                 [
                     Summit("S1"),
-                    Summit("S2", position=GeoPosition(304620000, 547390000)),
-                    Summit("S3", position=GeoPosition(404620000, 247390000)),
+                    Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
+                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
                 pytest.raises(MergeConflictError),
             ),
@@ -157,8 +157,16 @@ class TestMergingPipeDecorator:
             assert real.official_name == expected.official_name
             assert sorted(real.alternate_names) == sorted(expected.alternate_names)
             assert sorted(real.unspecified_names) == sorted(expected.unspecified_names)
-            assert real.position.latitude_int == expected.position.latitude_int
-            assert real.position.longitude_int == expected.position.longitude_int
+            assert (
+                real.high_grade_position.latitude_int == expected.high_grade_position.latitude_int
+            )
+            assert (
+                real.high_grade_position.longitude_int == expected.high_grade_position.longitude_int
+            )
+            assert real.low_grade_position.latitude_int == expected.low_grade_position.latitude_int
+            assert (
+                real.low_grade_position.longitude_int == expected.low_grade_position.longitude_int
+            )
 
     def test_add_or_enrich_route(self) -> None:
         """
