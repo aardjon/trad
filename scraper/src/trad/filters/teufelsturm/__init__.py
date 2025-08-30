@@ -10,7 +10,7 @@ from trad.core.boundaries.filters import Filter, FilterStage
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import Summit
 from trad.crosscuttings.di import DependencyProvider
-from trad.filters.teufelsturm.parser import parse_page, parse_route_list
+from trad.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
 
 _logger = getLogger(__name__)
 
@@ -23,9 +23,10 @@ class TeufelsturmDataFilter(Filter):
     available.
     """
 
-    _BASE_URL: Final = "https://www.teufelsturm.de/wege/"
-    _ROUTE_LIST_URL: Final = _BASE_URL + "suche.php?start={start}&anzahl={count}"
-    _ROUTE_DETAILS_URL: Final = _BASE_URL + "bewertungen/anzeige.php?wegnr={}"
+    _BASE_URL: Final = "https://www.teufelsturm.de/"
+    _ROUTE_LIST_URL: Final = _BASE_URL + "wege/suche.php?start={start}&anzahl={count}"
+    _ROUTE_DETAILS_URL: Final = _BASE_URL + "wege/bewertungen/anzeige.php?wegnr={}"
+    _SUMMIT_DETAILS_URL: Final = _BASE_URL + "gipfel/details.php?gipfelnr={summit_id}"
 
     @override
     def __init__(self, dependency_provider: DependencyProvider) -> None:
@@ -34,6 +35,7 @@ class TeufelsturmDataFilter(Filter):
         """
         super().__init__(dependency_provider)
         self._http_boundary = dependency_provider.provide(HttpNetworkingBoundary)
+        self._summit_cache = SummitCache(retrieve_summit_details_page=self._get_summit_page_text)
 
     @staticmethod
     @override
@@ -49,6 +51,7 @@ class TeufelsturmDataFilter(Filter):
         _logger.debug("'%s' filter started", self.get_name())
         route_ids = self._collect_route_ids()
         self._perform_scan(pipe, route_ids)
+        self._summit_cache.clear_cache()
         _logger.debug("'%s' filter finished", self.get_name())
 
     def _collect_route_ids(self) -> list[int]:
@@ -78,7 +81,7 @@ class TeufelsturmDataFilter(Filter):
                 # Don't log every single route index
                 _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
-            post_data = parse_page(page_text)
+            post_data = parse_page(page_text, self._summit_cache)
             if post_data.peak and not self._is_forbidden(post_data.peak):
                 pipe.add_or_enrich_summit(post_data.peak)
                 pipe.add_or_enrich_route(summit_name=post_data.peak.name, route=post_data.route)
@@ -92,6 +95,11 @@ class TeufelsturmDataFilter(Filter):
     def _get_page_text(self, route_id: int) -> str:
         """Returns the (text) content of the details page for the route with ID [route_id]."""
         url = self._ROUTE_DETAILS_URL.format(route_id)
+        return self._http_boundary.retrieve_text_resource(url)
+
+    def _get_summit_page_text(self, peak_id: int) -> str:
+        """Returns the (text) content of the details page for the summit with ID [peak_id]."""
+        url = self._SUMMIT_DETAILS_URL.format(summit_id=peak_id)
         return self._http_boundary.retrieve_text_resource(url)
 
     def _is_forbidden(self, summit: Summit) -> bool:
