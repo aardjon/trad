@@ -157,16 +157,8 @@ class TestMergingPipeDecorator:
             assert real.official_name == expected.official_name
             assert sorted(real.alternate_names) == sorted(expected.alternate_names)
             assert sorted(real.unspecified_names) == sorted(expected.unspecified_names)
-            assert (
-                real.high_grade_position.latitude_int == expected.high_grade_position.latitude_int
-            )
-            assert (
-                real.high_grade_position.longitude_int == expected.high_grade_position.longitude_int
-            )
-            assert real.low_grade_position.latitude_int == expected.low_grade_position.latitude_int
-            assert (
-                real.low_grade_position.longitude_int == expected.low_grade_position.longitude_int
-            )
+            assert real.high_grade_position.is_equal_to(expected.high_grade_position)
+            assert real.low_grade_position.is_equal_to(expected.low_grade_position)
 
     def test_add_or_enrich_route(self) -> None:
         """

@@ -187,10 +187,8 @@ def test_parse_page() -> None:
     page_data = parse_page(page_text, summit_cache)
 
     assert page_data.peak.name == expected_summit_name
-    assert page_data.peak.high_grade_position.latitude_int == UNDEFINED_GEOPOSITION.latitude_int
-    assert page_data.peak.high_grade_position.longitude_int == UNDEFINED_GEOPOSITION.longitude_int
-    assert page_data.peak.low_grade_position.latitude_int == expected_summit_position.latitude_int
-    assert page_data.peak.low_grade_position.longitude_int == expected_summit_position.longitude_int
+    assert page_data.peak.high_grade_position is UNDEFINED_GEOPOSITION
+    assert page_data.peak.low_grade_position.is_equal_to(expected_summit_position)
     assert page_data.route.route_name == "Loremweg"
     assert page_data.route.grade == "** II"
     assert len(page_data.posts) == 1

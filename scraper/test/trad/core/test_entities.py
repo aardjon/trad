@@ -104,6 +104,42 @@ class TestGeoPosition:
             GeoPosition(latlon_int[0], latlon_int[1])
 
     @pytest.mark.parametrize(
+        ("point1", "point2", "expected_result"),
+        [
+            (  # Completely different positions
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9421666, 14.0399232),
+                False,
+            ),
+            (  # Latitude is the same
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9424815, 14.0399232),
+                False,
+            ),
+            (  # Longitude is the same
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9421666, 14.0396597),
+                False,
+            ),
+            (  # Equal positions
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                True,
+            ),
+        ],
+    )
+    def test_is_equal_to(
+        self, *, point1: GeoPosition, point2: GeoPosition, expected_result: bool
+    ) -> None:
+        """
+        Ensures that the `is_within_radius()` method works as expected:
+         - Only return True if the latitude and longitude integers of both positions are equal
+         - The operands can be swapped
+        """
+        assert point1.is_equal_to(point2) == expected_result
+        assert point2.is_equal_to(point1) == expected_result
+
+    @pytest.mark.parametrize(
         ("point1", "point2", "distance", "expected_result"),
         [
             (  # Distance of the two points is between 39 and 40 meters
@@ -262,8 +298,7 @@ class TestSummit:
         """
         Tests the `position` property, i.e. that the correct position value is returned.
         """
-        assert summit.position.latitude_int == expected_return_value.latitude_int
-        assert summit.position.longitude_int == expected_return_value.longitude_int
+        assert summit.position.is_equal_to(expected_return_value)
 
     @pytest.mark.parametrize(
         ("summit", "expected_id_base"),
@@ -392,19 +427,10 @@ class TestSummit:
             assert sorted(existing_summit.unspecified_names) == sorted(
                 expected_summit.unspecified_names
             )
-            assert (
-                existing_summit.high_grade_position.latitude_int
-                == expected_summit.high_grade_position.latitude_int
+            assert existing_summit.high_grade_position.is_equal_to(
+                expected_summit.high_grade_position
             )
-            assert (
-                existing_summit.high_grade_position.longitude_int
-                == expected_summit.high_grade_position.longitude_int
-            )
-            assert (
-                existing_summit.low_grade_position.latitude_int
-                == expected_summit.low_grade_position.latitude_int
-            )
-            assert (
-                existing_summit.low_grade_position.longitude_int
-                == expected_summit.low_grade_position.longitude_int
+
+            assert existing_summit.low_grade_position.is_equal_to(
+                expected_summit.low_grade_position
             )

@@ -445,9 +445,6 @@ class TestOsmSummitDataFilter:
             summit1.official_name == summit2.official_name
             and sorted(summit1.alternate_names) == sorted(summit2.alternate_names)
             and sorted(summit1.unspecified_names) == sorted(summit2.unspecified_names)
-            and summit1.high_grade_position.latitude_int == summit2.high_grade_position.latitude_int
-            and summit1.high_grade_position.longitude_int
-            == summit2.high_grade_position.longitude_int
-            and summit1.low_grade_position.latitude_int == summit2.low_grade_position.latitude_int
-            and summit1.low_grade_position.longitude_int == summit2.low_grade_position.longitude_int
+            and summit1.high_grade_position.is_equal_to(summit2.high_grade_position)
+            and summit1.low_grade_position.is_equal_to(summit2.low_grade_position)
         )

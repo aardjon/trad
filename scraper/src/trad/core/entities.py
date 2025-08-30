@@ -25,6 +25,11 @@ class GeoPosition:
     10.000.000 to provide the same precision without the drawbacks of the floating point
     representation. The integer representation is the same as in the route database, to avoid
     unnecessary conversions.
+
+    GeoPosition does not override the equality operator (==) on purpose, because the meaning of
+    "equal positions" is not exactly intuitive and can depend on the use cases. That's why there are
+    specialized methods (e.g. `is_equal_to()` and `is_within_radius()`) which implement different
+    meanings of "equality".
     """
 
     _COORDINATE_PRECISION: Final = 10000000
@@ -79,6 +84,18 @@ class GeoPosition:
         The longitude value as decimal degree.
         """
         return float(self._longitude) / self._COORDINATE_PRECISION
+
+    def is_equal_to(self, other: Self) -> bool:
+        """
+        Return True if `self` and `other` are exactly equal, i.e. have the same internal latitude
+        and longitude values.
+
+        This is used for an exact data check, mainly in (but not limited to) unit tests. Two exactly
+        equal coordinates from different sources may result in slighlty different internal values
+        due to floating point operations/representation, so this check may return False for them.
+        You may want to consider using `is_within_radius()` with a small distance in such cases.
+        """
+        return self.latitude_int == other.latitude_int and self.longitude_int == other.longitude_int
 
     def is_within_radius(self, other: Self, max_distance: float) -> bool:
         """
@@ -307,8 +324,7 @@ class Summit:
         if self.high_grade_position == UNDEFINED_GEOPOSITION:
             self.high_grade_position = other.high_grade_position
         elif other.high_grade_position != UNDEFINED_GEOPOSITION and (
-            self.high_grade_position.latitude_int != other.high_grade_position.latitude_int
-            or self.high_grade_position.longitude_int != other.high_grade_position.longitude_int
+            not self.high_grade_position.is_equal_to(other.high_grade_position)
         ):
             raise MergeConflictError("summit", other.name, "high_grade_position")
 
