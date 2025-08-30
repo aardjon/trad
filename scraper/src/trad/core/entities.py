@@ -195,8 +195,17 @@ class Summit:
     official. These names do not end up in the created route database.
     """
 
-    position: GeoPosition = UNDEFINED_GEOPOSITION
+    high_grade_position: GeoPosition = UNDEFINED_GEOPOSITION
     """ Geographical position of this summit. """
+
+    low_grade_position: GeoPosition = UNDEFINED_GEOPOSITION
+    """
+    Additional, low-grade geographical position with e.g. bad precision or otherwise unclear
+    quality. It is used as a fallback, e.g. for mapping/merging different Summit objects when no
+    good position data is available (yet), but is not written into the created route dataabse. It
+    can be trusted to be at least more or less "close" (i.e. in the vicinity of a few hundred
+    meters) to the actual `high_grade_position`, though.
+    """
 
     def __post_init__(self) -> None:
         # Make sure that at least one name has been provided
@@ -221,6 +230,22 @@ class Summit:
         if not name:
             name = next(iter(self.unspecified_names))
         return name
+
+    @property
+    def position(self) -> GeoPosition:
+        """
+        Returns the best available geographical position for this summit.
+
+        It returns the `high_grade_position` if available, otherwise the `low_grade_position` (and
+        `UNDEFINED_GEOPOSITION` if none of them is set). May be useful if you just need a rough
+        position for e.g. displaying it or estimating a distance. If you need certainty about its
+        quality, use one of the specialized properties instead.
+        """
+        return (
+            self.high_grade_position
+            if self.high_grade_position != UNDEFINED_GEOPOSITION
+            else self.low_grade_position
+        )
 
     @property
     def unique_identifier(self) -> UniqueIdentifier:
@@ -278,13 +303,18 @@ class Summit:
             )
 
     def _enrich_position(self, other: Self) -> None:
-        if self.position == UNDEFINED_GEOPOSITION:
-            self.position = other.position
-        elif other.position != UNDEFINED_GEOPOSITION and (
-            self.position.latitude_int != other.position.latitude_int
-            or self.position.longitude_int != other.position.longitude_int
+        # Merge the high grade position
+        if self.high_grade_position == UNDEFINED_GEOPOSITION:
+            self.high_grade_position = other.high_grade_position
+        elif other.high_grade_position != UNDEFINED_GEOPOSITION and (
+            self.high_grade_position.latitude_int != other.high_grade_position.latitude_int
+            or self.high_grade_position.longitude_int != other.high_grade_position.longitude_int
         ):
-            raise MergeConflictError("summit", other.name, "position")
+            raise MergeConflictError("summit", other.name, "high_grade_position")
+
+        # Use the low-grade position only if none is set already - otherwise, ignore the other one
+        if self.low_grade_position == UNDEFINED_GEOPOSITION:
+            self.low_grade_position = other.low_grade_position
 
 
 @dataclass

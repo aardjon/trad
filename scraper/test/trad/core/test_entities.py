@@ -238,6 +238,34 @@ class TestSummit:
         assert summit.name == expected_return_value
 
     @pytest.mark.parametrize(
+        ("summit", "expected_return_value"),
+        [
+            (
+                Summit("Dummy", high_grade_position=GeoPosition(504620000, 147390000)),
+                GeoPosition(504620000, 147390000),
+            ),
+            (
+                Summit("Dummy", low_grade_position=GeoPosition(504620000, 147390000)),
+                GeoPosition(504620000, 147390000),
+            ),
+            (
+                Summit(
+                    "Dummy",
+                    high_grade_position=GeoPosition(147390000, 504620000),
+                    low_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                GeoPosition(147390000, 504620000),
+            ),
+        ],
+    )
+    def test_position(self, summit: Summit, expected_return_value: GeoPosition) -> None:
+        """
+        Tests the `position` property, i.e. that the correct position value is returned.
+        """
+        assert summit.position.latitude_int == expected_return_value.latitude_int
+        assert summit.position.longitude_int == expected_return_value.longitude_int
+
+    @pytest.mark.parametrize(
         ("summit", "expected_id_base"),
         [
             # Single names
@@ -265,8 +293,45 @@ class TestSummit:
             # Merge position data into an existing summit
             (
                 Summit("Summit 1"),
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1"),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1", high_grade_position=GeoPosition(504567000, 147650000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    high_grade_position=GeoPosition(504567000, 147650000),
+                    low_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+                nullcontext(),
+            ),
+            # Merging equal position datá must not raise an error
+            (
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    high_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    high_grade_position=GeoPosition(504620000, 147390000),
+                ),
                 nullcontext(),
             ),
             # Merge multiple names in various variants
@@ -292,26 +357,11 @@ class TestSummit:
                 ),
                 nullcontext(),
             ),
-            # Merging equal position datá must not raise an error
-            (
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
-                Summit(
-                    "Summit 1",
-                    alternate_names=["Summit 2"],
-                    position=GeoPosition(504620000, 147390000),
-                ),
-                Summit(
-                    "Summit 1",
-                    alternate_names=["Summit 2"],
-                    position=GeoPosition(504620000, 147390000),
-                ),
-                nullcontext(),
-            ),
             # Error Cases
             (
-                Summit("Summit", position=GeoPosition(504620000, 147390000)),
-                Summit("Summit", position=GeoPosition(404620000, 247390000)),
-                Summit("Summit", position=GeoPosition(504620000, 147390000)),
+                Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit", high_grade_position=GeoPosition(404620000, 247390000)),
+                Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
                 pytest.raises(MergeConflictError),
             ),
         ],
@@ -342,5 +392,19 @@ class TestSummit:
             assert sorted(existing_summit.unspecified_names) == sorted(
                 expected_summit.unspecified_names
             )
-            assert existing_summit.position.latitude_int == expected_summit.position.latitude_int
-            assert existing_summit.position.longitude_int == expected_summit.position.longitude_int
+            assert (
+                existing_summit.high_grade_position.latitude_int
+                == expected_summit.high_grade_position.latitude_int
+            )
+            assert (
+                existing_summit.high_grade_position.longitude_int
+                == expected_summit.high_grade_position.longitude_int
+            )
+            assert (
+                existing_summit.low_grade_position.latitude_int
+                == expected_summit.low_grade_position.latitude_int
+            )
+            assert (
+                existing_summit.low_grade_position.longitude_int
+                == expected_summit.low_grade_position.longitude_int
+            )
