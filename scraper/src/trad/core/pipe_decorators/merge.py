@@ -8,7 +8,7 @@ from logging import getLogger
 from typing import override
 
 from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import Post, Route, Summit, UniqueIdentifier
+from trad.core.entities import NormalizedName, Post, Route, Summit
 from trad.core.errors import EntityNotFoundError
 
 _logger = getLogger(__name__)
@@ -29,9 +29,9 @@ class MergingPipeDecorator(Pipe):
         """
         super().__init__()
         self._delegate = delegate_pipe
-        self._summit_name_lookup_map: dict[UniqueIdentifier, Summit] = {}
-        self._routes: dict[UniqueIdentifier, list[Route]] = {}
-        self._posts: list[tuple[UniqueIdentifier, str, Post]] = []
+        self._summit_name_lookup_map: dict[NormalizedName, Summit] = {}
+        self._routes: dict[NormalizedName, list[Route]] = {}
+        self._posts: list[tuple[NormalizedName, str, Post]] = []
 
     @override
     def initialize_pipe(self) -> None:
@@ -70,8 +70,8 @@ class MergingPipeDecorator(Pipe):
     def add_or_enrich_summit(self, summit: Summit) -> None:
         # Find all Summit objects that are physically the same as the new one (i.e. share a name)
         existing_summits_to_merge: dict[int, Summit] = {}
-        for identifier in summit.get_all_possible_identifiers():
-            existing_summit = self._summit_name_lookup_map.get(identifier, None)
+        for normalized_name in summit.get_all_normalized_names():
+            existing_summit = self._summit_name_lookup_map.get(normalized_name, None)
             if existing_summit is not None:
                 existing_summits_to_merge[id(existing_summit)] = existing_summit
         summits_to_merge = [*existing_summits_to_merge.values(), summit]
@@ -82,9 +82,9 @@ class MergingPipeDecorator(Pipe):
             destination_summit.enrich(merge_summit)
 
         # Make sure that the corresponding _summit_name_lookup_map entries refer to the destination
-        # object, by (re-)assing all (possibly extended) identifiers.
-        for identifier in destination_summit.get_all_possible_identifiers():
-            self._summit_name_lookup_map[identifier] = destination_summit
+        # object, by (re-)assing all (possibly extended) normalized_names.
+        for normalized_name in destination_summit.get_all_normalized_names():
+            self._summit_name_lookup_map[normalized_name] = destination_summit
 
         # TODO(aardjon): Existing routes need to be merged, too! Not necessary with only Teufelsturm
         #                and OSM data being merged, though, because we don't gather route data from
@@ -98,14 +98,14 @@ class MergingPipeDecorator(Pipe):
     def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         self._posts.append((self._get_summit_id(summit_name), route_name, post))
 
-    def _get_summit_id(self, summit_name: str) -> UniqueIdentifier:
+    def _get_summit_id(self, summit_name: str) -> NormalizedName:
         """
         Return the unique ID the of summit with the given `summit_name`. Raises EntityNotFoundError
         if no such summit can be found.
         """
-        summit_id = UniqueIdentifier(summit_name)
+        summit_id = NormalizedName(summit_name)
         try:
-            return self._summit_name_lookup_map[summit_id].unique_identifier
+            return self._summit_name_lookup_map[summit_id].normalized_name
         except KeyError:
             raise EntityNotFoundError(summit_name) from None
 
@@ -127,14 +127,14 @@ class MergingPipeDecorator(Pipe):
         Return all Routes that have been collected for the requested summit so far. This is meant to
         be used by unit tests only, don't use it in production code.
         """
-        return self._routes.get(UniqueIdentifier(summit_name), [])
+        return self._routes.get(NormalizedName(summit_name), [])
 
     def get_collected_posts(self, summit_name: str, route_name: str) -> Collection[Post]:
         """
         Return all Posts that have been collected for the requested route so far. This is meant to
         be used by unit tests only, don't use it in production code.
         """
-        summit_id = UniqueIdentifier(summit_name)
+        summit_id = NormalizedName(summit_name)
         return [
             post
             for summit, route, post in self._posts

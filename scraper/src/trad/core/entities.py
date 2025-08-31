@@ -141,45 +141,48 @@ discovered there, of course ;)
 """
 
 
-class UniqueIdentifier:
+class NormalizedName:
     """
-    A unique identifier of a single physical object (i.e. a summit or a route on a summit), unique
-    within the current route database. It is not meant to be displayed to users. Objects of this
-    class can be compared (but not ordered) and hashed (e.g. to use them as dict keys).
+    A normalized name of a single physical object (i.e. a summit or a route on a summit). It is not
+    meant to be displayed to users. Objects of this class can be compared (but not ordered) and
+    hashed (e.g. to use them as dict keys).
 
-    The unique identifier is a normalization of the input strings and is used to map slightly
-    different object name variants (e.g. different punctuation or permutations) to each other. It
-    does not work for completely different names, though.
+    The normalized name is based on the input strings and is used to map slightly different object
+    name variants (e.g. different punctuation or permutations) to each other. It does not match
+    completely different names, though. Also, since there may be objects with the same name, it is
+    not guaranteed to be unique.
     """
 
     def __init__(self, object_name: str):
         """
-        Create a new identifier object form the given `object_name`.
+        Create a new normalized representation from the given `object_name`.
         """
-        self._identifier = self.__create_identifier(object_name)
-        """ The normalized, unique identifier string. """
+        self._normalized_string = self.__normalize(object_name)
+        """ The normalized name string. """
 
     @staticmethod
-    def __create_identifier(object_name: str) -> str:
-        """Does the actual identifier normalization."""
-        identifier = object_name.lower()
+    def __normalize(object_name: str) -> str:
+        """Does the actual name normalization."""
+        normalized_name = object_name.lower()
         # Remove non-ASCII characters
-        identifier = "".join(c for c in identifier if c in string.printable)
+        normalized_name = "".join(c for c in normalized_name if c in string.printable)
         # Replace punctuation characters with spaces
-        identifier = "".join(c if c not in string.punctuation else " " for c in identifier)
+        normalized_name = "".join(
+            c if c not in string.punctuation else " " for c in normalized_name
+        )
         # Order the single segments alphabetically, and rejoin them with single underscores
-        return "_".join(sorted(identifier.split()))
+        return "_".join(sorted(normalized_name.split()))
 
     def __str__(self) -> str:
-        return self._identifier
+        return self._normalized_string
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, UniqueIdentifier):
+        if not isinstance(other, NormalizedName):
             return NotImplemented
-        return self._identifier == other._identifier
+        return self._normalized_string == other._normalized_string
 
     def __hash__(self) -> int:
-        return hash(self._identifier)
+        return hash(self._normalized_string)
 
 
 @dataclass
@@ -265,20 +268,19 @@ class Summit:
         )
 
     @property
-    def unique_identifier(self) -> UniqueIdentifier:
+    def normalized_name(self) -> NormalizedName:
         """
-        The default unique identifier of this summit, unique within the current route database. It
-        is not meant to be displayed to users.
+        The default normalized name of this summit, not meant to be displayed to users.
         """
-        return UniqueIdentifier(self.name)
+        return NormalizedName(self.name)
 
-    def get_all_possible_identifiers(self) -> list[UniqueIdentifier]:
+    def get_all_normalized_names(self) -> list[NormalizedName]:
         """
-        Return all known unique identifiers that refer to this object.
+        Return all known normalized names of this object.
         """
         off_name = [self.official_name] if self.official_name else []
         return [
-            UniqueIdentifier(name)
+            NormalizedName(name)
             for name in off_name + self.alternate_names + self.unspecified_names
         ]
 
@@ -301,7 +303,7 @@ class Summit:
             self.official_name = other.official_name
             return
 
-        if UniqueIdentifier(other.official_name) == UniqueIdentifier(self.official_name):
+        if NormalizedName(other.official_name) == NormalizedName(self.official_name):
             return
         raise MergeConflictError("summit", other.name, "official name")
 
