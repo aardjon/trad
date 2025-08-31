@@ -56,9 +56,15 @@ class TestMergingPipeDecorator:
             ),
             # Merge different name variants
             (
-                [Summit("Mons Permuta")],
+                [Summit("Mons Permuta", low_grade_position=GeoPosition(504620000, 147390000))],
                 Summit("Permuta, Mons", high_grade_position=GeoPosition(504620000, 147390000)),
-                [Summit("Mons Permuta", high_grade_position=GeoPosition(504620000, 147390000))],
+                [
+                    Summit(
+                        "Mons Permuta",
+                        high_grade_position=GeoPosition(504620000, 147390000),
+                        low_grade_position=GeoPosition(504620000, 147390000),
+                    )
+                ],
                 nullcontext(),
             ),
             # Merge multiple Summits into one if new information reveals that this is necessary
@@ -71,6 +77,80 @@ class TestMergingPipeDecorator:
                         alternate_names=["Name2"],
                         unspecified_names=["Name1", "Name2"],
                     )
+                ],
+                nullcontext(),
+            ),
+            # ... at least it their positions are close together
+            (
+                [
+                    Summit(
+                        unspecified_names=["Name1"],
+                        low_grade_position=GeoPosition(404620000, 247390000),
+                    ),
+                    Summit(
+                        unspecified_names=["Name2"],
+                        low_grade_position=GeoPosition(404621000, 247389000),
+                    ),
+                ],
+                Summit(
+                    official_name="Name1",
+                    alternate_names=["Name2"],
+                    high_grade_position=GeoPosition(404620000, 247390000),
+                ),
+                [
+                    Summit(
+                        official_name="Name1",
+                        alternate_names=["Name2"],
+                        unspecified_names=["Name1", "Name2"],
+                        high_grade_position=GeoPosition(404620000, 247390000),
+                        low_grade_position=GeoPosition(404620000, 247390000),
+                    )
+                ],
+                nullcontext(),
+            ),
+            # Two summits with the same name that are too far away from each other must not be
+            # merged
+            (
+                [
+                    Summit(
+                        official_name="Name1", high_grade_position=GeoPosition(304620000, 547390000)
+                    )
+                ],
+                Summit(
+                    official_name="Name1", high_grade_position=GeoPosition(547390000, 304620000)
+                ),
+                [
+                    Summit(
+                        official_name="Name1", high_grade_position=GeoPosition(304620000, 547390000)
+                    ),
+                    Summit(
+                        official_name="Name1", high_grade_position=GeoPosition(547390000, 304620000)
+                    ),
+                ],
+                nullcontext(),
+            ),
+            (
+                [
+                    Summit(
+                        unspecified_names=["Name2"],
+                        low_grade_position=GeoPosition(404630000, 247380000),
+                    ),
+                ],
+                Summit(
+                    official_name="Name1",
+                    alternate_names=["Name2"],
+                    high_grade_position=GeoPosition(247390000, 404620000),
+                ),
+                [
+                    Summit(
+                        unspecified_names=["Name2"],
+                        low_grade_position=GeoPosition(404630000, 247380000),
+                    ),
+                    Summit(
+                        official_name="Name1",
+                        alternate_names=["Name2"],
+                        high_grade_position=GeoPosition(247390000, 404620000),
+                    ),
                 ],
                 nullcontext(),
             ),
@@ -87,26 +167,31 @@ class TestMergingPipeDecorator:
             ),
             (
                 [
-                    Summit("S1"),
-                    Summit("S2"),
+                    Summit("S1", low_grade_position=GeoPosition(304620000, 347390000)),
+                    Summit("S2", low_grade_position=GeoPosition(504620000, 147391000)),
                     Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
                 Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
                 [
-                    Summit("S1"),
-                    Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
+                    Summit("S1", low_grade_position=GeoPosition(304620000, 347390000)),
+                    Summit(
+                        "S2",
+                        high_grade_position=GeoPosition(504620000, 147390000),
+                        low_grade_position=GeoPosition(504620000, 147391000),
+                    ),
                     Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
                 nullcontext(),
             ),
-            # Error case: Conflicting position data, existing data must not be changed!
+            # Error case: Conflicting position data (same name but positions are close together),
+            # existing data must not be changed!
             (
                 [
                     Summit("S1"),
                     Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
                     Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
-                Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("S2", high_grade_position=GeoPosition(304621000, 547389000)),
                 [
                     Summit("S1"),
                     Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
