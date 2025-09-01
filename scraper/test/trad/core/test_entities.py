@@ -6,7 +6,7 @@ from contextlib import AbstractContextManager, nullcontext
 
 import pytest
 
-from trad.core.entities import GeoPosition, Summit, UniqueIdentifier
+from trad.core.entities import GeoPosition, NormalizedName, Summit
 from trad.core.errors import MergeConflictError
 
 
@@ -103,14 +103,90 @@ class TestGeoPosition:
         with pytest.raises(ValueError, match="value must be within"):
             GeoPosition(latlon_int[0], latlon_int[1])
 
+    @pytest.mark.parametrize(
+        ("point1", "point2", "expected_result"),
+        [
+            (  # Completely different positions
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9421666, 14.0399232),
+                False,
+            ),
+            (  # Latitude is the same
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9424815, 14.0399232),
+                False,
+            ),
+            (  # Longitude is the same
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9421666, 14.0396597),
+                False,
+            ),
+            (  # Equal positions
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                True,
+            ),
+        ],
+    )
+    def test_is_equal_to(
+        self, *, point1: GeoPosition, point2: GeoPosition, expected_result: bool
+    ) -> None:
+        """
+        Ensures that the `is_within_radius()` method works as expected:
+         - Only return True if the latitude and longitude integers of both positions are equal
+         - The operands can be swapped
+        """
+        assert point1.is_equal_to(point2) == expected_result
+        assert point2.is_equal_to(point1) == expected_result
 
-class TestUniqueIdentifier:
+    @pytest.mark.parametrize(
+        ("point1", "point2", "distance", "expected_result"),
+        [
+            (  # Distance of the two points is between 39 and 40 meters
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),  # Rhombus
+                GeoPosition.from_decimal_degree(50.9421666, 14.0399232),  # Bärensteinscheibe
+                40.0,
+                True,
+            ),
+            (  # Distance of the two points is between 39 and 40 meters
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),  # Rhombus
+                GeoPosition.from_decimal_degree(50.9421666, 14.0399232),  # Bärensteinscheibe
+                39.1,
+                False,
+            ),
+            (  # Both points are the same
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                GeoPosition.from_decimal_degree(50.9424815, 14.0396597),
+                0.5,
+                True,
+            ),
+        ],
+    )
+    def test_is_within_radius(
+        self,
+        *,
+        point1: GeoPosition,
+        point2: GeoPosition,
+        distance: float,
+        expected_result: bool,
+    ) -> None:
+        """
+        Checks that the `is_within_radius()` method works as expected:
+         - Distance calculation is correct with a precision of about one meter
+         - The operands can be swapped
+         - Also works for equal points
+        """
+        assert point1.is_within_radius(point2, distance) == expected_result
+        assert point2.is_within_radius(point1, distance) == expected_result
+
+
+class TestNormalizedName:
     """
-    Unit tests for the UniqueIdentifer class.
+    Unit tests for the NormalizedName class.
     """
 
     @pytest.mark.parametrize(
-        ("object_name", "expected_identifier"),
+        ("object_name", "expected_normalization"),
         [
             ("AbCDe", "abcde"),  # Lower-case the name
             ("aäböcüdße", "abcde"),  # Remove german umlauts
@@ -130,36 +206,36 @@ class TestUniqueIdentifier:
             ("Lokomotive-Esse", "esse_lokomotive"),
         ],
     )
-    def test_creation(self, object_name: str, expected_identifier: str) -> None:
+    def test_creation(self, object_name: str, expected_normalization: str) -> None:
         """
-        Tests the correct generation of the unique identifier str and the string representation.
+        Tests the correct normalization and the string representation of the input value.
         """
-        identifier = UniqueIdentifier(object_name)
-        assert str(identifier) == expected_identifier
+        norm_name = NormalizedName(object_name)
+        assert str(norm_name) == expected_normalization
 
     @pytest.mark.parametrize(
         ("a", "b", "expect_equality"),
         [
-            (UniqueIdentifier("qwertz"), UniqueIdentifier("qwertz"), True),
-            (UniqueIdentifier("qwertz"), UniqueIdentifier("QwErTz"), True),
-            (UniqueIdentifier("qwertz"), UniqueIdentifier("qwarks"), False),
+            (NormalizedName("qwertz"), NormalizedName("qwertz"), True),
+            (NormalizedName("qwertz"), NormalizedName("QwErTz"), True),
+            (NormalizedName("qwertz"), NormalizedName("qwarks"), False),
         ],
     )
     def test_comparison(
-        self, a: UniqueIdentifier, b: UniqueIdentifier, *, expect_equality: bool
+        self, a: NormalizedName, b: NormalizedName, *, expect_equality: bool
     ) -> None:
         """
-        Ensures that the equality comparison of unique identifiers works as expected.
+        Ensures that the equality comparison of NormalizedNames works as expected.
         """
         assert (a == b) is expect_equality
         assert (a != b) is not expect_equality
 
     def test_dict_support(self) -> None:
         """
-        Ensures that UniqueIdentifier objects can be used as dict keys.
+        Ensures that NormalizedName objects can be used as dict keys.
         """
-        ident1 = UniqueIdentifier("test1")
-        ident2 = UniqueIdentifier("test2")
+        ident1 = NormalizedName("test1")
+        ident2 = NormalizedName("test2")
 
         id_dict = {ident1: "A", ident2: "B"}
         assert len(id_dict) == 2  # noqa: PLR2004
@@ -167,8 +243,8 @@ class TestUniqueIdentifier:
         assert ident2 in id_dict
         assert id_dict[ident1] == "A"
         assert id_dict[ident2] == "B"
-        assert id_dict[UniqueIdentifier("TesT1")] == "A"
-        assert id_dict[UniqueIdentifier("TesT2")] == "B"
+        assert id_dict[NormalizedName("TesT1")] == "A"
+        assert id_dict[NormalizedName("TesT2")] == "B"
 
 
 class TestSummit:
@@ -198,6 +274,33 @@ class TestSummit:
         assert summit.name == expected_return_value
 
     @pytest.mark.parametrize(
+        ("summit", "expected_return_value"),
+        [
+            (
+                Summit("Dummy", high_grade_position=GeoPosition(504620000, 147390000)),
+                GeoPosition(504620000, 147390000),
+            ),
+            (
+                Summit("Dummy", low_grade_position=GeoPosition(504620000, 147390000)),
+                GeoPosition(504620000, 147390000),
+            ),
+            (
+                Summit(
+                    "Dummy",
+                    high_grade_position=GeoPosition(147390000, 504620000),
+                    low_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                GeoPosition(147390000, 504620000),
+            ),
+        ],
+    )
+    def test_position(self, summit: Summit, expected_return_value: GeoPosition) -> None:
+        """
+        Tests the `position` property, i.e. that the correct position value is returned.
+        """
+        assert summit.position.is_equal_to(expected_return_value)
+
+    @pytest.mark.parametrize(
         ("summit", "expected_id_base"),
         [
             # Single names
@@ -212,12 +315,12 @@ class TestSummit:
             (Summit(alternate_names=["A"], unspecified_names=["U"]), "A"),
         ],
     )
-    def test_unique_identifier(self, summit: Summit, expected_id_base: str) -> None:
+    def test_normalized_name(self, summit: Summit, expected_id_base: str) -> None:
         """
-        Tests the generation of the unique identifier. `expected_id_base` is the name string from
-        which the identifier is expected to be created, `summit` is the Summit object to test.
+        Tests the generation of the normalized name. `expected_id_base` is the name string which is
+        expected to be normalized, `summit` is the Summit object to test.
         """
-        assert summit.unique_identifier == UniqueIdentifier(expected_id_base)
+        assert summit.normalized_name == NormalizedName(expected_id_base)
 
     @pytest.mark.parametrize(
         ("existing_summit", "summit_to_merge", "expected_summit", "failure_context"),
@@ -225,8 +328,45 @@ class TestSummit:
             # Merge position data into an existing summit
             (
                 Summit("Summit 1"),
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1"),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1", high_grade_position=GeoPosition(504567000, 147650000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    high_grade_position=GeoPosition(504567000, 147650000),
+                    low_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+                nullcontext(),
+            ),
+            # Merging equal position datá must not raise an error
+            (
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    high_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    high_grade_position=GeoPosition(504620000, 147390000),
+                ),
                 nullcontext(),
             ),
             # Merge multiple names in various variants
@@ -252,26 +392,11 @@ class TestSummit:
                 ),
                 nullcontext(),
             ),
-            # Merging equal position datá must not raise an error
-            (
-                Summit("Summit 1", position=GeoPosition(504620000, 147390000)),
-                Summit(
-                    "Summit 1",
-                    alternate_names=["Summit 2"],
-                    position=GeoPosition(504620000, 147390000),
-                ),
-                Summit(
-                    "Summit 1",
-                    alternate_names=["Summit 2"],
-                    position=GeoPosition(504620000, 147390000),
-                ),
-                nullcontext(),
-            ),
             # Error Cases
             (
-                Summit("Summit", position=GeoPosition(504620000, 147390000)),
-                Summit("Summit", position=GeoPosition(404620000, 247390000)),
-                Summit("Summit", position=GeoPosition(504620000, 147390000)),
+                Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit", high_grade_position=GeoPosition(404620000, 247390000)),
+                Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
                 pytest.raises(MergeConflictError),
             ),
         ],
@@ -302,5 +427,10 @@ class TestSummit:
             assert sorted(existing_summit.unspecified_names) == sorted(
                 expected_summit.unspecified_names
             )
-            assert existing_summit.position.latitude_int == expected_summit.position.latitude_int
-            assert existing_summit.position.longitude_int == expected_summit.position.longitude_int
+            assert existing_summit.high_grade_position.is_equal_to(
+                expected_summit.high_grade_position
+            )
+
+            assert existing_summit.low_grade_position.is_equal_to(
+                expected_summit.low_grade_position
+            )

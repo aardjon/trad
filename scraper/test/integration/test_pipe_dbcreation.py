@@ -128,8 +128,12 @@ def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
     `add_or_enrich()` calls.
     """
     summit1 = Summit(official_name="Beispielturm")
-    summit2 = Summit(official_name="Beispielturm", position=GeoPosition(470000000, 110000000))
-    summit3 = Summit(official_name="Beispielturm", position=GeoPosition(130000000, 370000000))
+    summit2 = Summit(
+        official_name="Beispielturm", high_grade_position=GeoPosition(470000000, 110000000)
+    )
+    summit3 = Summit(
+        official_name="Beispielturm", high_grade_position=GeoPosition(130000000, 370000000)
+    )
 
     # Insert Summit data without geographical coordinates
     pipe_v1.add_or_enrich_summit(summit1)

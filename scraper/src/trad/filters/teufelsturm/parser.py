@@ -9,19 +9,25 @@ import urllib
 from dataclasses import dataclass
 from datetime import datetime
 from io import StringIO
+from logging import getLogger
 from typing import TYPE_CHECKING, Any, Final
+from urllib.parse import urlparse
 
 import pandas as pd
 import pytz
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from trad.core.entities import Post, Route, Summit
+from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 from trad.core.errors import DataProcessingError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pandas.core.frame import DataFrame
     from pandas.core.series import Series
+
+_logger = getLogger(__name__)
 
 
 @dataclass
@@ -79,7 +85,7 @@ def parse_post(post: Series[Any] | DataFrame) -> Post:
     return Post(user_name=user[0], post_date=user[1], comment=comment, rating=rating)
 
 
-def parse_page(page_text: str) -> PageData:
+def parse_page(page_text: str, summit_cache: SummitCache) -> PageData:
     """Parses the given HTML [page_text] and returns the extracted data."""
     route_field_count: Final = 2
     grade_field_count: Final = 1
@@ -101,9 +107,14 @@ def parse_page(page_text: str) -> PageData:
     route = route_elements[0].get_text().strip()
 
     peak_element = route_elements[1].find("a")
-    if not peak_element:
+    if not isinstance(peak_element, Tag):
         raise DataProcessingError(f"Page '{soup.title}' has no valid route name")
-    peak = peak_element.get_text().strip()
+    peak_url = urlparse(peak_element.attrs.get("href", ""))
+    peak_id_result = re.search("gipfelnr=[0-9]+", peak_url.query)
+    if not peak_id_result or not peak_id_result.string:
+        raise DataProcessingError("Page has no valid summit ID.")
+    peak_id = int(peak_id_result.string.split("=")[1])
+    peak = summit_cache.get_summit_by_peak_id(peak_id)
 
     grade_result = re.search(r".*?\[(.*?)\].*", route_elements[1].get_text())
     if not grade_result or len(grade_result.groups()) != grade_field_count:
@@ -116,13 +127,10 @@ def parse_page(page_text: str) -> PageData:
     posts_table = df_list[3]
     posts = parse_posts(posts_table)
 
-    # Replace the summit name if it is wrong
-    peak = _fix_erroneous_name(peak)
-
     # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
     # 'unspecified'.
     return PageData(
-        peak=Summit(unspecified_names=[peak]),
+        peak=peak,
         route=Route(route_name=route, grade=grade),
         posts=posts,
     )
@@ -138,7 +146,7 @@ def _fix_erroneous_name(summit_name: str) -> str:
      - Typing mistakes
      - Spelling differs from the official name (e.g. using "1." or "I." instead of "First")
 
-    Theyare just hard-coded here and replaced with the correct (official) name variant. Some (or
+    They are just hard-coded here and replaced with the correct (official) name variant. Some (or
     even all) of the translations may be replaced by more generic approaches in the future.
     """
     known_name_errors = {
@@ -164,3 +172,81 @@ def parse_route_list(page_text: str) -> set[int]:
     return {
         int(urllib.parse.urlsplit(url).query.split("=")[1]) for url in regexp.findall(page_text)
     }
+
+
+def _parse_summit_page(page_text: str) -> Summit:
+    """Parses the given HTML [page_text] and creates a new Summit object from its data."""
+    soup = BeautifulSoup(page_text, "html.parser")
+    # The summit name is displayed with font face "Tahoma", size "3" and color of "#FFFFFF"
+    possible_peak_names = soup.find_all("font", color="#FFFFFF", face="Tahoma", size="3")
+    if len(possible_peak_names) != 1:
+        raise DataProcessingError(
+            f"Summit details page contains {len(possible_peak_names)} summit name candidates "
+            "(expected 1).",
+        )
+    peak_name = possible_peak_names[0].get_text()
+
+    # Replace the summit name if it is wrong
+    peak_name = _fix_erroneous_name(peak_name)
+
+    positions_table = soup.find_all("table")[-1]
+    lat = None
+    lon = None
+    for table_cell in positions_table.find_all("td"):
+        # Note: The coordinate values are interchanged on the summits page (no idea why, probably
+        # just a mistake), that's why we purposely assign the "Latitude" value to `lon` and the
+        # "Longitude" value to `lat`.
+        if table_cell.get_text() == "Longitude":
+            lat = table_cell.next_sibling.get_text()
+        if table_cell.get_text() == "Latitude":
+            lon = table_cell.next_sibling.get_text()
+
+    if not (lat and lon):
+        _logger.warning("Cannot find summit coordinates on details page of %s", peak_name)
+        position = UNDEFINED_GEOPOSITION
+    else:
+        try:
+            position = GeoPosition.from_decimal_degree(latitude=float(lat), longitude=float(lon))
+        except Exception as e:
+            raise DataProcessingError(
+                f"The extracted coordinate values are invalid: ({lat}, {lon})"
+            ) from e
+
+    # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
+    # 'unspecified'. Also, the position values are known to be quite inaccurate, that's why we use
+    # them for assistance only.
+    return Summit(unspecified_names=[peak_name], low_grade_position=position)
+
+
+class SummitCache:
+    """
+    A cache which provides Summit objects based on their teufelsturm ID, retrieving and creating
+    them on demand (and only once).
+
+    Individual cache entries are never deleted automatically, but it is possible to empty the whole
+    cache at once by calling `clear_cache()`.
+    """
+
+    def __init__(self, retrieve_summit_details_page: Callable[[int], str]):
+        """
+        Create a new cache instance. The `retrieve_summit_details_page` is a function that takes a
+        teufelsturm peak ID and returns the HTML content of this peak's details page.
+        """
+        self._retrieve_summit_details_page = retrieve_summit_details_page
+        self._seen_summits: dict[int, Summit] = {}
+
+    def get_summit_by_peak_id(self, peak_id: int) -> Summit:
+        """
+        Return the Summit object that corresponds to the given `peak_id`. If it is not present in
+        the cache already, the summit data is retrieved by calling retrieve_summit_details_page().
+        """
+        summit = self._seen_summits.get(peak_id, None)
+        if summit is None:
+            page_text = self._retrieve_summit_details_page(peak_id)
+            summit = _parse_summit_page(page_text)
+            self._seen_summits[peak_id] = summit
+        return summit
+
+    def clear_cache(self) -> None:
+        """Flushes the whole cache, deleting all previously retrieved summits."""
+        self._seen_summits = {}

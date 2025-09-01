@@ -6,6 +6,7 @@ import string
 from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
+from math import cos, pi, sqrt
 from typing import Final, Self
 
 from trad.core.errors import MergeConflictError
@@ -24,6 +25,11 @@ class GeoPosition:
     10.000.000 to provide the same precision without the drawbacks of the floating point
     representation. The integer representation is the same as in the route database, to avoid
     unnecessary conversions.
+
+    GeoPosition does not override the equality operator (==) on purpose, because the meaning of
+    "equal positions" is not exactly intuitive and can depend on the use cases. That's why there are
+    specialized methods (e.g. `is_equal_to()` and `is_within_radius()`) which implement different
+    meanings of "equality".
     """
 
     _COORDINATE_PRECISION: Final = 10000000
@@ -79,6 +85,42 @@ class GeoPosition:
         """
         return float(self._longitude) / self._COORDINATE_PRECISION
 
+    def is_equal_to(self, other: Self) -> bool:
+        """
+        Return True if `self` and `other` are exactly equal, i.e. have the same internal latitude
+        and longitude values.
+
+        This is used for an exact data check, mainly in (but not limited to) unit tests. Two exactly
+        equal coordinates from different sources may result in slighlty different internal values
+        due to floating point operations/representation, so this check may return False for them.
+        You may want to consider using `is_within_radius()` with a small distance in such cases.
+        """
+        return self.latitude_int == other.latitude_int and self.longitude_int == other.longitude_int
+
+    def is_within_radius(self, other: Self, max_distance: float) -> bool:
+        """
+        Return True if the distance between `self` and `other` is smaller (or equal) `max_distance`
+        meters, False if not. "Distance" means a direct, straight line - terrain and earth's
+        curvature are ignored, so this check becomes less accurate as max_distance increases. Also,
+        due to the involved floating point operations, the distance calculation may not be too
+        precise in some cases.
+        """
+        # This simple distance calculation uses the Pythagorean theorem but improves it by
+        # estimating the distance between two latitudes. This is good enough for the smaller
+        # distances in the scale of hundreds of meters we are expecting in this application.
+        # For more information and a detailled explanation, please have a look at
+        # https://en.kompf.de/gps/distcalc.html (we are using the "Improved method" here).
+        longitude_distance: Final = 111.3 * 1000  # We want the distance in meters
+        average_lat = (self.latitude_decimal_degree + other.latitude_decimal_degree) / 2 * pi / 180
+        dlat = longitude_distance * (self.latitude_decimal_degree - other.latitude_decimal_degree)
+        dlon = (
+            longitude_distance
+            * cos(average_lat)
+            * (self.longitude_decimal_degree - other.longitude_decimal_degree)
+        )
+        dist = sqrt(dlat * dlat + dlon * dlon)
+        return dist <= max_distance
+
     def __str__(self) -> str:
         hemisphere_lat = "N" if self._latitude >= 0 else "S"
         hemisphere_lon = "E" if self._longitude >= 0 else "W"
@@ -99,45 +141,48 @@ discovered there, of course ;)
 """
 
 
-class UniqueIdentifier:
+class NormalizedName:
     """
-    A unique identifier of a single physical object (i.e. a summit or a route on a summit), unique
-    within the current route database. It is not meant to be displayed to users. Objects of this
-    class can be compared (but not ordered) and hashed (e.g. to use them as dict keys).
+    A normalized name of a single physical object (i.e. a summit or a route on a summit). It is not
+    meant to be displayed to users. Objects of this class can be compared (but not ordered) and
+    hashed (e.g. to use them as dict keys).
 
-    The unique identifier is a normalization of the input strings and is used to map slightly
-    different object name variants (e.g. different punctuation or permutations) to each other. It
-    does not work for completely different names, though.
+    The normalized name is based on the input strings and is used to map slightly different object
+    name variants (e.g. different punctuation or permutations) to each other. It does not match
+    completely different names, though. Also, since there may be objects with the same name, it is
+    not guaranteed to be unique.
     """
 
     def __init__(self, object_name: str):
         """
-        Create a new identifier object form the given `object_name`.
+        Create a new normalized representation from the given `object_name`.
         """
-        self._identifier = self.__create_identifier(object_name)
-        """ The normalized, unique identifier string. """
+        self._normalized_string = self.__normalize(object_name)
+        """ The normalized name string. """
 
     @staticmethod
-    def __create_identifier(object_name: str) -> str:
-        """Does the actual identifier normalization."""
-        identifier = object_name.lower()
+    def __normalize(object_name: str) -> str:
+        """Does the actual name normalization."""
+        normalized_name = object_name.lower()
         # Remove non-ASCII characters
-        identifier = "".join(c for c in identifier if c in string.printable)
+        normalized_name = "".join(c for c in normalized_name if c in string.printable)
         # Replace punctuation characters with spaces
-        identifier = "".join(c if c not in string.punctuation else " " for c in identifier)
+        normalized_name = "".join(
+            c if c not in string.punctuation else " " for c in normalized_name
+        )
         # Order the single segments alphabetically, and rejoin them with single underscores
-        return "_".join(sorted(identifier.split()))
+        return "_".join(sorted(normalized_name.split()))
 
     def __str__(self) -> str:
-        return self._identifier
+        return self._normalized_string
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, UniqueIdentifier):
+        if not isinstance(other, NormalizedName):
             return NotImplemented
-        return self._identifier == other._identifier
+        return self._normalized_string == other._normalized_string
 
     def __hash__(self) -> int:
-        return hash(self._identifier)
+        return hash(self._normalized_string)
 
 
 @dataclass
@@ -170,8 +215,17 @@ class Summit:
     official. These names do not end up in the created route database.
     """
 
-    position: GeoPosition = UNDEFINED_GEOPOSITION
+    high_grade_position: GeoPosition = UNDEFINED_GEOPOSITION
     """ Geographical position of this summit. """
+
+    low_grade_position: GeoPosition = UNDEFINED_GEOPOSITION
+    """
+    Additional, low-grade geographical position with e.g. bad precision or otherwise unclear
+    quality. It is used as a fallback, e.g. for mapping/merging different Summit objects when no
+    good position data is available (yet), but is not written into the created route dataabse. It
+    can be trusted to be at least more or less "close" (i.e. in the vicinity of a few hundred
+    meters) to the actual `high_grade_position`, though.
+    """
 
     def __post_init__(self) -> None:
         # Make sure that at least one name has been provided
@@ -198,20 +252,35 @@ class Summit:
         return name
 
     @property
-    def unique_identifier(self) -> UniqueIdentifier:
+    def position(self) -> GeoPosition:
         """
-        The default unique identifier of this summit, unique within the current route database. It
-        is not meant to be displayed to users.
-        """
-        return UniqueIdentifier(self.name)
+        Returns the best available geographical position for this summit.
 
-    def get_all_possible_identifiers(self) -> list[UniqueIdentifier]:
+        It returns the `high_grade_position` if available, otherwise the `low_grade_position` (and
+        `UNDEFINED_GEOPOSITION` if none of them is set). May be useful if you just need a rough
+        position for e.g. displaying it or estimating a distance. If you need certainty about its
+        quality, use one of the specialized properties instead.
         """
-        Return all known unique identifiers that refer to this object.
+        return (
+            self.high_grade_position
+            if self.high_grade_position != UNDEFINED_GEOPOSITION
+            else self.low_grade_position
+        )
+
+    @property
+    def normalized_name(self) -> NormalizedName:
+        """
+        The default normalized name of this summit, not meant to be displayed to users.
+        """
+        return NormalizedName(self.name)
+
+    def get_all_normalized_names(self) -> list[NormalizedName]:
+        """
+        Return all known normalized names of this object.
         """
         off_name = [self.official_name] if self.official_name else []
         return [
-            UniqueIdentifier(name)
+            NormalizedName(name)
             for name in off_name + self.alternate_names + self.unspecified_names
         ]
 
@@ -234,7 +303,7 @@ class Summit:
             self.official_name = other.official_name
             return
 
-        if UniqueIdentifier(other.official_name) == UniqueIdentifier(self.official_name):
+        if NormalizedName(other.official_name) == NormalizedName(self.official_name):
             return
         raise MergeConflictError("summit", other.name, "official name")
 
@@ -253,13 +322,17 @@ class Summit:
             )
 
     def _enrich_position(self, other: Self) -> None:
-        if self.position == UNDEFINED_GEOPOSITION:
-            self.position = other.position
-        elif other.position != UNDEFINED_GEOPOSITION and (
-            self.position.latitude_int != other.position.latitude_int
-            or self.position.longitude_int != other.position.longitude_int
+        # Merge the high grade position
+        if self.high_grade_position == UNDEFINED_GEOPOSITION:
+            self.high_grade_position = other.high_grade_position
+        elif other.high_grade_position != UNDEFINED_GEOPOSITION and (
+            not self.high_grade_position.is_equal_to(other.high_grade_position)
         ):
-            raise MergeConflictError("summit", other.name, "position")
+            raise MergeConflictError("summit", other.name, "high_grade_position")
+
+        # Use the low-grade position only if none is set already - otherwise, ignore the other one
+        if self.low_grade_position == UNDEFINED_GEOPOSITION:
+            self.low_grade_position = other.low_grade_position
 
 
 @dataclass

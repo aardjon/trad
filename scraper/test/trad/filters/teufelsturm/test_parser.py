@@ -10,8 +10,9 @@ import pandas as pd
 import pytest
 import pytz
 
-from trad.core.entities import Post
+from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post
 from trad.filters.teufelsturm.parser import (
+    SummitCache,
     parse_page,
     parse_post,
     parse_posts,
@@ -165,11 +166,29 @@ def test_parse_user(input_text: str) -> None:
 
 
 def test_parse_page() -> None:
+    # The summit ID value is taken from the route_page_sample.html file
+    expected_summit_id: Final = 42
+    # Summit data (name and position) must be taken from the summit_details_page_sample.html file
+    expected_summit_name: Final = "Beispielwand"
+    expected_summit_position: Final = GeoPosition.from_decimal_degree(50.95105, 14.06769)
+
+    def mocked_retrieve_summit_details_page(peak_id: int) -> str:
+        assert peak_id == expected_summit_id
+        with dir_name.joinpath("summit_details_page_sample.html").open(
+            "rt", encoding="iso-8859-1"
+        ) as file:
+            return file.read()
+
+    summit_cache = SummitCache(mocked_retrieve_summit_details_page)
+
     dir_name = Path(__file__).parent
     with dir_name.joinpath("route_page_sample.html").open("rt", encoding="iso-8859-1") as file:
         page_text = file.read()
-    page_data = parse_page(page_text)
-    assert page_data.peak.name == "Beispielwand"
+    page_data = parse_page(page_text, summit_cache)
+
+    assert page_data.peak.name == expected_summit_name
+    assert page_data.peak.high_grade_position is UNDEFINED_GEOPOSITION
+    assert page_data.peak.low_grade_position.is_equal_to(expected_summit_position)
     assert page_data.route.route_name == "Loremweg"
     assert page_data.route.grade == "** II"
     assert len(page_data.posts) == 1

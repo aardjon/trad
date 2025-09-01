@@ -116,8 +116,8 @@ class DbSchemaV1Pipe(Pipe):
             query=sql_statement,
             query_parameters=[
                 summit.name,
-                summit.position.latitude_int,
-                summit.position.longitude_int,
+                summit.high_grade_position.latitude_int,
+                summit.high_grade_position.longitude_int,
             ],
         )
 
