@@ -522,6 +522,11 @@ ignore = [
   # Do not ban implicit namespace packages, because it's unclear why they are bad.
   "INP001",  # File is part of an implicit namespace package. Add an __init__.py.
 
+  # Disabled because we do not do any cryptographic (or even random-number) stuff in the scraper
+  # code at all and therefore do not want the warning for harmless uses of then 'random' module
+  # (which is used by some unit/integration tests).
+  "S311",  # Standard pseudo-random generators are not suitable for cryptographic purposes
+
   # Disabled because it is falsely triggered a lot for the statement creation code, which creates
   # SQL statements dynamically, inserting e.g. table and column names as well as WHERE conditions
   # with string operations.
