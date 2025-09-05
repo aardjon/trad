@@ -52,7 +52,7 @@ class MergingPipeDecorator(Pipe):
             _logger.debug(
                 "Writing %s routes for summit %d/%d ('%s')...",
                 len(routes),
-                idx,
+                idx + 1,
                 summit_count,
                 summit.name,
             )
