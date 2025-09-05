@@ -86,6 +86,12 @@ class Sqlite3Database(RelationalDatabaseBoundary):
             raise error
 
         self._db_handle = self._sqlite3_connect(str(destination_file), autocommit=True)
+        # Disable safe DB writes/commits for a *much* higher write performance. With these settings
+        # we will likely end up with a corrupt database file in case of a crash or power outage, but
+        # this is not a problem because the next run creates a new database anyway.
+        self._db_handle.execute("PRAGMA synchronous=off")
+        self._db_handle.execute("PRAGMA journal_mode=memory")
+        # Enable foreign key checks to ensure the relational integrity of the new database
         self._db_handle.execute("PRAGMA foreign_keys=true;")
 
     @override
