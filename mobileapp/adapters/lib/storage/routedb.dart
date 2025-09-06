@@ -215,7 +215,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
     Query query = Query.join(
       <String>[RoutesTable.tableName, PostsTable.tableName],
-      <String>['${RoutesTable.columnId} = ${PostsTable.columnId}'],
+      <String>['${RoutesTable.columnId} = ${PostsTable.columnRouteId}'],
       <String>[
         RoutesTable.columnId,
         RoutesTable.columnRouteName,
