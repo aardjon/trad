@@ -240,7 +240,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       int routeId = dataRow.getIntValue(RoutesTable.columnId);
       String name = dataRow.getStringValue(RoutesTable.columnRouteName);
       String grade = dataRow.getStringValue(RoutesTable.columnRouteGrade);
-      double rating = dataRow.getDoubleValue(averageRatingColumnName);
+      // The returned 'rating' is null for routes with no posts at all
+      double? rating = dataRow.getOptDoubleValue(averageRatingColumnName);
       routes.add(Route(routeId, name, grade, rating));
     }
     return routes;
