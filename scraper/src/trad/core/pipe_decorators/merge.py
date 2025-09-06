@@ -35,7 +35,7 @@ class MergingPipeDecorator(Pipe):
         self._delegate = delegate_pipe
         self._summits: list[Summit] = []
         self._routes: dict[NormalizedName, list[Route]] = {}
-        self._posts: list[tuple[NormalizedName, str, Post]] = []
+        self._posts: dict[NormalizedName, dict[str, list[Post]]] = {}
 
     @override
     def initialize_pipe(self) -> None:
@@ -52,18 +52,14 @@ class MergingPipeDecorator(Pipe):
             _logger.debug(
                 "Writing %s routes for summit %d/%d ('%s')...",
                 len(routes),
-                idx,
+                idx + 1,
                 summit_count,
                 summit.name,
             )
             for route in routes:
                 self._delegate.add_or_enrich_route(summit.name, route)
 
-                posts = [
-                    post_data[2]
-                    for post_data in self._posts
-                    if post_data[0] == summit.normalized_name and post_data[1] == route.route_name
-                ]
+                posts = self._posts.get(summit.normalized_name, {}).get(route.route_name, [])
                 for post in posts:
                     self._delegate.add_post(summit.name, route.route_name, post)
 
@@ -119,7 +115,9 @@ class MergingPipeDecorator(Pipe):
 
     @override
     def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
-        self._posts.append((self._find_first_summit(summit_name).normalized_name, route_name, post))
+        self._posts.setdefault(self._find_first_summit(summit_name).normalized_name, {}).setdefault(
+            route_name, []
+        ).append(post)
 
     def _find_first_summit(self, summit_name: str) -> Summit:
         """
@@ -156,8 +154,4 @@ class MergingPipeDecorator(Pipe):
         be used by unit tests only, don't use it in production code.
         """
         summit_id = NormalizedName(summit_name)
-        return [
-            post
-            for summit, route, post in self._posts
-            if summit == summit_id and route == route_name
-        ]
+        return self._posts.get(summit_id, {}).get(route_name, [])

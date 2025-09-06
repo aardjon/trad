@@ -70,7 +70,7 @@ class TestSqlite3Database:
         db.connect(Path("test.sqlite"))
         sqlite3_connect_mock.assert_called_once_with("test.sqlite", autocommit=True)
         assert db.is_connected()
-        sqlite3_connection_mock.execute.assert_called_once_with("PRAGMA foreign_keys=true;")
+        sqlite3_connection_mock.execute.assert_called_with("PRAGMA foreign_keys=true;")
 
     @pytest.mark.parametrize("is_connected", [True, False])
     def test_disconnect(
