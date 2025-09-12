@@ -81,7 +81,11 @@ class ApplicationWidePresenter implements PresentationBoundary {
   @override
   void showSummitDetails(Summit selectedSummit) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    SummitDetailsModel model = SummitDetailsModel(selectedSummit.id, selectedSummit.name);
+    SummitDetailsModel model = SummitDetailsModel(
+      selectedSummit.id,
+      selectedSummit.name,
+      selectedSummit.position != null,
+    );
     ui.showSummitDetails(model);
   }
 

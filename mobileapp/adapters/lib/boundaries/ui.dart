@@ -177,8 +177,12 @@ class SummitDetailsModel {
   /// Title of the summit details page.
   final String pageTitle;
 
+  /// Flag for displaying if the summit can be shown on a map (true) or not (false, e.g. because it
+  /// lacks a geo position).
+  final bool canShowOnMap;
+
   /// Constructor for directly initializing all members.
-  SummitDetailsModel(this.summitDataId, this.pageTitle);
+  SummitDetailsModel(this.summitDataId, this.pageTitle, this.canShowOnMap);
 }
 
 /// Model that provides all static data needed to display the route details page to the UI.
