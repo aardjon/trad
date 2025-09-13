@@ -84,7 +84,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
     SummitDetailsModel model = SummitDetailsModel(
       selectedSummit.id,
       selectedSummit.name,
-      selectedSummit.position != null,
+      canShowOnMap: selectedSummit.position != null,
     );
     ui.showSummitDetails(model);
   }

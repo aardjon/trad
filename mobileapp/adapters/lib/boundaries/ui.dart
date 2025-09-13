@@ -182,7 +182,7 @@ class SummitDetailsModel {
   final bool canShowOnMap;
 
   /// Constructor for directly initializing all members.
-  SummitDetailsModel(this.summitDataId, this.pageTitle, this.canShowOnMap);
+  SummitDetailsModel(this.summitDataId, this.pageTitle, {required this.canShowOnMap});
 }
 
 /// Model that provides all static data needed to display the route details page to the UI.
