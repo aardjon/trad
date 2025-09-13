@@ -98,6 +98,11 @@ class RouteDbUseCases {
     _presentationBoundary.updateRouteList(routeList, sortCriterion);
   }
 
+  /// Use Case: Show/Open a certain Summit on a map
+  Future<void> showSummitOnMap(int summitId) async {
+    _logger.info('Running use case showSummitOnMap($summitId)');
+  }
+
   /// Use Case: Show all posts for the selected route.
   Future<void> showPostsPage(int routeId) async {
     _logger.info('Running use case showPostsPage($routeId)');

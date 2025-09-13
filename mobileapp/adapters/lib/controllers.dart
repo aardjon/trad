@@ -101,6 +101,12 @@ class RouteDbController {
     );
   }
 
+  /// The user requested to show the summit [summitDataId] on a map.
+  void requestShowSummitOnMap(ItemDataId summitDataId) {
+    _logger.debug('UI request: Show summit $summitDataId on map');
+    unawaited(_routeDbUseCases.showSummitOnMap(summitDataId));
+  }
+
   /// The user requested to see all details of the single route identified by [routeDataId].
   void requestRouteDetails(ItemDataId routeDataId) {
     _logger.debug('UI request: Show details for route with ID $routeDataId');

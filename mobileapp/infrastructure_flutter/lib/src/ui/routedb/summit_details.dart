@@ -130,6 +130,7 @@ class SummitDetailsView extends StatelessWidget {
 
   void _onShowOnMap(ItemDataId summitDataId) {
     RouteDbController controller = RouteDbController();
+    controller.requestShowSummitOnMap(summitDataId);
   }
 
   Widget _showLoadingIndicator() {
