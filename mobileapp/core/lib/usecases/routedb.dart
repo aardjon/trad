@@ -11,6 +11,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
+import '../boundaries/sysenv.dart';
 import '../entities/errors.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
@@ -33,11 +34,15 @@ class RouteDbUseCases {
   /// settings.
   final AppPreferencesBoundary _preferencesBoundary;
 
+  /// Interface to the operating system environment.
+  final SystemEnvironmentBoundary _systemEnvBoundary;
+
   /// Constructor for creating a new RouteDbUseCases instance.
   RouteDbUseCases(DependencyProvider di)
     : _presentationBoundary = di.provide<PresentationBoundary>(),
       _storageBoundary = di.provide<RouteDbStorageBoundary>(),
-      _preferencesBoundary = di.provide<AppPreferencesBoundary>();
+      _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
+      _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>();
 
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
@@ -101,6 +106,19 @@ class RouteDbUseCases {
   /// Use Case: Show/Open a certain Summit on a map
   Future<void> showSummitOnMap(int summitId) async {
     _logger.info('Running use case showSummitOnMap($summitId)');
+    Summit selectedSummit = await _storageBoundary.retrieveSummit(summitId);
+    if (selectedSummit.position != null) {
+      await _systemEnvBoundary.openExternalMapsApp(selectedSummit.position!);
+    } else {
+      // Normally this shouldn't happen because the UI is not supposed to allow this use case for
+      // summits without a geo position. So if it does, there is another error somewhere else. For
+      // the same reason it's not necessary to show an explicit "error" use feedback - they
+      // shouldn't be able to end up here at all.
+      _logger.warning(
+        "Summit '${selectedSummit.name}' (${selectedSummit.id}) doesn't have a position to display "
+        'on a map, ignoring.',
+      );
+    }
   }
 
   /// Use Case: Show all posts for the selected route.
