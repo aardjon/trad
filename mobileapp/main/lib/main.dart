@@ -6,6 +6,7 @@ library;
 
 import 'dart:async';
 
+import 'package:adapters/boundaries/external_apps.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:adapters/boundaries/paths.dart';
@@ -28,6 +29,7 @@ import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:infrastructure_flutter/path_provider.dart';
+import 'package:infrastructure_flutter/url_launcher.dart';
 import 'package:infrastructure_flutter/repository/root_bundle_assets.dart';
 import 'package:infrastructure_flutter/repository/shared_preferences.dart';
 import 'package:infrastructure_flutter/ui.dart';
@@ -108,5 +110,6 @@ class ApplicationBootstrap {
     _dependencyProvider.registerSingleton<RelationalDatabaseBoundary>(Sqlite3Database.new);
     _dependencyProvider.registerSingleton<KeyValueStoreBoundary>(SharedPreferencesRepository.new);
     _dependencyProvider.registerFactory<FileSystemBoundary>(DartIoFileSystem.new);
+    _dependencyProvider.registerFactory<ExternalAppsBoundary>(UrlLauncher.new);
   }
 }

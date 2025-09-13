@@ -57,6 +57,15 @@ class SummitDetailsView extends StatelessWidget {
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[
         IconButton(
+          onPressed:
+              model.canShowOnMap
+                  ? () {
+                    _onShowOnMap(model.summitDataId);
+                  }
+                  : null,
+          icon: const Icon(Icons.map),
+        ),
+        IconButton(
           onPressed: () {
             unawaited(
               showModalBottomSheet(
@@ -117,6 +126,11 @@ class SummitDetailsView extends StatelessWidget {
   void _onRouteTap(ItemDataId routeDataId) {
     RouteDbController controller = RouteDbController();
     controller.requestRouteDetails(routeDataId);
+  }
+
+  void _onShowOnMap(ItemDataId summitDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestShowSummitOnMap(summitDataId);
   }
 
   Widget _showLoadingIndicator() {
