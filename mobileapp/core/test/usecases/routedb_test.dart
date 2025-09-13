@@ -3,6 +3,7 @@
 ///
 library;
 
+import 'package:core/boundaries/sysenv.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -23,6 +24,8 @@ class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
 
 class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
 
+class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
+
 /// Unit tests for the core.usecases.routedb.RouteDbUseCases component.
 void main() {
   setUpAll(() {
@@ -35,17 +38,20 @@ void main() {
   final RouteDbStorageBoundaryMock storageBoundaryMock = RouteDbStorageBoundaryMock();
   final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
   final AppPreferencesBoundaryMock preferencesBoundaryMock = AppPreferencesBoundaryMock();
+  final SystemEnvironmentBoundaryMock systemEnvBoundaryMock = SystemEnvironmentBoundaryMock();
 
   // Configure DI to provide the boundary mocks
   di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
   di.registerFactory<PresentationBoundary>(() => presentationBoundaryMock);
   di.registerFactory<AppPreferencesBoundary>(() => preferencesBoundaryMock);
+  di.registerFactory<SystemEnvironmentBoundary>(() => systemEnvBoundaryMock);
 
   tearDown(() {
     // Reset the mocks after each test case
     reset(storageBoundaryMock);
     reset(presentationBoundaryMock);
     reset(preferencesBoundaryMock);
+    reset(systemEnvBoundaryMock);
   });
 
   group('core.usecases.routedb.summits', () {
