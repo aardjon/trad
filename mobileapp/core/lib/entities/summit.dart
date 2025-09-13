@@ -20,7 +20,7 @@ class Summit {
   /// single "summit" point, which is a rare corner case that will hopefully be eliminated in the
   /// future.
   // TODO(aardjon): Make it mandatory when https://github.com/Headbucket/trad/issues/12 is done.
-  GeoPosition? position;
+  final GeoPosition? position;
 
   /// Constructor for directly initializing all members.
   Summit(this.id, this.name, [this.position]);
