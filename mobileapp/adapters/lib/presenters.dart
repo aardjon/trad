@@ -110,24 +110,23 @@ class ApplicationWidePresenter implements PresentationBoundary {
     return <ListViewItem>[
       ListViewItem(
         'Name',
-        endIcon:
-            usedSortCriterion == RoutesFilterMode.name ? const IconDefinition(Glyph.checked) : null,
+        endIcon: usedSortCriterion == RoutesFilterMode.name
+            ? const IconDefinition(Glyph.checked)
+            : null,
         itemId: RoutesFilterMode.name.index,
       ),
       ListViewItem(
         'Schwierigkeitsgrad',
-        endIcon:
-            usedSortCriterion == RoutesFilterMode.grade
-                ? const IconDefinition(Glyph.checked)
-                : null,
+        endIcon: usedSortCriterion == RoutesFilterMode.grade
+            ? const IconDefinition(Glyph.checked)
+            : null,
         itemId: RoutesFilterMode.grade.index,
       ),
       ListViewItem(
         'Bewertung',
-        endIcon:
-            usedSortCriterion == RoutesFilterMode.rating
-                ? const IconDefinition(Glyph.checked)
-                : null,
+        endIcon: usedSortCriterion == RoutesFilterMode.rating
+            ? const IconDefinition(Glyph.checked)
+            : null,
         itemId: RoutesFilterMode.rating.index,
       ),
     ];
@@ -168,18 +167,16 @@ class ApplicationWidePresenter implements PresentationBoundary {
     return <ListViewItem>[
       ListViewItem(
         'Neueste zuerst',
-        endIcon:
-            usedSortCriterion == PostsFilterMode.newestFirst
-                ? const IconDefinition(Glyph.checked)
-                : null,
+        endIcon: usedSortCriterion == PostsFilterMode.newestFirst
+            ? const IconDefinition(Glyph.checked)
+            : null,
         itemId: PostsFilterMode.newestFirst.index,
       ),
       ListViewItem(
         'Älteste zuerst',
-        endIcon:
-            usedSortCriterion == PostsFilterMode.oldestFirst
-                ? const IconDefinition(Glyph.checked)
-                : null,
+        endIcon: usedSortCriterion == PostsFilterMode.oldestFirst
+            ? const IconDefinition(Glyph.checked)
+            : null,
         itemId: PostsFilterMode.oldestFirst.index,
       ),
     ];

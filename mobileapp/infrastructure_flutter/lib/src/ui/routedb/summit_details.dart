@@ -57,12 +57,11 @@ class SummitDetailsView extends StatelessWidget {
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[
         IconButton(
-          onPressed:
-              model.canShowOnMap
-                  ? () {
-                    _onShowOnMap(model.summitDataId);
-                  }
-                  : null,
+          onPressed: model.canShowOnMap
+              ? () {
+                  _onShowOnMap(model.summitDataId);
+                }
+              : null,
           icon: const Icon(Icons.map),
         ),
         IconButton(
