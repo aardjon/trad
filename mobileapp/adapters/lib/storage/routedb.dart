@@ -6,6 +6,7 @@ library;
 import 'dart:io';
 
 import 'package:core/boundaries/storage/routedb.dart';
+import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
 import 'package:core/entities/sorting/posts_filter_mode.dart';
@@ -159,15 +160,29 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Summit> retrieveSummit(int summitDataId) async {
+    // Unknown/Missing position values are stored in the database with this special coordinates.
+    const (int, int) undefinedCoordinates = (0, 0);
+    // The precision of geographic coordinates stored in the database. The read value must be
+    // divided by this factor to get regular (floating point) decimal degree.
+    const double coordinateValuePrecision = 10000000;
+
     Query query = Query.table(SummitsTable.tableName, <String>[
       SummitsTable.columnId,
       SummitsTable.columnSummitName,
+      SummitsTable.columnLatitude,
+      SummitsTable.columnLongitude,
     ]);
     query.setWhereCondition('${SummitsTable.columnId} = ?', <int>[summitDataId]);
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     int id = resultSet[0].getIntValue(SummitsTable.columnId);
     String name = resultSet[0].getStringValue(SummitsTable.columnSummitName);
-    return Summit(id, name);
+    int lat = resultSet[0].getIntValue(SummitsTable.columnLatitude);
+    int lon = resultSet[0].getIntValue(SummitsTable.columnLongitude);
+    GeoPosition? position;
+    if ((lat, lon) != undefinedCoordinates) {
+      position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
+    }
+    return Summit(id, name, position);
   }
 
   @override
