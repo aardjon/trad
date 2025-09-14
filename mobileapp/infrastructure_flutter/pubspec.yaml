@@ -1,6 +1,6 @@
 name: infrastructure_flutter
 description: The Flutter part of the 'infrastructure' ring of the trad mobile application.
-version: 0.0.1
+resolution: workspace
 publish_to: none
 
 environment:

@@ -1,5 +1,6 @@
 name: main
 description: "The 'main' component of the trad mobile application."
+resolution: workspace
 publish_to: 'none'
 
 # The following defines the version and build number for your application.

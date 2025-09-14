@@ -1,6 +1,6 @@
 name: crosscuttings
 description: The 'crosscuttings' ring of the trad mobile application.
-version: 0.0.1
+resolution: workspace
 publish_to: none
 
 environment:
