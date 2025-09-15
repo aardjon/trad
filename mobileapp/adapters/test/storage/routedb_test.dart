@@ -77,7 +77,10 @@ void main() {
   });
 
   // The path to the route database file that should be used by the application.
-  const String expectedDbFilePath = '${PathProviderBoundaryMock.appDataDir}/peaks.sqlite';
+  final String expectedDbFilePath = fileSystemMock.joinPaths(
+    PathProviderBoundaryMock.appDataDir,
+    'peaks.sqlite',
+  );
 
   /// Test cases for ensuring the correct behaviour for wrong storage started/stopped states
   group('StorageState constraints', () {
