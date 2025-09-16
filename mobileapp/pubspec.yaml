@@ -55,7 +55,7 @@ melos:
     clean:
       help: Deletes local files that are generated during melos tasks, e.g. build files and coverage information.
       steps:
-        - find . -name dlcov_references_test.dart -exec rm {} \;
+        - find . -name dlcov_references_test.dart | xargs -r rm
         - rm -rf ./coverage
         - melos exec rm -rf coverage
         - melos exec rm -rf build
@@ -83,7 +83,7 @@ melos:
     test:
       help: Run all unit tests for the mobile application and create lcov coverage files (lcov.info).
       steps:
-        - find . -name lcov.info -exec rm {} \;
+        - find . -name lcov.info | xargs -r rm
         - melos exec --dir-exists=test dart run dlcov gen-refs
         - melos exec --no-flutter --dir-exists=test dart test --coverage=./coverage
         - melos exec --no-flutter --dir-exists=coverage/test dart run coverage:format_coverage --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
