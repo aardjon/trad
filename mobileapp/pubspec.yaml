@@ -2,11 +2,98 @@ name: trad
 description: The ultimate app for climbing in Saxony
 version: 0.0.1
 repository: https://github.com/Headbucket/trad
+workspace:
+  - adapters
+  - core
+  - crosscuttings
+  - infrastructure_flutter
+  - infrastructure_vanilla
+  - main
 
 environment:
   sdk: ^3.9.2
 
 dev_dependencies:
   cobertura: ^1.0.5
-  melos: ^6.3.0
+  melos: ^7.1.1
   very_good_analysis: ^9.0.0
+
+melos:
+  scripts:
+    analyze:
+      help: Run the Dart linter on all source files.
+      run: dart analyze --fatal-infos
+
+    build.linux:
+      help: Does a Linux build in release mode.
+      steps:
+        - mkdir -p artifacts
+        - rm -rf artifacts/trad_linux
+        - cd main
+        - flutter build linux --release
+        - cd ..
+        - mv main/build/linux/x64/release/bundle artifacts/trad_linux
+
+    build.android:
+      help: Does an Android build in release mode.
+      steps:
+        - mkdir -p artifacts
+        - cd main
+        - flutter build apk --release
+        - mv build/app/outputs/flutter-apk/app-release.apk ../artifacts/trad_android.apk
+
+    build.windows:
+      help: Does a Windows build in release mode.
+      steps:
+        - mkdir -p artifacts
+        - rm -rf artifacts\trad_windows
+        - cd main
+        - flutter build windows --release
+        - cd ..
+        - mv main\build\windows\x64\runner\Release artifacts\trad_windows
+
+    clean:
+      help: Deletes local files that are generated during melos tasks, e.g. build files and coverage information.
+      steps:
+        - find . -name dlcov_references_test.dart | xargs -r rm
+        - rm -rf ./coverage
+        - melos exec rm -rf coverage
+        - melos exec rm -rf build
+        - rm -rf artifacts
+
+    coverage:
+      help: Calculates test coverage for the whole mobile application. 'melos run test' must have been executed before.
+      steps:
+        - rm -rf ./coverage/report
+        - mkdir -p coverage
+        - melos exec --file-exists=coverage/lcov.info 'cat coverage/lcov.info >> ../coverage/lcov.info'
+        - lcov --remove coverage/lcov.info '*/dlcov_references_test.dart' -o coverage/lcov.info
+        - lcov --remove coverage/lcov.info '*/test/*_test.dart' -o coverage/lcov.info
+        - dart run cobertura convert
+        - genhtml -o ./coverage/report ./coverage/lcov.info --title "trad.mobileapp" --header-title "trad Code Coverage Report" --legend --show-details --no-function-coverage --show-navigation
+
+    deploy.android:
+      help: Install the build APK on the connected Android device (via ADB).
+      run: adb install artifacts/*.apk
+
+    format:
+      help: Auto-format all source files according to our formatting rules.
+      exec: dart format --line-length=100 --set-exit-if-changed .
+
+    test:
+      help: Run all unit tests for the mobile application and create lcov coverage files (lcov.info).
+      steps:
+        - find . -name lcov.info | xargs -r rm
+        - melos exec --dir-exists=test dart run dlcov gen-refs
+        - melos exec --no-flutter --dir-exists=test dart test --coverage=./coverage
+        - melos exec --no-flutter --dir-exists=coverage/test dart run coverage:format_coverage --in=./coverage --out=./coverage/lcov.info --lcov --report-on=.
+        - melos exec --flutter --dir-exists=test flutter test --coverage
+        - melos exec --flutter --file-exists=coverage/lcov.info "sed -i 's#SF:lib#SF:MELOS_PACKAGE_PATH/lib#g;s#SF:test#SF:MELOS_PACKAGE_PATH/test#g' coverage/lcov.info"
+
+    upgrade:
+      help: Upgrades all dependencies to their most current (allowed) versions.
+      steps:
+        - melos exec rm -f pubspec_overrides.yaml
+        - melos exec rm -f pubspec.lock
+        - rm pubspec.lock
+        - melos bootstrap
