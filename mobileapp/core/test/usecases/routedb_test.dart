@@ -3,7 +3,11 @@
 ///
 library;
 
+import 'dart:io';
+
 import 'package:core/boundaries/sysenv.dart';
+import 'package:core/entities/errors.dart';
+import 'package:core/entities/geoposition.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -29,9 +33,10 @@ class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBou
 /// Unit tests for the core.usecases.routedb.RouteDbUseCases component.
 void main() {
   setUpAll(() {
-    // Register a default document object which is used by mocktails `any` matcher
+    // Register default objects which are used by mocktails `any` matcher
     registerFallbackValue(RoutesFilterMode.name);
     registerFallbackValue(PostsFilterMode.newestFirst);
+    registerFallbackValue(GeoPosition(0, 0));
   });
 
   final DependencyProvider di = DependencyProvider();
@@ -52,6 +57,104 @@ void main() {
     reset(presentationBoundaryMock);
     reset(preferencesBoundaryMock);
     reset(systemEnvBoundaryMock);
+  });
+
+  // Tests for the route storage management (e.g. importing a new DB file)
+  group('core.usecases.routedb.management', () {
+    /// Dummy file path of the route database file to import
+    const String fakeFilePath = 'new_route_db.sqlite';
+
+    /// Checks the regular, normal route DB import behaviour:
+    ///  - The given file name is forwarded to the storage
+    ///  - After successful import, the new storage creation date is sent to the UI
+    ///  - If the storage was started before, it is stopped first (skipped if not started)
+    for (final bool stopStorageFirst in <bool>[false, true]) {
+      test('importRouteDbFile() success, stop first: $stopStorageFirst', () async {
+        final DateTime fakeCreationDate = DateTime(2025, 7, 23);
+
+        // Setup the storage mock as if everything went well
+        when(storageBoundaryMock.isStarted).thenReturn(stopStorageFirst);
+        when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {});
+        when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
+        when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
+          return fakeCreationDate;
+        });
+
+        RouteDbUseCases usecases = RouteDbUseCases(di);
+        await usecases.importRouteDbFile(fakeFilePath);
+
+        if (stopStorageFirst) {
+          // Make sure the started storage is stopped first
+          verify(storageBoundaryMock.stopStorage).called(1);
+        } else {
+          /// Make sure the storage is not explicitly stopped first
+          verifyNever(storageBoundaryMock.stopStorage);
+        }
+        // Make sure the correct file name is sent with the storage import request
+        verify(() => storageBoundaryMock.importRouteDbFile(fakeFilePath)).called(1);
+        // Make sure the storage is started (again)
+        verify(storageBoundaryMock.startStorage).called(1);
+        // Make sure the UI gets the storage state update and the new creation date
+        verify(() => presentationBoundaryMock.updateRouteDbStatus(fakeCreationDate)).called(1);
+      });
+    }
+
+    /// Ensures the correct behaviour in case some file operation failed:
+    /// - The error must be handled (don't throw)
+    /// - Still try to start the storage again
+    /// - The UI must be notified about the storage state (with date if a previous DB can be opened)
+    ///
+    /// This kind of error can happen e.g. if the given file doesn't exist or is not readable.
+    test('file operation error', () async {
+      // Setup the storage mock to simulate an IO error during import
+      when(storageBoundaryMock.isStarted).thenReturn(false);
+      when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {
+        throw const PathNotFoundException(fakeFilePath, OSError());
+      });
+      when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
+      when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
+        return DateTime(2025, 9, 3);
+      });
+
+      RouteDbUseCases usecases = RouteDbUseCases(di);
+      await usecases.importRouteDbFile(fakeFilePath);
+
+      // Make sure the correct file name is sent with the storage import request
+      verify(() => storageBoundaryMock.importRouteDbFile(fakeFilePath)).called(1);
+      // Make sure the storage is started (again)
+      verify(storageBoundaryMock.startStorage).called(1);
+      // Make sure the UI gets the storage state update and the creation date
+      verify(() => presentationBoundaryMock.updateRouteDbStatus(any())).called(1);
+    });
+
+    /// Ensures the correct behaviour in case the new route db is invalid, e.g. missing, corrupt
+    /// or just of an incompatible schema version:
+    /// - The error must be handled (don't throw)
+    /// - The UI must be notified about the missing storage
+    for (final StorageStartingException error in <StorageStartingException>[
+      InaccessibleStorageException(fakeFilePath, Exception()),
+      InvalidStorageFormatException(fakeFilePath, 'Invalid file format'),
+      IncompatibleStorageException(fakeFilePath, '0.1', '47.11'),
+    ]) {
+      test('invalid routedb error', () async {
+        // Setup the storage mock to simulate an incompatible route DB file
+        when(storageBoundaryMock.isStarted).thenReturn(false);
+        when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {});
+        when(storageBoundaryMock.startStorage).thenAnswer((_) async {
+          throw error;
+        });
+
+        RouteDbUseCases usecases = RouteDbUseCases(di);
+        await usecases.importRouteDbFile(fakeFilePath);
+
+        // Make sure the correct file name is sent with the storage import request
+        verify(() => storageBoundaryMock.importRouteDbFile(fakeFilePath)).called(1);
+        // Make sure the storage is started (again)
+        verify(storageBoundaryMock.startStorage).called(1);
+        // Make sure the UI gets the storage state update
+        verify(() => presentationBoundaryMock.updateRouteDbStatus(null)).called(1);
+      });
+    }
   });
 
   group('core.usecases.routedb.summits', () {
@@ -100,6 +203,42 @@ void main() {
       verify(() => storageBoundaryMock.retrieveSummits(filterText)).called(1);
       // Make sure the retrieved list is sent to the UI
       verify(() => presentationBoundaryMock.updateSummitList(summitList)).called(1);
+    });
+
+    /// Ensures the correct behaviour of the showSummitOnMap() method:
+    ///  - The requested summit must be loaded from the storage (retrieveSummit())
+    ///  - If the summit has a GeoPosition, this position is send to openExternalMapsApp()
+    ///  - If the summit has no GeoPosition, nothing happens
+    group('showSummitOnMap() use case', () {
+      final List<Summit> testedSummits = <Summit>[
+        Summit(42, 'Mount X'),
+        Summit(83, 'Mount Y', GeoPosition(51.852, 13.623)),
+      ];
+      for (final Summit summit in testedSummits) {
+        test('$summit', () async {
+          // Setup the storage mock
+          when(() => storageBoundaryMock.retrieveSummit(any())).thenAnswer((_) async {
+            return summit;
+          });
+          // Setup the sysenv mock
+          when(() => systemEnvBoundaryMock.openExternalMapsApp(any())).thenAnswer((_) async {});
+
+          // Run the actual test case
+          RouteDbUseCases usecases = RouteDbUseCases(di);
+          await usecases.showSummitOnMap(summit.id);
+
+          // Make sure the filter string is provided to the storage for loading the summit
+          verify(() => storageBoundaryMock.retrieveSummit(summit.id)).called(1);
+
+          // Make sure the summit's GeoPosition is provided to the SysEnv boundary (or not if
+          // missing).
+          if (summit.position != null) {
+            verify(() => systemEnvBoundaryMock.openExternalMapsApp(summit.position!)).called(1);
+          } else {
+            verifyNever(() => systemEnvBoundaryMock.openExternalMapsApp(any()));
+          }
+        });
+      }
     });
   });
 

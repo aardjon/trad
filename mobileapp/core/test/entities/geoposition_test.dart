@@ -50,4 +50,22 @@ void main() {
       });
     }
   });
+
+  /// Test cases for GeoPosition string conversion
+  group('String conversion', () {
+    List<(double, double, String)> testData = <(double, double, String)>[
+      (51.765, 13.456, '51.7650000°N 13.4560000°E'),
+      (-51.765, -13.456, '51.7650000°S 13.4560000°W'),
+      (51.765, -13.456, '51.7650000°N 13.4560000°W'),
+      (-51.765, 13.456, '51.7650000°S 13.4560000°E'),
+    ];
+    for (final (double, double, String) coords in testData) {
+      double lat = coords.$1;
+      double lon = coords.$2;
+      String expected = coords.$3;
+      test('String conversion', () {
+        expect(GeoPosition(lat, lon).toString(), expected);
+      });
+    }
+  });
 }
