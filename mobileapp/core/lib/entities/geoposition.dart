@@ -36,8 +36,8 @@ class GeoPosition {
   String toString() {
     String hemisphereLat = latitude >= 0.0 ? 'N' : 'S';
     String hemisphereLon = longitude >= 0.0 ? 'E' : 'W';
-    String latStr = latitude.toStringAsFixed(7);
-    String lonStr = longitude.toStringAsFixed(7);
+    String latStr = latitude.abs().toStringAsFixed(7);
+    String lonStr = longitude.abs().toStringAsFixed(7);
     return '$latStr°$hemisphereLat $lonStr°$hemisphereLon';
   }
 }
