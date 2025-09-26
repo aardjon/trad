@@ -13,6 +13,7 @@
 **/*.iml
 **/pubspec_overrides.yaml
 */build/
+**/.cxx/
 
 artifacts
 
