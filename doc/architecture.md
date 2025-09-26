@@ -426,6 +426,105 @@ So the generated source files must never be edited directly, but only ever by th
 To change the schema, update the DBML file. To modify the generated files, modify their templates.
 
 
+## 8.3 Application Branching and Versioning
+
+### 8.3.1 Requirements
+ - A new `scraper` version may be released without publishing a new version of the mobile app
+ - A new `mobileapp` version may be released without publishing a new version of the scraper
+ - It must be possible to release one part without publishing any already implemented new features of the other at any time
+ - Both applications need a version specifier to be shown to users, to facilitate debugging
+ - Each published version must be fixed as a tag (in git), to facilitate debugging
+
+### 8.3.2 Branch structure
+
+To fulfil the requirements, we use the following main branches:
+
+#### `mobileapp-staging` branch
+
+Used for collecting changes for the next mobile app release, so this is the branch to base a mobile
+app feature branch on, and to merge it into when the new feature is ready. To actually release a
+new version, the branch is merged into `main`. The branch is deleted and re-created after each
+release (if it doesn't exist, create it based on the current `main`). No changes to the
+[`scraper`](../scraper) directory are allowed on this branch.
+
+#### `scraper-staging` branch
+
+Used for collecting changes for the next scraper release, so this is the branch to base a scraper
+feature branch on, and to merge it into when the new feature is ready. To actually release a new
+version, the branch is merged into `main`. The branch is deleted and re-created after each release
+(if it doesn't exist, create it based on the current `main`). No changes to the
+[`mobileapp`](../mobileapp) directory are allowed on this branch.
+
+#### `main` branch
+
+This is the branch where release tags are created from (usually after merging one or both of the
+application `*-staging` branches). Direct changes to the applications are not allowed on this branch,
+but changing common things like documentation or CI scripts is, though.
+
+Tags are created from the `main` branch.
+
+### 8.3.3 Versioning
+
+The final version numbers are applied on the `main` branch just before releasing (tagging) a new
+version. Each application version may be part of multiple tags. The release version numbering
+schema is based on [semantic versioning](https://semver.org/), but with some adaptions due to
+application instead of API versioning. A version number contains of three (MAJOR, MINOR and PATCH)
+numbers (separated by dots) that are increment based on the actual changes.
+
+#### Scraper version
+
+The *API* (as of the Semantic Versioning documentation) is formed by the CLI interface, the created
+databases and things like potential future config files (in general: Everything that external
+actors may interact with). The scraper version number must also match the
+[Python version specification](https://packaging.python.org/en/latest/specifications/version-specifiers/#version-specifiers).
+
+A new version is a *MAJOR* upgrade, when it introduces (potential) incompatibilities to external
+stakeholders, e.g.:
+ - Removing/Changing a CLI parameter (existing scripts need to be adapted)
+ - Adding a new **mandatory** CLI parameter (existing scripts need to be adapted)
+ - Removing an output routedb schema version (i.e. new version cannot create a certain DB schema anymore)
+ - Completely removing support for a data source (for all routedb versions)
+
+A new version is a *MINOR* upgrade, when it does not affect existing behaviour, e.g.:
+ - Adding a new, **non-mandatory** CLI parameter
+ - Adding a new output routedb schema version
+ - Adding a new data source
+ - Internal changes that do not directly affect usage (e.g. refactorings or performance improvements)
+
+A new version is a *PATCH* upgrade, when it contains only bugfixes without introducing any
+incompatibilities or furter changes.
+
+#### Mobile App version
+
+The mobile app doesn't have something like an API and is not intended to be automated in any way.
+Also, most users probably don't care too much about the meaning of version numbers. So the version
+number decision can be somewhat arbitrary, but we still want to define at least some guidelines:
+
+A new version is a *MAJOR* upgrade, when external stakeholders may be forced to do or at least pay
+attention to something, e.g.:
+ - Enforcing the download of a new route database (=major upgrade to the minimum schema version)
+ - Changing the journal database schema in a backward-incompatible way (=an app downgrade gets complicated)
+ - A comprehensive GUI change or re-design
+ - Dropping some system/hardware support (=app cannot be used on a large amount of devices anymore)
+ - Dropping features
+
+A new version is a *MINOR* upgrade, when users can theoretically continue using the app without
+noticing, e.g.:
+ - Adding new features
+ - Adding a new table or column to the journal database (back-compatible change)
+
+A new version is a *PATCH* upgrade, when it contains only bugfixes without introducing any
+incompatibilities or furter changes.
+
+Furthermore, each major mobile app version may get a catchy label.
+
+### 8.3.4 Release Tagging
+
+For each release, the `main` branch is tagged. Tag names are the tag creation date (`YYYYMMDD`)
+appended by a sequential number in case more than one tag is needed on a single day. For example:
+`20250923.1` is the first tag created on 23rd Septemer 2025.
+
+
 # 9. Architecture Decisions
 
 ## 9.1 ADR-1: How to integrate Flutter into the architecture?

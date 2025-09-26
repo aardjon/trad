@@ -91,6 +91,14 @@ $ invoke run
 For further information about available `Invoke` scripts, please see [Development tools and CI](doc/devtools.md).
 
 
+## Important branches
+
+- Changes to the mobile app must be merged into the `mobileapp-staging` branch
+- Changes to the scraper must be merged into the `scraper-staging` branch
+- `scraper-staging` must not contain changes to the `mobileapp` directory, and vice-versa
+- If the required `staging` branch doesn't exist, just create it from `main`
+
+
 ## Coding Rules
 
 - In general, we follow the [Dart style guidelines](https://dart.dev/effective-dart/style) for Dart and the [Black style](https://black.readthedocs.io/en/stable/the_black_code_style/) for Python code.
