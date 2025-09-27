@@ -31,29 +31,34 @@ melos:
       help: Does a Linux build in release mode.
       steps:
         - mkdir -p artifacts
-        - rm -rf artifacts/trad_linux
+        - rm -rf artifacts/trad_linux-*
         - cd main
         - flutter build linux --release
         - cd ..
-        - mv main/build/linux/x64/release/bundle artifacts/trad_linux
+        - mv main/build/linux/x64/release/bundle artifacts/trad_linux-develop
+        - git describe --exact-match --tags > /dev/null 2>&1 && mv artifacts/trad_linux-develop artifacts/trad_linux-`grep 'version:' pubspec.yaml | cut -d' ' -f2` || true
 
     build.android:
       help: Does an Android build in release mode.
       steps:
         - mkdir -p artifacts
+        - rm -rf artifacts/trad_android-*
         - cd main
         - flutter build apk --release
-        - mv build/app/outputs/flutter-apk/app-release.apk ../artifacts/trad_android.apk
+        - cd ..
+        - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/trad_android-develop.apk
+        - git describe --exact-match --tags > /dev/null 2>&1 && mv artifacts/trad_android-develop.apk artifacts/trad_android-`grep 'version:' pubspec.yaml | cut -d' ' -f2`.apk || true
 
     build.windows:
       help: Does a Windows build in release mode.
       steps:
         - mkdir -p artifacts
-        - rm -rf artifacts\trad_windows
+        - rm -rf artifacts\trad_windows-*
         - cd main
         - flutter build windows --release
         - cd ..
-        - mv main\build\windows\x64\runner\Release artifacts\trad_windows
+        - mv main\build\windows\x64\runner\Release artifacts\trad_windows-develop
+        - git describe --exact-match --tags > /dev/null 2>&1 && mv artifacts/trad_windows-develop.apk artifacts/trad_windows-windows-`grep 'version:' pubspec.yaml | cut -d' ' -f2` || true
 
     clean:
       help: Deletes local files that are generated during melos tasks, e.g. build files and coverage information.
