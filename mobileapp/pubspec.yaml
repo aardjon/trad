@@ -1,6 +1,9 @@
 name: trad
 description: The ultimate app for climbing in Saxony
-version: 0.0.1
+# Attention: When incrementing the mobile app version number, please also change the
+# 'applicationVersion' constant in the crosscuttings/appmeta.dart file (both values must always be
+# equal)!
+version: 0.1.0
 repository: https://github.com/Headbucket/trad
 workspace:
   - adapters

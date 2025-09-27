@@ -7,6 +7,7 @@ library;
 import 'dart:async';
 
 import 'package:adapters/boundaries/external_apps.dart';
+import 'package:crosscuttings/appmeta.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:adapters/boundaries/paths.dart';
@@ -62,7 +63,8 @@ class ApplicationBootstrap {
   /// itself. Run [startApp] afterwards to actually start the app.
   void initApp() {
     _setupLogging(); // Setup logging before anything else to allow logging as soon as possible
-    _logger.info('Bootstrapping trad application');
+    _logger.info('Hi! This is $applicationName version $applicationVersion.');
+    _logger.info('Bootstrapping application');
     _setupDependencies();
   }
 
@@ -70,7 +72,7 @@ class ApplicationBootstrap {
   ///
   /// Must be called after [initApp] to actually run the first application use case (startup).
   Future<void> startApp() async {
-    _logger.info('Starting trad application');
+    _logger.info('Starting application');
     ApplicationWideUseCases appUseCases = ApplicationWideUseCases(_dependencyProvider);
     await appUseCases.startApplication();
   }
