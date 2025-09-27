@@ -226,3 +226,32 @@ jobs:
 
       - name: Run all tests
         run: dart run melos run test
+
+
+  publish-coverage-report:
+    needs: test-linux
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    concurrency:
+      group: ftp-deploy
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Import artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: trad-coverage-report
+          path: report
+
+      - name: Publish HTML coverage report
+        uses: sebastianpopp/ftp-action@releases/v2
+        with:
+          host: ${{ secrets.REPORT_FTP_HOST }}
+          user: ${{ secrets.REPORT_FTP_USER }}
+          password: ${{ secrets.REPORT_FTP_PW }}
+          localDir: "report/"
+          remoteDir: "main/mobileapp"
+          options: "--delete"
