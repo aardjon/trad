@@ -232,8 +232,6 @@ jobs:
     needs: test-linux
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    concurrency:
-      group: ftp-deploy
     timeout-minutes: 10
     defaults:
       run:
@@ -245,6 +243,9 @@ jobs:
         with:
           name: trad-coverage-report
           path: report
+
+      - name: IP
+        run: dig @resolver4.opendns.com myip.opendns.com +short
 
       - name: Publish HTML coverage report
         uses: sebastianpopp/ftp-action@releases/v2
