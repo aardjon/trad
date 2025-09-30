@@ -3,6 +3,38 @@ name: trad.scraper
 on: [push, pull_request]
 
 jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./scraper
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+            python-version: '>=3.12.7 <3.13.0' 
+
+      - name: Setup environment
+        run: |
+             echo "--- Upgrade pip"
+             pip install -U pip
+             echo "--- Install Invoke"
+             pip install invoke
+             echo "--- Install requirements"
+             invoke bootstrap
+
+      - name: Build app in release mode
+        run: invoke build
+        
+      - name: Archive build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trad-scraper-linux
+          path: scraper/artifacts/*
+          retention-days: 1
+
   check-style:
     runs-on: ubuntu-24.04
     defaults:

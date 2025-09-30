@@ -8,6 +8,8 @@ this file.
 import fileinput
 import platform
 import shutil
+from contextlib import suppress
+from io import StringIO
 from pathlib import Path
 from typing import Literal
 
@@ -96,6 +98,8 @@ def clean(context: Context) -> None:
     information.
     """
     context.run("rm -rf coverage")
+    context - run("rm -rf build")
+    context - run("rm -rf dist")
 
 
 @task(name="format")
@@ -181,6 +185,54 @@ def coverage(context: Context) -> None:
     executed before.
     """
     context.run("coverage html")
+
+
+@task
+def build(context: Context) -> None:
+    """
+    Compiles a standalone (release-mode) executable of the scraper application.
+    """
+
+    def get_app_version() -> str:
+        """Extract the application version number to use from the pyproject.toml file."""
+        version_definition: str = ""
+        with Path("pyproject.toml").open("rt") as fp:
+            for version_definition in fp:
+                if version_definition.startswith("version = "):
+                    break
+        return version_definition.split('"')[1]
+
+    def is_git_tag(ctx: Context) -> bool:
+        """Return True if the current checkout if of a Git tag, otherwise False."""
+        stdout = StringIO()
+        with suppress(Exception):
+            ctx.run("git describe --exact-match --tags", out_stream=stdout, err_stream=StringIO())
+        return bool(stdout.getvalue())
+
+    version = get_app_version() if is_git_tag(context) else "develop"
+    binary_name = f"trad-scraper-{version}"
+    print(f"Building scraper binary for version '{version}'...")
+
+    # Make sure the output directory exists
+    artifact_dir = Path("artifacts")
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+
+    final_binary = artifact_dir.joinpath(binary_name)
+
+    # Delete previous build results (if any)
+    shutil.rmtree("dist", ignore_errors=True)
+    shutil.rmtree("build", ignore_errors=True)
+    final_binary.unlink(missing_ok=True)
+
+    # Build the executable
+    start_script = Path("src", "scraper.py")
+    context.run(f"pyinstaller --onefile --strip --optimize=2 -n {binary_name} {start_script}")
+
+    # Move the binary from 'dist' to 'artifacts'
+    shutil.move(Path("dist", binary_name), final_binary)
+
+    print()
+    print(f"DONE! The created artifact is available at {final_binary}.")
 
 
 @task

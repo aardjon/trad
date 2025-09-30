@@ -117,22 +117,31 @@ This section describes the most importand development scripts. If not mentioned 
 scripts are available for both Melos (mobile app) and Invoke (scraper). Run them with `melos run
 [script]` and `invoke [script]`, respectively.
 
-
 ## analyze: Run the linter
 
 The `analyze` script runs the configured linter(s), e.g. [`dart analyze`](https://dart.dev/tools/dart-analyze)
 (Dart) or [ruff](https://docs.astral.sh/ruff/) (Python).
 
-## build.*: Build for various platforms
+## build*: Build the applications for various platforms
 
-The `build.*` scripts build the mobile application for different platforms. The generated artifacts
-are stored in the `artifacts` directory.
+### Building the mobile application
+
+The `build.*` Melos scripts build the mobile application for different platforms. The generated
+artifacts are stored in the `artifacts` directory.
 
 - `build.android`: Builds the Android application, creating an APK file.
 - `build.linux`: Builds the Linux application, creating an Ubuntu ELF binary. Only works on Linux.
 - `build.windows`: Builds the Windows application, creating an EXE file. Only works on Windows.
 
 These scripts are only available in the mobile app environment!
+
+### Building the scraper application
+
+The `build` invoke script builds and packages the scraper application for the currently running
+platform (but only Linux is officially supported). The generated artifact is stored in the
+`artifacts` directory.
+
+This script is only available in the scraper environment!
 
 ## coverage: Generate code coverage reports
 

@@ -4,6 +4,8 @@
 #
 #    pip-compile --constraint=app-requirements.txt --extra=dev --output-file=dev-requirements.txt --strip-extras pyproject.toml
 #
+altgraph==0.17.4
+    # via pyinstaller
 annotated-types==0.7.0
     # via
     #   -c app-requirements.txt
@@ -69,7 +71,10 @@ numpy==2.3.2
     #   pandas
     #   pandas-stubs
 packaging==25.0
-    # via pytest
+    # via
+    #   pyinstaller
+    #   pyinstaller-hooks-contrib
+    #   pytest
 pandas==2.3.1
     # via
     #   -c app-requirements.txt
@@ -92,6 +97,10 @@ pydantic-core==2.33.2
     #   pydantic
 pydbml==1.2.0
     # via dinja-tool
+pyinstaller==6.16.0
+    # via trad_scraper (pyproject.toml)
+pyinstaller-hooks-contrib==2025.9
+    # via pyinstaller
 pylint==3.3.8
     # via
     #   pylint-pytest
@@ -165,3 +174,6 @@ webencodings==0.5.1
     # via
     #   -c app-requirements.txt
     #   html5lib
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

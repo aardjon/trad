@@ -34,6 +34,7 @@ dev = [
   "pylint-pytest",
   "pylint-restricted-imports",
   "pytest",
+  "PyInstaller",
   "ruff",
   "types-beautifulsoup4",
   "types-requests",
@@ -43,6 +44,9 @@ dev = [
 [project.urls]
 Home = "https://github.com/Headbucket/trad"
 
+
+[console_scripts]
+scraper = "trad.main.main"
 
 
 [tool.coverage.run]
