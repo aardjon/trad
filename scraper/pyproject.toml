@@ -78,8 +78,32 @@ strict = true  # Enable strict mode
 warn_unused_ignores = true
 warn_redundant_casts = true
 
-# Enable additional error codes that seem to be not included in 'strict'
-enable_error_code = ["ignore-without-code"]
+# Explicitly enable all additional error codes (some of them are already active with 'strict').
+# More info on them: https://mypy.readthedocs.io/en/stable/error_code_list2.html
+enable_error_code = [
+  "comparison-overlap",
+  "deprecated",
+  "exhaustive-match",
+  "explicit-any",
+  "explicit-override",
+  "ignore-without-code",
+  "mutable-override",
+  "no-any-return",
+  "no-any-unimported",
+  "no-untyped-call",
+  "no-untyped-def",
+  "possibly-undefined",
+  "redundant-cast",
+  "redundant-expr",
+  "redundant-self",
+  "truthy-bool",
+  "truthy-iterable",
+  "type-arg",
+  "unimported-reveal",
+  "unreachable",
+  "unused-awaitable",
+  "unused-ignore",
+]
 
 # Disabled error codes:
 disable_error_code = "type-abstract"
