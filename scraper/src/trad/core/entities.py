@@ -7,7 +7,7 @@ from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from math import cos, pi, sqrt
-from typing import Final, Self
+from typing import Final, Self, override
 
 from trad.core.errors import MergeConflictError
 
@@ -121,6 +121,7 @@ class GeoPosition:
         dist = sqrt(dlat * dlat + dlon * dlon)
         return dist <= max_distance
 
+    @override
     def __str__(self) -> str:
         hemisphere_lat = "N" if self._latitude >= 0 else "S"
         hemisphere_lon = "E" if self._longitude >= 0 else "W"
@@ -173,14 +174,17 @@ class NormalizedName:
         # Order the single segments alphabetically, and rejoin them with single underscores
         return "_".join(sorted(normalized_name.split()))
 
+    @override
     def __str__(self) -> str:
         return self._normalized_string
 
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, NormalizedName):
             return NotImplemented
         return self._normalized_string == other._normalized_string
 
+    @override
     def __hash__(self) -> int:
         return hash(self._normalized_string)
 

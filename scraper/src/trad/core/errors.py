@@ -2,6 +2,8 @@
 Provides exception classes that may be raised during the scraping process.
 """
 
+from typing import override
+
 
 class FilterError(Exception):
     """
@@ -45,6 +47,7 @@ class EntityNotFoundError(PipeDataError):
         super().__init__()
         self._object_name = object_name
 
+    @override
     def __str__(self) -> str:
         return f"Referenced object '{self._object_name}' not found. Did you forget to add it?"
 
@@ -66,6 +69,7 @@ class MergeConflictError(PipeDataError):
         self._object_name = object_name
         self._conflicting_attribute = conflicting_attribute
 
+    @override
     def __str__(self) -> str:
         return (
             f"Cannot merge {self._object_type} data for '{self._object_name}' because of "
