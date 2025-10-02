@@ -82,7 +82,7 @@ class TeufelsturmDataFilter(Filter):
                 _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text, self._summit_cache)
-            if post_data.peak and not self._is_forbidden(post_data.peak):
+            if not self._is_forbidden(post_data.peak):
                 pipe.add_or_enrich_summit(post_data.peak)
                 pipe.add_or_enrich_route(summit_name=post_data.peak.name, route=post_data.route)
                 for post in post_data.posts:
