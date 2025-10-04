@@ -9,10 +9,10 @@ import '../../entities/sorting/routes_filter_mode.dart';
 /// Interface providing application preferences data to the core.
 ///
 /// Application preferences data is a set of rather small data that needs to be persisted between
-/// application runs but is not actual user data (which may be explicitly written loaded or
-/// exchanged by the user). It's typically used for storing some internal state to be recovered for
-/// the next run, for storing user preferences about the application itself. Preferences data is not
-/// meant to be shared with other application, and may be deleted or reset at any time.
+/// application runs but is not actual user data (which may be explicitly reloaded or exchanged by
+/// the user). It's typically used for storing some internal state to be recovered for the next run,
+/// for storing user preferences about the application itself. Preferences data is not meant to be
+/// shared with other application, and may be deleted or reset at any time.
 abstract interface class AppPreferencesBoundary {
   /// Initializes the storage.
   ///
