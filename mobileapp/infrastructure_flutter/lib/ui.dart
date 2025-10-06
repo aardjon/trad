@@ -72,14 +72,14 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateRouteDbStatus({
-    required bool routeDbActivated,
-    required String routeDbIdentifier,
-    String? availabilityMessage,
+    required bool activated,
+    required String label,
+    String? statusMessage,
   }) {
     _settingsState.updateRouteDbStatus(
-      routeDbActivationStatus: routeDbActivated,
-      dbIdentifier: routeDbIdentifier,
-      availabilityMessage: availabilityMessage,
+      routeDbActivationStatus: activated,
+      dbIdentifier: label,
+      availabilityMessage: statusMessage,
     );
   }
 
