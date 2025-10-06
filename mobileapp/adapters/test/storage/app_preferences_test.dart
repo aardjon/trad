@@ -16,11 +16,6 @@ class KeyValueStoreBoundaryMock extends Mock implements KeyValueStoreBoundary {}
 
 /// Unit tests for the adapters.storage.app_preferences.PreferencesStorage class.
 void main() {
-  /*setUpAll(() {
-    // Register a default values that are used by mocktails `any` matcher
-    registerFallbackValue(Query.table('example_table', <String>['example_column']));
-  });*/
-
   final KeyValueStoreBoundaryMock keyValueStoreMock = KeyValueStoreBoundaryMock();
   final DependencyProvider di = DependencyProvider();
 
