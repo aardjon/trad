@@ -1,7 +1,7 @@
 Requirements & Goals
 ====================
 
-# 1. Personal Journal
+# 1 Personal Journal
  - Manual logging of the following data for all climbed routes:
    - Date
    - Area
@@ -26,7 +26,7 @@ Requirements & Goals
     - Backward compatible import of old backups!
     - Maybe CSV export already satisfies this, needs to be checked!
 
-# 2. Route Database
+# 2 Route Database
 ## 2.1 List of climbing routes in the Saxon Switzerland area
  - Show a list of all summits:
     - Summit name
@@ -61,7 +61,16 @@ Requirements & Goals
  - For the beginning, go with an example snapshot included directly into the app
  - May it'd be enough to simply import a manually downloaded SQLite file?
 
-# 3. Knowledgebase
+# 3 Favourites
+ - The user shall be able to mark (and unmark) any summit as favourite
+ - Als marked summits can be shown in a separate favorite list (similar to the full summit list from 2.1)
+ - Summits can be removed from the favourite list
+ - The user can show the summit details (see 2.1) for each favourite
+ - The favorites must be still available after a route database upgrade
+ - If a summit is renamed in the route database (during an update), it is also renamed in the favourite list
+ - If a summit is removed from the route database (during an update), it is also removed from the favourite list
+
+# 4 Knowledgebase
 
 A collection of "articles" displaying formatted text including images and links to other articles.
 
@@ -78,14 +87,14 @@ Required articles:
   - Index
     - Structured Index/"Table of Contents" to easily list and navigate articles
 
-# 4 General/Misc
+# 5 General/Misc
  - User interface language: German
  - Keep the doors open for adding multi-language (Czech?) support later
 
 
-# 5 User Stories
-## 5.1 Information about climbing bans
+# 6 User Stories
+## 6.1 Information about climbing bans
 In the summit and in the route lists, I want to see some kind of stop sign (maybe 🚫?) if this summit/route is currently banned from climbing (based on the current system date). Furthermore, on the details page of this summit/route I want to see the exact dates this ban is active (e.g. 02/01-07/31).
 
-## 5.2 Location-based summit search
+## 6.2 Location-based summit search
 I want to be able to sort the summit list by distance to my current location, to easily find the closest summits (starting with the closest). Also, I want to be able to filter for summits within a certain distance (e.g. "1 km").
