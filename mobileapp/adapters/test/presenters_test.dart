@@ -154,9 +154,8 @@ void main() {
         bool expectMap = testParams.$2;
 
         test(summitPosition.toString(), () {
-          bool expectMap = false;
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          Summit summit = Summit(42, 'Mount Mock');
+          Summit summit = Summit(42, 'Mount Mock', summitPosition);
           presenter.showSummitDetails(summit);
 
           Matcher summitModelMatcher = isA<SummitDetailsModel>()
