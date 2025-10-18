@@ -6,6 +6,7 @@ To re-generate, run `invoke generate-schema routedb`.
 """
 
 from collections.abc import Sequence
+from enum import IntEnum
 from typing import Final, override
 
 from trad.adapters.boundaries.database import EntityName, SqlStatement
@@ -71,15 +72,76 @@ class DatabaseMetadataTable(TableSchema):
         return []
 
 
+class SummitNamesTable(TableSchema):
+    """
+    All names of all summits.
+
+    As a single summit can have multiple names, this table assigns specific names strings to summits.
+    Each summit must have exactly one official name assigned, but there may be several (including no)
+    additional names as well.
+
+    This table is designed for both searching by name and retrieving the name(s) of summits.
+    """
+
+    TABLE_NAME = "summit_names"
+    """ Name of the table. """
+
+    COLUMN_NAME: Final = "name"
+    """
+    The name of the 'name' TEXT column:
+    A single summit name string.
+    """
+
+    COLUMN_USAGE: Final = "usage"
+    """
+    The name of the 'usage' INTEGER column:
+    Usage of this name string (for this summit):
+    0 = Official name (the name given and used by local authorities, usually the default)
+    1 = Alternate name (e.g. a well-known "nickname" or an old name)
+    """
+
+    COLUMN_SUMMIT_ID: Final = "summit_id"
+    """
+    The name of the 'summit_id' INTEGER column:
+    ID of the summit this name is assigned to.
+    """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
+        CREATE TABLE summit_names (
+            "name" TEXT NOT NULL,
+            "usage" INTEGER NOT NULL,
+            "summit_id" INTEGER NOT NULL,
+            PRIMARY KEY(summit_id, usage, name),
+            FOREIGN KEY("summit_id") REFERENCES "summits" ("id") ON DELETE CASCADE
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[SqlStatement]:
+        return [
+            SqlStatement(
+                'CREATE INDEX "IdxSummitName" ON "summit_names" (name);',
+            ),
+        ]
+
+
 class SummitsTable(TableSchema):
     """
-    Table containing all summits.
+    Table containing all summit data.
 
-    Summit data from different sources is usually merged based on the summit name. To store
-    geographical coordinate values as integer values, their decimal representation is multiplied by
-    10.000.000 to support the same precision as the OSM database (7 decimal places, ~1 cm). Positive
-    values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is stored as
-    (509170936, 141992389).
+    The summit names are stored in the `summit_names` table. Each summit is guaranteed to have
+    exactly one official name assigned.
+
+    To store geographical coordinate values as integer values, their decimal representation is
+    multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+    ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+    stored as (509170936, 141992389).
 
     See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
     """
@@ -91,12 +153,6 @@ class SummitsTable(TableSchema):
     """
     The name of the 'id' INTEGER column:
     Summit ID, unique within this database.
-    """
-
-    COLUMN_SUMMIT_NAME: Final = "summit_name"
-    """
-    The name of the 'summit_name' TEXT column:
-    Official name of this summit. Names are unique.
     """
 
     COLUMN_LATITUDE: Final = "latitude"
@@ -120,7 +176,6 @@ class SummitsTable(TableSchema):
         return SqlStatement("""
         CREATE TABLE summits (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "summit_name" TEXT UNIQUE NOT NULL,
             "latitude" INTEGER NOT NULL,
             "longitude" INTEGER NOT NULL
         );
@@ -128,11 +183,7 @@ class SummitsTable(TableSchema):
 
     @override
     def index_ddl(self) -> list[SqlStatement]:
-        return [
-            SqlStatement(
-                'CREATE INDEX "IdxSummitName" ON "summits" (summit_name);',
-            ),
-        ]
+        return []
 
 
 class RoutesTable(TableSchema):
@@ -357,6 +408,7 @@ class DatabaseSchema:
         """
         return (
             DatabaseMetadataTable(),
+            SummitNamesTable(),
             SummitsTable(),
             RoutesTable(),
             PostsTable(),
@@ -365,3 +417,22 @@ class DatabaseSchema:
     def get_schema_version(self) -> tuple[int, int]:
         """Returns the version of this database schema as a tuple of (major, minor)."""
         return self._MAJOR_VERSION, self._MINOR_VERSION
+
+
+class NameUsage(IntEnum):
+    """
+    Usage definition of a single name string.
+    """
+
+    official = 0
+    """
+    The corresponding name is the official name given and used by some authorities. It is used e.g.
+    in the summit register. Each summit must have exactly one official name assigned.
+    """
+
+    alternate = 1
+    """
+    The corresponding name is a non-official but well-known and widely used alternative one. It can
+    be e.g. a nickname, a historic or a colloquial name. A single summit can have any (including no)
+    alternate names.
+    """

@@ -30,7 +30,7 @@ Project RouteDb {
 Table database_metadata {
   Note: '''
   Table containing some static metadata about the database itself.
-  
+
   Must contain exactly one row.
   '''
 
@@ -62,16 +62,55 @@ Table database_metadata {
   ]
 }
 
+
+Table summit_names {
+  Note: '''
+  All names of all summits.
+  
+  As a single summit can have multiple names, this table assigns specific names strings to summits.
+  Each summit must have exactly one official name assigned, but there may be several (including no)
+  additional names as well.
+
+  This table is designed for both searching by name and retrieving the name(s) of summits.
+  '''
+
+  name text [
+    not null,
+    note: 'A single summit name string.'
+  ]
+  usage integer [
+    not null,
+    note: '''
+      Usage of this name string (for this summit):
+      0 = Official name (the name given and used by local authorities, usually the default)
+      1 = Alternate name (e.g. a well-known "nickname" or an old name)
+    '''
+  ]
+  summit_id integer [
+    not null,
+    note: 'ID of the summit this name is assigned to.'
+  ]
+
+  indexes {
+    (summit_id, usage, name) [pk]
+    name [name: 'IdxSummitName']
+  }
+}
+// Foreign key summit_names -> summits
+Ref: summits.id < summit_names.summit_id [delete: cascade]
+
  
 Table summits {
   Note: '''
-  Table containing all summits.
+  Table containing all summit data.
   
-  Summit data from different sources is usually merged based on the summit name. To store
-  geographical coordinate values as integer values, their decimal representation is multiplied by
-  10.000.000 to support the same precision as the OSM database (7 decimal places, ~1 cm). Positive
-  values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is stored as
-  (509170936, 141992389).
+  The summit names are stored in the `summit_names` table. Each summit is guaranteed to have
+  exactly one official name assigned.
+  
+  To store geographical coordinate values as integer values, their decimal representation is
+  multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+  ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+  stored as (509170936, 141992389).
 
   See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
   '''
@@ -80,12 +119,6 @@ Table summits {
     primary key,
     increment,
     note: 'Summit ID, unique within this database.'
-  ]
-
-  summit_name text [
-    not null,
-    unique,
-    note: 'Official name of this summit. Names are unique.'
   ]
 
   latitude INTEGER [
@@ -97,10 +130,6 @@ Table summits {
     not null,
     note: 'The longitude value of the geographical position.'
   ]
-
-  indexes {
-    summit_name [name: 'IdxSummitName']
-  }
 }
 
 
