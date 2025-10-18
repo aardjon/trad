@@ -55,9 +55,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
-      routeDbActivated: routeDatabaseDate != null,
-      routeDbIdentifier: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
-      availabilityMessage: routeDatabaseDate != null ? null : noDbMessage,
+      activated: routeDatabaseDate != null,
+      label: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
+      statusMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
   }
 
