@@ -14,6 +14,7 @@ import pytest
 
 from trad.core.boundaries.pipes import Pipe
 from trad.core.entities import GeoPosition, Post, Route, Summit
+from trad.core.pipe_decorators.merge import MergingPipeDecorator
 from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
@@ -22,7 +23,9 @@ from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 @pytest.fixture
 def pipe_v1(tmp_path: Path) -> Iterator[Pipe]:
     database = Sqlite3Database()
-    pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=database)
+    pipe = MergingPipeDecorator(
+        DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=database)
+    )
     pipe.initialize_pipe()
     yield pipe
     database.disconnect()  # TODO(aardjon): Provide this on the Pipe!
@@ -61,7 +64,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     connection = connect(str(expected_db_file))
 
     # Ensure the summit has been added
-    result_set = list(connection.execute("SELECT summit_name FROM summits"))
+    result_set = list(connection.execute("SELECT name FROM summit_names"))
     assert len(result_set) == 1
     assert result_set[0][0] == "Falkenturm"
 
@@ -132,7 +135,7 @@ def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
         official_name="Beispielturm", high_grade_position=GeoPosition(470000000, 110000000)
     )
     summit3 = Summit(
-        official_name="Beispielturm", high_grade_position=GeoPosition(130000000, 370000000)
+        official_name="Beispielturm", low_grade_position=GeoPosition(470000011, 110000037)
     )
 
     # Insert Summit data without geographical coordinates
@@ -142,10 +145,14 @@ def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
     # Try to update the already set position (should be ignored)
     pipe_v1.add_or_enrich_summit(summit3)
 
+    pipe_v1.finalize_pipe()
+
     expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
     assert expected_db_file.exists()
 
     # Ensure that the Summit exists with the coordinates from the second call
     connection = connect(str(expected_db_file))
-    result_set = list(connection.execute("SELECT summit_name, latitude, longitude FROM summits"))
-    assert result_set == [("Beispielturm", 470000000, 110000000)]
+    summit_result_set = list(connection.execute("SELECT latitude, longitude FROM summits"))
+    assert summit_result_set == [(470000000, 110000000)]
+    name_result_set = list(connection.execute("SELECT name, usage FROM summit_names"))
+    assert name_result_set == [("Beispielturm", 0)]
