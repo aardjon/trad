@@ -24,6 +24,8 @@ class CliSettings(SettingsBoundary):
         args = self.__parse_command_line()
         self.__is_verbose: bool = args.verbose
         self.__output_dir: Path = args.output_dir
+        self.__record_traffic: list[Path] | None = args.record_traffic
+        self.__replay_traffic: list[Path] | None = args.replay_traffic
 
     def __parse_command_line(self) -> Namespace:
         """Returns the parsed command line."""
@@ -49,6 +51,21 @@ class CliSettings(SettingsBoundary):
             default=False,
             action="store_true",
         )
+        recorder_group = parser.add_mutually_exclusive_group()
+        recorder_group.add_argument(
+            "--record-traffic",
+            nargs=1,
+            required=False,
+            type=Path,
+            help="record all network traffic and store it into the directory following this option",
+        )
+        recorder_group.add_argument(
+            "--replay-traffic",
+            nargs=1,
+            required=False,
+            type=Path,
+            help="replay the network traffic stored in the directory following this option",
+        )
         return parser
 
     @override
@@ -58,3 +75,19 @@ class CliSettings(SettingsBoundary):
     @override
     def get_output_dir(self) -> Path:
         return self.__output_dir
+
+    @override
+    def is_record_traffic_mode(self) -> bool:
+        return bool(self.__record_traffic)
+
+    @override
+    def is_replay_traffic_mode(self) -> bool:
+        return bool(self.__replay_traffic)
+
+    @override
+    def get_traffic_recordings_path(self) -> Path | None:
+        return (
+            self.__record_traffic[0]
+            if self.__record_traffic
+            else (self.__replay_traffic[0] if self.__replay_traffic else None)
+        )
