@@ -6,6 +6,8 @@ starts the actual application.
 """
 
 import logging
+from functools import partial
+from typing import TYPE_CHECKING
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary
 from trad.adapters.boundaries.http import HttpNetworkingBoundary
@@ -18,9 +20,13 @@ from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.crosscuttings.di import DependencyProvider
 from trad.crosscuttings.logging import configure_logging
 from trad.filters.factory import AllFiltersFactory
+from trad.infrastructure.http_recorder import TrafficRecorder
 from trad.infrastructure.requests import RequestsHttp
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.pipes.factory import AllPipesFactory
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _logger = logging.getLogger(__name__)
 
@@ -85,6 +91,8 @@ class ApplicationBootstrap:
         """
         Setup all components (dependencies).
         """
+        settings = self.__dependency_provider.provide(SettingsBoundary)
+
         # Initialize all [adapters] components
         self.__dependency_provider.register_factory(
             PipeFactory, lambda: AllPipesFactory(self.__dependency_provider)
@@ -95,7 +103,12 @@ class ApplicationBootstrap:
 
         # Initialize all [infrastructure] components
         self.__dependency_provider.register_singleton(RelationalDatabaseBoundary, Sqlite3Database)
-        self.__dependency_provider.register_factory(HttpNetworkingBoundary, RequestsHttp)
+
+        traffic_recording_path = settings.get_traffic_recordings_path()
+        network_factory: Callable[[], HttpNetworkingBoundary] = RequestsHttp
+        if traffic_recording_path is not None and settings.is_record_traffic_mode():
+            network_factory = partial(TrafficRecorder, traffic_recording_path, RequestsHttp())
+        self.__dependency_provider.register_singleton(HttpNetworkingBoundary, network_factory)
 
     def run_application(self) -> None:
         """
