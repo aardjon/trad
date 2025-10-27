@@ -90,6 +90,25 @@ $ invoke run
 
 For further information about available `Invoke` scripts, please see [Development tools and CI](doc/devtools.md).
 
+#### 5. Record and replay network traffic
+
+To avoid accessing external network resources while testing and debugging, the Scraper can record
+all network traffic to disk:
+
+```
+python src/scraper.py --record-traffic /path/to/store/recordings /path/to/store/routedb
+```
+
+The recorded traffic can be replayed, to re-create the same route database without doing any real
+network requests:
+
+```
+python src/scraper.py --replay-traffic /path/to/store/recordings /path/to/store/routedb
+```
+
+Note that the recordings directory can easily exceed 100 MB and contain several tens of thousands
+of files.
+
 
 ## Important branches
 
