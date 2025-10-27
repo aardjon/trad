@@ -20,7 +20,7 @@ from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.crosscuttings.di import DependencyProvider
 from trad.crosscuttings.logging import configure_logging
 from trad.filters.factory import AllFiltersFactory
-from trad.infrastructure.http_recorder import TrafficRecorder
+from trad.infrastructure.http_recorder import TrafficPlayer, TrafficRecorder
 from trad.infrastructure.requests import RequestsHttp
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.pipes.factory import AllPipesFactory
@@ -106,8 +106,11 @@ class ApplicationBootstrap:
 
         traffic_recording_path = settings.get_traffic_recordings_path()
         network_factory: Callable[[], HttpNetworkingBoundary] = RequestsHttp
-        if traffic_recording_path is not None and settings.is_record_traffic_mode():
-            network_factory = partial(TrafficRecorder, traffic_recording_path, RequestsHttp())
+        if traffic_recording_path is not None:
+            if settings.is_record_traffic_mode():
+                network_factory = partial(TrafficRecorder, traffic_recording_path, RequestsHttp())
+            elif settings.is_replay_traffic_mode():
+                network_factory = partial(TrafficPlayer, traffic_recording_path)
         self.__dependency_provider.register_singleton(HttpNetworkingBoundary, network_factory)
 
     def run_application(self) -> None:

@@ -93,6 +93,69 @@ class TrafficRecorder(HttpNetworkingBoundary):
         self._output_path.joinpath(_record_index_file_name).write_text(json_data.decode("utf-8"))
 
 
+class TrafficPlayer(HttpNetworkingBoundary):
+    """
+    Networking implementation for replaying previously recorded network traffic. This component
+    doesn't do any real HTTP requests. Instead, the response to send for each request is taken from
+    the recordings directory. If no matching request can be found, a ConnectionError is raised.
+    """
+
+    def __init__(self, recordings_path: Path):
+        """
+        Create a new instance which replays the traffic form the given `recordings_path` directory.
+        """
+        self._recordings_path = recordings_path
+        """ The directory containing previously recorded traffic. """
+        self._record_index = self._load_record_index()
+        """ Nested dict structure for efficiently looking up the file name for a given request. """
+
+    def _load_record_index(self) -> dict[str, dict[str, dict[str, str]]]:
+        """Load the record index file and build the file name lookup structure."""
+        json_data = self._recordings_path.joinpath(_record_index_file_name).read_text()
+        request_list: list[_RecordIndexEntry] = _RecordIndex.validate_json(json_data)
+        record_index: dict[str, dict[str, dict[str, str]]] = {}
+        for recorded_request in request_list:
+            record_index.setdefault(recorded_request.url, {}).setdefault(
+                recorded_request.params_hash, {}
+            )[recorded_request.payload_hash] = recorded_request.file_name
+        return record_index
+
+    @override
+    def retrieve_text_resource(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None = None,
+    ) -> str:
+        return self._replay_request(url=url, url_params=url_params, query_content=None)
+
+    @override
+    def retrieve_json_resource(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None = None,
+        query_content: str | None = None,
+    ) -> JsonData:
+        return JsonData(
+            self._replay_request(url=url, url_params=url_params, query_content=query_content)
+        )
+
+    def _replay_request(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None,
+        query_content: str | None,
+    ) -> str:
+        """Return the recorded response payload for this request."""
+        filename = (
+            self._record_index.get(url, {})
+            .get(_RecordIndexEntry.calculate_params_hash(url_params), {})
+            .get(_RecordIndexEntry.calculate_payload_hash(query_content))
+        )
+        if not filename:
+            raise ConnectionError("No recorded traffic data found")
+        return self._recordings_path.joinpath(filename).read_text()
+
+
 _record_index_file_name: Final = "index.json"
 """ Name of the file containing the record index (i.e. the "table of contents"). """
 
