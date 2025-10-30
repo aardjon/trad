@@ -166,39 +166,46 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // divided by this factor to get regular (floating point) decimal degree.
     const double coordinateValuePrecision = 10000000;
 
-    Query query = Query.table(SummitsTable.tableName, <String>[
-      SummitsTable.columnId,
-      SummitsTable.columnSummitName,
-      SummitsTable.columnLatitude,
-      SummitsTable.columnLongitude,
-    ]);
-    query.setWhereCondition('${SummitsTable.columnId} = ?', <int>[summitDataId]);
+    Query query = Query.join(
+      <String>[SummitsTable.tableName, SummitNamesTable.tableName],
+      <String>['${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}'],
+      <String>[
+        SummitNamesTable.columnName,
+        SummitsTable.columnLatitude,
+        SummitsTable.columnLongitude,
+      ],
+    );
+    query.setWhereCondition(
+      '${SummitsTable.columnId} = ? and ${SummitNamesTable.columnUsage} = 0',
+      <int>[summitDataId],
+    );
+    query.limit = 1;
+
     List<ResultRow> resultSet = await _repository.executeQuery(query);
-    int id = resultSet[0].getIntValue(SummitsTable.columnId);
-    String name = resultSet[0].getStringValue(SummitsTable.columnSummitName);
+    String name = resultSet[0].getStringValue(SummitNamesTable.columnName);
     int lat = resultSet[0].getIntValue(SummitsTable.columnLatitude);
     int lon = resultSet[0].getIntValue(SummitsTable.columnLongitude);
     GeoPosition? position;
     if ((lat, lon) != undefinedCoordinates) {
       position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
     }
-    return Summit(id, name, position);
+    return Summit(summitDataId, name, position);
   }
 
   @override
   Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
     // Configure the query
-    Query query = Query.table(SummitsTable.tableName, <String>[
-      SummitsTable.columnId,
-      SummitsTable.columnSummitName,
+    Query query = Query.table(SummitNamesTable.tableName, <String>[
+      SummitNamesTable.columnSummitId,
+      SummitNamesTable.columnName,
     ]);
     if (nameFilter != null) {
       _logger.debug('Retrieving filtered summit list for "$nameFilter"');
-      query.setWhereCondition('${SummitsTable.columnSummitName} LIKE ?', <String>['%$nameFilter%']);
+      query.setWhereCondition('${SummitNamesTable.columnName} LIKE ?', <String>['%$nameFilter%']);
     } else {
       _logger.debug('Retrieving complete summit list');
     }
-    query.orderByColumns = <String>[SummitsTable.columnSummitName];
+    query.orderByColumns = <String>[SummitNamesTable.columnName];
 
     // Run the database query
     List<ResultRow> resultSet = await _repository.executeQuery(query);
@@ -206,8 +213,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Summit> summits = <Summit>[];
     for (final ResultRow dataRow in resultSet) {
-      int id = dataRow.getIntValue(SummitsTable.columnId);
-      String name = dataRow.getStringValue(SummitsTable.columnSummitName);
+      int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
+      String name = dataRow.getStringValue(SummitNamesTable.columnName);
       summits.add(Summit(id, name));
     }
     return summits;
