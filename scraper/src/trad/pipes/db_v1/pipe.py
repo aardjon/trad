@@ -14,8 +14,10 @@ from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
+    NameUsage,
     PostsTable,
     RoutesTable,
+    SummitNamesTable,
     SummitsTable,
 )
 
@@ -96,8 +98,12 @@ class DbSchemaV1Pipe(Pipe):
 
     @override
     def add_or_enrich_summit(self, summit: Summit) -> None:
+        summit_id = self._write_to_summits_table(summit)
+        self._write_to_summit_names_table(summit_id, summit)
+
+    def _write_to_summits_table(self, summit: Summit) -> int:
+        """Add the given Summit to the `summits` table and return the ID of the new record."""
         column_list = [
-            SummitsTable.COLUMN_SUMMIT_NAME,
             SummitsTable.COLUMN_LATITUDE,
             SummitsTable.COLUMN_LONGITUDE,
         ]
@@ -115,17 +121,69 @@ class DbSchemaV1Pipe(Pipe):
         self.__database_boundary.execute_write(
             query=sql_statement,
             query_parameters=[
-                summit.name,
                 summit.high_grade_position.latitude_int,
                 summit.high_grade_position.longitude_int,
             ],
         )
+        row_ids = self.__database_boundary.execute_read(
+            SqlStatement("SELECT last_insert_rowid() as rowid")
+        )
+        return row_ids[0].get_int_value("rowid")
+
+    def _write_to_summit_names_table(self, summit_id: int, summit: Summit) -> None:
+        column_list = [
+            SummitNamesTable.COLUMN_SUMMIT_ID,
+            SummitNamesTable.COLUMN_NAME,
+            SummitNamesTable.COLUMN_USAGE,
+        ]
+        column_names = ", ".join(column_list)
+        value_placeholders = self._get_value_placeholders(len(column_list))
+
+        sql_statement = SqlStatement(
+            f"INSERT INTO {SummitNamesTable.TABLE_NAME} ({column_names}) "
+            f"VALUES ({value_placeholders})"
+        )
+
+        if summit.official_name:
+            self.__database_boundary.execute_write(
+                query=sql_statement,
+                query_parameters=[
+                    summit_id,
+                    summit.official_name,
+                    NameUsage.official,
+                ],
+            )
+            for alternate_name in summit.alternate_names:
+                self.__database_boundary.execute_write(
+                    query=sql_statement,
+                    query_parameters=[
+                        summit_id,
+                        alternate_name,
+                        NameUsage.alternate,
+                    ],
+                )
+        else:
+            # Some summits don't have an official name. Possible reasons (besides bugs):
+            #    - "Massive" are not (yet) retrieved from OSM (https://github.com/Headbucket/trad/issues/12)
+            #    - New entries on some external sites
+            # As a workaround, we just handle this here. Should better be done by a separate
+            # VALIDATION filter, though, to make sure writte data is always complete.
+            # TODO(aardjon): Provide a proper implementation for this case
+            _logger.warning("Found Summit without official name: %s", summit.name)
+            self.__database_boundary.execute_write(
+                query=sql_statement,
+                query_parameters=[
+                    summit_id,
+                    summit.name,
+                    NameUsage.official,
+                ],
+            )
 
     @override
     def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
         select_summit = (
-            f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
-            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME}=? LIMIT 1"
+            f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
+            f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
         )
 
         column_list = [
@@ -163,8 +221,8 @@ class DbSchemaV1Pipe(Pipe):
     @override
     def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         select_summit = (
-            f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
-            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME}=? LIMIT 1"
+            f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
+            f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
         )
         select_route = (
             f"SELECT {RoutesTable.COLUMN_ID} FROM {RoutesTable.TABLE_NAME} "

@@ -4,11 +4,12 @@ Unit tests for the `trad.pipes.db_v1.pipe` module.
 
 from datetime import datetime
 from pathlib import Path
+from typing import Final
 from unittest.mock import Mock, call
 
-from trad.adapters.boundaries.database import RelationalDatabaseBoundary
+from trad.adapters.boundaries.database import DataRow, RelationalDatabaseBoundary
 from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
-from trad.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitsTable
+from trad.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitNamesTable, SummitsTable
 from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
 
@@ -18,7 +19,9 @@ class TestDbSchemaV1Pipe:
         Ensures that add_or_enrich_summit() executes the expected SQL statement (1), does it in
         exactly one database operation (2) and provides all query parameters separately (3).
         """
+        expected_db_writes: Final = 2
         fake_db_boundary = Mock(RelationalDatabaseBoundary)
+        fake_db_boundary.execute_read.return_value = [DataRow({"rowid": 42})]
         pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
 
         pipe.add_or_enrich_summit(
@@ -28,22 +31,21 @@ class TestDbSchemaV1Pipe:
             )
         )
 
-        expected_sql_statement = (
+        expected_summits_sql_statement = (
             f"INSERT INTO {SummitsTable.TABLE_NAME} ("
-            f"{SummitsTable.COLUMN_SUMMIT_NAME}, "
             f"{SummitsTable.COLUMN_LATITUDE}, "
             f"{SummitsTable.COLUMN_LONGITUDE}"
-            f") VALUES (?, ?, ?) "
+            f") VALUES (?, ?) "
             f"ON CONFLICT DO UPDATE SET "
-            f"{SummitsTable.COLUMN_SUMMIT_NAME}=excluded.{SummitsTable.COLUMN_SUMMIT_NAME}, "
             f"{SummitsTable.COLUMN_LATITUDE}=excluded.{SummitsTable.COLUMN_LATITUDE}, "
             f"{SummitsTable.COLUMN_LONGITUDE}=excluded.{SummitsTable.COLUMN_LONGITUDE} "
             f"WHERE {SummitsTable.COLUMN_LATITUDE}={UNDEFINED_GEOPOSITION.latitude_int} "
             f"AND {SummitsTable.COLUMN_LONGITUDE}={UNDEFINED_GEOPOSITION.longitude_int}"
         )
-        fake_db_boundary.execute_write.assert_called_once_with(
-            query=expected_sql_statement, query_parameters=["Foobar Rock", 130000000, 370000000]
+        fake_db_boundary.execute_write.assert_any_call(
+            query=expected_summits_sql_statement, query_parameters=[130000000, 370000000]
         )
+        assert fake_db_boundary.execute_write.call_count == expected_db_writes
 
     def test_add_or_enrich_route(self, tmp_path: Path) -> None:
         """
@@ -79,8 +81,8 @@ class TestDbSchemaV1Pipe:
             f"{RoutesTable.COLUMN_STARS}, "
             f"{RoutesTable.COLUMN_DANGER}"
             f") VALUES (("
-            f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
-            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME}=? LIMIT 1"
+            f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
+            f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
             f"), ?, ?, ?, ?, ?, ?, ?, ?)"
         )
         fake_db_boundary.execute_write.assert_called_once_with(
@@ -117,8 +119,8 @@ class TestDbSchemaV1Pipe:
             f") VALUES (("
             f"SELECT {RoutesTable.COLUMN_ID} FROM {RoutesTable.TABLE_NAME} WHERE "
             f"{RoutesTable.COLUMN_SUMMIT_ID}=("
-            f"SELECT {SummitsTable.COLUMN_ID} FROM {SummitsTable.TABLE_NAME} "
-            f"WHERE {SummitsTable.COLUMN_SUMMIT_NAME}=? LIMIT 1"
+            f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
+            f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
             f") AND {RoutesTable.COLUMN_ROUTE_NAME}=? LIMIT 1"
             f"), ?, ?, ?, ?)"
         )

@@ -49,9 +49,9 @@ class DataRow:
         """Returns a list of all column names that are available in this row object."""
         return self._raw_data.keys()
 
-    def get_int_value(self, column_name: EntityName) -> int | None:
+    def get_opt_int_value(self, column_name: EntityName) -> int | None:
         """
-        Returns the value of the requested integer column [column_name].
+        Returns the value of the requested nullable integer column [column_name].
 
         Exceptions (usually programming errors):
          - KeyError: The requested column doesn't exist in this row
@@ -62,7 +62,33 @@ class DataRow:
             raise TypeError("Value of column {column_name} is of unexpected type {type(value)}.")
         return value
 
-    def get_string_value(self, column_name: EntityName) -> str | None:
+    def get_int_value(self, column_name: EntityName) -> int:
+        """
+        Returns the value of the requested integer column [column_name].
+
+        Exceptions (usually programming errors):
+         - KeyError: The requested column doesn't exist in this row
+         - TypeError: The requested column is of a different type or None
+        """
+        value = self.get_opt_int_value(column_name)
+        if value is None:
+            raise TypeError("Value of column {column_name} is None.")
+        return value
+
+    def get_opt_string_value(self, column_name: EntityName) -> str | None:
+        """
+        Returns the value of the requested nullable string column [column_name].
+
+        Exceptions (usually programming errors):
+         - KeyError: The requested column doesn't exist in this row
+         - TypeError: The requested column is of a different type or None
+        """
+        value = self.__get_value(column_name)
+        if not isinstance(value, str | None):
+            raise TypeError("Value of column {column_name} is of unexpected type {type(value)}.")
+        return value
+
+    def get_string_value(self, column_name: EntityName) -> str:
         """
         Returns the value of the requested string column [column_name].
 
@@ -70,9 +96,9 @@ class DataRow:
          - KeyError: The requested column doesn't exist in this row
          - TypeError: The requested column is of a different type
         """
-        value = self.__get_value(column_name)
-        if not isinstance(value, str | None):
-            raise TypeError("Value of column {column_name} is of unexpected type {type(value)}.")
+        value = self.get_opt_string_value(column_name)
+        if value is None:
+            raise TypeError("Value of column {column_name} is None.")
         return value
 
     def get_object_value(self, column_name: EntityName) -> object:

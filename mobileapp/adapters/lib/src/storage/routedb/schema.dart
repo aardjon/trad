@@ -39,13 +39,41 @@ class DatabaseMetadataTable {
   static const String columnVendor = '$tableName.vendor';
 }
 
-/// Table containing all summits.
+/// All names of all summits.
 ///
-/// Summit data from different sources is usually merged based on the summit name. To store
-/// geographical coordinate values as integer values, their decimal representation is multiplied by
-/// 10.000.000 to support the same precision as the OSM database (7 decimal places, ~1 cm). Positive
-/// values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is stored as
-/// (509170936, 141992389).
+/// As a single summit can have multiple names, this table assigns specific names strings to summits.
+/// Each summit must have exactly one official name assigned, but there may be several (including no)
+/// additional names as well.
+///
+/// This table is designed for both searching by name and retrieving the name(s) of summits.
+class SummitNamesTable {
+  /// Name of the table.
+  static const String tableName = 'summit_names';
+
+  /// The name of the 'name' TEXT column:
+  /// A single summit name string.
+  static const String columnName = '$tableName.name';
+
+  /// The name of the 'usage' INTEGER column:
+  /// Usage of this name string (for this summit):
+  /// 0 = Official name (the name given and used by local authorities, usually the default)
+  /// 1 = Alternate name (e.g. a well-known "nickname" or an old name)
+  static const String columnUsage = '$tableName.usage';
+
+  /// The name of the 'summit_id' INTEGER column:
+  /// ID of the summit this name is assigned to.
+  static const String columnSummitId = '$tableName.summit_id';
+}
+
+/// Table containing all summit data.
+///
+/// The summit names are stored in the `summit_names` table. Each summit is guaranteed to have
+/// exactly one official name assigned.
+///
+/// To store geographical coordinate values as integer values, their decimal representation is
+/// multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+/// ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+/// stored as (509170936, 141992389).
 ///
 /// See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
 class SummitsTable {
@@ -55,10 +83,6 @@ class SummitsTable {
   /// The name of the 'id' INTEGER column:
   /// Summit ID, unique within this database.
   static const String columnId = '$tableName.id';
-
-  /// The name of the 'summit_name' TEXT column:
-  /// Official name of this summit. Names are unique.
-  static const String columnSummitName = '$tableName.summit_name';
 
   /// The name of the 'latitude' INTEGER column:
   /// The latitude value of the geographical position.

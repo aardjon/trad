@@ -6,6 +6,7 @@ To re-generate, run `invoke generate-schema routedb`.
 """
 
 from collections.abc import Sequence
+from enum import IntEnum
 from typing import Final, override
 
 from trad.adapters.boundaries.database import EntityName, SqlStatement
@@ -43,8 +44,12 @@ class {{table.name|replace("_", " ")|title|replace(" ", "")}}Table(TableSchema):
               {{-" UNIQUE" if column.unique}}
               {{-" NOT NULL" if not column.nullable}}
               {{-" AUTOINCREMENT" if column.autoincrement}}
-              {{-"," if not loop.last or table.unique_constraints or table.references}}
+              {{-"," if not loop.last or table.primary_key or table.unique_constraints or table.references}}
           {% endfor %}
+          {% if table.primary_key %}
+            PRIMARY KEY({{table.primary_key|join(", ")}})
+            {{-"," if table.unique_constraints or table.references}}
+          {%endif %}
           {% for columns in table.unique_constraints %}
             UNIQUE({{columns|join(", ")}})
               {{- "," if not loop.last or table.references}}
@@ -111,3 +116,21 @@ class DatabaseSchema:
         """Returns the version of this database schema as a tuple of (major, minor)."""
         return self._MAJOR_VERSION, self._MINOR_VERSION
 
+
+class NameUsage(IntEnum):
+    """
+    Usage definition of a single name string.
+    """
+
+    official = 0
+    """
+    The corresponding name is the official name given and used by some authorities. It is used e.g.
+    in the summit register. Each summit must have exactly one official name assigned.
+    """
+
+    alternate = 1
+    """
+    The corresponding name is a non-official but well-known and widely used alternative one. It can
+    be e.g. a nickname, a historic or a colloquial name. A single summit can have any (including no)
+    alternate names.
+    """
