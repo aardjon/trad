@@ -144,21 +144,38 @@ class DbSchemaV1Pipe(Pipe):
             f"VALUES ({value_placeholders})"
         )
 
-        self.__database_boundary.execute_write(
-            query=sql_statement,
-            query_parameters=[
-                summit_id,
-                summit.official_name,
-                NameUsage.official,
-            ],
-        )
-        for alternate_name in summit.alternate_names:
+        if summit.official_name:
             self.__database_boundary.execute_write(
                 query=sql_statement,
                 query_parameters=[
                     summit_id,
-                    alternate_name,
-                    NameUsage.alternate,
+                    summit.official_name,
+                    NameUsage.official,
+                ],
+            )
+            for alternate_name in summit.alternate_names:
+                self.__database_boundary.execute_write(
+                    query=sql_statement,
+                    query_parameters=[
+                        summit_id,
+                        alternate_name,
+                        NameUsage.alternate,
+                    ],
+                )
+        else:
+            # Some summits don't have an official name. Possible reasons (besides bugs):
+            #    - "Massive" are not (yet) retrieved from OSM (https://github.com/Headbucket/trad/issues/12)
+            #    - New entries on some external sites
+            # As a workaround, we just handle this here. Should better be done by a separate
+            # VALIDATION filter, though, to make sure writte data is always complete.
+            # TODO(aardjon): Provide a proper implementation for this case
+            _logger.warning("Found Summit without official name: %s", summit.name)
+            self.__database_boundary.execute_write(
+                query=sql_statement,
+                query_parameters=[
+                    summit_id,
+                    summit.name,
+                    NameUsage.official,
                 ],
             )
 
