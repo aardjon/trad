@@ -21,7 +21,7 @@ _PIPTOOLS_PKG_NAME = "pip-tools"
 """
 The 'pip-tools' package name to install during bootstrap.
 """
-_PIPTOOLS_MIN_VERSION = "7.4.1"
+_PIPTOOLS_MIN_VERSION = "7.5.1"
 """
 The minimum 'pip-tools' package version to install during bootstrap.
 """
