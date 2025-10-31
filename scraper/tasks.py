@@ -17,15 +17,6 @@ from invoke import task
 from invoke.context import Context
 from invoke.exceptions import UnexpectedExit
 
-_PIPTOOLS_PKG_NAME = "pip-tools"
-"""
-The 'pip-tools' package name to install during bootstrap.
-"""
-_PIPTOOLS_MIN_VERSION = "7.5.1"
-"""
-The minimum 'pip-tools' package version to install during bootstrap.
-"""
-
 
 @task
 def analyze(context: Context) -> None:
@@ -74,10 +65,7 @@ def bootstrap(context: Context) -> None:
     This installs all (dev) dependencies into the current virtualenv. After that, all other `invoke`
     scripts can be executed.
     """
-    if platform.system() == "Windows":
-        context.run(f"pip install -U {_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}")
-    else:
-        context.run(f"pip install -U '{_PIPTOOLS_PKG_NAME}>={_PIPTOOLS_MIN_VERSION}'")
+    context.run("pip install -r python-requirements.txt")
     context.run("pip-compile -q --strip-extras --output-file=app-requirements.txt pyproject.toml")
     context.run(
         "pip-compile "

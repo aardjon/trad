@@ -1,0 +1,6 @@
+# Requirements/Constraints of the Python/runtime environment itself, i.e. tools that are not
+# required by the Scraper but only for managing the build/dev environment.
+# This file is NOT managerd by pip-tools and can thus be edited manually.
+
+pip<25.3
+pip-tools>=7.5.1
