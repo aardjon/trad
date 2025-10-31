@@ -18,7 +18,12 @@ from trad.core.boundaries.settings import SettingsBoundary
 from trad.core.usecases import ScraperUseCases
 from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.crosscuttings.di import DependencyProvider
-from trad.crosscuttings.logging import configure_logging
+from trad.crosscuttings.logging import (
+    configure_console_logging,
+    configure_file_logging,
+    configure_log_channel,
+    initialize_logging,
+)
 from trad.filters.factory import AllFiltersFactory
 from trad.infrastructure.http_recorder import TrafficPlayer, TrafficRecorder
 from trad.infrastructure.requests import RequestsHttp
@@ -74,18 +79,19 @@ class ApplicationBootstrap:
 
     def __setup_logging(self) -> None:
         settings = self.__dependency_provider.provide(SettingsBoundary)
-        configure_logging(logging.DEBUG if settings.is_verbose() else logging.INFO)
 
-        if settings.is_verbose():
-            # Disable some log channels even in debug mode because they are still too chatty
-            # The statement_creator logs all executed SQL statements on DEBUG level
-            sql_statement_logger = logging.getLogger(
-                "trad.infrastructure.sqlite3db.statement_creator"
-            )
-            sql_statement_logger.setLevel(logging.INFO)
-            # urllib3 logs every single HTTP request
-            urllib3_logger = logging.getLogger("urllib3")
-            urllib3_logger.setLevel(logging.WARNING)
+        initialize_logging()
+        configure_console_logging(logging.DEBUG if settings.is_verbose() else logging.INFO)
+        log_file = settings.get_log_file()
+        if log_file is not None:
+            configure_file_logging(log_file, logging.DEBUG)
+
+        # Disable some log channels because they are too chatty
+
+        # The statement_creator logs all executed SQL statements on DEBUG level
+        configure_log_channel("trad.infrastructure.sqlite3db.statement_creator", logging.INFO)
+        # urllib3 logs every single HTTP request
+        configure_log_channel("urllib3", logging.WARNING)
 
     def __setup_dependencies(self) -> None:
         """

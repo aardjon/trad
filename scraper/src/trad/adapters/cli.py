@@ -24,6 +24,7 @@ class CliSettings(SettingsBoundary):
         args = self.__parse_command_line()
         self.__is_verbose: bool = args.verbose
         self.__output_dir: Path = args.output_dir
+        self.__log_file: list[Path] | None = args.logfile
         self.__record_traffic: list[Path] | None = args.record_traffic
         self.__replay_traffic: list[Path] | None = args.replay_traffic
 
@@ -51,6 +52,15 @@ class CliSettings(SettingsBoundary):
             default=False,
             action="store_true",
         )
+        parser.add_argument(
+            "-l",
+            "--logfile",
+            nargs=1,
+            required=False,
+            type=Path,
+            help="write debug log into the given file",
+        )
+
         recorder_group = parser.add_mutually_exclusive_group()
         recorder_group.add_argument(
             "--record-traffic",
@@ -71,6 +81,10 @@ class CliSettings(SettingsBoundary):
     @override
     def is_verbose(self) -> bool:
         return self.__is_verbose
+
+    @override
+    def get_log_file(self) -> Path | None:
+        return self.__log_file[0] if self.__log_file else None
 
     @override
     def get_output_dir(self) -> Path:

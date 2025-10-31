@@ -24,6 +24,12 @@ class SettingsBoundary(ABC):
         """
 
     @abstractmethod
+    def get_log_file(self) -> Path | None:
+        """
+        Returns the file to write debug logs into, or None if file logging is disabled.
+        """
+
+    @abstractmethod
     def is_record_traffic_mode(self) -> bool:
         """
         Returns True if network traffic shall be recorded, otherwise False. All recorded traffic
