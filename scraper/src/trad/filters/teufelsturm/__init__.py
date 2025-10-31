@@ -36,6 +36,16 @@ class TeufelsturmDataFilter(Filter):
         super().__init__(dependency_provider)
         self._http_boundary = dependency_provider.provide(HttpNetworkingBoundary)
         self._summit_cache = SummitCache(retrieve_summit_details_page=self._get_summit_page_text)
+        self._added_peak_name_hashes: set[int] = set()
+        """
+        Set of peak/summit name hashes that were already added to the Pipe.
+
+        This Filter iterates all routes, and therefore each summit/peak occurs once for each of its
+        routes (with exactly the same data every time). Adding a summit to the Pipe can be quite
+        expensive, that's why we want to do this only once (on first occurence) and not over and
+        over again (for each route). On Teufelsturm, summit names are unique. We store their hashes
+        only to speed up the lookup.
+        """
 
     @staticmethod
     @override
@@ -83,7 +93,10 @@ class TeufelsturmDataFilter(Filter):
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text, self._summit_cache)
             if not self._is_forbidden(post_data.peak):
-                pipe.add_or_enrich_summit(post_data.peak)
+                if hash(post_data.peak.name) not in self._added_peak_name_hashes:
+                    # Each summit must be added to the pipe only once (for performance)
+                    pipe.add_or_enrich_summit(post_data.peak)
+                    self._added_peak_name_hashes.add(hash(post_data.peak.name))
                 pipe.add_or_enrich_route(summit_name=post_data.peak.name, route=post_data.route)
                 for post in post_data.posts:
                     pipe.add_post(
