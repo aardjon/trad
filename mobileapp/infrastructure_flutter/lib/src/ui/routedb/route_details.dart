@@ -79,6 +79,7 @@ class RouteDetailsView extends StatelessWidget {
               appBar: _appBar(model, state, context),
               body: _listView(state, context),
               drawer: _appDrawer,
+              drawerEnableOpenDragGesture: false,
             );
           } else {
             return _showLoadingIndicator();

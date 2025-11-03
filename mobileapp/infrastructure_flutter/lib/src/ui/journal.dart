@@ -32,6 +32,7 @@ class JournalPage extends StatelessWidget {
         ),
       ),
       drawer: _appDrawer,
+      drawerEnableOpenDragGesture: false,
     );
   }
 }

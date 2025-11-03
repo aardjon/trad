@@ -41,6 +41,7 @@ class KnowledgebaseView extends StatelessWidget {
         ),
       ),
       drawer: _appDrawer,
+      drawerEnableOpenDragGesture: false,
     );
   }
 }

@@ -33,6 +33,7 @@ class SummitListView extends StatelessWidget {
         children: <Widget>[_searchBar(model.searchBarHint), _listView()],
       ),
       drawer: _appDrawer,
+      drawerEnableOpenDragGesture: false,
     );
   }
 
