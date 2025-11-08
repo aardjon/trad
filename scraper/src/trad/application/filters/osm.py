@@ -187,7 +187,7 @@ class OsmSummitDataFilter(Filter):
         return "OpenStreetMap"
 
     @override
-    def execute_filter(self, pipe: Pipe) -> None:
+    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
         area_id = self.__get_area_id()
 
@@ -210,7 +210,7 @@ class OsmSummitDataFilter(Filter):
         summits_from_nodes = self.__create_summits_from_nodes(osm_nodes.values())
 
         # Send all summits to the pipe
-        self.__store_summits(pipe, chain(summits_from_relations, summits_from_nodes))
+        self.__store_summits(output_pipe, chain(summits_from_relations, summits_from_nodes))
         _logger.debug(
             "Processed summits from %d relations and %d nodes", len(osm_relations), len(osm_nodes)
         )

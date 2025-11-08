@@ -8,7 +8,7 @@ from typing import Final, override
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
 from trad.kernel.boundaries.filters import Filter, FilterStage
-from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import Summit
 
@@ -36,9 +36,9 @@ class TeufelsturmDataFilter(Filter):
         super().__init__(dependency_provider)
         self._http_boundary = dependency_provider.provide(HttpNetworkingBoundary)
         self._summit_cache = SummitCache(retrieve_summit_details_page=self._get_summit_page_text)
-        self._added_peak_name_hashes: set[int] = set()
+        self._added_peak_name_hashes: dict[int, SummitInstanceId] = {}
         """
-        Set of peak/summit name hashes that were already added to the Pipe.
+        Peak/summit name hashes that were already added to the Pipe, and their assigned IDs.
 
         This Filter iterates all routes, and therefore each summit/peak occurs once for each of its
         routes (with exactly the same data every time). Adding a summit to the Pipe can be quite
@@ -57,10 +57,10 @@ class TeufelsturmDataFilter(Filter):
         return "teufelsturm.de"
 
     @override
-    def execute_filter(self, pipe: Pipe) -> None:
+    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
         route_ids = self._collect_route_ids()
-        self._perform_scan(pipe, route_ids)
+        self._perform_scan(output_pipe, route_ids)
         self._summit_cache.clear_cache()
         _logger.debug("'%s' filter finished", self.get_name())
 
@@ -93,15 +93,15 @@ class TeufelsturmDataFilter(Filter):
             page_text = self._get_page_text(page_id)
             post_data = parse_page(page_text, self._summit_cache)
             if not self._is_forbidden(post_data.peak):
-                if hash(post_data.peak.name) not in self._added_peak_name_hashes:
+                summit_id = self._added_peak_name_hashes.get(hash(post_data.peak.name))
+                if summit_id is None:
                     # Each summit must be added to the pipe only once (for performance)
-                    pipe.add_summit(post_data.peak)
-                    self._added_peak_name_hashes.add(hash(post_data.peak.name))
-                pipe.add_route(summit_name=post_data.peak.name, route=post_data.route)
+                    summit_id = pipe.add_summit(post_data.peak)
+                    self._added_peak_name_hashes[hash(post_data.peak.name)] = summit_id
+                route_id = pipe.add_route(summit_id=summit_id, route=post_data.route)
                 for post in post_data.posts:
                     pipe.add_post(
-                        summit_name=post_data.peak.name,
-                        route_name=post_data.route.route_name,
+                        route_id=route_id,
                         post=post,
                     )
 

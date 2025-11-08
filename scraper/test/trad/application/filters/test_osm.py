@@ -78,7 +78,7 @@ class TestOsmSummitDataFilter:
         osm_filter = OsmSummitDataFilter(DependencyProvider())
 
         with pytest.raises(expected_exception):
-            osm_filter.execute_filter(pipe=Mock(Pipe))
+            osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
         # Make sure there was only one network request in total
         mocked_network_boundary.retrieve_json_resource.assert_called_once()
 
@@ -118,7 +118,7 @@ class TestOsmSummitDataFilter:
         osm_filter = OsmSummitDataFilter(DependencyProvider())
 
         with pytest.raises(expected_exception):
-            osm_filter.execute_filter(pipe=Mock(Pipe))
+            osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
         # Make sure there were exactly two network requests in total
         assert (
             mocked_network_boundary.retrieve_json_resource.call_count
@@ -374,7 +374,7 @@ class TestOsmSummitDataFilter:
         )
 
         osm_filter = OsmSummitDataFilter(DependencyProvider())
-        osm_filter.execute_filter(pipe=mocked_pipe)
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=mocked_pipe)
 
         # Check the number of network requests
         assert (
