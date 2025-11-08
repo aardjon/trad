@@ -1,5 +1,5 @@
 """
-Unit tests for the trad.kernel.proxy_pipes.merge module.
+Unit tests for the trad.application.filters.merge module.
 """
 
 from contextlib import AbstractContextManager, nullcontext
@@ -8,10 +8,10 @@ from unittest.mock import Mock
 
 import pytest
 
+from trad.application.filters.merge import MergingPipeDecorator
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
-from trad.kernel.pipe_decorators.merge import MergingPipeDecorator
 
 
 class TestMergingPipeDecorator:
