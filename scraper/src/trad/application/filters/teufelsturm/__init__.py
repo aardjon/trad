@@ -5,8 +5,8 @@ Filter for importing data from Teufelsturm.de.
 from logging import getLogger
 from typing import Final, override
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary
-from trad.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
+from trad.application.adapters.boundaries.http import HttpNetworkingBoundary
+from trad.application.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
 from trad.kernel.boundaries.filters import Filter, FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.di import DependencyProvider

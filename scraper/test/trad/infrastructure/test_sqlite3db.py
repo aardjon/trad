@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from trad.adapters.boundaries.database import SqlStatement
+from trad.application.adapters.boundaries.database import SqlStatement
 from trad.infrastructure.sqlite3db import Sqlite3Database
 
 

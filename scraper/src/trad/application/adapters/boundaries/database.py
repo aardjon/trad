@@ -1,5 +1,5 @@
 """
-Definition of the boundary between pipes (`adapters` ring) and a concrete DBMS access library
+Definition of the boundary between pipes (`application` ring) and a concrete DBMS access library
 (`infrastructure` ring). The purpose of this inteface is not to hide the database itself but the
 library for accessing it. This allows for mocking the real database in unit tests, and also makes
 future changes/adaption to the lib interface easier.

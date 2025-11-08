@@ -4,10 +4,10 @@ Implementation of the FilterFactory component.
 
 from typing import Final, override
 
-from trad.filters.finalization import PipeFinalizingFilter
-from trad.filters.initialization import PipeInitializingFilter
-from trad.filters.osm import OsmSummitDataFilter
-from trad.filters.teufelsturm import TeufelsturmDataFilter
+from trad.application.filters.finalization import PipeFinalizingFilter
+from trad.application.filters.initialization import PipeInitializingFilter
+from trad.application.filters.osm import OsmSummitDataFilter
+from trad.application.filters.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.kernel.di import DependencyProvider
 

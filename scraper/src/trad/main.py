@@ -9,10 +9,11 @@ import logging
 from functools import partial
 from typing import TYPE_CHECKING
 
-from trad.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.adapters.boundaries.http import HttpNetworkingBoundary
-from trad.adapters.cli import CliSettings
-from trad.filters.factory import AllFiltersFactory
+from trad.application.adapters.boundaries.database import RelationalDatabaseBoundary
+from trad.application.adapters.boundaries.http import HttpNetworkingBoundary
+from trad.application.filters.factory import AllFiltersFactory
+from trad.application.pipes.factory import AllPipesFactory
+from trad.infrastructure.cli import CliSettings
 from trad.infrastructure.http_recorder import TrafficPlayer, TrafficRecorder
 from trad.infrastructure.logging import (
     configure_console_logging,
@@ -28,7 +29,6 @@ from trad.kernel.boundaries.pipes import PipeFactory
 from trad.kernel.boundaries.settings import SettingsBoundary
 from trad.kernel.di import DependencyProvider
 from trad.kernel.usecases import ScraperUseCases
-from trad.pipes.factory import AllPipesFactory
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -99,7 +99,7 @@ class ApplicationBootstrap:
         """
         settings = self.__dependency_provider.provide(SettingsBoundary)
 
-        # Initialize all [adapters] components
+        # Initialize all [application] components
         self.__dependency_provider.register_factory(
             PipeFactory, lambda: AllPipesFactory(self.__dependency_provider)
         )

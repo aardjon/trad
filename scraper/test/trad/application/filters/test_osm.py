@@ -1,5 +1,5 @@
 """
-Unit tests for the 'trad.infrastructure.filters.osm' module.
+Unit tests for the 'trad.application.filters.osm' module.
 """
 
 import json
@@ -9,8 +9,8 @@ from unittest.mock import ANY, Mock, NonCallableMock
 
 import pytest
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
-from trad.filters.osm import OsmSummitDataFilter
+from trad.application.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
+from trad.application.filters.osm import OsmSummitDataFilter
 from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.di import DependencyProvider

@@ -9,8 +9,8 @@ from collections.abc import Sequence
 from enum import IntEnum
 from typing import Final, override
 
-from trad.adapters.boundaries.database import EntityName, SqlStatement
-from trad.pipes.schemabase import TableSchema
+from trad.application.adapters.boundaries.database import EntityName, SqlStatement
+from trad.application.pipes.schemabase import TableSchema
 
 
 class DatabaseMetadataTable(TableSchema):

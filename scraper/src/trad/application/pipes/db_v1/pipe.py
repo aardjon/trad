@@ -7,11 +7,8 @@ from logging import getLogger
 from pathlib import Path
 from typing import Final, override
 
-from trad.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
-from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
-from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
-from trad.pipes.db_v1.dbschema import (
+from trad.application.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
+from trad.application.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
     NameUsage,
@@ -20,6 +17,9 @@ from trad.pipes.db_v1.dbschema import (
     SummitNamesTable,
     SummitsTable,
 )
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 
 _logger = getLogger(__name__)
 

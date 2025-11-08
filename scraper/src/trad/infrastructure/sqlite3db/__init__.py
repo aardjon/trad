@@ -9,7 +9,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Literal, Self, override
 
-from trad.adapters.boundaries.database import (
+from trad.application.adapters.boundaries.database import (
     DataRow,
     DataRowContainer,
     RelationalDatabaseBoundary,
