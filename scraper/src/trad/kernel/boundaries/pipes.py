@@ -3,8 +3,21 @@ Boundary interface to the `pipes` component.
 """
 
 from abc import ABCMeta, abstractmethod
+from typing import NewType
 
 from trad.kernel.entities import Post, Route, Summit
+
+SummitInstanceId = NewType("SummitInstanceId", int)
+"""
+Identifier for a certain Summit object within the current Pipe (not the summit itself!). This ID is
+only valid within a single Pipe instance, i.e. only for the Filter that got it.
+"""
+
+RouteInstanceId = NewType("RouteInstanceId", int)
+"""
+Identifier for a certain Route object within the current Pipe (not the route itself!). This ID is
+only valid within a single Pipe instance, i.e. only for the Filter that got it.
+"""
 
 
 class Pipe(metaclass=ABCMeta):
@@ -12,11 +25,11 @@ class Pipe(metaclass=ABCMeta):
     Interface to the Pipe component all Filters work on.
 
     The pipe is the shared storage that filters can read from and write their modified data into.
-    The concrete structure and technical details of the pipe storage are hidden behind this
-    interface, so that there may be different implementations (e.g. for different schema versions).
-    The goal is that no Filters need to be modified in case (only) the storage structure changes.
+    A new Pipe is created for each stage, that's why Filters can get an input and an output pipe.
+    The concrete structure and technical details of the storage is hidden behind this interface,
+    though.
 
-    Because there is only one Pipe and Filters may run in parallel, all pipe operations must be
+    Because several Filters may access tze same Pipe in parallel, all pipe operations are
     thread-safe.
 
     The pipe has an internal state: It must be initialized (by calling `initialize_pipe()`) before
@@ -42,28 +55,31 @@ class Pipe(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def add_summit(self, summit: Summit) -> None:
+    def add_summit(self, summit: Summit) -> SummitInstanceId:
         """
-        Add the given [summit] data to the pipe if it doesn't exist already, or enriches the
-        attributes missing in the existing one with the data of [summit]. "Missing" attributes are
-        the ones that are set to the special *default* or *undefined* value in the existing data.
+        Add the given [summit] data to the pipe. Returns the assigned ID for the newly added summit.
         Existing data is never dropped or replaced.
+
+        The returned ID is only valid for the current Filter!
         """
 
     @abstractmethod
-    def add_route(self, summit_name: str, route: Route) -> None:
+    def add_route(self, summit_id: SummitInstanceId, route: Route) -> RouteInstanceId:
         """
-        Add the given [route] to the pipe, assigning it to the summit [summit_name]. If the route
-        already exists, it's missing attributes are enriched with the data of [route]. "Missing"
-        ones are the ones that are set to the special *default* or *undefined* value in the existing
-        data. Existing data is never dropped or replaced.
+        Add the given [route] to the pipe, assigning it to the summit identified by [summit_id].
+        Returns the assigned ID for the newly added route. Existing data is never dropped or
+        replaced.
+        Raises EntityNotFoundError if the given `summit_id` doesn't exist.
+
+        The returned ID is only valid for the current Filter!
         """
 
     @abstractmethod
-    def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
+    def add_post(self, route_id: RouteInstanceId, post: Post) -> None:
         """
-        Add the given [post] to the pipe, assigning it to the route [route_name] on the summit
-        [summit_name].
+        Add the given [post] to the pipe, assigning it to the route identified by [route_id].
+        Existing data is never dropped or replaced.
+        Raises EntityNotFoundError if the given `route_id` doesn't exist.
         """
 
 

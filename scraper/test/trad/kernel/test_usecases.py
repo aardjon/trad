@@ -34,7 +34,8 @@ class TestScraperUseCases:
         Test the main scraper use case:
          - Are all filters retrieved (for all stages)?
          - Is the pipe created (once)?
-         - Are all filters executed with the created pipe?
+         - Are all filters executed with the correct pipe (i.e. input pipe was the previous output
+           one)?
         """
         mocked_filters = [[Mock(Filter)] for _ in FilterStage]
         mocked_filter_factory = NonCallableMock(FilterFactory)
@@ -42,16 +43,17 @@ class TestScraperUseCases:
             mocked_filters  # ([fm] for fm in mocked_filters)
         )
         mocked_pipe_factory = NonCallableMock(PipeFactory)
-        mocked_pipe = Mock(Pipe)
-        mocked_pipe_factory.create_pipe.return_value = mocked_pipe
+
+        mocked_pipes = [Mock(Pipe, name=f"Pipe #{i}") for i in range(len(FilterStage) + 1)]
+        mocked_pipe_factory.create_pipe.side_effect = mocked_pipes
         dependency_provider.register_singleton(FilterFactory, lambda: mocked_filter_factory)
         dependency_provider.register_singleton(PipeFactory, lambda: mocked_pipe_factory)
 
         usecases = ScraperUseCases(dependency_provider)
         usecases.produce_routedb()
 
-        # Ensure that the pipe has been created
-        mocked_pipe_factory.create_pipe.assert_called_once()
+        # Ensure that all pipes have been created
+        assert mocked_pipe_factory.create_pipe.call_count == len(FilterStage) + 1
 
         # Ensure that all filters for all stages are retrieved
         assert mocked_filter_factory.create_filters.call_count == len(FilterStage)
@@ -61,5 +63,7 @@ class TestScraperUseCases:
         )
 
         # Ensure that all filters have been executed with the given pipe instance
-        for filter_mock in mocked_filters:
-            filter_mock[0].execute_filter.assert_called_once_with(mocked_pipe)
+        for idx, filter_mock in enumerate(mocked_filters):
+            filter_mock[0].execute_filter.assert_called_once_with(
+                mocked_pipes[idx], mocked_pipes[idx + 1]
+            )

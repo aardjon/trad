@@ -44,12 +44,13 @@ class FilterStage(Enum):
 
 class Filter(metaclass=ABCMeta):
     """
-    Interface of a certain (architectural) "filter" that can be executed.
+    Interface of a certain (architectural) "Filter" that can be executed.
 
-    A Filter instance defines a certain operation on the current pipe, like adding or converting
-    data, but there may also be Filters for "meta tasks" like initialisation or finalisation. Each
+    A Filter instance reads data from a singlen input source (either a Pipe or an external data
+    source), performs a certain operation on it (e.g. adding or converting data) and writes the
+    changed data into a single output source (either another Pipe or some external format). Each
     individual instance is only executed once, but it shall be possible to run different instances
-    on the same pipe in parallel. Each Filter must be assigned to a certain stage to run in.
+    on the same pipes in parallel. Each Filter must be assigned to a certain stage to run in.
     """
 
     @abstractmethod
@@ -76,9 +77,11 @@ class Filter(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def execute_filter(self, pipe: Pipe) -> None:
+    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
         """
-        Executes the operation of this Filter, reading and writing data from/to the given [pipe].
+        Executes the operation of this Filter, reading data either from the given `input_pipe' or an
+        external source, and writing transformed data either to the given `output_pipe` or an
+        external destination.
 
         In case of an unrecoverable error, this method may raise any Exception. The whole scraper
         run is cancelled in such a case.

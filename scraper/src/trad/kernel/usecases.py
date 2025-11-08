@@ -31,18 +31,26 @@ class ScraperUseCases:
         _logger.info("Now running usecase 'produce_routedb'")
         pipe = self.__pipe_factory.create_pipe()
         for stage in FilterStage:
+            previous_pipe = pipe
+            pipe = self.__pipe_factory.create_pipe()
             self.__run_filters_of_stage(
                 stage,
-                pipe,
+                input_pipe=previous_pipe,
+                output_pipe=pipe,
             )
 
-    def __run_filters_of_stage(self, stage: FilterStage, pipe: Pipe) -> None:
+    def __run_filters_of_stage(
+        self,
+        stage: FilterStage,
+        input_pipe: Pipe,
+        output_pipe: Pipe,
+    ) -> None:
         """
-        Executes all filters of a single `stage` on the given `pipe`.
+        Executes all filters of a single `stage` on the given pipes.
         """
         filters = self.__filter_factory.create_filters(stage)
         _logger.info("Executing %i filters for stage %s", len(filters), stage.name)
         # For now, run them sequentially. To improve performance, running in parallel may be an
         # option in the future.
         for current_filter in filters:
-            current_filter.execute_filter(pipe)
+            current_filter.execute_filter(input_pipe, output_pipe)
