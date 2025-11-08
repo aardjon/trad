@@ -9,8 +9,8 @@ import logging
 from functools import partial
 from typing import TYPE_CHECKING
 
-from trad.application.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.application.adapters.boundaries.http import HttpNetworkingBoundary
+from trad.application.boundaries.database import RelationalDatabaseBoundary
+from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.factory import AllFiltersFactory
 from trad.application.pipes.factory import AllPipesFactory
 from trad.infrastructure.cli import CliSettings

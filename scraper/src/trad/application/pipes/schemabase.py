@@ -4,7 +4,7 @@ Abstract interface for describing the database schema (e.g. table structure and 
 
 from abc import ABCMeta, abstractmethod
 
-from trad.application.adapters.boundaries.database import EntityName, SqlStatement
+from trad.application.boundaries.database import EntityName, SqlStatement
 
 
 class TableSchema(metaclass=ABCMeta):

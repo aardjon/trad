@@ -10,7 +10,7 @@ from typing import Final, override
 
 import requests
 
-from trad.application.adapters.boundaries.http import (
+from trad.application.boundaries.http import (
     HttpNetworkingBoundary,
     HttpRequestError,
     JsonData,

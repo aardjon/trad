@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from enum import IntEnum
 from typing import Final, override
 
-from trad.application.adapters.boundaries.database import EntityName, SqlStatement
+from trad.application.boundaries.database import EntityName, SqlStatement
 from trad.application.pipes.schemabase import TableSchema
 
 

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Final
 from unittest.mock import Mock, call
 
-from trad.application.adapters.boundaries.database import DataRow, RelationalDatabaseBoundary
+from trad.application.boundaries.database import DataRow, RelationalDatabaseBoundary
 from trad.application.pipes.db_v1.dbschema import (
     PostsTable,
     RoutesTable,

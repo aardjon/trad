@@ -7,7 +7,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import Final, override
 
-from trad.application.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
+from trad.application.boundaries.database import RelationalDatabaseBoundary, SqlStatement
 from trad.application.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,

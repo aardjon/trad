@@ -21,7 +21,7 @@ from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
-from trad.application.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
+from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.kernel.boundaries.filters import Filter, FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.di import DependencyProvider

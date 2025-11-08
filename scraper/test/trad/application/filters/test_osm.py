@@ -9,7 +9,7 @@ from unittest.mock import ANY, Mock, NonCallableMock
 
 import pytest
 
-from trad.application.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
+from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters.osm import OsmSummitDataFilter
 from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe

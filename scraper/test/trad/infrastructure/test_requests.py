@@ -11,7 +11,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import HTTPError, Timeout
 from requests.models import Response
 
-from trad.application.adapters.boundaries.http import HttpRequestError
+from trad.application.boundaries.http import HttpRequestError
 from trad.infrastructure.requests import RequestsHttp
 
 
