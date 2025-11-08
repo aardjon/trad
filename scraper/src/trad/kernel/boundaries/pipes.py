@@ -42,7 +42,7 @@ class Pipe(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def add_or_enrich_summit(self, summit: Summit) -> None:
+    def add_summit(self, summit: Summit) -> None:
         """
         Add the given [summit] data to the pipe if it doesn't exist already, or enriches the
         attributes missing in the existing one with the data of [summit]. "Missing" attributes are
@@ -51,7 +51,7 @@ class Pipe(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
+    def add_route(self, summit_name: str, route: Route) -> None:
         """
         Add the given [route] to the pipe, assigning it to the summit [summit_name]. If the route
         already exists, it's missing attributes are enriched with the data of [route]. "Missing"

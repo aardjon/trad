@@ -45,8 +45,8 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
 
     pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
     pipe.initialize_pipe()
-    pipe.add_or_enrich_summit(Summit(official_name="Falkenturm"))
-    pipe.add_or_enrich_route(summit_name="Falkenturm", route=Route(route_name="AW", grade="II"))
+    pipe.add_summit(Summit(official_name="Falkenturm"))
+    pipe.add_route(summit_name="Falkenturm", route=Route(route_name="AW", grade="II"))
     pipe.add_post(
         summit_name="Falkenturm",
         route_name="AW",
@@ -139,11 +139,11 @@ def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
     )
 
     # Insert Summit data without geographical coordinates
-    pipe_v1.add_or_enrich_summit(summit1)
+    pipe_v1.add_summit(summit1)
     # Enrich this Summit with a position
-    pipe_v1.add_or_enrich_summit(summit2)
+    pipe_v1.add_summit(summit2)
     # Try to update the already set position (should be ignored)
-    pipe_v1.add_or_enrich_summit(summit3)
+    pipe_v1.add_summit(summit3)
 
     pipe_v1.finalize_pipe()
 

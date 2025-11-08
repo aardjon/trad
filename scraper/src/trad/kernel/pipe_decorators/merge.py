@@ -47,7 +47,7 @@ class MergingPipeDecorator(Pipe):
         summit_count = len(self._summits)
         _logger.debug("Writing summits with %s names...", summit_count)
         for idx, summit in enumerate(self._summits):
-            self._delegate.add_or_enrich_summit(summit)
+            self._delegate.add_summit(summit)
             routes = self._routes.get(summit.normalized_name, [])
             _logger.debug(
                 "Writing %s routes for summit %d/%d ('%s')...",
@@ -57,7 +57,7 @@ class MergingPipeDecorator(Pipe):
                 summit.name,
             )
             for route in routes:
-                self._delegate.add_or_enrich_route(summit.name, route)
+                self._delegate.add_route(summit.name, route)
 
                 posts = self._posts.get(summit.normalized_name, {}).get(route.route_name, [])
                 for post in posts:
@@ -72,7 +72,7 @@ class MergingPipeDecorator(Pipe):
         self._delegate.finalize_pipe()
 
     @override
-    def add_or_enrich_summit(self, summit: Summit) -> None:
+    def add_summit(self, summit: Summit) -> None:
         new_summit_normalized_names = set(summit.get_all_normalized_names())
         # Find all alreay known Summit objects that are physically the same as the new one
         match_search_radius: Final = 200  # Radius in meters
@@ -108,7 +108,7 @@ class MergingPipeDecorator(Pipe):
         #                OSM.
 
     @override
-    def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
+    def add_route(self, summit_name: str, route: Route) -> None:
         self._routes.setdefault(self._find_first_summit(summit_name).normalized_name, []).append(
             route
         )

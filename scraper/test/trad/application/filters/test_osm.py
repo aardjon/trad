@@ -422,10 +422,10 @@ class TestOsmSummitDataFilter:
             assert '["natural"="peak"]' in id_query_content
 
         # Make sure that the expected number of summits has been sent to the Pipe
-        assert mocked_pipe.add_or_enrich_summit.call_count == len(expected_summits)
+        assert mocked_pipe.add_summit.call_count == len(expected_summits)
         # Make sure all sent summit data matches our expectation
         stored_summits: list[Summit] = sorted(
-            (call.args[0] for call in mocked_pipe.add_or_enrich_summit.call_args_list),
+            (call.args[0] for call in mocked_pipe.add_summit.call_args_list),
             key=lambda s: s.name,
         )
         assert all(

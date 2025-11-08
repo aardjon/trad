@@ -97,7 +97,7 @@ class DbSchemaV1Pipe(Pipe):
         self.__database_boundary.disconnect()
 
     @override
-    def add_or_enrich_summit(self, summit: Summit) -> None:
+    def add_summit(self, summit: Summit) -> None:
         summit_id = self._write_to_summits_table(summit)
         self._write_to_summit_names_table(summit_id, summit)
 
@@ -180,7 +180,7 @@ class DbSchemaV1Pipe(Pipe):
             )
 
     @override
-    def add_or_enrich_route(self, summit_name: str, route: Route) -> None:
+    def add_route(self, summit_name: str, route: Route) -> None:
         select_summit = (
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"

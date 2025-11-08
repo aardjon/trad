@@ -209,7 +209,7 @@ class TestMergingPipeDecorator:
         failure_context: AbstractContextManager[None],
     ) -> None:
         """
-        Ensures that add_or_enrich_summit() collects and merges Summit data properly:
+        Ensures that add_summit() collects and merges Summit data properly:
          - A Summit not already available is simply added
          - An existing Summit's data is enriched
          - Unrelated existing Summits must not be changed
@@ -227,11 +227,11 @@ class TestMergingPipeDecorator:
 
         proxy_pipe = MergingPipeDecorator(inner_pipe)
         for summit in existing_summits:
-            proxy_pipe.add_or_enrich_summit(summit)
+            proxy_pipe.add_summit(summit)
 
         # The actual test case: Adding another summit
         with failure_context:
-            proxy_pipe.add_or_enrich_summit(add_summit)
+            proxy_pipe.add_summit(add_summit)
 
         # Check the resulting summit list and data
         for real, expected in zip(
@@ -247,14 +247,14 @@ class TestMergingPipeDecorator:
 
     def test_add_or_enrich_route(self) -> None:
         """
-        Ensures that add_or_enrich_route() collects and merges Route data properly.
+        Ensures that add_route() collects and merges Route data properly.
         """
         inner_pipe = Mock(Pipe)
         proxy_pipe = MergingPipeDecorator(inner_pipe)
-        proxy_pipe.add_or_enrich_summit(Summit("Summit"))
+        proxy_pipe.add_summit(Summit("Summit"))
         dummy_route = Route(route_name="Example Trail", grade="I")
 
-        proxy_pipe.add_or_enrich_route("Summit", dummy_route)
+        proxy_pipe.add_route("Summit", dummy_route)
 
         assert list(proxy_pipe.get_collected_routes("Summit")) == [dummy_route]
 
@@ -264,8 +264,8 @@ class TestMergingPipeDecorator:
         """
         inner_pipe = Mock(Pipe)
         proxy_pipe = MergingPipeDecorator(inner_pipe)
-        proxy_pipe.add_or_enrich_summit(Summit("Summit"))
-        proxy_pipe.add_or_enrich_route("Summit", Route(route_name="Route", grade="III"))
+        proxy_pipe.add_summit(Summit("Summit"))
+        proxy_pipe.add_route("Summit", Route(route_name="Route", grade="III"))
         dummy_post = Post(
             user_name="johndoe",
             comment="",

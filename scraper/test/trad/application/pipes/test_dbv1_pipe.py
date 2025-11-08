@@ -19,17 +19,17 @@ from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route
 
 
 class TestDbSchemaV1Pipe:
-    def test_add_or_enrich_summit(self, tmp_path: Path) -> None:
+    def test_add_summit(self, tmp_path: Path) -> None:
         """
-        Ensures that add_or_enrich_summit() executes the expected SQL statement (1), does it in
-        exactly one database operation (2) and provides all query parameters separately (3).
+        Ensures that add_summit() executes the expected SQL statement (1), does it in exactly one
+        database operation (2) and provides all query parameters separately (3).
         """
         expected_db_writes: Final = 2
         fake_db_boundary = Mock(RelationalDatabaseBoundary)
         fake_db_boundary.execute_read.return_value = [DataRow({"rowid": 42})]
         pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
 
-        pipe.add_or_enrich_summit(
+        pipe.add_summit(
             Summit(
                 official_name="Foobar Rock",
                 high_grade_position=GeoPosition.from_decimal_degree(13, 37),
@@ -52,15 +52,15 @@ class TestDbSchemaV1Pipe:
         )
         assert fake_db_boundary.execute_write.call_count == expected_db_writes
 
-    def test_add_or_enrich_route(self, tmp_path: Path) -> None:
+    def test_add_route(self, tmp_path: Path) -> None:
         """
-        Ensures that add_or_enrich_route() executes the expected SQL statement (1), does it in
-        exactly one database operation (2) and provides all query parameters separately (3).
+        Ensures that add_route() executes the expected SQL statement (1), does it in exactly one
+        database operation (2) and provides all query parameters separately (3).
         """
         fake_db_boundary = Mock(RelationalDatabaseBoundary)
         pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
 
-        pipe.add_or_enrich_route(
+        pipe.add_route(
             summit_name="Mock Monument",
             route=Route(
                 route_name="Anxiety",

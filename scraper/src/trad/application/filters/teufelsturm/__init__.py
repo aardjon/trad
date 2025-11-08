@@ -95,9 +95,9 @@ class TeufelsturmDataFilter(Filter):
             if not self._is_forbidden(post_data.peak):
                 if hash(post_data.peak.name) not in self._added_peak_name_hashes:
                     # Each summit must be added to the pipe only once (for performance)
-                    pipe.add_or_enrich_summit(post_data.peak)
+                    pipe.add_summit(post_data.peak)
                     self._added_peak_name_hashes.add(hash(post_data.peak.name))
-                pipe.add_or_enrich_route(summit_name=post_data.peak.name, route=post_data.route)
+                pipe.add_route(summit_name=post_data.peak.name, route=post_data.route)
                 for post in post_data.posts:
                     pipe.add_post(
                         summit_name=post_data.peak.name,

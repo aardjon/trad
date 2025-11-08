@@ -330,7 +330,7 @@ class OsmSummitDataFilter(Filter):
     def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:
         for summit in summits:
             try:
-                pipe.add_or_enrich_summit(summit)
+                pipe.add_summit(summit)
             except MergeConflictError as e:
                 _logger.warning(e)
 
