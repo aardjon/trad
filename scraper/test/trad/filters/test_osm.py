@@ -10,12 +10,12 @@ from unittest.mock import ANY, Mock, NonCallableMock
 import pytest
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
-from trad.core.boundaries.filters import FilterStage
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import GeoPosition, Summit
-from trad.core.errors import DataProcessingError, DataRetrievalError
-from trad.crosscuttings.di import DependencyProvider
 from trad.filters.osm import OsmSummitDataFilter
+from trad.kernel.boundaries.filters import FilterStage
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.di import DependencyProvider
+from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 
 @pytest.fixture

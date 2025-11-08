@@ -12,11 +12,11 @@ from typing import Final
 
 import pytest
 
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import GeoPosition, Post, Route, Summit
-from trad.core.pipe_decorators.merge import MergingPipeDecorator
-from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.infrastructure.sqlite3db import Sqlite3Database
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.entities import GeoPosition, Post, Route, Summit
+from trad.kernel.pipe_decorators.merge import MergingPipeDecorator
 from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 
 

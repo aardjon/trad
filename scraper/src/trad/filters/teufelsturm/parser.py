@@ -18,8 +18,8 @@ import pytz
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
-from trad.core.errors import DataProcessingError
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
+from trad.kernel.errors import DataProcessingError
 
 if TYPE_CHECKING:
     from collections.abc import Callable

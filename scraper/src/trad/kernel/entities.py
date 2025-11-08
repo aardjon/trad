@@ -9,7 +9,7 @@ from datetime import datetime
 from math import cos, pi, sqrt
 from typing import Final, Self, override
 
-from trad.core.errors import MergeConflictError
+from trad.kernel.errors import MergeConflictError
 
 NO_GRADE: Final = 0
 """ Special value to mark a missing or no grade. """

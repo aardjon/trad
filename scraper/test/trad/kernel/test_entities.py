@@ -1,13 +1,13 @@
 """
-Unit tests for the core.entities module.
+Unit tests for the trad.kernel.entities module.
 """
 
 from contextlib import AbstractContextManager, nullcontext
 
 import pytest
 
-from trad.core.entities import GeoPosition, NormalizedName, Summit
-from trad.core.errors import MergeConflictError
+from trad.kernel.entities import GeoPosition, NormalizedName, Summit
+from trad.kernel.errors import MergeConflictError
 
 
 class TestGeoPosition:

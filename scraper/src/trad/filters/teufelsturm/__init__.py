@@ -6,11 +6,11 @@ from logging import getLogger
 from typing import Final, override
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary
-from trad.core.boundaries.filters import Filter, FilterStage
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import Summit
-from trad.crosscuttings.di import DependencyProvider
 from trad.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
+from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.di import DependencyProvider
+from trad.kernel.entities import Summit
 
 _logger = getLogger(__name__)
 

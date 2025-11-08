@@ -75,3 +75,11 @@ class MergeConflictError(PipeDataError):
             f"Cannot merge {self._object_type} data for '{self._object_name}' because of "
             f"conflicting {self._conflicting_attribute} values."
         )
+
+
+class InvalidStateError(Exception):
+    """
+    Raised when an operation cannot be fulfilled due to an invalid application (or component) state.
+    The reason is usually a programming or configuration error, the end user cannot do much about it
+    when it happens unexpectedly at runtime.
+    """

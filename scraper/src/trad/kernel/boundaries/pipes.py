@@ -4,7 +4,7 @@ Boundary interface to the `pipes` component.
 
 from abc import ABCMeta, abstractmethod
 
-from trad.core.entities import Post, Route, Summit
+from trad.kernel.entities import Post, Route, Summit
 
 
 class Pipe(metaclass=ABCMeta):

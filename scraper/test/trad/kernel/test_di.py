@@ -1,11 +1,11 @@
 """
-Unit tests for the trad.crosscuttings.di module.
+Unit tests for the trad.kernel.di module.
 """
 
 import pytest
 
-from trad.crosscuttings.di import DependencyProvider
-from trad.crosscuttings.errors import InvalidStateError
+from trad.kernel.di import DependencyProvider
+from trad.kernel.errors import InvalidStateError
 
 
 class ExampleInterface1: ...

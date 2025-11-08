@@ -5,8 +5,8 @@ Boundary interface to the filters component.
 from abc import ABCMeta, abstractmethod
 from enum import Enum, auto
 
-from trad.core.boundaries.pipes import Pipe
-from trad.crosscuttings.di import DependencyProvider
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.di import DependencyProvider
 
 
 class FilterStage(Enum):

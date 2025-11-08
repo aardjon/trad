@@ -4,9 +4,9 @@ The scraper use case implementations.
 
 from logging import getLogger
 
-from trad.core.boundaries.filters import FilterFactory, FilterStage
-from trad.core.boundaries.pipes import Pipe, PipeFactory
-from trad.crosscuttings.di import DependencyProvider
+from trad.kernel.boundaries.filters import FilterFactory, FilterStage
+from trad.kernel.boundaries.pipes import Pipe, PipeFactory
+from trad.kernel.di import DependencyProvider
 
 _logger = getLogger(__name__)
 

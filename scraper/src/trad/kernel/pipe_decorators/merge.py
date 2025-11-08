@@ -8,9 +8,9 @@ from contextlib import suppress
 from logging import getLogger
 from typing import Final, override
 
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
-from trad.core.errors import EntityNotFoundError
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
+from trad.kernel.errors import EntityNotFoundError
 
 _logger = getLogger(__name__)
 

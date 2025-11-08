@@ -5,10 +5,10 @@ Filter implementations that are supposed to run in INITIALIZING stage.
 from logging import getLogger
 from typing import override
 
-from trad.core.boundaries.filters import Filter, FilterStage
-from trad.core.boundaries.pipes import Pipe
-from trad.core.boundaries.settings import SettingsBoundary
-from trad.crosscuttings.di import DependencyProvider
+from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.boundaries.settings import SettingsBoundary
+from trad.kernel.di import DependencyProvider
 
 _logger = getLogger(__name__)
 

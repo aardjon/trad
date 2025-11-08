@@ -22,11 +22,11 @@ from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from trad.adapters.boundaries.http import HttpNetworkingBoundary, HttpRequestError
-from trad.core.boundaries.filters import Filter, FilterStage
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import GeoPosition, Summit
-from trad.core.errors import DataProcessingError, DataRetrievalError, MergeConflictError
-from trad.crosscuttings.di import DependencyProvider
+from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.di import DependencyProvider
+from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.errors import DataProcessingError, DataRetrievalError, MergeConflictError
 
 _logger = getLogger(__name__)
 

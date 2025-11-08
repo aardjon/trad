@@ -8,9 +8,9 @@ from pathlib import Path
 from typing import Final, override
 
 from trad.adapters.boundaries.database import RelationalDatabaseBoundary, SqlStatement
-from trad.core.boundaries.pipes import Pipe
-from trad.core.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
-from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
+from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 from trad.pipes.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,

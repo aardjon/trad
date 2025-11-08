@@ -11,7 +11,7 @@ from typing import TypeVar
 from lidipy import Lidi
 from lidipy.exceptions import BindingMissing
 
-from trad.crosscuttings.errors import InvalidStateError
+from trad.kernel.errors import InvalidStateError
 
 _InterfaceType = TypeVar("_InterfaceType")
 """ The interface type being registered or requested. """

@@ -8,7 +8,7 @@ from typing import Final
 from unittest.mock import Mock, call
 
 from trad.adapters.boundaries.database import DataRow, RelationalDatabaseBoundary
-from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 from trad.pipes.db_v1.dbschema import PostsTable, RoutesTable, SummitNamesTable, SummitsTable
 from trad.pipes.db_v1.pipe import DbSchemaV1Pipe
 

@@ -1,5 +1,5 @@
 """
-Unit tests for the trad.core.usecases module.
+Unit tests for the trad.kernel.usecases module.
 """
 
 from collections.abc import Iterator
@@ -7,10 +7,10 @@ from unittest.mock import Mock, NonCallableMock, call
 
 import pytest
 
-from trad.core.boundaries.filters import Filter, FilterFactory, FilterStage
-from trad.core.boundaries.pipes import Pipe, PipeFactory
-from trad.core.usecases import ScraperUseCases
-from trad.crosscuttings.di import DependencyProvider
+from trad.kernel.boundaries.filters import Filter, FilterFactory, FilterStage
+from trad.kernel.boundaries.pipes import Pipe, PipeFactory
+from trad.kernel.di import DependencyProvider
+from trad.kernel.usecases import ScraperUseCases
 
 
 @pytest.fixture

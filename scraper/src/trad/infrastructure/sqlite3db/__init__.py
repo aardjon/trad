@@ -15,7 +15,7 @@ from trad.adapters.boundaries.database import (
     RelationalDatabaseBoundary,
     SqlStatement,
 )
-from trad.crosscuttings.errors import InvalidStateError
+from trad.kernel.errors import InvalidStateError
 
 _logger = getLogger(__name__)
 

@@ -1,5 +1,5 @@
 """
-Implementation of the `trad.core.boundaries.settings` interface, which gives access to the user's
+Implementation of the `trad.kernel.boundaries.settings` interface, which gives access to the user's
 application configuration.
 """
 
@@ -7,7 +7,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import override
 
-from trad.core.boundaries.settings import SettingsBoundary
+from trad.kernel.boundaries.settings import SettingsBoundary
 
 
 class CliSettings(SettingsBoundary):

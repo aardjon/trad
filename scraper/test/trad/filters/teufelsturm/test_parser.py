@@ -10,7 +10,6 @@ import pandas as pd
 import pytest
 import pytz
 
-from trad.core.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post
 from trad.filters.teufelsturm.parser import (
     SummitCache,
     parse_page,
@@ -20,6 +19,7 @@ from trad.filters.teufelsturm.parser import (
     parse_route_list,
     parse_user_name,
 )
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post
 
 posts_test_dict: Final = {
     0: {
