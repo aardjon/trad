@@ -65,7 +65,7 @@ def bootstrap(context: Context) -> None:
     This installs all (dev) dependencies into the current virtualenv. After that, all other `invoke`
     scripts can be executed.
     """
-    context.run("pip install -r python-requirements.txt")
+    context.run("python -m pip install -r python-requirements.txt")
     context.run("pip-compile -q --strip-extras --output-file=app-requirements.txt pyproject.toml")
     context.run(
         "pip-compile "
