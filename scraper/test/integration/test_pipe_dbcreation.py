@@ -12,8 +12,8 @@ from typing import Final
 
 import pytest
 
+from trad.application.filters.db_v1 import DbSchemaV1Pipe
 from trad.application.filters.merge import MergeFilter
-from trad.application.pipes.db_v1.pipe import DbSchemaV1Pipe
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe

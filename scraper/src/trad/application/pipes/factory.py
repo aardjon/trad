@@ -5,7 +5,7 @@ Implementation of the PipeFactory component.
 from typing import override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
-from trad.application.pipes.db_v1.pipe import DbSchemaV1Pipe
+from trad.application.filters.db_v1 import DbSchemaV1Pipe
 from trad.kernel.boundaries.pipes import Pipe, PipeFactory
 from trad.kernel.boundaries.settings import SettingsBoundary
 from trad.kernel.di import DependencyProvider

@@ -1,5 +1,5 @@
 """
-Unit tests for the `trad.application.pipes.db_v1.pipe` module.
+Unit tests for the `trad.application.filters.db_v1` module.
 """
 
 from datetime import datetime
@@ -8,13 +8,13 @@ from typing import Final
 from unittest.mock import Mock, call
 
 from trad.application.boundaries.database import DataRow, RelationalDatabaseBoundary
-from trad.application.pipes.db_v1.dbschema import (
+from trad.application.filters.db_v1 import DbSchemaV1Pipe
+from trad.application.filters.db_v1.dbschema import (
     PostsTable,
     RoutesTable,
     SummitNamesTable,
     SummitsTable,
 )
-from trad.application.pipes.db_v1.pipe import DbSchemaV1Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 
 
