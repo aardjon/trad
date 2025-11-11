@@ -8,46 +8,56 @@ from contextlib import suppress
 from logging import getLogger
 from typing import Final, override
 
+from trad.kernel.boundaries.filters import Filter, FilterStage
 from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
 _logger = getLogger(__name__)
 
 
-class MergingPipeDecorator(Pipe):
+class MergeFilter(Filter):
     """
-    A special Pipe implementation which collects (and merges) all data in memory, and sends the
-    merged data to the real Pipes during finalization only.
-
-    This is an implementation of the *Decorator* design pattern (don't mix it up with Python
-    decorators!).
+    A Filter for merging Summit (and Route) instances that are actually describing the same physical
+    object into a single instance.
 
     TODO(aardjon): Routes are not correctly merged yet because atm there is only ever one single
                    source for routes which is also retrieved last. This must be fixed!
     """
 
-    def __init__(self, delegate_pipe: Pipe) -> None:
-        """
-        Create a new Pipe decorator which sends all collected data to the given `delegate_pipe`.
-        """
-        super().__init__()
-        self._delegate = delegate_pipe
+    @override
+    def __init__(self, dependency_provider: DependencyProvider) -> None:
+        super().__init__(dependency_provider)
         self._summits: list[Summit] = []
         self._routes: dict[NormalizedName, list[Route]] = {}
         self._posts: dict[NormalizedName, dict[str, list[Post]]] = {}
 
+    @staticmethod
     @override
-    def initialize_pipe(self) -> None:
-        self._delegate.initialize_pipe()
+    def get_stage() -> FilterStage:
+        return FilterStage.OPTIMIZATION
 
     @override
-    def finalize_pipe(self) -> None:
-        # Finally, write all collected data into the delegate pipe
+    def get_name(self) -> str:
+        return "DataMerge"
+
+    @override
+    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+        for summit_id, summit in input_pipe.iter_summits():
+            self._add_summit(summit)
+            for route_id, route in input_pipe.iter_routes_of_summit(summit_id):
+                self._add_route(summit.name, route)
+                for post in input_pipe.iter_posts_of_route(route_id):
+                    self._add_post(summit.name, route.route_name, post)
+        self._write_merged_data(output_pipe)
+
+    def _write_merged_data(self, output_pipe: Pipe) -> None:
+        # Write all collected data into the output pipe
         summit_count = len(self._summits)
         _logger.debug("Writing summits with %s names...", summit_count)
         for idx, summit in enumerate(self._summits):
-            self._delegate.add_summit(summit)
+            summit_id = output_pipe.add_summit(summit)
             routes = self._routes.get(summit.normalized_name, [])
             _logger.debug(
                 "Writing %s routes for summit %d/%d ('%s')...",
@@ -57,24 +67,20 @@ class MergingPipeDecorator(Pipe):
                 summit.name,
             )
             for route in routes:
-                self._delegate.add_route(summit.name, route)
+                route_id = output_pipe.add_route(summit_id, route)
 
                 posts = self._posts.get(summit.normalized_name, {}).get(route.route_name, [])
                 for post in posts:
-                    self._delegate.add_post(summit.name, route.route_name, post)
+                    output_pipe.add_post(route_id, post)
 
         # Delete all in-memory data
         self._summits.clear()
         self._routes.clear()
         self._posts.clear()
 
-        _logger.debug("Finalizing all pipes...")
-        self._delegate.finalize_pipe()
-
-    @override
-    def add_summit(self, summit: Summit) -> None:
+    def _add_summit(self, summit: Summit) -> None:
         new_summit_normalized_names = set(summit.get_all_normalized_names())
-        # Find all alreay known Summit objects that are physically the same as the new one
+        # Find all already known Summit objects that are physically the same as the new one
         match_search_radius: Final = 200  # Radius in meters
         existing_summits_to_merge: dict[int, Summit] = {}
         for existing_summit in self._summits:
@@ -107,14 +113,12 @@ class MergingPipeDecorator(Pipe):
         #                and OSM data being merged, though, because we don't gather route data from
         #                OSM.
 
-    @override
-    def add_route(self, summit_name: str, route: Route) -> None:
+    def _add_route(self, summit_name: str, route: Route) -> None:
         self._routes.setdefault(self._find_first_summit(summit_name).normalized_name, []).append(
             route
         )
 
-    @override
-    def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
+    def _add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         self._posts.setdefault(self._find_first_summit(summit_name).normalized_name, {}).setdefault(
             route_name, []
         ).append(post)

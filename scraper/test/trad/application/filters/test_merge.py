@@ -2,42 +2,28 @@
 Unit tests for the trad.application.filters.merge module.
 """
 
-from contextlib import AbstractContextManager, nullcontext
 from datetime import UTC, datetime
 from unittest.mock import Mock
 
 import pytest
 
-from trad.application.filters.merge import MergingPipeDecorator
-from trad.kernel.boundaries.pipes import Pipe
+from trad.application.filters.merge import MergeFilter
+from trad.application.pipe import CollectedData
+from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
 
 
-class TestMergingPipeDecorator:
+class TestMergeFilter:
     """
-    Unit tests for the MergingPipeDecorator class.
+    Unit tests for the MergeFilter class.
     """
-
-    def test_initialize_pipe(self) -> None:
-        inner_pipe = Mock(Pipe)
-        proxy_pipe = MergingPipeDecorator(inner_pipe)
-
-        proxy_pipe.initialize_pipe()
-        inner_pipe.initialize_pipe.assert_called_once()
-
-    def test_finalize_pipe(self) -> None:
-        inner_pipe = Mock(Pipe)
-        proxy_pipe = MergingPipeDecorator(inner_pipe)
-
-        proxy_pipe.finalize_pipe()
-        inner_pipe.finalize_pipe.assert_called_once()
 
     @pytest.mark.parametrize(
-        ("existing_summits", "add_summit", "expected_summit_list", "failure_context"),
+        ("existing_summits", "add_summit", "expected_summit_list"),
         [
             # Simple adding of a new summit
-            ([], Summit("Summit"), [Summit("Summit")], nullcontext()),
+            ([], Summit("Summit"), [Summit("Summit")]),
             # Don't create double entries within a list
             (
                 [
@@ -52,7 +38,6 @@ class TestMergingPipeDecorator:
                         unspecified_names=["Unspec1", "Unspec2", "Unspec3"],
                     )
                 ],
-                nullcontext(),
             ),
             # Merge different name variants
             (
@@ -65,7 +50,6 @@ class TestMergingPipeDecorator:
                         low_grade_position=GeoPosition(504620000, 147390000),
                     )
                 ],
-                nullcontext(),
             ),
             # Merge multiple Summits into one if new information reveals that this is necessary
             (
@@ -78,7 +62,6 @@ class TestMergingPipeDecorator:
                         unspecified_names=["Name1", "Name2"],
                     )
                 ],
-                nullcontext(),
             ),
             # ... at least it their positions are close together
             (
@@ -106,7 +89,6 @@ class TestMergingPipeDecorator:
                         low_grade_position=GeoPosition(404620000, 247390000),
                     )
                 ],
-                nullcontext(),
             ),
             # Two summits with the same name that are too far away from each other must not be
             # merged
@@ -127,7 +109,6 @@ class TestMergingPipeDecorator:
                         official_name="Name1", high_grade_position=GeoPosition(547390000, 304620000)
                     ),
                 ],
-                nullcontext(),
             ),
             (
                 [
@@ -152,7 +133,6 @@ class TestMergingPipeDecorator:
                         high_grade_position=GeoPosition(247390000, 404620000),
                     ),
                 ],
-                nullcontext(),
             ),
             # Don't change other existing summits
             (
@@ -163,7 +143,6 @@ class TestMergingPipeDecorator:
                     Summit("S2", high_grade_position=GeoPosition(404620000, 247390000)),
                     Summit("S3", high_grade_position=GeoPosition(504620000, 147390000)),
                 ],
-                nullcontext(),
             ),
             (
                 [
@@ -181,32 +160,14 @@ class TestMergingPipeDecorator:
                     ),
                     Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
                 ],
-                nullcontext(),
-            ),
-            # Error case: Conflicting position data (same name but positions are close together),
-            # existing data must not be changed!
-            (
-                [
-                    Summit("S1"),
-                    Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
-                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
-                ],
-                Summit("S2", high_grade_position=GeoPosition(304621000, 547389000)),
-                [
-                    Summit("S1"),
-                    Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
-                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
-                ],
-                pytest.raises(MergeConflictError),
             ),
         ],
     )
-    def test_add_or_enrich_summit(
+    def test_add_summit(
         self,
         existing_summits: list[Summit],
         add_summit: Summit,
         expected_summit_list: list[Summit],
-        failure_context: AbstractContextManager[None],
     ) -> None:
         """
         Ensures that add_summit() collects and merges Summit data properly:
@@ -214,28 +175,26 @@ class TestMergingPipeDecorator:
          - An existing Summit's data is enriched
          - Unrelated existing Summits must not be changed
          - When adding additional names, several existing Summits may have to be merged into one
-         - Unsolvable merge conflicts raise a MergeConflictError (preserving existing data)
 
-        :param existing_summits: List of Summits that are already stored in the Pipe.
+        :param existing_summits: List of Summits that are already stored in the input pipe.
         :param add_summit: The Summit object to add to the Pipe.
-        :param expected_summit_list: List of Summits expected to be stored in the Pipe after the add
-            operation.
-        :param failure_context: Exception context the adding is done within, can be used to expect a
-            certain exception to be raised.
+        :param expected_summit_list: List of Summits expected to be stored in the output pipe after
+            the filter run.
         """
-        inner_pipe = Mock(Pipe)
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
 
-        proxy_pipe = MergingPipeDecorator(inner_pipe)
         for summit in existing_summits:
-            proxy_pipe.add_summit(summit)
+            input_pipe.add_summit(summit)
+        input_pipe.add_summit(add_summit)
 
-        # The actual test case: Adding another summit
-        with failure_context:
-            proxy_pipe.add_summit(add_summit)
+        # The actual test case: Run the filter
+        merge_filter = MergeFilter(Mock(DependencyProvider))
+        merge_filter.execute_filter(input_pipe, output_pipe)
 
         # Check the resulting summit list and data
         for real, expected in zip(
-            proxy_pipe.get_collected_summits(),
+            (s for i, s in output_pipe.iter_summits()),
             expected_summit_list,
             strict=True,
         ):
@@ -245,34 +204,74 @@ class TestMergingPipeDecorator:
             assert real.high_grade_position.is_equal_to(expected.high_grade_position)
             assert real.low_grade_position.is_equal_to(expected.low_grade_position)
 
-    def test_add_or_enrich_route(self) -> None:
+    @pytest.mark.parametrize(
+        ("input_summits", "expected_error"),
+        [
+            # Error case: Conflicting position data (same name but positions are close together),
+            # existing data must not be changed!
+            (
+                [
+                    Summit("S1"),
+                    Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
+                    Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
+                    Summit("S2", high_grade_position=GeoPosition(304621000, 547389000)),
+                ],
+                MergeConflictError,
+            ),
+        ],
+    )
+    def test_add_summit_merge_conflict(
+        self, input_summits: list[Summit], expected_error: type[Exception]
+    ) -> None:
+        """
+        Ensures that add_summit() raises in case of unsolvable merge conflicts.
+
+        :param input_summits: List of Summits that are stored in the input pipe.
+        """
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
+
+        for summit in input_summits:
+            input_pipe.add_summit(summit)
+
+        merge_filter = MergeFilter(Mock(DependencyProvider))
+        with pytest.raises(expected_error):
+            merge_filter.execute_filter(input_pipe, output_pipe)
+
+    def test_add_route(self) -> None:
         """
         Ensures that add_route() collects and merges Route data properly.
         """
-        inner_pipe = Mock(Pipe)
-        proxy_pipe = MergingPipeDecorator(inner_pipe)
-        proxy_pipe.add_summit(Summit("Summit"))
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
+
         dummy_route = Route(route_name="Example Trail", grade="I")
+        summit_id = input_pipe.add_summit(Summit("Summit"))
+        route_id = input_pipe.add_route(summit_id, dummy_route)
 
-        proxy_pipe.add_route("Summit", dummy_route)
+        merge_filter = MergeFilter(Mock(DependencyProvider))
 
-        assert list(proxy_pipe.get_collected_routes("Summit")) == [dummy_route]
+        merge_filter.execute_filter(input_pipe, output_pipe)
+        assert list(output_pipe.iter_routes_of_summit(summit_id)) == [(route_id, dummy_route)]
 
     def test_add_post(self) -> None:
         """
         Ensures that add_post() collects Post data properly.
         """
-        inner_pipe = Mock(Pipe)
-        proxy_pipe = MergingPipeDecorator(inner_pipe)
-        proxy_pipe.add_summit(Summit("Summit"))
-        proxy_pipe.add_route("Summit", Route(route_name="Route", grade="III"))
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
+
+        summit_id = input_pipe.add_summit(Summit("Summit"))
+        route_id = input_pipe.add_route(summit_id, Route(route_name="Route", grade="III"))
         dummy_post = Post(
             user_name="johndoe",
             comment="",
             rating=1,
             post_date=datetime(2020, 7, 15, tzinfo=UTC),
         )
+        input_pipe.add_post(route_id, dummy_post)
 
-        proxy_pipe.add_post("Summit", "Route", dummy_post)
+        merge_filter = MergeFilter(Mock(DependencyProvider))
 
-        assert list(proxy_pipe.get_collected_posts("Summit", "Route")) == [dummy_post]
+        merge_filter.execute_filter(input_pipe, output_pipe)
+        assert list(output_pipe.iter_posts_of_route(route_id)) == [dummy_post]

@@ -6,6 +6,7 @@ from typing import Final, override
 
 from trad.application.filters.finalization import PipeFinalizingFilter
 from trad.application.filters.initialization import PipeInitializingFilter
+from trad.application.filters.merge import MergeFilter
 from trad.application.filters.osm import OsmSummitDataFilter
 from trad.application.filters.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory, FilterStage
@@ -31,6 +32,7 @@ class AllFiltersFactory(FilterFactory):
             PipeInitializingFilter,
             OsmSummitDataFilter,
             TeufelsturmDataFilter,
+            MergeFilter,
             PipeFinalizingFilter,
         ]
         return [

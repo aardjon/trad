@@ -5,7 +5,6 @@ Implementation of the PipeFactory component.
 from typing import override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
-from trad.application.filters.merge import MergingPipeDecorator
 from trad.application.pipes.db_v1.pipe import DbSchemaV1Pipe
 from trad.kernel.boundaries.pipes import Pipe, PipeFactory
 from trad.kernel.boundaries.settings import SettingsBoundary
@@ -25,4 +24,4 @@ class AllPipesFactory(PipeFactory):
     @override
     def create_pipe(self) -> Pipe:
         destination_path = self.__settings.get_output_dir()
-        return MergingPipeDecorator(DbSchemaV1Pipe(destination_path, self.__database_boundary))
+        return DbSchemaV1Pipe(destination_path, self.__database_boundary)
