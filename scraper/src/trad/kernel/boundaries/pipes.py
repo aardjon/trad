@@ -3,6 +3,7 @@ Boundary interface to the `pipes` component.
 """
 
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterator
 from typing import NewType
 
 from trad.kernel.entities import Post, Route, Summit
@@ -24,35 +25,13 @@ class Pipe(metaclass=ABCMeta):
     """
     Interface to the Pipe component all Filters work on.
 
-    The pipe is the shared storage that filters can read from and write their modified data into.
-    A new Pipe is created for each stage, that's why Filters can get an input and an output pipe.
+    The pipe is the shared storage that filters can read from or write their modified data into.
     The concrete structure and technical details of the storage is hidden behind this interface,
     though.
-
-    Because several Filters may access tze same Pipe in parallel, all pipe operations are
-    thread-safe.
-
-    The pipe has an internal state: It must be initialized (by calling `initialize_pipe()`) before
-    any other operation is allowed, and finalized (by calling `finalize_pipe()`) after everything
-    else is done. If any method is called in the wrong state, it throws an InvalidStateError.
+    For each stage, two Pipe instances are created and handed to all of its Filters, that's why
+    Filters get an input and an output pipe. Because several Filters may access the same Pipe in
+    parallel, all pipe operations are thread-safe.
     """
-
-    @abstractmethod
-    def initialize_pipe(self) -> None:
-        """
-        Initializes the pipe for creating a new route database.
-
-        Must be called exactly once prior to any other operation.
-        """
-
-    @abstractmethod
-    def finalize_pipe(self) -> None:
-        """
-        Finalizes the creation of a new route database, closing the pipe.
-
-        Must be called exactly once after all other operations are done. The Pipe is not usable
-        anymore afterwards.
-        """
 
     @abstractmethod
     def add_summit(self, summit: Summit) -> SummitInstanceId:
@@ -60,7 +39,7 @@ class Pipe(metaclass=ABCMeta):
         Add the given [summit] data to the pipe. Returns the assigned ID for the newly added summit.
         Existing data is never dropped or replaced.
 
-        The returned ID is only valid for the current Filter!
+        The returned ID is only valid for the current Filter and Pipe instances!
         """
 
     @abstractmethod
@@ -71,7 +50,7 @@ class Pipe(metaclass=ABCMeta):
         replaced.
         Raises EntityNotFoundError if the given `summit_id` doesn't exist.
 
-        The returned ID is only valid for the current Filter!
+        The returned ID is only valid for the current Filter and Pipe instances!
         """
 
     @abstractmethod
@@ -80,6 +59,30 @@ class Pipe(metaclass=ABCMeta):
         Add the given [post] to the pipe, assigning it to the route identified by [route_id].
         Existing data is never dropped or replaced.
         Raises EntityNotFoundError if the given `route_id` doesn't exist.
+        """
+
+    @abstractmethod
+    def iter_summits(self) -> Iterator[tuple[SummitInstanceId, Summit]]:
+        """
+        Return all stored summits together with their instance IDs. The returned IDs are only valid
+        for the current Filter and Pipe instances!
+        """
+
+    @abstractmethod
+    def iter_routes_of_summit(
+        self, summit_id: SummitInstanceId
+    ) -> Iterator[tuple[RouteInstanceId, Route]]:
+        """
+        Return all routes together with their instance ID, that belong to the summit with the given
+        `summit_id`. The returned IDs are only valid for the current Filter and Pipe instances!
+        Returns an empty iterator if `summit_id` doesn't exist.
+        """
+
+    @abstractmethod
+    def iter_posts_of_route(self, route_id: RouteInstanceId) -> Iterator[Post]:
+        """
+        Return all posts that belong to the route with the given `route_id`, or an empty iterator if
+        `route_id` doesn't exist.
         """
 
 
