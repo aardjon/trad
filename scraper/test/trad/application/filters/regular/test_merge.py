@@ -1,12 +1,12 @@
 """
-Unit tests for the trad.application.filters.merge module.
+Unit tests for the trad.application.filters.regular.merge module.
 """
 
 from datetime import UTC, datetime
 
 import pytest
 
-from trad.application.filters.merge import MergeFilter
+from trad.application.filters.regular.merge import MergeFilter
 from trad.application.pipe import CollectedData
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError

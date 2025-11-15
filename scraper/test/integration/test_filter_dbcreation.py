@@ -10,7 +10,7 @@ from sqlite3 import connect
 from typing import Final
 from unittest.mock import Mock
 
-from trad.application.filters.merge import MergeFilter
+from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.pipe import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
