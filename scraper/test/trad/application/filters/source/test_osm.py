@@ -1,5 +1,5 @@
 """
-Unit tests for the 'trad.application.filters.osm' module.
+Unit tests for the 'trad.application.filters.source.osm' module.
 """
 
 import json
@@ -10,7 +10,7 @@ from unittest.mock import ANY, Mock
 import pytest
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
-from trad.application.filters.osm import OsmSummitDataFilter
+from trad.application.filters.source.osm import OsmSummitDataFilter
 from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import GeoPosition, Summit

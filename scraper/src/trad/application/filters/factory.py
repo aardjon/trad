@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, Final, override
 from trad.application.boundaries.database import RelationalDatabaseBoundary
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.merge import MergeFilter
-from trad.application.filters.osm import OsmSummitDataFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
-from trad.application.filters.teufelsturm import TeufelsturmDataFilter
+from trad.application.filters.source.osm import OsmSummitDataFilter
+from trad.application.filters.source.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.kernel.boundaries.settings import SettingsBoundary
 from trad.kernel.di import DependencyProvider
