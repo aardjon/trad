@@ -10,7 +10,7 @@ from enum import IntEnum
 from typing import Final, override
 
 from trad.application.boundaries.database import EntityName, SqlStatement
-from trad.application.pipes.schemabase import TableSchema
+from trad.application.filters.sink._schemabase import TableSchema
 
 
 class DatabaseMetadataTable(TableSchema):
