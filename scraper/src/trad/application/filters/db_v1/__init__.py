@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Final, override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary, SqlStatement
+from trad.application.filters._base import SinkFilter
 from trad.application.filters.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
@@ -18,14 +19,14 @@ from trad.application.filters.db_v1.dbschema import (
     SummitsTable,
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
-from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 
 _logger = getLogger(__name__)
 
 
-class DbSchemaV1Filter(Filter):
+class DbSchemaV1Filter(SinkFilter):
     """
     Filter implementation for creating a route database file (schema version 1) that can be used
     with the trad mobile app.
@@ -56,7 +57,10 @@ class DbSchemaV1Filter(Filter):
         return "WriteDbSchemaV1"
 
     @override
-    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+    def _execute_sink_filter(
+        self,
+        input_pipe: Pipe,
+    ) -> None:
         _logger.debug("Executing filter for writing into %s", self.__destination_file)
         self.__database_boundary.connect(self.__destination_file, overwrite=True)
         self._initialize_database()

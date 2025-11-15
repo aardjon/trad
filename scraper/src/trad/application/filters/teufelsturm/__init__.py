@@ -6,15 +6,16 @@ from logging import getLogger
 from typing import Final, override
 
 from trad.application.boundaries.http import HttpNetworkingBoundary
+from trad.application.filters._base import SourceFilter
 from trad.application.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
-from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.entities import Summit
 
 _logger = getLogger(__name__)
 
 
-class TeufelsturmDataFilter(Filter):
+class TeufelsturmDataFilter(SourceFilter):
     """
     Filter for importing data from https://www.teufelsturm.de into the pipe.
 
@@ -57,7 +58,7 @@ class TeufelsturmDataFilter(Filter):
         return "teufelsturm.de"
 
     @override
-    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+    def _execute_source_filter(self, output_pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
         route_ids = self._collect_route_ids()
         self._perform_scan(output_pipe, route_ids)

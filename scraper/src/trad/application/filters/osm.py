@@ -22,7 +22,8 @@ from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
-from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.application.filters._base import SourceFilter
+from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError, MergeConflictError
@@ -150,7 +151,7 @@ class _OverpassNodesResponse(_ReadOnlyPydanticModel):
     elements: list[_OverpassNode]
 
 
-class OsmSummitDataFilter(Filter):
+class OsmSummitDataFilter(SourceFilter):
     """
     Filter for importing summit data from the OpenStreetMap database.
 
@@ -187,7 +188,7 @@ class OsmSummitDataFilter(Filter):
         return "OpenStreetMap"
 
     @override
-    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+    def _execute_source_filter(self, output_pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
         area_id = self.__get_area_id()
 
