@@ -1,5 +1,5 @@
 """
-Unit tests for the `trad.application.filters.db_v1` module.
+Unit tests for the `trad.application.filters.sink.db_v1` module.
 """
 
 from datetime import datetime
@@ -11,8 +11,8 @@ from trad.application.boundaries.database import (
     DataRowContainer,
     RelationalDatabaseBoundary,
 )
-from trad.application.filters.db_v1 import DbSchemaV1Filter
-from trad.application.filters.db_v1.dbschema import (
+from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
+from trad.application.filters.sink.db_v1.dbschema import (
     PostsTable,
     RoutesTable,
     SummitNamesTable,

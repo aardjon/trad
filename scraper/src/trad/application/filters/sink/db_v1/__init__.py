@@ -9,7 +9,7 @@ from typing import Final, override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary, SqlStatement
 from trad.application.filters._base import SinkFilter
-from trad.application.filters.db_v1.dbschema import (
+from trad.application.filters.sink.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
     NameUsage,
