@@ -42,6 +42,7 @@ class DbSchemaV1Filter(Filter):
         Create a new filter that writes all data from the input pipe into a new route DB file within
         the given [output_directory], using the provided [database_boundary].
         """
+        super().__init__()
         self.__destination_file = output_directory.joinpath(self._DB_FILE_NAME)
         self.__database_boundary = database_boundary
 

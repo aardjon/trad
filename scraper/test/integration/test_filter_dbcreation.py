@@ -16,7 +16,6 @@ from trad.application.pipe import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 
 
@@ -140,7 +139,7 @@ def test_data_enrichment(tmp_path: Path) -> None:
 
     intermediate_pipe = CollectedData()
 
-    merge_filter = MergeFilter(Mock(DependencyProvider))
+    merge_filter = MergeFilter()
     merge_filter.execute_filter(input_pipe=input_pipe, output_pipe=intermediate_pipe)
     output_filter = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
     output_filter.execute_filter(input_pipe=intermediate_pipe, output_pipe=Mock(Pipe))

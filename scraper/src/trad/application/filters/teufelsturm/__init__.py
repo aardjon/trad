@@ -9,7 +9,6 @@ from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.teufelsturm.parser import SummitCache, parse_page, parse_route_list
 from trad.kernel.boundaries.filters import Filter, FilterStage
 from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
-from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import Summit
 
 _logger = getLogger(__name__)
@@ -29,12 +28,13 @@ class TeufelsturmDataFilter(Filter):
     _SUMMIT_DETAILS_URL: Final = _BASE_URL + "gipfel/details.php?gipfelnr={summit_id}"
 
     @override
-    def __init__(self, dependency_provider: DependencyProvider) -> None:
+    def __init__(self, network_boundary: HttpNetworkingBoundary) -> None:
         """
-        Constructor.
+        Create a new TeufelsturmDataFilter instance that retrieves data via the given
+        [network_boundary].
         """
-        super().__init__(dependency_provider)
-        self._http_boundary = dependency_provider.provide(HttpNetworkingBoundary)
+        super().__init__()
+        self._http_boundary = network_boundary
         self._summit_cache = SummitCache(retrieve_summit_details_page=self._get_summit_page_text)
         self._added_peak_name_hashes: dict[int, SummitInstanceId] = {}
         """

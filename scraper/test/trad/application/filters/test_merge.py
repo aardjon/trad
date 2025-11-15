@@ -3,13 +3,11 @@ Unit tests for the trad.application.filters.merge module.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import Mock
 
 import pytest
 
 from trad.application.filters.merge import MergeFilter
 from trad.application.pipe import CollectedData
-from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
 
@@ -189,7 +187,7 @@ class TestMergeFilter:
         input_pipe.add_summit(add_summit)
 
         # The actual test case: Run the filter
-        merge_filter = MergeFilter(Mock(DependencyProvider))
+        merge_filter = MergeFilter()
         merge_filter.execute_filter(input_pipe, output_pipe)
 
         # Check the resulting summit list and data
@@ -234,7 +232,7 @@ class TestMergeFilter:
         for summit in input_summits:
             input_pipe.add_summit(summit)
 
-        merge_filter = MergeFilter(Mock(DependencyProvider))
+        merge_filter = MergeFilter()
         with pytest.raises(expected_error):
             merge_filter.execute_filter(input_pipe, output_pipe)
 
@@ -249,7 +247,7 @@ class TestMergeFilter:
         summit_id = input_pipe.add_summit(Summit("Summit"))
         route_id = input_pipe.add_route(summit_id, dummy_route)
 
-        merge_filter = MergeFilter(Mock(DependencyProvider))
+        merge_filter = MergeFilter()
 
         merge_filter.execute_filter(input_pipe, output_pipe)
         assert list(output_pipe.iter_routes_of_summit(summit_id)) == [(route_id, dummy_route)]
@@ -271,7 +269,7 @@ class TestMergeFilter:
         )
         input_pipe.add_post(route_id, dummy_post)
 
-        merge_filter = MergeFilter(Mock(DependencyProvider))
+        merge_filter = MergeFilter()
 
         merge_filter.execute_filter(input_pipe, output_pipe)
         assert list(output_pipe.iter_posts_of_route(route_id)) == [dummy_post]

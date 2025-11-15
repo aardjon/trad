@@ -10,7 +10,6 @@ from typing import Final, override
 
 from trad.kernel.boundaries.filters import Filter, FilterStage
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
@@ -26,9 +25,10 @@ class MergeFilter(Filter):
                    source for routes which is also retrieved last. This must be fixed!
     """
 
-    @override
-    def __init__(self, dependency_provider: DependencyProvider) -> None:
-        super().__init__(dependency_provider)
+    def __init__(self) -> None:
+        """
+        Create a new MergeFilter instance.
+        """
         self._summits: list[Summit] = []
         self._routes: dict[NormalizedName, list[Route]] = {}
         self._posts: dict[NormalizedName, dict[str, list[Post]]] = {}

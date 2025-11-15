@@ -3,9 +3,9 @@ Unit tests for the 'trad.application.filters.osm' module.
 """
 
 import json
-from collections.abc import Callable, Iterator
+from collections.abc import Callable
 from typing import Final
-from unittest.mock import ANY, Mock, NonCallableMock
+from unittest.mock import ANY, Mock
 
 import pytest
 
@@ -13,35 +13,18 @@ from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequest
 from trad.application.filters.osm import OsmSummitDataFilter
 from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 
-@pytest.fixture
-def mocked_network_boundary() -> Iterator[Mock]:
-    """
-    Provides a mocked HttpNetworkingBoundary component which is also registered at the
-    DependencyProvider, and unregisters it after the test execution.
-    """
-    # Note: Lidi decides whether a given implementation has to be executed (again) or not by
-    #     checking callable(), which is always True for normals Mocks. That's why we have to use
-    #     NonCallableMock instead.
-    mocked_boundary = NonCallableMock(HttpNetworkingBoundary)
-    DependencyProvider().register_singleton(HttpNetworkingBoundary, lambda: mocked_boundary)
-    yield mocked_boundary
-    DependencyProvider().shutdown()
-
-
 class TestOsmSummitDataFilter:
-    @pytest.mark.usefixtures("mocked_network_boundary")
     def test_metadata(self) -> None:
         """
         Ensures the current return values of the "metadata" methods like filter name and filter
         stage.
         """
         assert OsmSummitDataFilter.get_stage() == FilterStage.IMPORTING
-        osm_filter = OsmSummitDataFilter(DependencyProvider())
+        osm_filter = OsmSummitDataFilter(Mock(HttpNetworkingBoundary))
         assert "OpenStreetMap" in osm_filter.get_name()
 
     @pytest.mark.parametrize(
@@ -69,13 +52,13 @@ class TestOsmSummitDataFilter:
         self,
         nominatim_response: str | Exception,
         expected_exception: type[Exception],
-        mocked_network_boundary: Mock,
     ) -> None:
         """
         Ensures the correct behaviour in case of errors during the Nominatim request.
         """
+        mocked_network_boundary = Mock(HttpNetworkingBoundary)
         mocked_network_boundary.retrieve_json_resource.side_effect = [nominatim_response]
-        osm_filter = OsmSummitDataFilter(DependencyProvider())
+        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
 
         with pytest.raises(expected_exception):
             osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
@@ -103,7 +86,6 @@ class TestOsmSummitDataFilter:
         self,
         overpass_response: str | Exception,
         expected_exception: type[Exception],
-        mocked_network_boundary: Mock,
     ) -> None:
         """
         Ensures the correct behaviour in case of errors during the Overpass request.
@@ -111,11 +93,12 @@ class TestOsmSummitDataFilter:
         valid_nominatim_response: Final = '[{"osm_id": 42}]'
         expected_network_request_count: Final = 2
 
+        mocked_network_boundary = Mock(HttpNetworkingBoundary)
         mocked_network_boundary.retrieve_json_resource.side_effect = [
             valid_nominatim_response,
             overpass_response,
         ]
-        osm_filter = OsmSummitDataFilter(DependencyProvider())
+        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
 
         with pytest.raises(expected_exception):
             osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
@@ -349,7 +332,6 @@ class TestOsmSummitDataFilter:
         nominatim_response_factory: Callable[[int], list[dict[str, object]]],
         overpass_responses: list[dict[str, object]],
         expected_summits: list[Summit],
-        mocked_network_boundary: Mock,
     ) -> None:
         """
         Ensure the correct behaviour if no errors occur:
@@ -369,11 +351,13 @@ class TestOsmSummitDataFilter:
         if len(overpass_responses) > 1:
             # Response of the Overpass node ID query, if any
             retrieve_json_resource_side_effects.append(json.dumps(overpass_responses[1]))
+
+        mocked_network_boundary = Mock(HttpNetworkingBoundary)
         mocked_network_boundary.retrieve_json_resource.side_effect = (
             retrieve_json_resource_side_effects
         )
 
-        osm_filter = OsmSummitDataFilter(DependencyProvider())
+        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=mocked_pipe)
 
         # Check the number of network requests

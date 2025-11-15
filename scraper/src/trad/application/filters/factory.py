@@ -2,18 +2,20 @@
 Implementation of the FilterFactory component.
 """
 
-from typing import Final, override
+from typing import TYPE_CHECKING, Final, override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
+from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.db_v1 import DbSchemaV1Filter
-from trad.application.filters.finalization import PipeFinalizingFilter
-from trad.application.filters.initialization import PipeInitializingFilter
 from trad.application.filters.merge import MergeFilter
 from trad.application.filters.osm import OsmSummitDataFilter
 from trad.application.filters.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory, FilterStage
 from trad.kernel.boundaries.settings import SettingsBoundary
 from trad.kernel.di import DependencyProvider
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class AllFiltersFactory(FilterFactory):
@@ -31,22 +33,21 @@ class AllFiltersFactory(FilterFactory):
 
     @override
     def create_filters(self, stage: FilterStage) -> list[Filter]:
-        filter_classes: Final = [
-            PipeInitializingFilter,
-            OsmSummitDataFilter,
-            TeufelsturmDataFilter,
-            MergeFilter,
-            lambda dip: DbSchemaV1Filter(
-                dip.provide(SettingsBoundary).get_output_dir(),
-                dip.provide(RelationalDatabaseBoundary),
+        filter_classes: Final[dict[type[Filter], Callable[[], Filter]]] = {
+            OsmSummitDataFilter: lambda: OsmSummitDataFilter(
+                self.__dependency_provider.provide(HttpNetworkingBoundary)
             ),
-            PipeFinalizingFilter,
-        ]
+            TeufelsturmDataFilter: lambda: TeufelsturmDataFilter(
+                self.__dependency_provider.provide(HttpNetworkingBoundary)
+            ),
+            MergeFilter: MergeFilter,
+            DbSchemaV1Filter: lambda: DbSchemaV1Filter(
+                self.__dependency_provider.provide(SettingsBoundary).get_output_dir(),
+                self.__dependency_provider.provide(RelationalDatabaseBoundary),
+            ),
+        }
         return [
-            # Ignoring the MyPy warning "Cannot instantiate abstract class" here because it is a
-            # known False Positive which will hopefully go away in some future version.
-            # See also: https://github.com/python/mypy/issues/15554
-            filter_class(self.__dependency_provider)  # type: ignore[abstract]
-            for filter_class in filter_classes
+            filter_creator()
+            for filter_class, filter_creator in filter_classes.items()
             if filter_class.get_stage() == stage
         ]
