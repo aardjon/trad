@@ -4,37 +4,44 @@ Unit tests for the `trad.application.filters.db_v1` module.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Final
 from unittest.mock import Mock, call
 
-from trad.application.boundaries.database import DataRow, RelationalDatabaseBoundary
-from trad.application.filters.db_v1 import DbSchemaV1Pipe
+from trad.application.boundaries.database import (
+    DataRow,
+    DataRowContainer,
+    RelationalDatabaseBoundary,
+)
+from trad.application.filters.db_v1 import DbSchemaV1Filter
 from trad.application.filters.db_v1.dbschema import (
     PostsTable,
     RoutesTable,
     SummitNamesTable,
     SummitsTable,
 )
+from trad.application.pipe import CollectedData
+from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 
 
-class TestDbSchemaV1Pipe:
+class TestDbSchemaV1Filter:
     def test_add_summit(self, tmp_path: Path) -> None:
         """
         Ensures that add_summit() executes the expected SQL statement (1), does it in exactly one
         database operation (2) and provides all query parameters separately (3).
         """
-        expected_db_writes: Final = 2
-        fake_db_boundary = Mock(RelationalDatabaseBoundary)
-        fake_db_boundary.execute_read.return_value = [DataRow({"rowid": 42})]
-        pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
-
-        pipe.add_summit(
+        input_pipe = CollectedData()
+        input_pipe.add_summit(
             Summit(
                 official_name="Foobar Rock",
                 high_grade_position=GeoPosition.from_decimal_degree(13, 37),
             )
         )
+
+        fake_db_boundary = Mock(RelationalDatabaseBoundary)
+        fake_db_boundary.execute_read.return_value = [DataRow({"rowid": 42})]
+
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=fake_db_boundary)
+        db_writer.execute_filter(input_pipe, output_pipe=Mock(Pipe))
 
         expected_summits_sql_statement = (
             f"INSERT INTO {SummitsTable.TABLE_NAME} ("
@@ -50,18 +57,17 @@ class TestDbSchemaV1Pipe:
         fake_db_boundary.execute_write.assert_any_call(
             query=expected_summits_sql_statement, query_parameters=[130000000, 370000000]
         )
-        assert fake_db_boundary.execute_write.call_count == expected_db_writes
+        self._check_database_finalization(fake_db_boundary)
 
     def test_add_route(self, tmp_path: Path) -> None:
         """
         Ensures that add_route() executes the expected SQL statement (1), does it in exactly one
         database operation (2) and provides all query parameters separately (3).
         """
-        fake_db_boundary = Mock(RelationalDatabaseBoundary)
-        pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
-
-        pipe.add_route(
-            summit_name="Mock Monument",
+        input_pipe = CollectedData()
+        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument"))
+        input_pipe.add_route(
+            summit_id=summit_id,
             route=Route(
                 route_name="Anxiety",
                 grade="VIIb",
@@ -73,6 +79,14 @@ class TestDbSchemaV1Pipe:
                 dangerous=True,
             ),
         )
+
+        fake_db_boundary = Mock(RelationalDatabaseBoundary)
+        fake_db_boundary.execute_read.return_value = DataRowContainer(
+            [DataRow({"rowid": 0})]  # Dummy row ID
+        )
+
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=fake_db_boundary)
+        db_writer.execute_filter(input_pipe, output_pipe=Mock(Pipe))
 
         expected_sql_statement = (
             f"INSERT OR IGNORE INTO {RoutesTable.TABLE_NAME} ("
@@ -90,22 +104,34 @@ class TestDbSchemaV1Pipe:
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
             f"), ?, ?, ?, ?, ?, ?, ?, ?)"
         )
-        fake_db_boundary.execute_write.assert_called_once_with(
+        fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
             query_parameters=["Mock Monument", "Anxiety", "VIIb", 10, 8, 9, 2, 1, True],
         )
+        self._check_database_finalization(fake_db_boundary)
 
     def test_add_post(self, tmp_path: Path) -> None:
         """
         Ensures that app_post() executes the expected SQL statement (1), does it in exactly one
         database operation (2) and provides all query parameters separately (3).
         """
-        fake_db_boundary = Mock(RelationalDatabaseBoundary)
-        pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
-
-        pipe.add_post(
-            summit_name="Mock Monument",
-            route_name="Anxiety",
+        input_pipe = CollectedData()
+        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument"))
+        route_id = input_pipe.add_route(
+            summit_id=summit_id,
+            route=Route(
+                route_name="Anxiety",
+                grade="VIIb",
+                grade_rp=8,
+                grade_af=10,
+                grade_ou=9,
+                grade_jump=2,
+                star_count=1,
+                dangerous=True,
+            ),
+        )
+        input_pipe.add_post(
+            route_id=route_id,
             post=Post(
                 user_name="John Doe",
                 post_date=datetime.fromisoformat("2023-12-24T13:14:00+01:00"),
@@ -113,6 +139,14 @@ class TestDbSchemaV1Pipe:
                 rating=2,
             ),
         )
+
+        fake_db_boundary = Mock(RelationalDatabaseBoundary)
+        fake_db_boundary.execute_read.return_value = DataRowContainer(
+            [DataRow({"rowid": 0})]  # Dummy row ID
+        )
+
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=fake_db_boundary)
+        db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
 
         expected_sql_statement = (
             f"INSERT OR IGNORE INTO {PostsTable.TABLE_NAME} ("
@@ -129,7 +163,7 @@ class TestDbSchemaV1Pipe:
             f") AND {RoutesTable.COLUMN_ROUTE_NAME}=? LIMIT 1"
             f"), ?, ?, ?, ?)"
         )
-        fake_db_boundary.execute_write.assert_called_once_with(
+        fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
             query_parameters=[
                 "Mock Monument",
@@ -140,19 +174,15 @@ class TestDbSchemaV1Pipe:
                 2,
             ],
         )
+        self._check_database_finalization(fake_db_boundary)
 
-    def test_finalize_pipe(self, tmp_path: Path) -> None:
+    def _check_database_finalization(self, fake_db_boundary: Mock) -> None:
         """
-        Ensures that finalize_pipe() executes the expected SQL commands and disconnects the
+        Ensures that the filter executes the VACUUM and ANALYZE commands and disconnects the
         database.
         """
         expected_sql_commands = ["ANALYZE", "VACUUM"]
 
-        fake_db_boundary = Mock(RelationalDatabaseBoundary)
-        pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=fake_db_boundary)
-        pipe.finalize_pipe()
-
-        assert fake_db_boundary.execute_write.call_count == len(expected_sql_commands)
         fake_db_boundary.execute_write.assert_has_calls(
             [call(command) for command in expected_sql_commands],
             any_order=False,

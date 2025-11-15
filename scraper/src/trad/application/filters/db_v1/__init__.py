@@ -18,16 +18,17 @@ from trad.application.filters.db_v1.dbschema import (
     SummitsTable,
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
+from trad.kernel.boundaries.filters import Filter, FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 
 _logger = getLogger(__name__)
 
 
-class DbSchemaV1Pipe(Pipe):
+class DbSchemaV1Filter(Filter):
     """
-    Pipe implementation for creating a route database file (schema version 1) that can be used with
-    the trad mobile app.
+    Filter implementation for creating a route database file (schema version 1) that can be used
+    with the trad mobile app.
 
     This class encapsulates all knowledge about the structure of the route database in this
     particular schema version.
@@ -38,17 +39,38 @@ class DbSchemaV1Pipe(Pipe):
 
     def __init__(self, output_directory: Path, database_boundary: RelationalDatabaseBoundary):
         """
-        Create a new pipe that writes the generated database file into the given [output_directory],
-        using the provided [database_boundary].
+        Create a new filter that writes all data from the input pipe into a new route DB file within
+        the given [output_directory], using the provided [database_boundary].
         """
         self.__destination_file = output_directory.joinpath(self._DB_FILE_NAME)
         self.__database_boundary = database_boundary
 
+    @staticmethod
     @override
-    def initialize_pipe(self) -> None:
-        _logger.debug("Initializing routedb pipe for writing into %s", self.__destination_file)
-        self.__database_boundary.connect(self.__destination_file, overwrite=True)
+    def get_stage() -> FilterStage:
+        return FilterStage.FINALIZATION
 
+    @override
+    def get_name(self) -> str:
+        return "WriteDbSchemaV1"
+
+    @override
+    def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+        _logger.debug("Executing filter for writing into %s", self.__destination_file)
+        self.__database_boundary.connect(self.__destination_file, overwrite=True)
+        self._initialize_database()
+
+        for summit_id, summit in input_pipe.iter_summits():
+            self._add_summit(summit)
+            for route_id, route in input_pipe.iter_routes_of_summit(summit_id):
+                self._add_route(summit.name, route)
+                for post in input_pipe.iter_posts_of_route(route_id):
+                    self._add_post(summit.name, route.route_name, post)
+
+        self._finalize_database()
+        self.__database_boundary.disconnect()
+
+    def _initialize_database(self) -> None:
         schema = DatabaseSchema()
         self._create_schema(schema)
         self._write_metadata(schema)
@@ -89,15 +111,12 @@ class DbSchemaV1Pipe(Pipe):
             ],
         )
 
-    @override
-    def finalize_pipe(self) -> None:
+    def _finalize_database(self) -> None:
         _logger.debug("Finalizing routedb pipe")
         self.__database_boundary.execute_write(SqlStatement("ANALYZE"))
         self.__database_boundary.execute_write(SqlStatement("VACUUM"))
-        self.__database_boundary.disconnect()
 
-    @override
-    def add_summit(self, summit: Summit) -> None:
+    def _add_summit(self, summit: Summit) -> None:
         summit_id = self._write_to_summits_table(summit)
         self._write_to_summit_names_table(summit_id, summit)
 
@@ -179,8 +198,7 @@ class DbSchemaV1Pipe(Pipe):
                 ],
             )
 
-    @override
-    def add_route(self, summit_name: str, route: Route) -> None:
+    def _add_route(self, summit_name: str, route: Route) -> None:
         select_summit = (
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
@@ -218,8 +236,7 @@ class DbSchemaV1Pipe(Pipe):
             ],
         )
 
-    @override
-    def add_post(self, summit_name: str, route_name: str, post: Post) -> None:
+    def _add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         select_summit = (
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"

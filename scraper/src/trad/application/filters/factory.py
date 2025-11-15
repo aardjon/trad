@@ -4,12 +4,15 @@ Implementation of the FilterFactory component.
 
 from typing import Final, override
 
+from trad.application.boundaries.database import RelationalDatabaseBoundary
+from trad.application.filters.db_v1 import DbSchemaV1Filter
 from trad.application.filters.finalization import PipeFinalizingFilter
 from trad.application.filters.initialization import PipeInitializingFilter
 from trad.application.filters.merge import MergeFilter
 from trad.application.filters.osm import OsmSummitDataFilter
 from trad.application.filters.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory, FilterStage
+from trad.kernel.boundaries.settings import SettingsBoundary
 from trad.kernel.di import DependencyProvider
 
 
@@ -33,6 +36,10 @@ class AllFiltersFactory(FilterFactory):
             OsmSummitDataFilter,
             TeufelsturmDataFilter,
             MergeFilter,
+            lambda dip: DbSchemaV1Filter(
+                dip.provide(SettingsBoundary).get_output_dir(),
+                dip.provide(RelationalDatabaseBoundary),
+            ),
             PipeFinalizingFilter,
         ]
         return [

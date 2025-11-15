@@ -100,9 +100,7 @@ class ApplicationBootstrap:
         settings = self.__dependency_provider.provide(SettingsBoundary)
 
         # Initialize all [application] components
-        self.__dependency_provider.register_factory(
-            PipeFactory, lambda: AllPipesFactory(self.__dependency_provider)
-        )
+        self.__dependency_provider.register_factory(PipeFactory, AllPipesFactory)
         self.__dependency_provider.register_factory(
             FilterFactory, lambda: AllFiltersFactory(self.__dependency_provider)
         )

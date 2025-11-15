@@ -1,32 +1,23 @@
 """
-Integration test for the database creation via the V1 pipe and the underlying database
+Integration test for the database creation via the V1 filter and the underlying database
 infrastructure. This is testing the creation of a real database (no mocking) and thus can be a bit
 slower than other tests.
 """
 
 import datetime
-from collections.abc import Iterator
 from pathlib import Path
 from sqlite3 import connect
 from typing import Final
+from unittest.mock import Mock
 
-import pytest
-
-from trad.application.filters.db_v1 import DbSchemaV1Pipe
+from trad.application.filters.db_v1 import DbSchemaV1Filter
 from trad.application.filters.merge import MergeFilter
+from trad.application.pipe import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.di import DependencyProvider
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
-
-
-@pytest.fixture
-def pipe_v1(tmp_path: Path) -> Iterator[Pipe]:
-    database = Sqlite3Database()
-    pipe = MergeFilter(DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=database))
-    pipe.initialize_pipe()
-    yield pipe
-    database.disconnect()  # TODO(aardjon): Provide this on the Pipe!
 
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
@@ -41,13 +32,11 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
         2  # 'summits' and 'routes' tables each have one user-defined index
     )
 
-    pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
-    pipe.initialize_pipe()
-    pipe.add_summit(Summit(official_name="Falkenturm"))
-    pipe.add_route(summit_name="Falkenturm", route=Route(route_name="AW", grade="II"))
-    pipe.add_post(
-        summit_name="Falkenturm",
-        route_name="AW",
+    input_pipe = CollectedData()
+    summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm"))
+    route_id = input_pipe.add_route(summit_id=summit_id, route=Route(route_name="AW", grade="II"))
+    input_pipe.add_post(
+        route_id=route_id,
         post=Post(
             user_name="John Doe",
             comment="This is great!",
@@ -55,6 +44,9 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
             rating=post_rating,
         ),
     )
+
+    db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
+    db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
 
     expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
     assert expected_db_file.exists()
@@ -91,8 +83,10 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
 
 def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
     """Ensures that the database metadata is written correctly."""
-    pipe = DbSchemaV1Pipe(output_directory=tmp_path, database_boundary=Sqlite3Database())
-    pipe.initialize_pipe()
+    pipe = CollectedData()
+
+    db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
+    db_writer.execute_filter(input_pipe=pipe, output_pipe=Mock(Pipe))
 
     expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
     assert expected_db_file.exists()
@@ -123,10 +117,10 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
     assert (current_time - compile_time).total_seconds() < max_allowed_difference
 
 
-def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
+def test_data_enrichment(tmp_path: Path) -> None:
     """
     Ensures that existing data is correctly enriched (updated) by several subsequent
-    `add_or_enrich()` calls.
+    `add_()` calls.
     """
     summit1 = Summit(official_name="Beispielturm")
     summit2 = Summit(
@@ -136,14 +130,20 @@ def test_data_enrichment(pipe_v1: Pipe, tmp_path: Path) -> None:
         official_name="Beispielturm", low_grade_position=GeoPosition(470000011, 110000037)
     )
 
+    input_pipe = CollectedData()
     # Insert Summit data without geographical coordinates
-    pipe_v1.add_summit(summit1)
+    input_pipe.add_summit(summit1)
     # Enrich this Summit with a position
-    pipe_v1.add_summit(summit2)
+    input_pipe.add_summit(summit2)
     # Try to update the already set position (should be ignored)
-    pipe_v1.add_summit(summit3)
+    input_pipe.add_summit(summit3)
 
-    pipe_v1.finalize_pipe()
+    intermediate_pipe = CollectedData()
+
+    merge_filter = MergeFilter(Mock(DependencyProvider))
+    merge_filter.execute_filter(input_pipe=input_pipe, output_pipe=intermediate_pipe)
+    output_filter = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
+    output_filter.execute_filter(input_pipe=intermediate_pipe, output_pipe=Mock(Pipe))
 
     expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
     assert expected_db_file.exists()
