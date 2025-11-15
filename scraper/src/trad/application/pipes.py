@@ -5,7 +5,7 @@ Implementation of the Pipe interface.
 from collections.abc import Iterator
 from typing import override
 
-from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
+from trad.kernel.boundaries.pipes import Pipe, PipeFactory, RouteInstanceId, SummitInstanceId
 from trad.kernel.entities import Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
@@ -63,3 +63,13 @@ class CollectedData(Pipe):
     def iter_posts_of_route(self, route_id: RouteInstanceId) -> Iterator[Post]:
         post_ids = self._posts2routes.get(route_id, [])
         yield from (self._posts[post_id] for post_id in post_ids)
+
+
+class AllPipesFactory(PipeFactory):
+    """
+    PipeFactory implementation for creating the correct pipes for all stages.
+    """
+
+    @override
+    def create_pipe(self) -> Pipe:
+        return CollectedData()

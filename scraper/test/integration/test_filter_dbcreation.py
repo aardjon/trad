@@ -12,7 +12,7 @@ from unittest.mock import Mock
 
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
-from trad.application.pipe import CollectedData
+from trad.application.pipes import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe

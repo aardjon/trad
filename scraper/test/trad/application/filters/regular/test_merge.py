@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import pytest
 
 from trad.application.filters.regular.merge import MergeFilter
-from trad.application.pipe import CollectedData
+from trad.application.pipes import CollectedData
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
 

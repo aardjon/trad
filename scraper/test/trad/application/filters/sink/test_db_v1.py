@@ -18,7 +18,7 @@ from trad.application.filters.sink.db_v1.dbschema import (
     SummitNamesTable,
     SummitsTable,
 )
-from trad.application.pipe import CollectedData
+from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 
