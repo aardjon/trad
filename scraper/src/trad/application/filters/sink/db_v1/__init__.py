@@ -65,13 +65,14 @@ class DbSchemaV1Filter(SinkFilter):
         self.__database_boundary.connect(self.__destination_file, overwrite=True)
         self._initialize_database()
 
+        # pylint: disable=duplicate-code
         for summit_id, summit in input_pipe.iter_summits():
             self._add_summit(summit)
             for route_id, route in input_pipe.iter_routes_of_summit(summit_id):
                 self._add_route(summit.name, route)
                 for post in input_pipe.iter_posts_of_route(route_id):
                     self._add_post(summit.name, route.route_name, post)
-
+        # pylint: enable=duplicate-code
         self._finalize_database()
         self.__database_boundary.disconnect()
 
