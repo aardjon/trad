@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, TypeAdapter
 
-from trad.adapters.boundaries.http import HttpNetworkingBoundary, JsonData
+from trad.application.boundaries.http import HttpNetworkingBoundary, JsonData
 
 
 class TrafficRecorder(HttpNetworkingBoundary):

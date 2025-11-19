@@ -9,26 +9,26 @@ import logging
 from functools import partial
 from typing import TYPE_CHECKING
 
-from trad.adapters.boundaries.database import RelationalDatabaseBoundary
-from trad.adapters.boundaries.http import HttpNetworkingBoundary
-from trad.adapters.cli import CliSettings
-from trad.core.boundaries.filters import FilterFactory
-from trad.core.boundaries.pipes import PipeFactory
-from trad.core.boundaries.settings import SettingsBoundary
-from trad.core.usecases import ScraperUseCases
-from trad.crosscuttings.appmeta import APPLICATION_NAME, APPLICATION_VERSION
-from trad.crosscuttings.di import DependencyProvider
-from trad.crosscuttings.logging import (
+from trad.application.boundaries.database import RelationalDatabaseBoundary
+from trad.application.boundaries.http import HttpNetworkingBoundary
+from trad.application.filters.factory import AllFiltersFactory
+from trad.application.pipes import AllPipesFactory
+from trad.infrastructure.cli import CliSettings
+from trad.infrastructure.http_recorder import TrafficPlayer, TrafficRecorder
+from trad.infrastructure.logging import (
     configure_console_logging,
     configure_file_logging,
     configure_log_channel,
     initialize_logging,
 )
-from trad.filters.factory import AllFiltersFactory
-from trad.infrastructure.http_recorder import TrafficPlayer, TrafficRecorder
 from trad.infrastructure.requests import RequestsHttp
 from trad.infrastructure.sqlite3db import Sqlite3Database
-from trad.pipes.factory import AllPipesFactory
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
+from trad.kernel.boundaries.filters import FilterFactory
+from trad.kernel.boundaries.pipes import PipeFactory
+from trad.kernel.boundaries.settings import SettingsBoundary
+from trad.kernel.di import DependencyProvider
+from trad.kernel.usecases import ScraperUseCases
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -99,10 +99,8 @@ class ApplicationBootstrap:
         """
         settings = self.__dependency_provider.provide(SettingsBoundary)
 
-        # Initialize all [adapters] components
-        self.__dependency_provider.register_factory(
-            PipeFactory, lambda: AllPipesFactory(self.__dependency_provider)
-        )
+        # Initialize all [application] components
+        self.__dependency_provider.register_factory(PipeFactory, AllPipesFactory)
         self.__dependency_provider.register_factory(
             FilterFactory, lambda: AllFiltersFactory(self.__dependency_provider)
         )
