@@ -207,7 +207,6 @@ disable = [
   # great benefit.
   "while-used",
 
-
   # Disable most docstring checkers because we dont't want to enforce too much of their content and
   # style. See also the "pydocstyle" comment at the ruff config.
   "missing-param-doc",
@@ -439,7 +438,7 @@ disable = [
 
 enable = [
   "all",
-  # Explicitly enable the rules from the restricted-import plugin
+  # Explicitly enable the rules from the restricted-imports plugin
   "E6901",
   "E6902",
 ]
@@ -459,17 +458,21 @@ restricted-import-recurse=true
 
 # Colon/semicolon-delimited sets of names that determine what modules are
 # not allowed to be imported from another module
-# "trad.a:trad.r1;trad.r2" means: trad.a must not import trad.r1 or trad.r2"
+# "trad.a:trad.r1;trad.r2" means: trad.a must neither import trad.r1 nor trad.r2"
 restricted-imports=[
   # Restrictions derived from the Clean Architecture Pattern:
-  "trad.crosscuttings:trad.core;trad.adapters;trad.filters;trad.pipes;trad.infrastructure;trad.main",
-  "trad.core:trad.adapters;trad.filters;trad.pipes;trad.infrastructure;trad.main",
-  "trad.adapters:trad.infrastructure;trad.main;trad.filters;trad.pipes",
-  "trad.infrastructure:trad.main;trad.core",
+  "trad.kernel:trad.application;trad.infrastructure;trad.main",
+  "trad.application:trad.infrastructure;trad.main",
+  "trad.infrastructure:trad.main",
 
   # Restrictions derived from the Pipes-and-Filters Pattern:
-  "trad.filters:trad.pipes",
-  "trad.pipes:trad.filters",
+  "trad.application.filters:trad.application.pipes",
+  "trad.application.filters.sink:trad.application.filters.source;trad.application.filters.regular",
+  "trad.application.filters.source:trad.application.filters.sink;trad.application.filters.regular",
+  "trad.application.filters.regular:trad.application.filters.source;trad.application.filters.sink",
+  "trad.application.filters.source.osm:trad.application.filters.source.teufelsturm",
+  "trad.application.filters.source.teufelsturm:trad.application.filters.source.osm",
+  "trad.application.pipes:trad.application.filters",
 ]
 
 [tool.pylint.broad_try_clause]
