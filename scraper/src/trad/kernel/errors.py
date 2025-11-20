@@ -7,8 +7,8 @@ from typing import override
 
 class FilterError(Exception):
     """
-    Raised by Filters when they cannot continue because of an unrecoverable error. This usually leads
-    to an abortion of the whole scraper.
+    Raised by Filters when they cannot continue because of an unrecoverable error. This usually
+    leads to an abortion of the whole scraper.
     """
 
 
@@ -48,6 +48,30 @@ class MergeConflictError(DataProcessingError):
         return (
             f"Cannot merge {self._object_type} data for '{self._object_name}' because of "
             f"conflicting {self._conflicting_attribute} values."
+        )
+
+
+class IncompleteDataError(DataProcessingError):
+    """
+    Raises when an entity object is missing some mandatory data which must be set.
+
+    This problem cannot be fixed automatically.
+    """
+
+    def __init__(self, incomplete_object: object, missing_property_name: str):
+        """
+        Creates a new Exception notifying about missing data on the `incomplete_object` entity.
+        `missing_property_name` gives the name of the missing/empty attribute.
+        """
+        super().__init__()
+        self._incomplete_entity = incomplete_object
+        self._missing_property_name = missing_property_name
+
+    @override
+    def __str__(self) -> str:
+        return (
+            f"Missing '{self._missing_property_name}' data in 'str({self._incomplete_entity})' "
+            "object."
         )
 
 

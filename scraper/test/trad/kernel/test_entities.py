@@ -3,11 +3,16 @@ Unit tests for the trad.kernel.entities module.
 """
 
 from contextlib import AbstractContextManager, nullcontext
+from typing import Final
 
 import pytest
 
 from trad.kernel.entities import GeoPosition, NormalizedName, Summit
 from trad.kernel.errors import MergeConflictError
+
+# Two example points that can be used by some test cases.
+_example_position_1: Final = GeoPosition.from_decimal_degree(50.8965380, 14.0819149)  # Barbarine
+_example_position_2: Final = GeoPosition.from_decimal_degree(50.9052275, 14.2189117)  # Teufelsturm
 
 
 class TestGeoPosition:
@@ -434,3 +439,49 @@ class TestSummit:
             assert existing_summit.low_grade_position.is_equal_to(
                 expected_summit.low_grade_position
             )
+
+    @pytest.mark.parametrize(
+        ("input_summit", "expected_output_summit"),
+        [
+            # Happy paths: Summit data is valid
+            (Summit("No position"), Summit("No position")),
+            (
+                Summit("With Position", high_grade_position=_example_position_1),
+                Summit("With Position", high_grade_position=_example_position_1),
+            ),
+            (
+                Summit("With Position", low_grade_position=_example_position_1),
+                Summit("With Position", low_grade_position=_example_position_1),
+            ),
+            (
+                Summit("Official", alternate_names=["alt1", "alt2"]),
+                Summit("Official", alternate_names=["alt1", "alt2"]),
+            ),
+            (
+                Summit("Official", unspecified_names=["unspec_name"]),
+                Summit("Official", unspecified_names=["unspec_name"]),
+            ),
+            # Auto-Fix paths: invalid data that can be fixed automatically
+            # Official name is missing: Use the next best name as the ONLY one
+            (
+                Summit(alternate_names=["alt_name1", "alt_name2"]),
+                Summit(official_name="alt_name1"),
+            ),
+            (
+                Summit(unspecified_names=["unspec_name1", "unspec_name2"]),
+                Summit(official_name="unspec_name1"),
+            ),
+        ],
+    )
+    def test_fix_invalid_data(
+        self,
+        input_summit: Summit,
+        expected_output_summit: Summit,
+    ) -> None:
+        """
+        Test the validation and automatic data fixing (fix_invalid_data() method):
+         - Valid data must not be changed
+         - Missing official name: Fixed automatically
+        """
+        input_summit.fix_invalid_data()
+        assert input_summit == expected_output_summit

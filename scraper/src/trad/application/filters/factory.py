@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Final, override
 from trad.application.boundaries.database import RelationalDatabaseBoundary
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.regular.merge import MergeFilter
+from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.filters.source.osm import OsmSummitDataFilter
 from trad.application.filters.source.teufelsturm import TeufelsturmDataFilter
@@ -41,6 +42,7 @@ class AllFiltersFactory(FilterFactory):
                 self.__dependency_provider.provide(HttpNetworkingBoundary)
             ),
             MergeFilter: MergeFilter,
+            DataValidationFilter: DataValidationFilter,
             DbSchemaV1Filter: lambda: DbSchemaV1Filter(
                 self.__dependency_provider.provide(SettingsBoundary).get_output_dir(),
                 self.__dependency_provider.provide(RelationalDatabaseBoundary),

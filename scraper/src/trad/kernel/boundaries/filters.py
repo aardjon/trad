@@ -28,6 +28,13 @@ class FilterStage(Enum):
     (data-complete) business object for each physical one.
     """
 
+    VALIDATION = auto()
+    """
+    The processed data is being validated. The Filters in this stage do various data checks and can
+    drop (or fix) faulty data (or even cancel the whole process). At the end of this stage, the Pipe
+    contains only the processed data that passed all the validations.
+    """
+
     WRITING = auto()
     """
     The processed data is being written to the final destination(s). No output Pipe is written by

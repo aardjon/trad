@@ -6,10 +6,13 @@ import string
 from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
+from logging import getLogger
 from math import cos, pi, sqrt
 from typing import Final, Self, override
 
-from trad.kernel.errors import MergeConflictError
+from trad.kernel.errors import IncompleteDataError, MergeConflictError
+
+_logger = getLogger(__name__)
 
 NO_GRADE: Final = 0
 """ Special value to mark a missing or no grade. """
@@ -338,6 +341,28 @@ class Summit:
         if self.low_grade_position == UNDEFINED_GEOPOSITION:
             self.low_grade_position = other.low_grade_position
 
+    def fix_invalid_data(self) -> None:
+        """
+        Checks if the data of this Summit is invalid, and tries to fix any problems if possible.
+        If the data is already valid, `self` is not modified. If invalid data cannot be fixed, an
+        `IncompleteDataError` is raised.
+
+        This method logs a warning message when automatically fixing data.
+        """
+        if not self.official_name:
+            # Some summits don't have an official name. Possible reasons (besides bugs):
+            #    - "Massive" are not (yet) retrieved from OSM (https://github.com/Headbucket/trad/issues/12)
+            #    - New entries on some external sites
+            # This can be fixed automatically by using any of the other names instead.
+            available_name = self.name
+            _logger.warning(
+                "Found Summit without official name, setting it to '%s'",
+                available_name,
+            )
+            self.official_name = available_name
+            self.alternate_names.clear()
+            self.unspecified_names.clear()
+
 
 @dataclass
 class Route:
@@ -404,6 +429,17 @@ class Route:
     """
     True if the route is officially marked as "dangerous", False if not.
     """
+
+    def fix_invalid_data(self) -> None:
+        """
+        Checks if the data of this Route is invalid, and tries to fix any problems if possible.
+        If the data is already valid, `self` is not modified. If invalid data cannot be fixed, an
+        `IncompleteDataError` is raised.
+
+        This method logs a warning message when automatically fixing data.
+        """
+        if not self.route_name:
+            raise IncompleteDataError(self, "name")
 
 
 @dataclass
