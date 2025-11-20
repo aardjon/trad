@@ -10,34 +10,28 @@ from trad.kernel.boundaries.pipes import Pipe
 
 class FilterStage(Enum):
     """
-    Definition of the manipulations a filter can do to the destination storage (the "pipe"). Each
-    filter is assigned to a certain stage, depending on what it does. Several filters of the same
-    state may run in an arbitrary order or even in parallel.
-    """
-
-    INITIALIZATION = auto()
-    """
-    The storage has not been created yet. Normally, only one filter should run in this stage
-    (e.g. initializing the storage).
+    Definition of the processing steps a Filter can be executed in. The stages are executed in that
+    order. Several filters of the same stage can run in an arbitrary order or even in parallel.
     """
 
     IMPORTING = auto()
     """
-    The storage already contains some but still uncomplete data. This is the state in which most
-    filters run, additional data shall be added in this stage.
+    The data is being imported from various sources (there is no input Pipe). This is the state in
+    which most filters run, additional data shall be added in this stage. At its end, the Pipe may
+    contain multiple business objects for each physical one, providing different parts of the final
+    data.
     """
 
-    OPTIMIZATION = auto()
+    MERGING = auto()
     """
-    The storage contains all data. Filters running in this stage may e.g. reorganize or optimize the
-    data but are not supposed to add or delete actual business data.
+    The imported data is being merged. At the end of this stage, the Pipe contains a single
+    (data-complete) business object for each physical one.
     """
 
-    FINALIZATION = auto()
+    WRITING = auto()
     """
-    The storage data has its final state and is ready to be used, but may still need some
-    finalization to be published (e.g. writing the storage to its final destination). Normally, only
-    one filter should run in this stage.
+    The processed data is being written to the final destination(s). No output Pipe is written by
+    this stage.
     """
 
 

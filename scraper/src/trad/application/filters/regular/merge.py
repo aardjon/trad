@@ -36,7 +36,7 @@ class MergeFilter(Filter):
     @staticmethod
     @override
     def get_stage() -> FilterStage:
-        return FilterStage.OPTIMIZATION
+        return FilterStage.MERGING
 
     @override
     def get_name(self) -> str:

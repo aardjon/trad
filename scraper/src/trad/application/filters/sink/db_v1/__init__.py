@@ -50,7 +50,7 @@ class DbSchemaV1Filter(SinkFilter):
     @staticmethod
     @override
     def get_stage() -> FilterStage:
-        return FilterStage.FINALIZATION
+        return FilterStage.WRITING
 
     @override
     def get_name(self) -> str:
