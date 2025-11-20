@@ -13,7 +13,7 @@ authors = [
   {name = "Thomas Wesenigk"}
 ]
 classifiers = ["Private :: Do Not Upload"]
-requires-python = ">=3.12.7"
+requires-python = ">=3.14.0"
 dependencies = [
   "beautifulsoup4",
   "lidipy",
