@@ -13,7 +13,7 @@ authors = [
   {name = "Thomas Wesenigk"}
 ]
 classifiers = ["Private :: Do Not Upload"]
-requires-python = ">=3.12.7"
+requires-python = ">=3.14.0"
 dependencies = [
   "beautifulsoup4",
   "lidipy",
@@ -567,6 +567,13 @@ ignore = [
   # attacker could cause would be a broken or unusable database file.
   "S608",  # Possible SQL injection vector through string-based query construction
 
+  # Disabled because we don't want to enforce any imports to be moved into TYPE_CHECKING blocks.
+  # This is just trying to prevent potential performance penalties, which should be fixed with
+  # Python 3.14/PEP 649 anyway.
+  "TC001",  # Move application import into a type-checking block
+  "TC002",  # Move third-party import into a type-checking block
+  "TC003",  # Move built-in import into a type-checking block
+
   # We don't want to create issues for every single TODO.
   "TD003",  # TODO: this link has no issue
 
@@ -622,7 +629,6 @@ ignore = [
 
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
-
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

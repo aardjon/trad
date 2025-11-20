@@ -60,7 +60,7 @@ section must be run with this `virtualenv` being activated, of course.
 
 #### 1. Make sure you have an appropriate Python version installed in your system.
 
-At the time of writing, we were using Python 3.12.7, please check the `project.requires-python`
+At the time of writing, we were using Python 3.14.0, please check the `project.requires-python`
 setting of [this pyproject.toml file](scraper/pyproject.toml) for the current version constraint.
 
 It is usually a good idea to use the latest `pip` version for package installation. Update it with
