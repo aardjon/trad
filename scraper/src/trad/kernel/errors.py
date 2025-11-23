@@ -53,7 +53,7 @@ class MergeConflictError(DataProcessingError):
 
 class IncompleteDataError(DataProcessingError):
     """
-    Raises when an entity object is missing some mandatory data which must be set.
+    Raised when an entity object is missing some mandatory data which must be set.
 
     This problem cannot be fixed automatically.
     """
@@ -73,6 +73,25 @@ class IncompleteDataError(DataProcessingError):
             f"Missing '{self._missing_property_name}' data in 'str({self._incomplete_entity})' "
             "object."
         )
+
+
+class ValueParseError(DataProcessingError):
+    """
+    Raised when a string cannot be parsed because of an invalid/unexpected format.
+    """
+
+    def __init__(self, value_type: str, invalid_value: str):
+        """
+        Creates a new Exception notifying about a parse error while trying to parse the
+        `invalid_value` string into an object of type `value_type`.
+        """
+        super().__init__()
+        self._value_type = value_type
+        self._invalid_value = invalid_value
+
+    @override
+    def __str__(self) -> str:
+        return f"Value '{self._invalid_value}' is not a valid {self._value_type})."
 
 
 class PipeDataError(Exception):
