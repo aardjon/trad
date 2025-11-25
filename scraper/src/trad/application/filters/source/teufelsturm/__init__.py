@@ -5,6 +5,7 @@ Filter for importing data from Teufelsturm.de.
 from logging import getLogger
 from typing import Final, override
 
+from trad.application.boundaries.grade_parser import GradeParser
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters._base import SourceFilter
 from trad.application.filters.source.teufelsturm.parser import (
@@ -15,6 +16,7 @@ from trad.application.filters.source.teufelsturm.parser import (
 from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.entities import Summit
+from trad.kernel.errors import DataProcessingError
 
 _logger = getLogger(__name__)
 
@@ -33,13 +35,14 @@ class TeufelsturmDataFilter(SourceFilter):
     _SUMMIT_DETAILS_URL: Final = _BASE_URL + "gipfel/details.php?gipfelnr={summit_id}"
 
     @override
-    def __init__(self, network_boundary: HttpNetworkingBoundary) -> None:
+    def __init__(self, network_boundary: HttpNetworkingBoundary, grade_parser: GradeParser) -> None:
         """
         Create a new TeufelsturmDataFilter instance that retrieves data via the given
-        [network_boundary].
+        [network_boundary] and parses climbing grades with the given [grade_parser].
         """
         super().__init__()
         self._http_boundary = network_boundary
+        self._grade_parser = grade_parser
         self._summit_cache = SummitCache(retrieve_summit_details_page=self._get_summit_page_text)
         self._added_peak_name_hashes: dict[int, SummitInstanceId] = {}
         """
@@ -96,7 +99,14 @@ class TeufelsturmDataFilter(SourceFilter):
                 # Don't log every single route index
                 _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
-            post_data = parse_page(page_text, self._summit_cache)
+            try:
+                post_data = parse_page(page_text, self._summit_cache, self._grade_parser)
+            except DataProcessingError as e:
+                _logger.exception(
+                    "Ignoring page %s due to a processing error!", page_id, exc_info=e
+                )
+                continue
+
             if not self._is_forbidden(post_data.peak):
                 summit_id = self._added_peak_name_hashes.get(hash(post_data.peak.name))
                 if summit_id is None:

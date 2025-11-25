@@ -5,6 +5,7 @@ Implementation of the FilterFactory component.
 from typing import TYPE_CHECKING, Final, override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
+from trad.application.boundaries.grade_parser import GradeParser
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.regular.validation import DataValidationFilter
@@ -39,7 +40,8 @@ class AllFiltersFactory(FilterFactory):
                 self.__dependency_provider.provide(HttpNetworkingBoundary)
             ),
             TeufelsturmDataFilter: lambda: TeufelsturmDataFilter(
-                self.__dependency_provider.provide(HttpNetworkingBoundary)
+                self.__dependency_provider.provide(HttpNetworkingBoundary),
+                self.__dependency_provider.provide(GradeParser),
             ),
             MergeFilter: MergeFilter,
             DataValidationFilter: DataValidationFilter,

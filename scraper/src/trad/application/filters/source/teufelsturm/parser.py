@@ -18,6 +18,7 @@ import pytz
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from trad.application.boundaries.grade_parser import GradeParser
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 from trad.kernel.errors import DataProcessingError
 
@@ -85,7 +86,7 @@ def parse_post(post: Series[Any] | DataFrame) -> Post:
     return Post(user_name=user[0], post_date=user[1], comment=comment, rating=rating)
 
 
-def parse_page(page_text: str, summit_cache: SummitCache) -> PageData:
+def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradeParser) -> PageData:
     """Parses the given HTML [page_text] and returns the extracted data."""
     route_field_count: Final = 2
     grade_field_count: Final = 1
@@ -119,7 +120,8 @@ def parse_page(page_text: str, summit_cache: SummitCache) -> PageData:
     grade_result = re.search(r".*?\[(.*?)\].*", route_elements[1].get_text())
     if not grade_result or len(grade_result.groups()) != grade_field_count:
         raise DataProcessingError("Page has no valid grade.")
-    grade = grade_result.group(1).strip()
+    grade_label = grade_result.group(1).strip()
+    parsed_grade = grade_parser.parse_saxon_grade(grade_label)
 
     df_list = pd.read_html(
         StringIO(page_text.replace("<br>", "|"))
@@ -127,11 +129,18 @@ def parse_page(page_text: str, summit_cache: SummitCache) -> PageData:
     posts_table = df_list[3]
     posts = parse_posts(posts_table)
 
-    # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
-    # 'unspecified'.
     return PageData(
         peak=peak,
-        route=Route(route_name=route, grade=grade),
+        route=Route(
+            route_name=route,
+            grade=grade_label,
+            grade_af=parsed_grade.af,
+            grade_ou=parsed_grade.ou,
+            grade_rp=parsed_grade.rp,
+            grade_jump=parsed_grade.jump,
+            star_count=parsed_grade.stars,
+            dangerous=parsed_grade.danger,
+        ),
         posts=posts,
     )
 

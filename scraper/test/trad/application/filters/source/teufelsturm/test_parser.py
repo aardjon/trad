@@ -19,6 +19,7 @@ from trad.application.filters.source.teufelsturm.parser import (
     parse_route_list,
     parse_user_name,
 )
+from trad.infrastructure.grade_regex import RegexBasedParser
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post
 
 posts_test_dict: Final = {
@@ -184,7 +185,7 @@ def test_parse_page() -> None:
     dir_name = Path(__file__).parent
     with dir_name.joinpath("route_page_sample.html").open("rt", encoding="iso-8859-1") as file:
         page_text = file.read()
-    page_data = parse_page(page_text, summit_cache)
+    page_data = parse_page(page_text, summit_cache, RegexBasedParser())
 
     assert page_data.peak.name == expected_summit_name
     assert page_data.peak.high_grade_position is UNDEFINED_GEOPOSITION

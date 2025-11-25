@@ -10,10 +10,12 @@ from functools import partial
 from typing import TYPE_CHECKING
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
+from trad.application.boundaries.grade_parser import GradeParser
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.factory import AllFiltersFactory
 from trad.application.pipes import AllPipesFactory
 from trad.infrastructure.cli import CliSettings
+from trad.infrastructure.grade_regex import RegexBasedParser
 from trad.infrastructure.http_recorder import TrafficPlayer, TrafficRecorder
 from trad.infrastructure.logging import (
     configure_console_logging,
@@ -107,6 +109,7 @@ class ApplicationBootstrap:
 
         # Initialize all [infrastructure] components
         self.__dependency_provider.register_singleton(RelationalDatabaseBoundary, Sqlite3Database)
+        self.__dependency_provider.register_singleton(GradeParser, RegexBasedParser)
 
         traffic_recording_path = settings.get_traffic_recordings_path()
         network_factory: Callable[[], HttpNetworkingBoundary] = RequestsHttp
