@@ -95,6 +95,11 @@ class TeufelsturmDataFilter(SourceFilter):
     def _perform_scan(self, pipe: Pipe, page_ids: list[int]) -> None:
         count: Final = len(page_ids)
         for idx, page_id in enumerate(page_ids):
+            if self._check_ignore_route(page_id):
+                # Don't even retrieve the data for ignored routes
+                _logger.info("Ignoring forbidden route %d", page_id)
+                continue
+
             if (idx + 1) % 25 == 0:
                 # Don't log every single route index
                 _logger.debug("Importing route %d of %d", idx + 1, count)
@@ -150,6 +155,24 @@ class TeufelsturmDataFilter(SourceFilter):
             "Wobstspitze",
         }
         if summit.name in forbidden_summit_names:
-            _logger.debug("Ignoring forbidden summit %s", summit.name)
+            _logger.info("Ignoring forbidden summit %s", summit.name)
             return True
         return False
+
+    def _check_ignore_route(self, external_route_id: int) -> bool:
+        """
+        Return True if the route with the given external ID (aka "Weg Nr") must be ignored, or False
+        if not (the normal case).
+
+        Background: Teufelsturm contains some "route" entries that to not correspond to actual
+        routes (for different reasons) and therefore shall be ignored.
+        """
+        routes_to_ignore: Final = {
+            4149,  # Stripteasehöhle, Großer Eislochturm (it's a cave)
+            4150,  # Schwedenhöhle, Rabenturm (it's a cave)
+            7298,  # Zustieg, Grießgrundwächter (tips for finding the summit)
+            6366,  # Zugang, Ziegenrückenturm (tips for finding the summit)
+            991,  # Mittelweg, Wartturm (doesn't exist anymore)
+            13323,  # Basteiweg, Wartturm (doesn't exist anymore)
+        }
+        return external_route_id in routes_to_ignore
