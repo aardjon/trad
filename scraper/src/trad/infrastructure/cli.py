@@ -7,6 +7,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import override
 
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.settings import SettingsBoundary
 
 
@@ -39,6 +40,12 @@ class CliSettings(SettingsBoundary):
         as their help texts. Returns the configured parser object.
         """
         parser = ArgumentParser()
+        parser.add_argument(
+            "--version",
+            help="show version information and exit",
+            action="version",
+            version=f"{APPLICATION_NAME} version {APPLICATION_VERSION}",
+        )
         parser.add_argument(
             "output_dir",
             help="path to the directory to create the route database file(s) in",
