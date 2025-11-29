@@ -21,6 +21,9 @@ class MainMenuModel {
   /// List item for the settings domain.
   final ListViewItem settingsItem;
 
+  /// Application version string to show.
+  final String applicationVersionLabel;
+
   /// Constructor for directly initializing all members.
   const MainMenuModel(
     this.menuHeader,
@@ -28,6 +31,7 @@ class MainMenuModel {
     this.routedbItem,
     this.knowledgebaseItem,
     this.settingsItem,
+    this.applicationVersionLabel,
   );
 }
 

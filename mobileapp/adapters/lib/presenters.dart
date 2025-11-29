@@ -8,6 +8,7 @@
 ///
 library;
 
+import 'package:crosscuttings/appmeta.dart';
 import 'package:intl/intl.dart';
 
 import 'package:core/boundaries/presentation.dart';
@@ -43,6 +44,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
+        '$applicationName Version $applicationVersion',
       ),
     );
   }

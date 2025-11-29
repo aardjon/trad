@@ -67,7 +67,10 @@ class TradDrawerFactory {
                   onTap: _controller.requestSwitchToSettings,
                 ),
               ];
-              return NavigationDrawer(children: itemList);
+              return NavigationDrawer(
+                footer: Text(_model.applicationVersionLabel),
+                children: itemList,
+              );
             },
           ),
         );

@@ -26,6 +26,7 @@ void main() {
         ListViewItem('[NoRouteDB]'),
         ListViewItem('[NoKnowledgebase]'),
         ListViewItem('[NoSettings]'),
+        'Application version 0.0.0',
       ),
     );
     registerFallbackValue(SummitListModel('[NoPageTitle]', '[NoSearchBarHint]'));
