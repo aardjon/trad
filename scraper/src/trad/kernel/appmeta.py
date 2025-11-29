@@ -7,7 +7,7 @@ from typing import Final
 APPLICATION_NAME: Final = "trad.scraper"
 """ The official name of the scraper application, as being displayed to the user. """
 
-APPLICATION_VERSION: Final = "0.0.0"
+APPLICATION_VERSION: Final = "0.1.0"
 """
 The current version of the scraper application.
 If not on a tag (i.e. "development mode"), this is usually the version number that was included in
