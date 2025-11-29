@@ -225,14 +225,17 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     const String averageRatingColumnName = 'rating'; // Name of the virtual column from the join
 
     /// Configure the query
-    String orderByColumn;
+    List<String> orderByColumns;
     switch (sortCriterion) {
       case RoutesFilterMode.name:
-        orderByColumn = '${RoutesTable.columnRouteName} ASC';
+        orderByColumns = <String>['${RoutesTable.columnRouteName} ASC'];
       case RoutesFilterMode.grade:
-        orderByColumn = '${RoutesTable.columnRouteGrade} ASC';
+        orderByColumns = <String>[
+          '${RoutesTable.columnGradeAf} ASC',
+          '${RoutesTable.columnGradeJump} ASC',
+        ];
       case RoutesFilterMode.rating:
-        orderByColumn = '$averageRatingColumnName DESC';
+        orderByColumns = <String>['$averageRatingColumnName DESC'];
     }
 
     Query query = Query.join(
@@ -251,7 +254,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnRouteName,
       RoutesTable.columnRouteGrade,
     ];
-    query.orderByColumns = <String>[orderByColumn];
+    query.orderByColumns = orderByColumns;
 
     // Execute the query
     List<ResultRow> resultSet = await _repository.executeQuery(query);
