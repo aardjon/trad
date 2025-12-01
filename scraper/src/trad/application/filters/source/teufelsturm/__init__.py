@@ -13,7 +13,6 @@ from trad.application.filters.source.teufelsturm.parser import (
     parse_page,
     parse_route_list,
 )
-from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.entities import Summit
 from trad.kernel.errors import DataProcessingError
@@ -54,11 +53,6 @@ class TeufelsturmDataFilter(SourceFilter):
         over again (for each route). On Teufelsturm, summit names are unique. We store their hashes
         only to speed up the lookup.
         """
-
-    @staticmethod
-    @override
-    def get_stage() -> FilterStage:
-        return FilterStage.IMPORTING
 
     @override
     def get_name(self) -> str:

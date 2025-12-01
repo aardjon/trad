@@ -1,12 +1,12 @@
 """
-VALIDATION stage Filter implementation.
+Data validating Filter implementation.
 """
 
 from collections.abc import Collection, Mapping
 from logging import getLogger
 from typing import override
 
-from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId
 from trad.kernel.entities import Post, Route, Summit
 from trad.kernel.errors import IncompleteDataError
@@ -22,11 +22,6 @@ class DataValidationFilter(Filter):
      - Ignore this data set completely (i.e. don't write it into the output pipe)
      - Cancel the whole process
     """
-
-    @staticmethod
-    @override
-    def get_stage() -> FilterStage:
-        return FilterStage.VALIDATION
 
     @override
     def get_name(self) -> str:

@@ -23,7 +23,6 @@ from pydantic.type_adapter import TypeAdapter
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters._base import SourceFilter
-from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError, MergeConflictError
@@ -177,11 +176,6 @@ class OsmSummitDataFilter(SourceFilter):
         """
         super().__init__()
         self._osm_api_receiver = OsmApiReceiver(http_boundary=network_boundary)
-
-    @staticmethod
-    @override
-    def get_stage() -> FilterStage:
-        return FilterStage.IMPORTING
 
     @override
     def get_name(self) -> str:

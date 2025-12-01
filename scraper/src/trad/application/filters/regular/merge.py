@@ -8,7 +8,7 @@ from contextlib import suppress
 from logging import getLogger
 from typing import Final, override
 
-from trad.kernel.boundaries.filters import Filter, FilterStage
+from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
@@ -32,11 +32,6 @@ class MergeFilter(Filter):
         self._summits: list[Summit] = []
         self._routes: dict[NormalizedName, list[Route]] = {}
         self._posts: dict[NormalizedName, dict[str, list[Post]]] = {}
-
-    @staticmethod
-    @override
-    def get_stage() -> FilterStage:
-        return FilterStage.MERGING
 
     @override
     def get_name(self) -> str:
