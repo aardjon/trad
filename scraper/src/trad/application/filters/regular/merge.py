@@ -5,13 +5,13 @@ actually describe the same physical entity into a single one.
 
 from abc import ABC, abstractmethod
 from contextlib import suppress
+from dataclasses import dataclass
 from logging import getLogger
 from typing import Final, override
 
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
-from trad.kernel.errors import EntityNotFoundError
 
 _logger = getLogger(__name__)
 
@@ -29,9 +29,7 @@ class MergeFilter(Filter):
         """
         Create a new MergeFilter instance.
         """
-        self._summits: list[Summit] = []
-        self._routes: dict[NormalizedName, list[Route]] = {}
-        self._posts: dict[NormalizedName, dict[str, list[Post]]] = {}
+        self._merged_summit_data: list[_SummitRelatedData] = []
 
     @override
     def get_name(self) -> str:
@@ -39,72 +37,67 @@ class MergeFilter(Filter):
 
     @override
     def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
-        merger = _SummitMerger(self._summits)
+        merger = _SummitMerger(self._merged_summit_data)
         for summit_id, summit in input_pipe.iter_summits():
-            merger.merge_entity(summit)
-
+            full_summit_data = _SummitRelatedData(summit=summit, routes=[])
             for route_id, route in input_pipe.iter_routes_of_summit(summit_id):
-                self._add_route(summit.name, route)
+                full_route_data = _RouteRelatedData(route=route, posts=[])
                 for post in input_pipe.iter_posts_of_route(route_id):
-                    self._add_post(summit.name, route.route_name, post)
+                    full_route_data.posts.append(post)
+                full_summit_data.routes.append(full_route_data)
+            merger.merge_entity(full_summit_data)
+
         self._write_merged_data(output_pipe)
 
     def _write_merged_data(self, output_pipe: Pipe) -> None:
         # Write all collected data into the output pipe
-        summit_count = len(self._summits)
+        summit_count = len(self._merged_summit_data)
         _logger.debug("Writing summits with %s names...", summit_count)
-        for idx, summit in enumerate(self._summits):
-            summit_id = output_pipe.add_summit(summit)
-            routes = self._routes.get(summit.normalized_name, [])
+        for idx, summit_data in enumerate(self._merged_summit_data):
+            summit_id = output_pipe.add_summit(summit_data.summit)
             _logger.debug(
                 "Writing %s routes for summit %d/%d ('%s')...",
-                len(routes),
+                len(summit_data.routes),
                 idx + 1,
                 summit_count,
-                summit.name,
+                summit_data.summit.name,
             )
-            for route in routes:
-                route_id = output_pipe.add_route(summit_id, route)
 
-                posts = self._posts.get(summit.normalized_name, {}).get(route.route_name, [])
-                for post in posts:
+            for route_data in summit_data.routes:
+                route_id = output_pipe.add_route(summit_id, route_data.route)
+
+                for post in route_data.posts:
                     output_pipe.add_post(route_id, post)
 
         # Delete all in-memory data
-        self._summits.clear()
-        self._routes.clear()
-        self._posts.clear()
-
-    def _add_route(self, summit_name: str, route: Route) -> None:
-        self._routes.setdefault(self._find_first_summit(summit_name).normalized_name, []).append(
-            route
-        )
-        # TODO(aardjon): Existing routes need to be merged, too! Not necessary with only Teufelsturm
-        #                and OSM data being merged, though, because we don't gather route data from
-        #                OSM.
-
-    def _add_post(self, summit_name: str, route_name: str, post: Post) -> None:
-        self._posts.setdefault(self._find_first_summit(summit_name).normalized_name, {}).setdefault(
-            route_name, []
-        ).append(post)
-
-    def _find_first_summit(self, summit_name: str) -> Summit:
-        """
-        Find the first summit object with the given `summit_name`. Raises EntityNotFoundError if no
-        such summit can be found.
-        """
-        normalized_name = NormalizedName(summit_name)
-        try:
-            return next(
-                summit
-                for summit in self._summits
-                if normalized_name in summit.get_all_normalized_names()
-            )
-        except StopIteration:
-            raise EntityNotFoundError(summit_name) from None
+        self._merged_summit_data.clear()
 
 
-class _EntityMerger[Entity: (Summit, Route)](ABC):
+@dataclass
+class _SummitRelatedData:
+    """
+    Encapsulation of all data related to a single summit.
+    """
+
+    summit: Summit
+    """ The summit instance. """
+    routes: list[_RouteRelatedData]
+    """ Data of all routes that are assigned to this summit. """
+
+
+@dataclass
+class _RouteRelatedData:
+    """
+    Encapsulation of all data related to a single route.
+    """
+
+    route: Route
+    """ The Route instance. """
+    posts: list[Post]
+    """ All Posts that are assigned to this route. """
+
+
+class _EntityMerger[Entity: (_SummitRelatedData, _RouteRelatedData)](ABC):
     """
     Generic algorithm for merging summits or routes. New entities are merged into the list provided
     on instantiation (modifying it!). Utilizes the Template Method design pattern, i.e. certain
@@ -167,7 +160,7 @@ class _EntityMerger[Entity: (Summit, Route)](ABC):
         """
 
 
-class _SummitMerger(_EntityMerger[Summit]):
+class _SummitMerger(_EntityMerger[_SummitRelatedData]):
     """
     Concrete implementation for merging Summit objects.
     """
@@ -179,7 +172,7 @@ class _SummitMerger(_EntityMerger[Summit]):
     """
 
     @override
-    def __init__(self, known_entities: list[Summit]):
+    def __init__(self, known_entities: list[_SummitRelatedData]):
         super().__init__(known_entities)
         self.__new_summit_id = 0
         """
@@ -190,23 +183,26 @@ class _SummitMerger(_EntityMerger[Summit]):
         """ All normalized names of the Summit with the id `self.__new_summit_id` (may be empy). """
 
     @override
-    def _is_same(self, existing_entity: Summit, new_entity: Summit) -> bool:
-        new_summit_normalized_names = self.__get_all_normalied_names(new_entity)
+    def _is_same(self, existing_entity: _SummitRelatedData, new_entity: _SummitRelatedData) -> bool:
+        existing_summit = existing_entity.summit
+        new_summit = new_entity.summit
+
+        new_summit_normalized_names = self.__get_all_normalized_names(new_summit)
         return bool(
-            new_summit_normalized_names.intersection(existing_entity.get_all_normalized_names())
+            new_summit_normalized_names.intersection(existing_summit.get_all_normalized_names())
             and (
                 (
-                    existing_entity.position is UNDEFINED_GEOPOSITION
-                    or new_entity.position is UNDEFINED_GEOPOSITION
+                    existing_summit.position is UNDEFINED_GEOPOSITION
+                    or new_summit.position is UNDEFINED_GEOPOSITION
                 )
-                or existing_entity.position.is_within_radius(
-                    new_entity.position,
+                or existing_summit.position.is_within_radius(
+                    new_summit.position,
                     self._match_search_radius,
                 )
             )
         )
 
-    def __get_all_normalied_names(self, summit: Summit) -> set[NormalizedName]:
+    def __get_all_normalized_names(self, summit: Summit) -> set[NormalizedName]:
         """
         Returns all normalized names of the given `summit`. This method implements a cache of the
         last requested summit object, to not calculate the normalized strings over and over again.
@@ -217,8 +213,12 @@ class _SummitMerger(_EntityMerger[Summit]):
         return self.__new_summit_normalized_names
 
     @override
-    def _merge_objects(self, target_entity: Summit, source_entity: Summit) -> None:
-        target_entity.enrich(source_entity)
+    def _merge_objects(
+        self,
+        target_entity: _SummitRelatedData,
+        source_entity: _SummitRelatedData,
+    ) -> None:
+        target_entity.summit.enrich(source_entity.summit)
 
         # TODO(aardjon): Assigned routes need to be merged, too! Not necessary with only Teufelsturm
         #                and OSM data being merged, though, because we don't gather route data from
