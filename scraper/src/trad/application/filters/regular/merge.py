@@ -3,7 +3,6 @@ Provides the functionality of merging different data objects (e.g. from differen
 actually describe the same physical entity into a single one.
 """
 
-from collections.abc import Collection
 from contextlib import suppress
 from logging import getLogger
 from typing import Final, override
@@ -132,25 +131,3 @@ class MergeFilter(Filter):
             )
         except StopIteration:
             raise EntityNotFoundError(summit_name) from None
-
-    def get_collected_summits(self) -> Collection[Summit]:
-        """
-        Return all Summits that have been collected and merged so far. This is meant to be used by
-        unit tests only, don't use it in production code.
-        """
-        return self._summits
-
-    def get_collected_routes(self, summit_name: str) -> Collection[Route]:
-        """
-        Return all Routes that have been collected for the requested summit so far. This is meant to
-        be used by unit tests only, don't use it in production code.
-        """
-        return self._routes.get(NormalizedName(summit_name), [])
-
-    def get_collected_posts(self, summit_name: str, route_name: str) -> Collection[Post]:
-        """
-        Return all Posts that have been collected for the requested route so far. This is meant to
-        be used by unit tests only, don't use it in production code.
-        """
-        summit_id = NormalizedName(summit_name)
-        return self._posts.get(summit_id, {}).get(route_name, [])
