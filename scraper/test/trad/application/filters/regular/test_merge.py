@@ -3,6 +3,7 @@ Unit tests for the trad.application.filters.regular.merge module.
 """
 
 from datetime import UTC, datetime
+from typing import Final
 
 import pytest
 
@@ -161,7 +162,7 @@ class TestMergeFilter:
             ),
         ],
     )
-    def test_add_summit(
+    def test_merge_summits(
         self,
         existing_summits: list[Summit],
         add_summit: Summit,
@@ -218,13 +219,14 @@ class TestMergeFilter:
             ),
         ],
     )
-    def test_add_summit_merge_conflict(
+    def test_summit_merge_conflict(
         self, input_summits: list[Summit], expected_error: type[Exception]
     ) -> None:
         """
-        Ensures that add_summit() raises in case of unsolvable merge conflicts.
+        Ensures that trying to merge summit data with unresolvable conflicts raises.
 
         :param input_summits: List of Summits that are stored in the input pipe.
+        :param expected_error: The exception type that must be raised.
         """
         input_pipe = CollectedData()
         output_pipe = CollectedData()
@@ -236,40 +238,361 @@ class TestMergeFilter:
         with pytest.raises(expected_error):
             merge_filter.execute_filter(input_pipe, output_pipe)
 
-    def test_add_route(self) -> None:
+    @pytest.mark.parametrize(
+        ("input_routes", "expected_output_routes"),
+        [
+            pytest.param(
+                [
+                    [Route("AW", grade="")],
+                    [
+                        Route(
+                            "AW",
+                            grade_af=9,
+                            grade_ou=8,
+                            grade_rp=7,
+                            grade_jump=6,
+                            star_count=0,
+                            dangerous=True,
+                            grade="",
+                        )
+                    ],
+                ],
+                [
+                    Route(
+                        "AW",
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                        grade="",
+                    )
+                ],
+                id="Merge two routes (first one without data)",
+            ),
+            pytest.param(
+                [
+                    [
+                        Route(
+                            "AW",
+                            grade_af=9,
+                            grade_ou=8,
+                            grade_rp=7,
+                            grade_jump=6,
+                            star_count=0,
+                            dangerous=True,
+                            grade="",
+                        )
+                    ],
+                    [Route("AW", grade="")],
+                ],
+                [
+                    Route(
+                        "AW",
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                        grade="",
+                    )
+                ],
+                id="Merge two routes (second one without data)",
+            ),
+            pytest.param(
+                [
+                    [
+                        Route(
+                            "AW",
+                            star_count=2,
+                            grade="",
+                        )
+                    ],
+                    [Route("AW", grade="")],
+                ],
+                [
+                    Route(
+                        "AW",
+                        star_count=2,
+                        grade="",
+                    )
+                ],
+                id="Merge two routes (star count only)",
+            ),
+            pytest.param(
+                [
+                    [
+                        Route(
+                            "AW",
+                            dangerous=True,
+                            grade="",
+                        )
+                    ],
+                    [Route("AW", grade="")],
+                ],
+                [
+                    Route(
+                        "AW",
+                        dangerous=True,
+                        grade="",
+                    )
+                ],
+                id="Merge two routes (danger only)",
+            ),
+            pytest.param(
+                [
+                    [
+                        Route(
+                            "AW",
+                            grade_af=9,
+                            grade_ou=8,
+                            grade_rp=7,
+                            grade_jump=6,
+                            star_count=0,
+                            dangerous=True,
+                            grade="",
+                        )
+                    ]
+                ]
+                * 2,
+                [
+                    Route(
+                        "AW",
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                        grade="",
+                    )
+                ],
+                id="Merge two routes with equal data",
+            ),
+            pytest.param(
+                [
+                    [Route("AW", grade="", star_count=1), Route("Talweg", grade="")],
+                    [Route("AW", grade=""), Route("SO-Rinne", grade="", star_count=2)],
+                ],
+                [
+                    Route(
+                        "AW",
+                        star_count=1,
+                        grade="",
+                    ),
+                    Route("Talweg", grade=""),
+                    Route("SO-Rinne", grade="", star_count=2),
+                ],
+                id="Merge some of many routes",
+            ),
+            pytest.param(
+                [
+                    [Route("AW", grade="")],
+                    [Route("AW", grade="", star_count=1)],
+                    [Route("AW", grade="")],
+                ],
+                [
+                    Route(
+                        "AW",
+                        star_count=1,
+                        grade="",
+                    ),
+                ],
+                id="Merge more than two Summit instances",
+            ),
+        ],
+    )
+    def test_merge_routes_same_summit(
+        self,
+        input_routes: list[list[Route]],
+        expected_output_routes: list[Route],
+    ) -> None:
         """
-        Ensures that add_route() collects and merges Route data properly.
+        Ensures that Route data on a single summit (but different Summit instances) is merged
+        properly. Each `input_routes` item is a list of Routes of a single Summit instance, but all
+        Summit instances (and therefore, all routes) represent the same geographical object. That's
+        why `expected_output_routes` is a simple list of (merged) routes.
         """
         input_pipe = CollectedData()
         output_pipe = CollectedData()
 
-        dummy_route = Route(route_name="Example Trail", grade="I")
-        summit_id = input_pipe.add_summit(Summit("Summit"))
-        route_id = input_pipe.add_route(summit_id, dummy_route)
+        for routes in input_routes:
+            summit_id = input_pipe.add_summit(Summit("Fake Summit"))
+            for route in routes:
+                input_pipe.add_route(summit_id=summit_id, route=route)
 
         merge_filter = MergeFilter()
-
         merge_filter.execute_filter(input_pipe, output_pipe)
-        assert list(output_pipe.iter_routes_of_summit(summit_id)) == [(route_id, dummy_route)]
 
-    def test_add_post(self) -> None:
-        """
-        Ensures that add_post() collects Post data properly.
-        """
-        input_pipe = CollectedData()
-        output_pipe = CollectedData()
+        output_summit_data = list(output_pipe.iter_summits())
+        assert len(output_summit_data) == 1  # All summits must have been merged into a single one
 
-        summit_id = input_pipe.add_summit(Summit("Summit"))
-        route_id = input_pipe.add_route(summit_id, Route(route_name="Route", grade="III"))
-        dummy_post = Post(
-            user_name="johndoe",
-            comment="",
-            rating=1,
-            post_date=datetime(2020, 7, 15, tzinfo=UTC),
+        # Make sure that the resulting routes are as expected
+        output_summit_id = output_summit_data[0][0]
+        output_routes = sorted(
+            [route for _id, route in output_pipe.iter_routes_of_summit(output_summit_id)],
+            key=lambda route: route.route_name,
         )
-        input_pipe.add_post(route_id, dummy_post)
+
+        assert sorted(expected_output_routes, key=lambda route: route.route_name) == output_routes
+
+    def test_merge_routes_different_summits(self) -> None:
+        """Ensure that two routes with the same name on different summits are not merged."""
+        route1 = Route(
+            "AW",
+            grade_af=1,
+            grade_ou=2,
+            grade_rp=3,
+            grade_jump=0,
+            star_count=1,
+            dangerous=False,
+            grade="",
+        )
+        route2 = Route(
+            "AW",
+            grade_af=9,
+            grade_ou=8,
+            grade_rp=7,
+            grade_jump=6,
+            star_count=0,
+            dangerous=True,
+            grade="",
+        )
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
+
+        summit1_id = input_pipe.add_summit(Summit("Summit 1"))
+        summit2_id = input_pipe.add_summit(Summit("Summit 2"))
+        input_pipe.add_route(summit_id=summit1_id, route=route1)
+        input_pipe.add_route(summit_id=summit2_id, route=route2)
 
         merge_filter = MergeFilter()
-
         merge_filter.execute_filter(input_pipe, output_pipe)
-        assert list(output_pipe.iter_posts_of_route(route_id)) == [dummy_post]
+
+        output_pipe_data = {}
+        for output_summit_id, output_summit in output_pipe.iter_summits():
+            output_pipe_data[output_summit.official_name or ""] = [
+                route for _id, route in output_pipe.iter_routes_of_summit(output_summit_id)
+            ]
+
+        assert output_pipe_data == {"Summit 1": [route1], "Summit 2": [route2]}
+
+    @pytest.mark.parametrize(
+        ("input_routes", "expected_error"),
+        [
+            pytest.param(
+                [
+                    Route("AW", grade_af=4, grade=""),
+                    Route("AW", grade_af=2, grade=""),
+                ],
+                MergeConflictError,
+                id="Conflicting af grade",
+            ),
+            pytest.param(
+                [
+                    Route("AW", grade_ou=4, grade=""),
+                    Route("AW", grade_rp=2, grade=""),
+                ],
+                MergeConflictError,
+                id="Conflicting ou/rp grade",
+            ),
+            pytest.param(
+                [
+                    Route("AW", star_count=2, grade=""),
+                    Route("AW", star_count=1, grade=""),
+                ],
+                MergeConflictError,
+                id="Conflicting star count",
+            ),
+        ],
+    )
+    def test_route_merge_conflict(
+        self, input_routes: list[Route], expected_error: type[Exception]
+    ) -> None:
+        """
+        Ensures that trying to merge route data with unresolvable conflicts raises.
+
+        :param input_routes: List of Routes that are stored in the input pipe.
+        :param expected_error: The exception type that must be raised.
+        """
+        summit_name: Final = "Mock Peak"
+
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
+
+        for route in input_routes:
+            summit_id = input_pipe.add_summit(Summit(summit_name))
+            input_pipe.add_route(summit_id, route)
+
+        merge_filter = MergeFilter()
+        with pytest.raises(expected_error):
+            merge_filter.execute_filter(input_pipe, output_pipe)
+
+    @pytest.mark.parametrize(
+        "input_posts",
+        [
+            pytest.param(
+                [
+                    Post(
+                        user_name="johndoe",
+                        comment="some comment",
+                        rating=0,
+                        post_date=datetime(2019, 4, 13, tzinfo=UTC),
+                    ),
+                    Post(
+                        user_name="maxmu",
+                        comment="some other ocmment",
+                        rating=2,
+                        post_date=datetime(2021, 8, 5, tzinfo=UTC),
+                    ),
+                ],
+                id="Two different posts",
+            ),
+            pytest.param(
+                [
+                    Post(
+                        user_name="johndoe",
+                        comment="",
+                        rating=1,
+                        post_date=datetime(2020, 7, 15, tzinfo=UTC),
+                    ),
+                    Post(
+                        user_name="johndoe",
+                        comment="",
+                        rating=1,
+                        post_date=datetime(2020, 7, 15, tzinfo=UTC),
+                    ),
+                ],
+                id="Identical post data",
+            ),
+        ],
+    )
+    def test_merge_posts(self, input_posts: list[Post]) -> None:
+        """
+        Ensures that all posts are kept when merging route data. Posts are not actually merged but
+        just added to the target route.
+        """
+        input_pipe = CollectedData()
+        output_pipe = CollectedData()
+
+        for post in input_posts:
+            summit_id = input_pipe.add_summit(Summit("Summit"))
+            route_id = input_pipe.add_route(summit_id, Route(route_name="Route", grade=""))
+            input_pipe.add_post(route_id, post)
+
+        merge_filter = MergeFilter()
+        merge_filter.execute_filter(input_pipe, output_pipe)
+
+        output_summit_ids = [summit_id for summit_id, _summit in output_pipe.iter_summits()]
+        assert len(output_summit_ids) == 1  # All summits must have been merged into a single one
+
+        output_route_ids = [
+            route_id for route_id, _route in output_pipe.iter_routes_of_summit(output_summit_ids[0])
+        ]
+        assert len(output_route_ids) == 1  # All routes must have been merged into a single one
+
+        # Make sure that the resulting route contains all posts
+        output_posts = list(output_pipe.iter_posts_of_route(output_route_ids[0]))
+        assert output_posts == input_posts

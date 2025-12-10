@@ -11,7 +11,15 @@ from typing import Final, override
 
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, NormalizedName, Post, Route, Summit
+from trad.kernel.entities import (
+    NO_GRADE,
+    UNDEFINED_GEOPOSITION,
+    NormalizedName,
+    Post,
+    Route,
+    Summit,
+)
+from trad.kernel.errors import MergeConflictError
 
 _logger = getLogger(__name__)
 
@@ -20,9 +28,6 @@ class MergeFilter(Filter):
     """
     A Filter for merging Summit (and Route) instances that are actually describing the same physical
     object into a single instance.
-
-    TODO(aardjon): Routes are not correctly merged yet because atm there is only ever one single
-                   source for routes which is also retrieved last. This must be fixed!
     """
 
     def __init__(self) -> None:
@@ -220,6 +225,57 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
     ) -> None:
         target_entity.summit.enrich(source_entity.summit)
 
-        # TODO(aardjon): Assigned routes need to be merged, too! Not necessary with only Teufelsturm
-        #                and OSM data being merged, though, because we don't gather route data from
-        #                OSM.
+        merger = _RouteMerger(target_entity.routes)
+        for route_data in source_entity.routes:
+            merger.merge_entity(route_data)
+
+
+class _RouteMerger(_EntityMerger[_RouteRelatedData]):
+    """
+    Concrete implementation for merging Route objects (including their Posts).
+    """
+
+    @override
+    def _is_same(self, existing_entity: _RouteRelatedData, new_entity: _RouteRelatedData) -> bool:
+        return existing_entity.route.route_name == new_entity.route.route_name
+
+    @override
+    def _merge_objects(
+        self,
+        target_entity: _RouteRelatedData,
+        source_entity: _RouteRelatedData,
+    ) -> None:
+        target_route = target_entity.route
+        source_route = source_entity.route
+
+        # Merge grade data
+        target_grade = (
+            target_route.grade_af,
+            target_route.grade_ou,
+            target_route.grade_rp,
+            target_route.grade_jump,
+            target_route.dangerous,
+            target_route.star_count,
+        )
+        source_grade = (
+            source_route.grade_af,
+            source_route.grade_ou,
+            source_route.grade_rp,
+            source_route.grade_jump,
+            source_route.dangerous,
+            source_route.star_count,
+        )
+        missing_grade: Final = (NO_GRADE, NO_GRADE, NO_GRADE, NO_GRADE, False, 0)
+
+        if target_grade == missing_grade:
+            target_route.grade_af = source_route.grade_af
+            target_route.grade_ou = source_route.grade_ou
+            target_route.grade_rp = source_route.grade_rp
+            target_route.grade_jump = source_route.grade_jump
+            target_route.dangerous = source_route.dangerous
+            target_route.star_count = source_route.star_count
+        elif source_grade not in (missing_grade, target_grade):
+            raise MergeConflictError("route", source_route.route_name, "grade")
+
+        # Add all posts from the source route to the target route
+        target_entity.posts.extend(source_entity.posts)
