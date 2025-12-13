@@ -6,7 +6,7 @@
 #
 annotated-types==0.7.0
     # via pydantic
-beautifulsoup4==4.14.2
+beautifulsoup4==4.14.3
     # via
     #   pandas
     #   trad_scraper (pyproject.toml)
@@ -52,7 +52,7 @@ typing-inspection==0.4.2
     # via pydantic
 tzdata==2025.2
     # via pandas
-urllib3==2.5.0
+urllib3==2.6.2
     # via requests
 webencodings==0.5.1
     # via html5lib

@@ -14,7 +14,7 @@ astroid==4.0.2
     # via
     #   pylint
     #   pylint-restricted-imports
-beautifulsoup4==4.14.2
+beautifulsoup4==4.14.3
     # via
     #   -c app-requirements.txt
     #   pandas
@@ -27,7 +27,7 @@ charset-normalizer==3.4.4
     # via
     #   -c app-requirements.txt
     #   requests
-coverage==7.12.0
+coverage==7.13.0
     # via trad_scraper (pyproject.toml)
 dill==0.4.0
     # via pylint
@@ -49,7 +49,7 @@ isort==7.0.0
     # via pylint
 jinja2==3.1.6
     # via dinja-tool
-librt==0.6.3
+librt==0.7.3
     # via mypy
 lidipy==0.3.2
     # via
@@ -81,11 +81,11 @@ pandas==2.3.3
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-pandas-stubs==2.3.2.250926
+pandas-stubs==2.3.3.251201
     # via trad_scraper (pyproject.toml)
 pathspec==0.12.1
     # via mypy
-platformdirs==4.5.0
+platformdirs==4.5.1
     # via pylint
 pluggy==1.6.0
     # via pytest
@@ -103,7 +103,7 @@ pyinstaller==6.17.0
     # via trad_scraper (pyproject.toml)
 pyinstaller-hooks-contrib==2025.10
     # via pyinstaller
-pylint==4.0.3
+pylint==4.0.4
     # via
     #   pylint-pytest
     #   pylint-restricted-imports
@@ -130,7 +130,7 @@ requests==2.32.5
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-ruff==0.14.7
+ruff==0.14.9
     # via trad_scraper (pyproject.toml)
 six==1.17.0
     # via
@@ -169,7 +169,7 @@ tzdata==2025.2
     # via
     #   -c app-requirements.txt
     #   pandas
-urllib3==2.5.0
+urllib3==2.6.2
     # via
     #   -c app-requirements.txt
     #   requests
