@@ -166,7 +166,17 @@ def test_parse_user(input_text: str) -> None:
     assert f"{parsed_date:%d.%m.%Y %H:%M}" == expected_date
 
 
-def test_parse_page() -> None:
+@pytest.mark.parametrize(
+    "sample_route_page_file",
+    ["route_page_sample_simple.html", "route_page_sample_extended.html"],
+)
+def test_parse_page(sample_route_page_file: str) -> None:
+    """
+    Tests that the HTML page parser returns the expected (hard coded) results from the example
+    files. The difference between the "simple" and the "extended" route page file is, that the
+    "extended" variant contains additional information (e.g. "Erstbegeher") and therefore has a
+    slightly different DOM structure.
+    """
     # The summit ID value is taken from the route_page_sample.html file
     expected_summit_id: Final = 42
     # Summit data (name and position) must be taken from the summit_details_page_sample.html file
@@ -183,7 +193,7 @@ def test_parse_page() -> None:
     summit_cache = SummitCache(mocked_retrieve_summit_details_page)
 
     dir_name = Path(__file__).parent
-    with dir_name.joinpath("route_page_sample.html").open("rt", encoding="iso-8859-1") as file:
+    with dir_name.joinpath(sample_route_page_file).open("rt", encoding="iso-8859-1") as file:
         page_text = file.read()
     page_data = parse_page(page_text, summit_cache, RegexBasedParser())
 
