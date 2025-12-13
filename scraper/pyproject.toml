@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "trad_scraper"
 # Attention: When incrementing the scraper version number, please also change the
 # 'APPLICATION_VERSION' constant in the kernel/appmeta.dart file (both values must always be equal)!
-version = "0.1.0"
+version = "0.1.1"
 description = "Route data scraper for the trad mobile application."
 authors = [
   {name = "Karsten Wesenigk"},
