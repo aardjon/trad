@@ -1,5 +1,5 @@
 """
-Concrete pipe implementation writing a route database with schema version 1.
+Filter implementation writing a route database with schema version 1.
 """
 
 import datetime
@@ -19,7 +19,6 @@ from trad.application.filters.sink.db_v1.dbschema import (
     SummitsTable,
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
-from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
 
@@ -46,11 +45,6 @@ class DbSchemaV1Filter(SinkFilter):
         super().__init__()
         self.__destination_file = output_directory.joinpath(self._DB_FILE_NAME)
         self.__database_boundary = database_boundary
-
-    @staticmethod
-    @override
-    def get_stage() -> FilterStage:
-        return FilterStage.WRITING
 
     @override
     def get_name(self) -> str:

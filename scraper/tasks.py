@@ -271,7 +271,7 @@ def version(_context: Context, version: str) -> None:
 
     # Update appmeta.py (source code)
     replace_line_in_file(
-        Path("src", "trad", "crosscuttings", "appmeta.py"),
+        Path("src", "trad", "kernel", "appmeta.py"),
         "APPLICATION_VERSION: Final = ",
         f'APPLICATION_VERSION: Final = "{version}"',
     )

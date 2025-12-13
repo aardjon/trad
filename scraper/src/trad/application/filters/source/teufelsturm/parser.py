@@ -126,7 +126,7 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     df_list = pd.read_html(
         StringIO(page_text.replace("<br>", "|"))
     )  # this parses all the tables in webpages to a list
-    posts_table = df_list[3]
+    posts_table = _find_posts_table(df_list)
     posts = parse_posts(posts_table)
 
     return PageData(
@@ -143,6 +143,18 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
         ),
         posts=posts,
     )
+
+
+def _find_posts_table(dataframes: list[DataFrame]) -> DataFrame:
+    """
+    Search the given HTML table dataframes and return the one representing the one containing all
+    user posts/comments. Raises DataProcessingError if no matching table can be found.
+    """
+    for table_df in reversed(dataframes):
+        header = list(table_df.loc[0])
+        if " ".join(header).startswith("Benutzer Kommentar Bewertung"):
+            return table_df
+    raise DataProcessingError("Page doesn't contain a posts table")
 
 
 def _fix_erroneous_name(summit_name: str) -> str:

@@ -2,9 +2,10 @@
 The scraper use case implementations.
 """
 
+from collections.abc import Collection
 from logging import getLogger
 
-from trad.kernel.boundaries.filters import FilterFactory, FilterStage
+from trad.kernel.boundaries.filters import Filter, FilterFactory
 from trad.kernel.boundaries.pipes import Pipe, PipeFactory
 from trad.kernel.di import DependencyProvider
 
@@ -30,27 +31,31 @@ class ScraperUseCases:
         """
         _logger.info("Now running usecase 'produce_routedb'")
         pipe = self.__pipe_factory.create_pipe()
-        for stage in FilterStage:
+        _logger.debug("Executing Filters in %i stages", self.__filter_factory.get_stage_count())
+        for stage_idx, stage_filters in enumerate(self.__filter_factory.iter_filter_stages()):
             previous_pipe = pipe
             pipe = self.__pipe_factory.create_pipe()
             self.__run_filters_of_stage(
-                stage,
+                stage_idx,
+                stage_filters,
                 input_pipe=previous_pipe,
                 output_pipe=pipe,
             )
 
     def __run_filters_of_stage(
         self,
-        stage: FilterStage,
+        stage_index: int,
+        stage_filters: Collection[Filter],
         input_pipe: Pipe,
         output_pipe: Pipe,
     ) -> None:
         """
-        Executes all filters of a single `stage` on the given pipes.
+        Executes all given filters (of a single stage) on the given pipes.
         """
-        filters = self.__filter_factory.create_filters(stage)
-        _logger.info("Executing %i filters for stage %s", len(filters), stage.name)
+        _logger.info("Entered stage %i to run %i filters...", stage_index, len(stage_filters))
         # For now, run them sequentially. To improve performance, running in parallel may be an
         # option in the future.
-        for current_filter in filters:
+        for current_filter in stage_filters:
+            _logger.info("Executing filter '%s' (stage %i)", current_filter.get_name(), stage_index)
             current_filter.execute_filter(input_pipe, output_pipe)
+            _logger.info("'%s' filter finished", current_filter.get_name())

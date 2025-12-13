@@ -52,7 +52,7 @@ IDEs with Dart/Flutter support (e.g. Android Studio) usually rely on the Dart to
  
 ### Route Data Scraper
 
-In your local working copy, the scraper code is stored within the `mobileapp` directory, so all
+In your local working copy, the scraper code is stored within the `scraper` directory, so all
 following commands must be executed from there.
 
 We recommend to create a separate `virtualenv` for `trad`. If you do so, all commands given in this

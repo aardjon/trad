@@ -11,19 +11,16 @@ import pytest
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters.source.osm import OsmSummitDataFilter
-from trad.kernel.boundaries.filters import FilterStage
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 
 class TestOsmSummitDataFilter:
-    def test_metadata(self) -> None:
+    def test_name(self) -> None:
         """
-        Ensures the current return values of the "metadata" methods like filter name and filter
-        stage.
+        Ensures the filter name to be correct.
         """
-        assert OsmSummitDataFilter.get_stage() == FilterStage.IMPORTING
         osm_filter = OsmSummitDataFilter(Mock(HttpNetworkingBoundary))
         assert "OpenStreetMap" in osm_filter.get_name()
 
