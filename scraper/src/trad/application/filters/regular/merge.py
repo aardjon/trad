@@ -223,11 +223,68 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
         target_entity: _SummitRelatedData,
         source_entity: _SummitRelatedData,
     ) -> None:
-        target_entity.summit.enrich(source_entity.summit)
+        self.enrich_summit(target_entity.summit, source_entity.summit)
 
         merger = _RouteMerger(target_entity.routes)
         for route_data in source_entity.routes:
             merger.merge_entity(route_data)
+
+    @staticmethod
+    def enrich_summit(target: Summit, source: Summit) -> None:
+        """
+        Enrich (merge) the `target` Summit instance with the data from `source` (making it the union
+        of both). Raises `MergeConflictError` if some data cannot be merged because of an
+        unresolvable conflict.
+        """
+        _SummitMerger._enrich_official_name(target, source)
+        _SummitMerger._enrich_alternate_names(target, source)
+        _SummitMerger._enrich_unspecified_names(target, source)
+        _SummitMerger._enrich_position(target, source)
+
+    @staticmethod
+    def _enrich_official_name(target: Summit, source: Summit) -> None:
+        if not source.official_name:
+            return
+
+        if not target.official_name:
+            target.official_name = source.official_name
+            return
+
+        if NormalizedName(source.official_name) == NormalizedName(target.official_name):
+            return
+        raise MergeConflictError("summit", source.name, "official name")
+
+    @staticmethod
+    def _enrich_alternate_names(target: Summit, source: Summit) -> None:
+        if source.alternate_names:
+            target.alternate_names = list(
+                dict.fromkeys(target.alternate_names + source.alternate_names)
+            )
+        # Make sure the official name is not contained in the alternate list
+        if target.official_name:
+            with suppress(ValueError):
+                target.alternate_names.remove(target.official_name)
+
+    @staticmethod
+    def _enrich_unspecified_names(target: Summit, source: Summit) -> None:
+        if source.unspecified_names:
+            target.unspecified_names = list(
+                dict.fromkeys(target.unspecified_names + source.unspecified_names)
+            )
+
+    @staticmethod
+    def _enrich_position(target: Summit, source: Summit) -> None:
+        # Merge the high grade position
+        if target.high_grade_position == UNDEFINED_GEOPOSITION:
+            target.high_grade_position = source.high_grade_position
+        elif source.high_grade_position != UNDEFINED_GEOPOSITION and (
+            not target.high_grade_position.is_equal_to(source.high_grade_position)
+        ):
+            raise MergeConflictError("summit", source.name, "high_grade_position")
+
+        # Use the low-grade position only if none is set already - otherwise, ignore the other one
+        if target.low_grade_position == UNDEFINED_GEOPOSITION:
+            target.low_grade_position = source.low_grade_position
 
 
 class _RouteMerger(_EntityMerger[_RouteRelatedData]):

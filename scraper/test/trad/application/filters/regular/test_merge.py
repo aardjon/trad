@@ -2,12 +2,13 @@
 Unit tests for the trad.application.filters.regular.merge module.
 """
 
+from contextlib import AbstractContextManager, nullcontext
 from datetime import UTC, datetime
 from typing import Final
 
 import pytest
 
-from trad.application.filters.regular.merge import MergeFilter
+from trad.application.filters.regular.merge import MergeFilter, _SummitMerger
 from trad.application.pipes import CollectedData
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
@@ -596,3 +597,120 @@ class TestMergeFilter:
         # Make sure that the resulting route contains all posts
         output_posts = list(output_pipe.iter_posts_of_route(output_route_ids[0]))
         assert output_posts == input_posts
+
+
+class TestSummitMerger:
+    """Unit tests for the SummitMerger class."""
+
+    @pytest.mark.parametrize(
+        ("existing_summit", "summit_to_merge", "expected_summit", "failure_context"),
+        [
+            # Merge position data into an existing summit
+            (
+                Summit("Summit 1"),
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1"),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1", high_grade_position=GeoPosition(504567000, 147650000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    high_grade_position=GeoPosition(504567000, 147650000),
+                    low_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                nullcontext(),
+            ),
+            (
+                Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+                nullcontext(),
+            ),
+            # Merging equal position datá must not raise an error
+            (
+                Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    high_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                Summit(
+                    "Summit 1",
+                    alternate_names=["Summit 2"],
+                    high_grade_position=GeoPosition(504620000, 147390000),
+                ),
+                nullcontext(),
+            ),
+            # Merge multiple names in various variants
+            (
+                Summit(official_name="Official", alternate_names=["Alt1", "Alt2"]),
+                Summit(official_name="Official", alternate_names=["Alt3"]),
+                Summit(official_name="Official", alternate_names=["Alt1", "Alt2", "Alt3"]),
+                nullcontext(),
+            ),
+            (
+                Summit(official_name="Official", alternate_names=["Alt2"]),
+                Summit(alternate_names=["Official", "Alt3"]),
+                Summit(official_name="Official", alternate_names=["Alt2", "Alt3"]),
+                nullcontext(),
+            ),
+            (
+                Summit(unspecified_names=["Unspec"]),
+                Summit(official_name="Name", alternate_names=["Alt1", "Alt2"]),
+                Summit(
+                    official_name="Name",
+                    alternate_names=["Alt1", "Alt2"],
+                    unspecified_names=["Unspec"],
+                ),
+                nullcontext(),
+            ),
+            # Error Cases
+            (
+                Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("Summit", high_grade_position=GeoPosition(404620000, 247390000)),
+                Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
+                pytest.raises(MergeConflictError),
+            ),
+        ],
+    )
+    def test_enrich_summit(
+        self,
+        existing_summit: Summit,
+        summit_to_merge: Summit,
+        expected_summit: Summit,
+        failure_context: AbstractContextManager[None],
+    ) -> None:
+        """
+        Tests the enrichment ("merge") of an existing Summit object with data from another one:
+
+        - Position data is added if there is none already
+        - The official name is set if it is not already
+        - All alternate and unspecified names are added to the existing Summit
+        - The official name must not be included in the alternate names list
+        - Unresolvable merge conflicts raise a MergeConflictError (preserving existing data)
+        """
+        with failure_context:
+            _SummitMerger.enrich_summit(target=existing_summit, source=summit_to_merge)
+
+            assert existing_summit.official_name == expected_summit.official_name
+            assert sorted(existing_summit.alternate_names) == sorted(
+                expected_summit.alternate_names
+            )
+            assert sorted(existing_summit.unspecified_names) == sorted(
+                expected_summit.unspecified_names
+            )
+            assert existing_summit.high_grade_position.is_equal_to(
+                expected_summit.high_grade_position
+            )
+
+            assert existing_summit.low_grade_position.is_equal_to(
+                expected_summit.low_grade_position
+            )

@@ -3,14 +3,13 @@ Provides all the business/core data types.
 """
 
 import string
-from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from logging import getLogger
 from math import cos, pi, sqrt
 from typing import Final, Self, override
 
-from trad.kernel.errors import IncompleteDataError, MergeConflictError
+from trad.kernel.errors import IncompleteDataError
 
 _logger = getLogger(__name__)
 
@@ -290,56 +289,6 @@ class Summit:
             NormalizedName(name)
             for name in off_name + self.alternate_names + self.unspecified_names
         ]
-
-    def enrich(self, other: Self) -> None:
-        """
-        Enrich (merge) this Summit instance with the data from `other` (making it the union of
-        `self` and `other`). Raises `MergeConflictError` if some data cannot be merged because of an
-        unresolvable conflict.
-        """
-        self._enrich_official_name(other)
-        self._enrich_alternate_names(other)
-        self._enrich_unspecified_names(other)
-        self._enrich_position(other)
-
-    def _enrich_official_name(self, other: Self) -> None:
-        if not other.official_name:
-            return
-
-        if not self.official_name:
-            self.official_name = other.official_name
-            return
-
-        if NormalizedName(other.official_name) == NormalizedName(self.official_name):
-            return
-        raise MergeConflictError("summit", other.name, "official name")
-
-    def _enrich_alternate_names(self, other: Self) -> None:
-        if other.alternate_names:
-            self.alternate_names = list(dict.fromkeys(self.alternate_names + other.alternate_names))
-        # Make sure the official name is not contained in the alternate list
-        if self.official_name:
-            with suppress(ValueError):
-                self.alternate_names.remove(self.official_name)
-
-    def _enrich_unspecified_names(self, other: Self) -> None:
-        if other.unspecified_names:
-            self.unspecified_names = list(
-                dict.fromkeys(self.unspecified_names + other.unspecified_names)
-            )
-
-    def _enrich_position(self, other: Self) -> None:
-        # Merge the high grade position
-        if self.high_grade_position == UNDEFINED_GEOPOSITION:
-            self.high_grade_position = other.high_grade_position
-        elif other.high_grade_position != UNDEFINED_GEOPOSITION and (
-            not self.high_grade_position.is_equal_to(other.high_grade_position)
-        ):
-            raise MergeConflictError("summit", other.name, "high_grade_position")
-
-        # Use the low-grade position only if none is set already - otherwise, ignore the other one
-        if self.low_grade_position == UNDEFINED_GEOPOSITION:
-            self.low_grade_position = other.low_grade_position
 
     def fix_invalid_data(self) -> None:
         """
