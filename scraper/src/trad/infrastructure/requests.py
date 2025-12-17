@@ -15,6 +15,7 @@ from trad.application.boundaries.http import (
     HttpRequestError,
     JsonData,
 )
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 
 
 class RequestsHttp(HttpNetworkingBoundary):
@@ -26,10 +27,9 @@ class RequestsHttp(HttpNetworkingBoundary):
     Library documentation: https://docs.python-requests.org/en/latest/index.html
     """
 
-    _USER_AGENT_HEADER: Final = {"User-Agent": "TradRouteDbScraper/NONE"}
+    _USER_AGENT_HEADER: Final = {"User-Agent": f"{APPLICATION_NAME}/{APPLICATION_VERSION}"}
     """
     The user agent string header to send with HTTP requests.
-    TODO(aardjon): We need a real version number to use here...
     """
 
     _REQUEST_TIMEOUT: Final = 60

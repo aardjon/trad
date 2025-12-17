@@ -13,6 +13,7 @@ from requests.models import Response
 
 from trad.application.boundaries.http import HttpRequestError
 from trad.infrastructure.requests import RequestsHttp
+from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 
 
 @patch("trad.infrastructure.requests.requests.get")
@@ -25,7 +26,7 @@ class TestRequestsHttp:
 
     _TEST_BASE_URL: Final = "https://www.fomori.de/trad/testing"
     _EXPECTED_REQUEST_TIMEOUT: Final = 60
-    _EXPECTED_USER_AGENT: Final = "TradRouteDbScraper/NONE"
+    _EXPECTED_USER_AGENT: Final = f"{APPLICATION_NAME}/{APPLICATION_VERSION}"
 
     @pytest.mark.parametrize(
         "url_params",
