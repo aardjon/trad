@@ -5,6 +5,7 @@ library;
 
 import 'dart:io';
 
+import 'package:core/boundaries/ota.dart';
 import 'package:core/boundaries/sysenv.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/geoposition.dart';
@@ -24,6 +25,8 @@ import 'package:crosscuttings/di.dart';
 
 class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary {}
 
+class RouteDbDownloadBoundaryMock extends Mock implements RouteDbDownloadBoundary {}
+
 class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
 
 class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
@@ -41,22 +44,26 @@ void main() {
 
   final DependencyProvider di = DependencyProvider();
   final RouteDbStorageBoundaryMock storageBoundaryMock = RouteDbStorageBoundaryMock();
+  final RouteDbDownloadBoundaryMock downloadBoundaryMock = RouteDbDownloadBoundaryMock();
   final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
   final AppPreferencesBoundaryMock preferencesBoundaryMock = AppPreferencesBoundaryMock();
   final SystemEnvironmentBoundaryMock systemEnvBoundaryMock = SystemEnvironmentBoundaryMock();
 
-  // Configure DI to provide the boundary mocks
-  di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-  di.registerFactory<PresentationBoundary>(() => presentationBoundaryMock);
-  di.registerFactory<AppPreferencesBoundary>(() => preferencesBoundaryMock);
-  di.registerFactory<SystemEnvironmentBoundary>(() => systemEnvBoundaryMock);
+  setUp(() {
+    // Configure DI to provide the boundary mocks
+    di.registerFactory<PresentationBoundary>(() => presentationBoundaryMock);
+    di.registerFactory<AppPreferencesBoundary>(() => preferencesBoundaryMock);
+    di.registerFactory<SystemEnvironmentBoundary>(() => systemEnvBoundaryMock);
+  });
 
-  tearDown(() {
+  tearDown(() async {
     // Reset the mocks after each test case
     reset(storageBoundaryMock);
+    reset(downloadBoundaryMock);
     reset(presentationBoundaryMock);
     reset(preferencesBoundaryMock);
     reset(systemEnvBoundaryMock);
+    await di.shutdown();
   });
 
   // Tests for the route storage management (e.g. importing a new DB file)
@@ -68,6 +75,9 @@ void main() {
     /// be installed successfully.
     test('importRouteDbFile use case', () async {
       final DateTime fakeCreationDate = DateTime(2024, 8, 13);
+
+      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
+      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
 
       // Setup the storage mock as if everything went well
       when(storageBoundaryMock.isStarted).thenReturn(false);
@@ -82,10 +92,229 @@ void main() {
 
       // Make sure the correct file name is sent with the storage import request
       verify(() => storageBoundaryMock.importRouteDbFile(fakeFilePath)).called(1);
+
+      // Make sure that the OTA component was not called
+      verifyNever(downloadBoundaryMock.getAvailableUpdateCandidates);
+    });
+
+    /// Simple happy-path test of the whole importRouteDbFile() use case: A new database file must
+    /// be downloaded and installed successfully.
+    test('updateRouteDatabase() use case', () async {
+      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
+      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
+
+      when(storageBoundaryMock.isStarted).thenReturn(false);
+      when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {});
+      when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
+      when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
+        return DateTime(2023, 12, 25);
+      });
+      when(downloadBoundaryMock.getAvailableUpdateCandidates).thenAnswer((_) async {
+        return <RouteDbUpdateCandidate>[
+          RouteDbUpdateCandidate(
+            identifier: 'db_id',
+            creationDate: DateTime(2025, 1, 1),
+            compatibilityMode: CompatibilityMode.exactMatch,
+          ),
+        ];
+      });
+      when(() => downloadBoundaryMock.downloadRouteDatabase(any())).thenAnswer((_) async {
+        return fakeFilePath;
+      });
+      when(downloadBoundaryMock.cleanupResources).thenAnswer((_) async {});
+
+      RouteDbUseCases usecases = RouteDbUseCases(di);
+      await usecases.updateRouteDatabase();
+
+      // Make sure the file name of the downloaded file was sent with the storage import request
+      verify(() => storageBoundaryMock.importRouteDbFile(fakeFilePath)).called(1);
+
+      // Make sure all created (temporary) files are deleted again
+      verify(downloadBoundaryMock.cleanupResources).called(1);
+    });
+
+    // Tests for downloading database updates.
+    group('download db update', () {
+      // Ensures that the correct update candidate is chosen among many of them. In this test, there
+      // is always a candidate to choose at the end.
+      //
+      // - All updates older than the currently loaded DB (if any) are completely ignored
+      // - If there is only one candidate, choose it
+      // - From several "exact match" candidates, choose the newest one
+      // - From several candidates of the same date, prefer "exact match" over "backward compatible"
+      // - Newest date is more important that "exact match" compatibility
+      //
+      // Test case parameters:
+      //  1: Creation date of the currently started storage. Null if no storage shall be started.
+      //  2: List of available updates that are returned from the RouteDbDownloadBoundary. Each item
+      //     is a pair of compatibility mode (1) and creation date (2) of a single update candidate.
+      //  3: Index of the update list (parameter 2) item which is expected to be chosen.
+      List<(DateTime?, List<(CompatibilityMode, DateTime)>, int)> testParams =
+          <(DateTime?, List<(CompatibilityMode, DateTime)>, int)>[
+            (
+              // Only one update candidate at all
+              null,
+              <(CompatibilityMode, DateTime)>[(CompatibilityMode.exactMatch, DateTime(2025, 1, 1))],
+              0,
+            ),
+
+            (
+              // Several candidates of the same schema version
+              null,
+              <(CompatibilityMode, DateTime)>[
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 2)),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 3)),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 1)),
+              ],
+              1,
+            ),
+
+            (
+              // Several candidates of the same date
+              null,
+              <(CompatibilityMode, DateTime)>[
+                (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 2)),
+                (
+                  CompatibilityMode.exactMatch,
+                  DateTime(2025, 1, 2),
+                ),
+              ],
+              1,
+            ),
+
+            (
+              // Prefer newer candidate over exact schema version
+              null,
+              <(CompatibilityMode, DateTime)>[
+                (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 3)),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 2)),
+              ],
+              0,
+            ),
+
+            (
+              // Ignore updates older than the currently loaded DB
+              DateTime(2025, 1, 3),
+              <(CompatibilityMode, DateTime)>[
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 2)),
+                (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 4)),
+              ],
+              1,
+            ),
+
+            (
+              // Choose the best candidate from several newer one as usual
+              DateTime(2025, 1, 2),
+              <(CompatibilityMode, DateTime)>[
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 4)),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 1)),
+                (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 4)),
+              ],
+              0,
+            ),
+          ];
+      for (final (DateTime?, List<(CompatibilityMode, DateTime)>, int) params in testParams) {
+        test('choose candidate', () async {
+          List<RouteDbUpdateCandidate> candidates = <RouteDbUpdateCandidate>[];
+          params.$2.asMap().forEach((int idx, (CompatibilityMode, DateTime) candidateData) {
+            candidates.add(
+              RouteDbUpdateCandidate(
+                identifier: 'db$idx',
+                creationDate: candidateData.$2,
+                compatibilityMode: candidateData.$1,
+              ),
+            );
+          });
+          di.registerFactory<RouteDbStorageBoundary>(() => _FakeStorageBoundary(params.$1));
+          di.registerFactory<RouteDbDownloadBoundary>(
+            () => _FakeRouteDbDownloadBoundary(
+              candidates,
+            ),
+          );
+          _DbFileInstallerMock mockedDbInstaller = _DbFileInstallerMock();
+          when(() => mockedDbInstaller.installFromLocalFile(any())).thenAnswer((_) async {});
+
+          RouteDbUseCases usecases = RouteDbUseCases(
+            di,
+            dbInstallerFactory: (RouteDbStorageBoundary p_, PresentationBoundary s_) =>
+                mockedDbInstaller,
+          );
+          await usecases.updateRouteDatabase();
+
+          String expectedDbFile = '${candidates[params.$3].identifier}.sqlite';
+          verify(() => mockedDbInstaller.installFromLocalFile(expectedDbFile)).called(1);
+        });
+      }
+
+      /// Ensures the correct behaviour in case all update checks went fine (i.e. no errors!), but
+      /// there are no usable candidates.
+      List<(DateTime?, List<(CompatibilityMode, DateTime)>)> testParameters =
+          <(DateTime?, List<(CompatibilityMode, DateTime)>)>[
+            (
+              // Only available candidate is outdated
+              DateTime(2025, 1, 5),
+              <(CompatibilityMode, DateTime)>[(CompatibilityMode.exactMatch, DateTime(2025, 1, 1))],
+            ),
+            (
+              // All available candidates are outdated
+              DateTime(2025, 1, 5),
+              <(CompatibilityMode, DateTime)>[
+                (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 3)),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 2)),
+              ],
+            ),
+            (
+              // No online updates are available at all, but storage is available
+              DateTime(2025, 1, 5),
+              <(CompatibilityMode, DateTime)>[],
+            ),
+            (
+              // No online updates are available at all, and no storage is available
+              null,
+              <(CompatibilityMode, DateTime)>[],
+            ),
+          ];
+      for (final (DateTime?, List<(CompatibilityMode, DateTime)>) params in testParameters) {
+        test('no updates available', () async {
+          List<RouteDbUpdateCandidate> candidates = <RouteDbUpdateCandidate>[];
+          for (final (CompatibilityMode, DateTime) candidateData in params.$2) {
+            candidates.add(
+              RouteDbUpdateCandidate(
+                identifier: 'db_id',
+                creationDate: candidateData.$2,
+                compatibilityMode: candidateData.$1,
+              ),
+            );
+          }
+          _FakeRouteDbDownloadBoundary fakeDownloader = _FakeRouteDbDownloadBoundary(
+            candidates,
+          );
+          _FakeStorageBoundary fakeStorage = _FakeStorageBoundary(params.$1);
+          di.registerFactory<RouteDbStorageBoundary>(() => fakeStorage);
+          di.registerFactory<RouteDbDownloadBoundary>(() => fakeDownloader);
+
+          _DbFileInstallerMock mockedDbInstaller = _DbFileInstallerMock();
+          when(() => mockedDbInstaller.installFromLocalFile(any())).thenAnswer((_) async {});
+
+          RouteDbUseCases usecases = RouteDbUseCases(
+            di,
+            dbInstallerFactory: (RouteDbStorageBoundary p_, PresentationBoundary s_) =>
+                mockedDbInstaller,
+          );
+          await usecases.updateRouteDatabase();
+          verifyNever(() => mockedDbInstaller.installFromLocalFile(any()));
+        });
+      }
     });
 
     // Tests for the LocalDbFileInstaller class.
-    group('LocalDbFileInstaller', () {
+    group('install given file', () {
+      setUp(() {
+        // Configure DI to provide the boundary mocks
+        di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
+        di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
+      });
+
       /// Checks the regular, normal route DB import behaviour:
       ///  - The given file name is forwarded to the storage
       ///  - After successful import, the new storage creation date is sent to the UI
@@ -190,6 +419,12 @@ void main() {
   });
 
   group('core.usecases.routedb.summits', () {
+    setUp(() {
+      // Configure DI to provide the boundary mocks
+      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
+      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
+    });
+
     List<Summit> summitList = <Summit>[
       Summit(1, 'Mount A'),
       Summit(2, 'Mount B'),
@@ -275,6 +510,12 @@ void main() {
   });
 
   group('core.usecases.routedb.routes', () {
+    setUp(() {
+      // Configure DI to provide the boundary mocks
+      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
+      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
+    });
+
     const RoutesFilterMode sortCriterion = RoutesFilterMode.grade;
     final Summit summit = Summit(42, 'Teufelsturm');
     final List<Route> routeList = <Route>[
@@ -347,6 +588,12 @@ void main() {
   });
 
   group('core.usecases.routedb.posts', () {
+    setUp(() {
+      // Configure DI to provide the boundary mocks
+      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
+      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
+    });
+
     const PostsFilterMode sortCriterion = PostsFilterMode.oldestFirst;
     final Route route = Route(1337, 'Wanderweg', 'II', 1);
     final List<Post> postList = <Post>[
@@ -418,3 +665,48 @@ void main() {
     });
   });
 }
+
+class _FakeStorageBoundary extends Fake implements RouteDbStorageBoundary {
+  /// Creation date of teh currently started storage; null if no storage is started at all.
+  final DateTime? _currentDbCreationDate;
+
+  _FakeStorageBoundary(this._currentDbCreationDate);
+
+  @override
+  bool isStarted() {
+    return _currentDbCreationDate != null;
+  }
+
+  @override
+  Future<DateTime> getCreationDate() async {
+    if (_currentDbCreationDate == null) {
+      throw StateError('Storage not started');
+    }
+    return _currentDbCreationDate;
+  }
+}
+
+class _FakeRouteDbDownloadBoundary extends Fake implements RouteDbDownloadBoundary {
+  /// The list of candidates to be returned from getAvailableUpdateCandidates().
+  final Map<RouteDatabaseId, RouteDbUpdateCandidate> _updateCandidates;
+
+  _FakeRouteDbDownloadBoundary(List<RouteDbUpdateCandidate> updateCandidates)
+    : _updateCandidates = <RouteDatabaseId, RouteDbUpdateCandidate>{
+        for (RouteDbUpdateCandidate c in updateCandidates) c.identifier: c,
+      };
+
+  @override
+  Future<List<RouteDbUpdateCandidate>> getAvailableUpdateCandidates() async {
+    return List<RouteDbUpdateCandidate>.from(_updateCandidates.values);
+  }
+
+  @override
+  Future<String> downloadRouteDatabase(RouteDatabaseId identifier) async {
+    return '${_updateCandidates[identifier]!.identifier}.sqlite';
+  }
+
+  @override
+  Future<void> cleanupResources() async {}
+}
+
+class _DbFileInstallerMock extends Mock implements DbFileInstaller {}

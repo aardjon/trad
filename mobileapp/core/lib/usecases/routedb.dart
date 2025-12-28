@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
+import '../boundaries/ota.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
@@ -30,6 +31,9 @@ class RouteDbUseCases {
   /// Interface to the storage boundary component, used for loading stored data.
   final RouteDbStorageBoundary _storageBoundary;
 
+  /// Interface to the download boundary, used for fetching database updates.
+  final RouteDbDownloadBoundary _downloadBoundary;
+
   /// Interface to the storage boundary component, used for reading and writing application config
   /// settings.
   final AppPreferencesBoundary _preferencesBoundary;
@@ -50,14 +54,24 @@ class RouteDbUseCases {
     DbFileInstaller Function(RouteDbStorageBoundary, PresentationBoundary)? dbInstallerFactory,
   }) : _presentationBoundary = di.provide<PresentationBoundary>(),
        _storageBoundary = di.provide<RouteDbStorageBoundary>(),
+       _downloadBoundary = di.provide<RouteDbDownloadBoundary>(),
        _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
        _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>(),
        _createDbInstaller = dbInstallerFactory ?? LocalDbFileInstaller.new;
 
+  /// Use case: Download the most current route database via OTA and install (import) it.
+  Future<void> updateRouteDatabase() async {
+    _logger.debug('Running use case updateRouteDatabase()');
+    await _fetchAndInstallRouteDb(
+      dbFileProvider: OnlineDbFileProvider(_storageBoundary, _downloadBoundary),
+      dbFileInstaller: _createDbInstaller(_storageBoundary, _presentationBoundary),
+    );
+    await _downloadBoundary.cleanupResources();
+  }
+
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
     _logger.debug('Running use case importRouteDbFile()');
-
     await _fetchAndInstallRouteDb(
       dbFileProvider: LocalDbFileProvider(filePath),
       dbFileInstaller: _createDbInstaller(_storageBoundary, _presentationBoundary),
@@ -173,6 +187,70 @@ class LocalDbFileProvider implements DbFileProvider {
   @override
   Future<String?> determineLocalFileToInstall() async {
     return _filePath;
+  }
+}
+
+/// DbFileProvider implementation that downloads the most current route database file from the OTA
+/// service, and provides it.
+class OnlineDbFileProvider implements DbFileProvider {
+  /// Interface to the storage boundary component, used for loading stored data.
+  final RouteDbStorageBoundary _storageBoundary;
+
+  /// Interface to the download boundary, used for fetching database updates.
+  final RouteDbDownloadBoundary _downloadBoundary;
+
+  /// Constructor for directly initializing all members.
+  OnlineDbFileProvider(this._storageBoundary, this._downloadBoundary);
+
+  @override
+  Future<String?> determineLocalFileToInstall() async {
+    List<RouteDbUpdateCandidate> availableDatabases = await _downloadBoundary
+        .getAvailableUpdateCandidates();
+    if (availableDatabases.isEmpty) {
+      _logger.info('There are no compatible route databases available for download.');
+      return null;
+    }
+
+    RouteDatabaseId? chosenUpdateId = await _chooseUpdateId(availableDatabases);
+    if (chosenUpdateId == null) {
+      _logger.info('No updated route database available.');
+      return null;
+    }
+
+    _logger.info("Chose database '$chosenUpdateId' out of ${availableDatabases.length} candidates");
+    return _downloadBoundary.downloadRouteDatabase(chosenUpdateId);
+  }
+
+  Future<RouteDatabaseId?> _chooseUpdateId(List<RouteDbUpdateCandidate> availableDatabases) async {
+    DateTime currentDbDate = DateTime(1900); // Long ago fallback if there is no current route DB
+    if (_storageBoundary.isStarted()) {
+      currentDbDate = await _storageBoundary.getCreationDate();
+    }
+
+    availableDatabases.sort(_compareUpdateCandidates);
+    for (final RouteDbUpdateCandidate candidate in availableDatabases) {
+      if (candidate.creationDate.isAfter(currentDbDate)) {
+        return candidate.identifier;
+      }
+    }
+    return null;
+  }
+
+  static int _compareUpdateCandidates(RouteDbUpdateCandidate left, RouteDbUpdateCandidate right) {
+    // If two creation dates are different, the newest one shall be first
+    int compareResult = right.creationDate.compareTo(left.creationDate);
+    if (compareResult == 0) {
+      // For equal creation dates, databases of a fully compatible format shall be preferred over
+      // backward compatible ones
+      if (left.compatibilityMode == CompatibilityMode.exactMatch &&
+          right.compatibilityMode == CompatibilityMode.backwardCompatible) {
+        compareResult = -1;
+      } else if (left.compatibilityMode == CompatibilityMode.backwardCompatible &&
+          right.compatibilityMode == CompatibilityMode.exactMatch) {
+        compareResult = 1;
+      }
+    }
+    return compareResult;
   }
 }
 
