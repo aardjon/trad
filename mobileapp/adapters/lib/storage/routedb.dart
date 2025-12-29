@@ -120,7 +120,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       throw PathNotFoundException(
         filePath,
         const OSError('File not found'),
-        'Unable to import "{filePath}" because it does not exist',
+        'Unable to import database because the requested file does not exist',
       );
     }
 
