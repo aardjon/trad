@@ -37,35 +37,42 @@ class RouteDbUseCases {
   /// Interface to the operating system environment.
   final SystemEnvironmentBoundary _systemEnvBoundary;
 
+  /// Factory function for creating the DbFileInstaller to use for actually installing a certain DB
+  /// file. May be used to inject a mocked installer for easier unit testing.
+  final DbFileInstaller Function(RouteDbStorageBoundary, PresentationBoundary) _createDbInstaller;
+
   /// Constructor for creating a new RouteDbUseCases instance.
-  RouteDbUseCases(DependencyProvider di)
-    : _presentationBoundary = di.provide<PresentationBoundary>(),
-      _storageBoundary = di.provide<RouteDbStorageBoundary>(),
-      _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
-      _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>();
+  ///
+  /// The [dbInstallerFactory] parameter allows unit tests to inject a user-defined or mocked
+  /// DbFileInstaller and should not be given in normal production code.
+  RouteDbUseCases(
+    DependencyProvider di, {
+    DbFileInstaller Function(RouteDbStorageBoundary, PresentationBoundary)? dbInstallerFactory,
+  }) : _presentationBoundary = di.provide<PresentationBoundary>(),
+       _storageBoundary = di.provide<RouteDbStorageBoundary>(),
+       _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
+       _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>(),
+       _createDbInstaller = dbInstallerFactory ?? LocalDbFileInstaller.new;
 
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
     _logger.debug('Running use case importRouteDbFile()');
-    if (_storageBoundary.isStarted()) {
-      _storageBoundary.stopStorage();
-    }
-    try {
-      await _storageBoundary.importRouteDbFile(filePath);
-    } on Exception catch (error, stackTrace) {
-      _logger.warning('Unable to import database file due to', error, stackTrace);
-      // TODO(aardjon): Request the UI to show an error
-    }
 
-    // TODO(aardjon): This is a code duplication with the startApplication() use case, eliminate!
-    try {
-      // Start again with the default database. If the import failed, this is the previous one
-      await _storageBoundary.startStorage();
-      DateTime routeDbDate = await _storageBoundary.getCreationDate();
-      _presentationBoundary.updateRouteDbStatus(routeDbDate);
-    } on StorageStartingException {
-      // No or an invalid DB may have been there before already
-      _presentationBoundary.updateRouteDbStatus(null);
+    await _fetchAndInstallRouteDb(
+      dbFileProvider: LocalDbFileProvider(filePath),
+      dbFileInstaller: _createDbInstaller(_storageBoundary, _presentationBoundary),
+    );
+  }
+
+  /// Fetch and install a new route db file. The actual work is delegated to to the given
+  /// [dbFileProvider] and [dbFileInstaller].
+  Future<void> _fetchAndInstallRouteDb({
+    required DbFileProvider dbFileProvider,
+    required DbFileInstaller dbFileInstaller,
+  }) async {
+    String? filePath = await dbFileProvider.determineLocalFileToInstall();
+    if (filePath != null) {
+      await dbFileInstaller.installFromLocalFile(filePath);
     }
   }
 
@@ -137,5 +144,71 @@ class RouteDbUseCases {
     unawaited(_preferencesBoundary.setInitialPostsSortCriterion(sortCriterion));
     List<Post> postList = await _storageBoundary.retrievePostsOfRoute(routeId, sortCriterion);
     _presentationBoundary.updatePostList(postList, sortCriterion);
+  }
+}
+
+/// Interface for determining a local file that shall be installed as new route database.
+abstract interface class DbFileProvider {
+  /// Return the full path to the route database file to install. If there is no such file (e.g.
+  /// because there are no updates at all), null is returned.
+  Future<String?> determineLocalFileToInstall();
+}
+
+/// Interface for actually installing a route database file.
+abstract interface class DbFileInstaller {
+  /// Install the file form the the given [filePath] as new route database. The previous database
+  /// (if any) is discarded if the installation was successful. In case of an error, the previous
+  /// database file is kept.
+  Future<void> installFromLocalFile(String filePath);
+}
+
+/// DbFileProvider implementation that simply provides the file path defined on construction.
+class LocalDbFileProvider implements DbFileProvider {
+  /// The full route database file path to provide.
+  final String _filePath;
+
+  /// Constructor for directly initializing all members.
+  LocalDbFileProvider(this._filePath);
+
+  @override
+  Future<String?> determineLocalFileToInstall() async {
+    return _filePath;
+  }
+}
+
+/// DbFileInstaller implementation for installing a local database file. This is the normal
+/// implementation used in production code.
+class LocalDbFileInstaller implements DbFileInstaller {
+  /// Interface to the storage boundary component, used for loading stored data.
+  final RouteDbStorageBoundary _storageBoundary;
+
+  /// Interface to the presentation boundary component, used for displaying things.
+  final PresentationBoundary _presentationBoundary;
+
+  /// Constructor for directly initializing all members.
+  LocalDbFileInstaller(this._storageBoundary, this._presentationBoundary);
+
+  @override
+  Future<void> installFromLocalFile(String filePath) async {
+    if (_storageBoundary.isStarted()) {
+      _storageBoundary.stopStorage();
+    }
+    try {
+      await _storageBoundary.importRouteDbFile(filePath);
+    } on Exception catch (error, stackTrace) {
+      _logger.warning('Unable to import database file due to', error, stackTrace);
+      // TODO(aardjon): Request the UI to show an error
+    }
+
+    // TODO(aardjon): This is a code duplication with the startApplication() use case, eliminate!
+    try {
+      // Start again with the installed database. If the import failed, this is the previous one.
+      await _storageBoundary.startStorage();
+      DateTime routeDbDate = await _storageBoundary.getCreationDate();
+      _presentationBoundary.updateRouteDbStatus(routeDbDate);
+    } on StorageStartingException {
+      // No or an invalid DB may have been there before already
+      _presentationBoundary.updateRouteDbStatus(null);
+    }
   }
 }
