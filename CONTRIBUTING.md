@@ -2,13 +2,13 @@
 
 ## Feedback
 
-Feel free to [open an issue](https://github.com/Headbucket/trad/issues) for bug reports, feature requests or simple questions. Please assign the corresponding label your new issue.
+Feel free to [open an issue](https://github.com/aardjon/trad/issues) for bug reports, feature requests or simple questions. Please assign the corresponding label your new issue.
 
 ## Setup a development environment
 
 This section is a short how-to for setting up a development environment for the mobile app and/or
 the scraper application. It assumes that you already got a local working copy of the source code
-repository (e.g. `git clone https://github.com/Headbucket/trad.git`).
+repository (e.g. `git clone https://github.com/aardjon/trad.git`).
 
 ### Mobile App
 
