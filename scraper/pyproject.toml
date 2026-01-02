@@ -12,9 +12,12 @@ version = "0.1.1"
 description = "Route data scraper for the trad mobile application."
 authors = [
   {name = "Karsten Wesenigk"},
-  {name = "Thomas Wesenigk"}
+  {name = "Thomas Wesenigk"},
 ]
-classifiers = ["Private :: Do Not Upload"]
+classifiers = [
+  "Private :: Do Not Upload",
+  "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+]
 requires-python = ">=3.14.0"
 dependencies = [
   "beautifulsoup4",

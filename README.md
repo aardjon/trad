@@ -27,6 +27,17 @@ The new route database file is written into `output_directory`. Depending on you
 running the scraper may take up to an hour or even longer. Provide `-v` to enable some more verbose
 debug log, which will give you some kind of progress feedback.
 
+## Copyright & License
+
+Copyright 2024-today by Karsten Wesenigk & Thomas Wesenigk
+
+This software (including all its related files like assets or documentation) is licensed under the
+[European Union Public License 1.2](LICENSE.txt) (SPDX: `EUPL-1.2`). Visit
+https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12 to read it in your
+favourite language.
+
 ## Similar tools
 
-A possible alternative is [YacGuide](https://github.com/YacGroup/yacguide) which also provides a personal climbing journal and works offline but is solely based on (and optimized for) [sandsteinklettern.de](http://www.sandsteinklettern.de).
+A possible alternative is [YacGuide](https://github.com/YacGroup/yacguide) which also provides a
+personal climbing journal and works offline but is solely based on (and optimized for)
+[sandsteinklettern.de](http://www.sandsteinklettern.de).
