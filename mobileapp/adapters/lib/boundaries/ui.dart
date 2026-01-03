@@ -216,8 +216,14 @@ class SettingsModel {
   /// Title of the settings page.
   final String pageTitle;
 
+  /// Title of the route database settings section
+  final String routeDbSectionTitle;
+
   /// Label to use for the route database identifier.
   final String routeDbIdLabel;
+
+  /// Label for the "update the route database" action.
+  final String routeDbUpdateLabel;
 
   /// Label to use for the "select new route database to import" action.
   final String routeDbFileSelectionActionLabel;
@@ -225,12 +231,18 @@ class SettingsModel {
   /// Label to use for the actual route db file selection widget.
   final String routeDbFileSelectionFieldLabel;
 
+  /// Text to display while the route database is being updated.
+  final String routeDbUpdateInProgressLabel;
+
   /// Constructor for directly initializing all members.
   SettingsModel({
     required this.pageTitle,
+    required this.routeDbSectionTitle,
     required this.routeDbIdLabel,
+    required this.routeDbUpdateLabel,
     required this.routeDbFileSelectionActionLabel,
     required this.routeDbFileSelectionFieldLabel,
+    required this.routeDbUpdateInProgressLabel,
   });
 }
 
@@ -259,6 +271,11 @@ abstract interface class ApplicationUiBoundary {
     required String label,
     String? statusMessage,
   });
+
+  /// Notify the UI about some progress change of a running route DB update task.
+  ///
+  /// Set [inProgress] to true when the update task has been started, and to false when it is done.
+  void updateRouteDbUpdateProgress({required bool inProgress});
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].
   ///

@@ -52,8 +52,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
   @override
   void updateRouteDbStatus(DateTime? routeDatabaseDate) {
     const String noDbMessage =
-        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Um sie zu '
-        'aktivieren, importieren Sie bitte eine Wegedatenbankdatei.';
+        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
+        'indem du Wegedaten herunterlädst bzw. importierst.';
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
@@ -61,6 +61,18 @@ class ApplicationWidePresenter implements PresentationBoundary {
       label: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
       statusMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
+  }
+
+  @override
+  void routeDbUpdateTaskStarted() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateRouteDbUpdateProgress(inProgress: true);
+  }
+
+  @override
+  void routeDbUpdateTaskDone() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateRouteDbUpdateProgress(inProgress: false);
   }
 
   @override
@@ -201,9 +213,12 @@ class ApplicationWidePresenter implements PresentationBoundary {
   void showSettings() {
     SettingsModel settingsModel = SettingsModel(
       pageTitle: 'Einstellungen',
+      routeDbSectionTitle: 'Wegedaten',
       routeDbIdLabel: 'Aktuelle Wegedatenbank:',
-      routeDbFileSelectionActionLabel: 'Wegedatenbank importieren',
+      routeDbUpdateLabel: 'Wegedaten herunterladen',
+      routeDbFileSelectionActionLabel: 'Wegedaten aus Datei importieren',
       routeDbFileSelectionFieldLabel: 'Bitte eine Wegedatenbankdatei zum Importieren auswählen',
+      routeDbUpdateInProgressLabel: 'Wegedaten werden heruntergeladen...',
     );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.showSettings(settingsModel);

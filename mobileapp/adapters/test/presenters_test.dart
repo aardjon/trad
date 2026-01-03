@@ -35,9 +35,12 @@ void main() {
     registerFallbackValue(
       SettingsModel(
         pageTitle: '[NoPageTitle]',
+        routeDbSectionTitle: '[NoSectionTitle]',
         routeDbIdLabel: '[NoRouteDbId]',
+        routeDbUpdateLabel: '[NoRouteDbUpdateLabel]',
         routeDbFileSelectionActionLabel: '[NoFileSelectionActionLabel]',
         routeDbFileSelectionFieldLabel: '[NoFileSelectionFieldLabel]',
+        routeDbUpdateInProgressLabel: '[NoProgressLabel]',
       ),
     );
   });

@@ -84,6 +84,11 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
+  void updateRouteDbUpdateProgress({required bool inProgress}) {
+    _settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
+  }
+
+  @override
   void showSummitList(SummitListModel model) {
     _logger.debug('Displaying summit list page');
     _switchToRoute(UiRoute.summitlist.toRouteString(), isRoot: true, routeArguments: model);
