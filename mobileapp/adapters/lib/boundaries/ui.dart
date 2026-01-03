@@ -219,6 +219,9 @@ class SettingsModel {
   /// Label to use for the route database identifier.
   final String routeDbIdLabel;
 
+  /// Label for the "update the route database" action.
+  final String routeDbUpdateLabel;
+
   /// Label to use for the "select new route database to import" action.
   final String routeDbFileSelectionActionLabel;
 
@@ -229,6 +232,7 @@ class SettingsModel {
   SettingsModel({
     required this.pageTitle,
     required this.routeDbIdLabel,
+    required this.routeDbUpdateLabel,
     required this.routeDbFileSelectionActionLabel,
     required this.routeDbFileSelectionFieldLabel,
   });

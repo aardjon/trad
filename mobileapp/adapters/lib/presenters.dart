@@ -202,7 +202,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
     SettingsModel settingsModel = SettingsModel(
       pageTitle: 'Einstellungen',
       routeDbIdLabel: 'Aktuelle Wegedatenbank:',
-      routeDbFileSelectionActionLabel: 'Wegedatenbank importieren',
+      routeDbUpdateLabel: 'Online-Update der Wegedatenbank',
+      routeDbFileSelectionActionLabel: 'Lokale Wegedatenbankdatei importieren',
       routeDbFileSelectionFieldLabel: 'Bitte eine Wegedatenbankdatei zum Importieren auswählen',
     );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();

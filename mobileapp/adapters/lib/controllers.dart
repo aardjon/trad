@@ -74,6 +74,12 @@ class RouteDbController {
   /// The use case object from the `core` ring.
   final RouteDbUseCases _routeDbUseCases = RouteDbUseCases(DependencyProvider());
 
+  /// The user requested updating the route database.
+  void requestRouteDbUpdate() {
+    _logger.debug('UI request: Update route database');
+    unawaited(_routeDbUseCases.updateRouteDatabase());
+  }
+
   /// The user selected the route database file [selectedDbFile] to be imported.
   void requestRouteDbFileImport(String selectedDbFile) {
     _logger.debug('UI request: Import route DB file "$selectedDbFile"');

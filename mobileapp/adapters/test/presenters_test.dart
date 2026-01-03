@@ -36,6 +36,7 @@ void main() {
       SettingsModel(
         pageTitle: '[NoPageTitle]',
         routeDbIdLabel: '[NoRouteDbId]',
+        routeDbUpdateLabel: '[NoRouteDbUpdateLabel]',
         routeDbFileSelectionActionLabel: '[NoFileSelectionActionLabel]',
         routeDbFileSelectionFieldLabel: '[NoFileSelectionFieldLabel]',
       ),

@@ -63,6 +63,13 @@ class SettingsPage extends StatelessWidget {
               Text('${model.routeDbIdLabel} ${state.getRouteDbIdentifier()}'),
               const SizedBox(height: 10),
               ElevatedButton(
+                child: Text(model.routeDbUpdateLabel),
+                onPressed: () async {
+                  _routeDbController.requestRouteDbUpdate();
+                },
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
                 child: Text(model.routeDbFileSelectionActionLabel),
                 onPressed: () async {
                   FilePickerResult? result = await FilePicker.platform.pickFiles(
