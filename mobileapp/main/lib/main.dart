@@ -7,6 +7,8 @@ library;
 import 'dart:async';
 
 import 'package:adapters/boundaries/external_apps.dart';
+import 'package:adapters/boundaries/network.dart';
+import 'package:core/boundaries/ota.dart';
 import 'package:crosscuttings/appmeta.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,6 +23,7 @@ import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/presenters.dart';
 import 'package:adapters/storage/knowledgebase.dart';
 import 'package:adapters/storage/routedb.dart';
+import 'package:adapters/ota_routedb.dart';
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/boundaries/storage/knowledgebase.dart';
 import 'package:core/boundaries/storage/preferences.dart';
@@ -36,6 +39,7 @@ import 'package:infrastructure_flutter/repository/shared_preferences.dart';
 import 'package:infrastructure_flutter/ui.dart';
 import 'package:infrastructure_vanilla/repositories/dartio_path.dart';
 import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
+import 'package:infrastructure_vanilla/http.dart';
 
 /// The global main entry point - The one and only :)
 void main() {
@@ -101,6 +105,10 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<RouteDbStorageBoundary>(
       () => RouteDbStorage(_dependencyProvider),
     );
+    _dependencyProvider.registerFactory<RouteDbDownloadBoundary>(
+      () => RouteDbOnlineUpdater(_dependencyProvider),
+    );
+
     _dependencyProvider.registerFactory<AppPreferencesBoundary>(
       () => PreferencesStorage(_dependencyProvider),
     );
@@ -113,5 +121,6 @@ class ApplicationBootstrap {
     _dependencyProvider.registerSingleton<KeyValueStoreBoundary>(SharedPreferencesRepository.new);
     _dependencyProvider.registerFactory<FileSystemBoundary>(DartIoFileSystem.new);
     _dependencyProvider.registerFactory<ExternalAppsBoundary>(UrlLauncher.new);
+    _dependencyProvider.registerFactory<HttpNetworkingBoundary>(HttpNetworkRequests.new);
   }
 }
