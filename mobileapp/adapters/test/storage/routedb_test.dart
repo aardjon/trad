@@ -55,25 +55,22 @@ class RelationalDatabaseBoundaryMock extends Mock implements RelationalDatabaseB
 
 /// Unit tests for the adapters.storage.routedb.RouteDbStorage class.
 void main() {
-  setUpAll(() {
-    // Register a default values that are used by mocktails `any` matcher
-    registerFallbackValue(Query.table('example_table', <String>['example_column']));
-  });
-
   final RelationalDatabaseBoundaryMock rdbMock = RelationalDatabaseBoundaryMock();
   final FileSystemBoundary fileSystemMock = FileSystemBoundaryMock();
   final PathProviderBoundaryMock pathProviderMock = PathProviderBoundaryMock(fileSystemMock);
   final DependencyProvider di = DependencyProvider();
 
-  di.registerFactory<PathProviderBoundary>(() => pathProviderMock);
-  di.registerFactory<FileSystemBoundary>(() => fileSystemMock);
-  di.registerSingleton<RelationalDatabaseBoundary>(() => rdbMock);
+  setUp(() {
+    di.registerFactory<PathProviderBoundary>(() => pathProviderMock);
+    di.registerFactory<FileSystemBoundary>(() => fileSystemMock);
+  });
 
-  tearDown(() {
+  tearDown(() async {
     // Reset the mocks after each test case
     reset(rdbMock);
     reset(pathProviderMock);
     reset(fileSystemMock);
+    await di.shutdown();
   });
 
   // The path to the route database file that should be used by the application.
@@ -84,6 +81,10 @@ void main() {
 
   /// Test cases for ensuring the correct behaviour for wrong storage started/stopped states
   group('StorageState constraints', () {
+    setUp(() {
+      di.registerSingleton<RelationalDatabaseBoundary>(() => rdbMock);
+    });
+
     /// Ensure that a StateError is thrown if the storage is already started
     test('importRouteDbFile', () async {
       // Simulate a STARTED repository
@@ -95,10 +96,28 @@ void main() {
         await storage.importRouteDbFile('/does/not/matter.sqlite');
       }, throwsStateError);
     });
+
+    /// Ensure that a StateError is thrown if the storage is stopped
+    test('getCreationDate', () async {
+      // Simulate a STOPPED repository
+      when(rdbMock.isConnected).thenReturn(false);
+
+      // Run the test case
+      RouteDbStorage storage = RouteDbStorage(di);
+      expect(() async {
+        await storage.getCreationDate();
+      }, throwsStateError);
+    });
   });
 
   /// Test cases for the startStorage() method
   group('test startStorage', () {
+    setUp(() {
+      // Register a default values that are used by mocktails `any` matcher
+      registerFallbackValue(Query.table('example_table', <String>['example_column']));
+      di.registerSingleton<RelationalDatabaseBoundary>(() => rdbMock);
+    });
+
     /// Ensures that the storage is initialized correctly, meaning that connect() is called at the
     /// database
     ///  - with the expected database file path
@@ -182,6 +201,12 @@ void main() {
 
   /// Test cases for the importRouteDbFile() method
   group('test importRouteDbFile', () {
+    setUp(() {
+      // Register a default values that are used by mocktails `any` matcher
+      registerFallbackValue(Query.table('example_table', <String>['example_column']));
+      di.registerSingleton<RelationalDatabaseBoundary>(() => rdbMock);
+    });
+
     final Directory userDownloadDir = fileSystemMock.getDirectory('/home/user/Downloads/');
     userDownloadDir.createSync(recursive: true);
 
@@ -335,4 +360,47 @@ void main() {
       }, throwsA(isA<IncompatibleStorageException>()));
     });
   });
+
+  group('database queries', () {
+    test('getCreationDate()', () async {
+      final DateTime fakeCreationDate = DateTime(2025, 4, 13, 15, 17, 39);
+
+      _FakeRelationalDatabase fakeRdb = _FakeRelationalDatabase();
+      fakeRdb.queryResult = <ResultRow>[
+        ResultRow(<String, Object?>{
+          DatabaseMetadataTable.columnCompileTime: fakeCreationDate.toIso8601String(),
+        }),
+      ];
+      di.registerFactory<RelationalDatabaseBoundary>(() => fakeRdb);
+
+      // Run the test case
+      RouteDbStorage storage = RouteDbStorage(di);
+      DateTime creationTime = await storage.getCreationDate();
+
+      expect(creationTime, equals(fakeCreationDate));
+      expect(fakeRdb.executedQueries.length, equals(1));
+
+      Query executedQuery = fakeRdb.executedQueries[0];
+      expect(executedQuery.tableNames, equals(<String>[DatabaseMetadataTable.tableName]));
+      expect(executedQuery.columNames, equals(<String>[DatabaseMetadataTable.columnCompileTime]));
+    });
+  });
+}
+
+class _FakeRelationalDatabase extends Fake implements RelationalDatabaseBoundary {
+  final List<Query> executedQueries = <Query>[];
+
+  /// The result set that will be returned by the next [executeQuery()] call.
+  List<ResultRow> queryResult = <ResultRow>[];
+
+  @override
+  bool isConnected() {
+    return true;
+  }
+
+  @override
+  Future<List<ResultRow>> executeQuery(Query query) async {
+    executedQueries.add(query);
+    return queryResult;
+  }
 }

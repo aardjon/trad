@@ -151,11 +151,16 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     if (!isStarted()) {
       throw StateError('Cannot get database creation date while the storage is STOPPED.');
     }
-    // TODO(aardjon): The data retrieval date must be stored in the database itself. But for now, we
-    //    use the file modification date for simplicity.
-    String dbFilePath = await _getExpectedDbFile();
-    File dbFile = _fileSystemBoundary.getFile(dbFilePath);
-    return dbFile.statSync().modified;
+
+    Query query = Query.table(DatabaseMetadataTable.tableName, <String>[
+      DatabaseMetadataTable.columnCompileTime,
+    ]);
+    query.limit = 1;
+
+    // Run the database query
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+    String dateStrValue = resultSet[0].getStringValue(DatabaseMetadataTable.columnCompileTime);
+    return DateTime.parse(dateStrValue);
   }
 
   @override
