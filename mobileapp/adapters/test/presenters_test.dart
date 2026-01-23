@@ -94,37 +94,31 @@ void main() {
   group('routedb domain', () {
     /// Ensure the correct behaviour of the updateRouteDbStatus() method:
     ///  - If it gets a DB creation date, activate the routeDB domain in the UI, send the DB
-    ///    creation date as part of the label and don't send a status message.
-    ///  - If it gets null, deactivate the routeDB domain in the UI, send a special "No DB available"
-    ///    label and send a status message.
+    ///    creation date as label and don't send a status message.
+    ///  - If it gets null, deactivate the routeDB domain in the UI, send a special "No DB
+    ///    available" label and send a status message.
     group('updateRouteDbStatus()', () {
-      List<(DateTime?, bool)> testData = <(DateTime?, bool)>[
-        (DateTime.now(), true),
-        (null, false),
+      /// Make sure the correct values are sent to the UI when the route DB status is changed. If
+      /// there is a route DB date, the creation timestamp must be formatted correctly.
+      final List<(DateTime?, String)> testParams = <(DateTime?, String)>[
+        (DateTime(2023, 1, 2, 3, 4), '02.01.2023 03:04'), // minimal digit value
+        (DateTime(2023, 12, 31, 23, 59), '31.12.2023 23:59'), // full digit values
+        (DateTime(2024, 4, 16, 13, 9), '16.04.2024 13:09'), // mixed
+        (null, 'Keine'), // no timestamp given
       ];
-      for (final (DateTime?, bool) testParams in testData) {
-        DateTime? dbCreationDT = testParams.$1;
-        bool expectActivation = testParams.$2;
-        test('$dbCreationDT', () {
-          const String expectedMissingDbLabel = 'Keine';
 
+      for (final (DateTime?, String) args in testParams) {
+        DateTime? inputDate = args.$1;
+        String expectedLabel = args.$2;
+        test('db date = $inputDate', () {
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          presenter.updateRouteDbStatus(dbCreationDT);
+          presenter.updateRouteDbStatus(inputDate);
 
-          // Configure two  matchers for the parameters that we expect to be provided to the UI boundary.
-          final Matcher dbLabelMatcher = expectActivation
-              ? predicate(
-                  (String label) =>
-                      label != expectedMissingDbLabel &&
-                      label.contains(dbCreationDT!.toIso8601String()),
-                )
-              : equals(expectedMissingDbLabel);
-          final Matcher availabilityMessageMatcher = expectActivation ? isNull : isNotEmpty;
-
+          final Matcher availabilityMessageMatcher = inputDate != null ? isNull : isNotEmpty;
           verify(
             () => fakeUi.updateRouteDbStatus(
-              activated: expectActivation,
-              label: any(named: 'label', that: dbLabelMatcher),
+              activated: inputDate != null,
+              label: expectedLabel,
               statusMessage: any(named: 'statusMessage', that: availabilityMessageMatcher),
             ),
           ).called(1);

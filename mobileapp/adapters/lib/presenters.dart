@@ -55,10 +55,12 @@ class ApplicationWidePresenter implements PresentationBoundary {
         'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
         'indem du Wegedaten herunterlädst bzw. importierst.';
 
+    final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
+
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
       activated: routeDatabaseDate != null,
-      label: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
+      label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
       statusMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
   }
@@ -214,7 +216,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
     SettingsModel settingsModel = SettingsModel(
       pageTitle: 'Einstellungen',
       routeDbSectionTitle: 'Wegedaten',
-      routeDbIdLabel: 'Aktuelle Wegedatenbank:',
+      routeDbIdLabel: 'Datenstand:',
       routeDbUpdateLabel: 'Wegedaten herunterladen',
       routeDbFileSelectionActionLabel: 'Wegedaten aus Datei importieren',
       routeDbFileSelectionFieldLabel: 'Bitte eine Wegedatenbankdatei zum Importieren auswählen',
