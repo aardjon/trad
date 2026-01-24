@@ -60,6 +60,10 @@ class SettingsNotifier extends ChangeNotifier {
   /// The identifier of the currently used route database
   String _routeDbIdentifier = '';
 
+  /// Displays whether the route db is currently being updated in the background (true) or not
+  /// (false).
+  bool _routeDbUpdateInProgress = false;
+
   /// Returns true if the route database is currently available, false if not.
   bool isRouteDbAavailable() {
     return _routeDbActivationStatus;
@@ -77,6 +81,11 @@ class SettingsNotifier extends ChangeNotifier {
     return _routeDbAvailabilityMessage;
   }
 
+  /// Returns true if the route database is currently being updated, or false if not.
+  bool isRouteDbUpdateInProgress() {
+    return _routeDbUpdateInProgress;
+  }
+
   /// Replaces the status information of the route database with the given [dbIdentifier] and
   /// [availabilityMessage].
   ///
@@ -89,6 +98,13 @@ class SettingsNotifier extends ChangeNotifier {
     _routeDbActivationStatus = routeDbActivationStatus;
     _routeDbAvailabilityMessage = availabilityMessage;
     _routeDbIdentifier = dbIdentifier;
+    notifyListeners();
+  }
+
+  /// Updates the progress status of a currently running route DB update task to [inProgress]:
+  /// true if the task is running, false if not.
+  void updateRouteDbUpdateProgress({required bool inProgress}) {
+    _routeDbUpdateInProgress = inProgress;
     notifyListeners();
   }
 }

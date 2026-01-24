@@ -22,6 +22,12 @@ abstract interface class PresentationBoundary {
   /// Let the UI display/update the [routeDatabaseDate] as given.
   void updateRouteDbStatus(DateTime? routeDatabaseDate);
 
+  /// Notify the UI about a running route database update.
+  void routeDbUpdateTaskStarted();
+
+  /// Notify the UI that the route database update is done.
+  void routeDbUpdateTaskDone();
+
   /// Let the UI display the list of summits in the *route db* domain.
   ///
   /// The actual summit list data must be set separately by calling [updateSummitList()].

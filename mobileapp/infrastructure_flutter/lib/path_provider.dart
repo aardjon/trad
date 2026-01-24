@@ -21,4 +21,10 @@ class SystemPathProvider implements PathProviderBoundary {
     Directory dataDir = await getApplicationSupportDirectory();
     return Directory(dataDir.absolute.path);
   }
+
+  @override
+  Future<Directory> getTempDir() async {
+    Directory tempDir = await getTemporaryDirectory();
+    return Directory(tempDir.absolute.path);
+  }
 }

@@ -28,6 +28,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0
+  path_provider_platform_interface:  # Use the version defined by path_provider
+  plugin_platform_interface:  # Use the version defined by path_provider
   test: ^1.26.0
   very_good_analysis: ^10.0.0
 

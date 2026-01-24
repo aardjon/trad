@@ -30,23 +30,28 @@ final Logger _logger = Logger('trad.infrastructure_flutter.ui');
 class ApplicationUI implements ApplicationUiBoundary {
   /// The central state of the UI.
   ///
-  /// This is the only real instance of the state, all other clients should only reference this one
-  /// and never create their own!
+  /// This is the only real instance of the state, all other clients (views) should only reference
+  /// this one and never create their own!
   static final GuiState _uiState = GuiState();
 
   static final SettingsNotifier _settingsState = SettingsNotifier();
 
   /// The central summit list state of the UI.
   ///
-  /// This is the only real instance of this, all other clients should only reference this one
-  /// and never create their own!
-  // TODO(aardjon): There should be no central state within the GUI implementation, i.e. each summit
-  //    list widget should probably have its own notifier/state (the UI interface documentation is
-  //    correct, the current implementation is not). Can we find a better solution for this?
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
   static final SummitListNotifier _summitListState = SummitListNotifier();
 
+  /// The central route list/summit details state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
   static final RouteListNotifier _routeListState = RouteListNotifier();
 
+  /// The central post list state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
   static final PostListNotifier _postListState = PostListNotifier();
 
   @override
@@ -81,6 +86,11 @@ class ApplicationUI implements ApplicationUiBoundary {
       dbIdentifier: label,
       availabilityMessage: statusMessage,
     );
+  }
+
+  @override
+  void updateRouteDbUpdateProgress({required bool inProgress}) {
+    _settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
   }
 
   @override

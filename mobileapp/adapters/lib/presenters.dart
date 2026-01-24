@@ -52,15 +52,29 @@ class ApplicationWidePresenter implements PresentationBoundary {
   @override
   void updateRouteDbStatus(DateTime? routeDatabaseDate) {
     const String noDbMessage =
-        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Um sie zu '
-        'aktivieren, importieren Sie bitte eine Wegedatenbankdatei.';
+        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
+        'indem du Wegedaten herunterlädst bzw. importierst.';
+
+    final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
       activated: routeDatabaseDate != null,
-      label: routeDatabaseDate != null ? routeDatabaseDate.toIso8601String() : 'Keine',
+      label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
       statusMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
+  }
+
+  @override
+  void routeDbUpdateTaskStarted() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateRouteDbUpdateProgress(inProgress: true);
+  }
+
+  @override
+  void routeDbUpdateTaskDone() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateRouteDbUpdateProgress(inProgress: false);
   }
 
   @override
@@ -100,7 +114,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem(
           route.routeName,
           subTitle: route.routeGrade,
-          endIcon: _ratingMapper.getDoubleRatingIcon(route.routeRating ?? 0.0),
+          endIcon: route.routeRating != null
+              ? _ratingMapper.getDoubleRatingIcon(route.routeRating!)
+              : null,
           itemId: route.id,
         ),
       );
@@ -201,9 +217,12 @@ class ApplicationWidePresenter implements PresentationBoundary {
   void showSettings() {
     SettingsModel settingsModel = SettingsModel(
       pageTitle: 'Einstellungen',
-      routeDbIdLabel: 'Aktuelle Wegedatenbank:',
-      routeDbFileSelectionActionLabel: 'Wegedatenbank importieren',
+      routeDbSectionTitle: 'Wegedaten',
+      routeDbIdLabel: 'Datenstand:',
+      routeDbUpdateLabel: 'Wegedaten herunterladen',
+      routeDbFileSelectionActionLabel: 'Wegedaten aus Datei importieren',
       routeDbFileSelectionFieldLabel: 'Bitte eine Wegedatenbankdatei zum Importieren auswählen',
+      routeDbUpdateInProgressLabel: 'Wegedaten werden heruntergeladen...',
     );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.showSettings(settingsModel);
