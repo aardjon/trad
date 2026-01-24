@@ -20,11 +20,12 @@ classifiers = [
 ]
 requires-python = ">=3.14.0"
 dependencies = [
-  "beautifulsoup4",
-  "lidipy",
-  "pandas[html]",
-  "pydantic",
-  "requests",
+  "beautifulsoup4<5.0",
+  "lidipy<1.0",
+  "pandas[html]<3.0",
+  "pydantic<3.0",
+  "requests<3.0",
+  "numpy<2.4",  # Only needed by pandas, but must not upgraded to 2.4 due to old dev platform
 ]
 
 
