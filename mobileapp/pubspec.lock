@@ -213,10 +213,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: "289279317b4b16eb2bb7e271abccd4bf84ec9bdcbe999e278a94b804f5630418"
+      sha256: d07d37192dbf97461359c1518788f203b0c9102cfd2c35a716b823741219542c
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   file:
     dependency: transitive
     description:
@@ -229,10 +229,10 @@ packages:
     dependency: transitive
     description:
       name: file_picker
-      sha256: "7872545770c277236fd32b022767576c562ba28366204ff1a5628853cf8f2200"
+      sha256: d974b6ba2606371ac71dd94254beefb6fa81185bde0b59bdc1df09885da85fde
       url: "https://pub.dev"
     source: hosted
-    version: "10.3.7"
+    version: "10.3.8"
   flutter:
     dependency: transitive
     description: flutter
@@ -332,10 +332,10 @@ packages:
     dependency: transitive
     description:
       name: image
-      sha256: "51555e36056541237b15b57afc31a0f53d4f9aefd9bd00873a6dc0090e54e332"
+      sha256: "492bd52f6c4fbb6ee41f781ff27765ce5f627910e1e0cbecfa3d9add5562604c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.6.0"
+    version: "4.7.2"
   intl:
     dependency: transitive
     description:
@@ -476,10 +476,10 @@ packages:
     dependency: transitive
     description:
       name: mustache_template
-      sha256: daa42be75f2ccfb287c24a75e7ac594f2ea0b32bf9ebe7c15154aa45b2dfb2de
+      sha256: "4326d0002ff58c74b9486990ccbdab08157fca3c996fe9e197aff9d61badf307"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   nested:
     dependency: transitive
     description:
@@ -945,10 +945,10 @@ packages:
     dependency: transitive
     description:
       name: watcher
-      sha256: f52385d4f73589977c80797e60fe51014f7f2b957b5e9a62c3f6ada439889249
+      sha256: "1398c9f081a753f9226febe8900fce8f7d0a67163334e1c94a2438339d79d635"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   web:
     dependency: transitive
     description:
