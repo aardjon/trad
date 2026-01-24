@@ -114,7 +114,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem(
           route.routeName,
           subTitle: route.routeGrade,
-          endIcon: _ratingMapper.getDoubleRatingIcon(route.routeRating ?? 0.0),
+          endIcon: route.routeRating != null
+              ? _ratingMapper.getDoubleRatingIcon(route.routeRating!)
+              : null,
           itemId: route.id,
         ),
       );
