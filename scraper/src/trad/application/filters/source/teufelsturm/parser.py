@@ -187,6 +187,22 @@ def _fix_erroneous_name(summit_name: str) -> str:
     return known_name_errors.get(summit_name, summit_name)
 
 
+def _ignore_wrong_position(peak_name: str) -> bool:
+    """
+    Checks if the peak with the given `peak_name` is known to have a wrong position on teufelsturm
+    which must therefore be ignored. Returns False if teh position value is okay and shall be used,
+    or True if it must be ignored.
+    """
+    known_wrong_positions: Final = [
+        "Falkenturm",
+        "Langes Horn",
+        "Silvesterturm",
+        "Sprunghorn",
+        "Zwerg",
+    ]
+    return peak_name in known_wrong_positions
+
+
 def parse_route_list(page_text: str) -> set[int]:
     """Parses the given HTML [page_text] and returns the IDs of all referenced routes."""
     regexp = re.compile(r"/wege/bewertungen/anzeige\.php\?wegnr=\d+")
@@ -210,28 +226,33 @@ def _parse_summit_page(page_text: str) -> Summit:
     # Replace the summit name if it is wrong
     peak_name = _fix_erroneous_name(peak_name)
 
-    positions_table = soup.find_all("table")[-1]
-    lat = None
-    lon = None
-    for table_cell in positions_table.find_all("td"):
-        # Note: The coordinate values are interchanged on the summits page (no idea why, probably
-        # just a mistake), that's why we purposely assign the "Latitude" value to `lon` and the
-        # "Longitude" value to `lat`.
-        if table_cell.get_text() == "Longitude":
-            lat = table_cell.next_sibling.get_text()
-        if table_cell.get_text() == "Latitude":
-            lon = table_cell.next_sibling.get_text()
+    # Get the summit's geo position
+    position = UNDEFINED_GEOPOSITION
+    if not _ignore_wrong_position(peak_name):
+        positions_table = soup.find_all("table")[-1]
+        lat = None
+        lon = None
+        for table_cell in positions_table.find_all("td"):
+            # Note: The coordinate values are swapped on the summits page (no idea why, probably
+            # just a mistake), that's why we purposely assign the "Latitude" value to `lon` and the
+            # "Longitude" value to `lat`.
+            if table_cell.get_text() == "Longitude":
+                lat = table_cell.next_sibling.get_text()
+            if table_cell.get_text() == "Latitude":
+                lon = table_cell.next_sibling.get_text()
 
-    if not (lat and lon):
-        _logger.warning("Cannot find summit coordinates on details page of %s", peak_name)
-        position = UNDEFINED_GEOPOSITION
-    else:
-        try:
-            position = GeoPosition.from_decimal_degree(latitude=float(lat), longitude=float(lon))
-        except Exception as e:
-            raise DataProcessingError(
-                f"The extracted coordinate values are invalid: ({lat}, {lon})"
-            ) from e
+        if not (lat and lon):
+            _logger.warning("Cannot find summit coordinates on details page of %s", peak_name)
+            position = UNDEFINED_GEOPOSITION
+        else:
+            try:
+                position = GeoPosition.from_decimal_degree(
+                    latitude=float(lat), longitude=float(lon)
+                )
+            except Exception as e:
+                raise DataProcessingError(
+                    f"The extracted coordinate values are invalid: ({lat}, {lon})"
+                ) from e
 
     # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
     # 'unspecified'. Also, the position values are known to be quite inaccurate, that's why we use
