@@ -729,10 +729,12 @@ QREQ-15 | 4 | Transferability | It shall be easily possible to add a new destina
 
 |  English             |  German                   |
 |----------------------|---------------------------|
+| Area                 | (Kletter-)Gebiet          |
 | Technical grade      | Schwierigskeitsgrad       |
 | Adjectival grade     | Ernsthaftigkeitsbewertung |
 | Journal              | Logbuch / Fahrtenbuch     |
 | Climbing ban         | Gipfelsperrung            |
 | Climbing regulations | Kletterregeln             |
 | (Climbing) Route     | Kletterweg                |
+| Sector               | Teilgebiet                |
 | Summit               | Gipfel                    |
