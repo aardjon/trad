@@ -23,9 +23,6 @@ _logger = getLogger(__name__)
 class TeufelsturmDataFilter(SourceFilter):
     """
     Filter for importing data from https://www.teufelsturm.de into the pipe.
-
-    This filter imports Summit, Route and Posting data, but doesn't overwrite them if already
-    available.
     """
 
     _BASE_URL: Final = "https://www.teufelsturm.de/"
