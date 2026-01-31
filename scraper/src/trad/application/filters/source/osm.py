@@ -334,7 +334,7 @@ class OsmApiReceiver:
     """
     Represents an endpoint for querying the OpenStreetMap API. Responsible for choosing the correct
     API for the requested usecase, for providing/creating all necessary options, query strings etc.
-    and vor parsing/validating the reponses. All methods of this class return Pydantic model objects
+    and for parsing/validating the reponses. All methods of this class return Pydantic model objects
     (derived from _ReadOnlyPydanticModel), never plain JSON strings.
     """
 
