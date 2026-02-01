@@ -3,6 +3,7 @@ Provides the functionality of merging different data objects (e.g. from differen
 actually describe the same physical entity into a single one.
 """
 
+import string
 from abc import ABC, abstractmethod
 from contextlib import suppress
 from dataclasses import dataclass
@@ -42,15 +43,16 @@ class MergeFilter(Filter):
 
     @override
     def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
-        merger = _SummitMerger(self._merged_summit_data)
+        summit_merger = _SummitMerger(self._merged_summit_data)
         for summit_id, summit in input_pipe.iter_summits():
             full_summit_data = _SummitRelatedData(summit=summit, routes=[])
+            route_merger = _RouteMerger(full_summit_data.routes)
             for route_id, route in input_pipe.iter_routes_of_summit(summit_id):
                 full_route_data = _RouteRelatedData(route=route, posts=[])
                 for post in input_pipe.iter_posts_of_route(route_id):
                     full_route_data.posts.append(post)
-                full_summit_data.routes.append(full_route_data)
-            merger.merge_entity(full_summit_data)
+                route_merger.merge_entity(full_route_data)
+            summit_merger.merge_entity(full_summit_data)
 
         self._write_merged_data(output_pipe)
 
@@ -122,7 +124,7 @@ class _EntityMerger[Entity: (_SummitRelatedData, _RouteRelatedData)](ABC):
         """
         Merges the given `new_entity` into the target entities list. Due to that, the list may:
         - increase, if the entity is new and therefore just added
-        - keep it length, if the entity is merged into an existing one
+        - keep its length, if the entity is merged into an existing one
         - shrink, if the new entity reveals that several existing ones must be merged
 
         However, the target list will never be empty after calling this method.
@@ -145,7 +147,7 @@ class _EntityMerger[Entity: (_SummitRelatedData, _RouteRelatedData)](ABC):
                 self.__target_entities.remove(merge_object)
 
         # Make sure that the target object is contained in self._summits list, because it may have
-        # been the first of its kind (without any merging happening)
+        # been the first of its kind (without any merging happening at all)
         if target_object not in self.__target_entities:
             self.__target_entities.append(target_object)
 
@@ -160,7 +162,7 @@ class _EntityMerger[Entity: (_SummitRelatedData, _RouteRelatedData)](ABC):
     def _merge_objects(self, target_entity: Entity, source_entity: Entity) -> None:
         """
         Merges the `source_entity` into `target_entity` by enriching its data. The target entity is
-        modifed (unless their data is already equal). Raises MergeConflictError if merging is not
+        modified (unless their data is already equal). Raises MergeConflictError if merging is not
         possible.
         """
 
@@ -294,7 +296,43 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
 
     @override
     def _is_same(self, existing_entity: _RouteRelatedData, new_entity: _RouteRelatedData) -> bool:
-        return existing_entity.route.route_name == new_entity.route.route_name
+        existing_route = existing_entity.route
+        new_route = new_entity.route
+        return self.__normalize_name(existing_route.route_name) == self.__normalize_name(
+            new_route.route_name
+        ) and (
+            existing_route.grade_af == new_route.grade_af
+            or existing_route.conflict_rank != new_route.conflict_rank
+        )
+
+    def __normalize_name(self, object_name: str) -> str:
+        """Does the actual name normalization."""
+        normalized_name = object_name
+        # Replace some common abbreviations
+        # Note: The order is important (don't replace "O-" only for "NO-")!
+        for abbr, full in (
+            ("AW", "Alter Weg"),
+            ("NO-", "Nordost"),
+            ("NW-", "Nordwest"),
+            ("SO-", "Südost"),
+            ("SW-", "Südwest"),
+            ("N-", "Nord"),
+            ("S-", "Süd"),
+            ("O-", "Ost"),
+            ("W-", "West"),
+        ):
+            normalized_name = normalized_name.replace(abbr, full)
+
+        # Lower-case the whole string
+        normalized_name = normalized_name.lower()
+        # Remove non-ASCII characters
+        normalized_name = "".join(c for c in normalized_name if c in string.printable)
+        # Replace punctuation characters with spaces
+        normalized_name = "".join(
+            c if c not in string.punctuation else " " for c in normalized_name
+        )
+        # Order the single segments alphabetically, and rejoin them with single underscores
+        return "_".join(sorted(normalized_name.split()))
 
     @override
     def _merge_objects(
@@ -331,8 +369,24 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
             target_route.grade_jump = source_route.grade_jump
             target_route.dangerous = source_route.dangerous
             target_route.star_count = source_route.star_count
-        elif source_grade not in (missing_grade, target_grade):
-            raise MergeConflictError("route", source_route.route_name, "grade")
+            target_route.conflict_rank = source_route.conflict_rank
+        elif source_grade == target_grade:
+            # Data is equal - use the better (lower) rank if they differ
+            target_route.conflict_rank = min(target_route.conflict_rank, source_route.conflict_rank)
+        elif source_grade != missing_grade:
+            # Take the data from the object with the lower rank. If this is the target, nothing must
+            # be done to just keep the data.
+            if source_route.conflict_rank < target_route.conflict_rank:
+                target_route.grade_af = source_route.grade_af
+                target_route.grade_ou = source_route.grade_ou
+                target_route.grade_rp = source_route.grade_rp
+                target_route.grade_jump = source_route.grade_jump
+                target_route.dangerous = source_route.dangerous
+                target_route.star_count = source_route.star_count
+                target_route.conflict_rank = source_route.conflict_rank
+            elif source_route.conflict_rank == target_route.conflict_rank:
+                # Conflicting data and same rank
+                raise MergeConflictError("route", source_route.route_name, "grade")
 
         # Add all posts from the source route to the target route
         target_entity.posts.extend(source_entity.posts)
