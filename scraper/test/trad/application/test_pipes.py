@@ -60,7 +60,7 @@ class TestCollectedData:
             summit_id = pipe.add_summit(Mock(Summit, name=f"Summit #{summit_idx}"))
 
             routes_of_summits[summit_id] = [
-                Route(f"Route #{route_number_base + i}", "I") for i in range(route_count)
+                Route(1, f"Route #{route_number_base + i}", "I") for i in range(route_count)
             ]
             for route in routes_of_summits[summit_id]:
                 pipe.add_route(summit_id, route)
@@ -120,7 +120,7 @@ class TestCollectedData:
         ("invalid_id_operation", "expected_error_message"),
         [
             (
-                lambda pipe: pipe.add_route(summit_id=1337, route=Route("Route 1", "V")),
+                lambda pipe: pipe.add_route(summit_id=1337, route=Route(1, "Route 1", "V")),
                 "Summit",
             ),
             (

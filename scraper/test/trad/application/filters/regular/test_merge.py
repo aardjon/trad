@@ -244,9 +244,10 @@ class TestMergeFilter:
         [
             pytest.param(
                 [
-                    [Route("AW", grade="")],
+                    [Route(1, "AW", grade="")],
                     [
                         Route(
+                            1,
                             "AW",
                             grade_af=9,
                             grade_ou=8,
@@ -260,6 +261,7 @@ class TestMergeFilter:
                 ],
                 [
                     Route(
+                        1,
                         "AW",
                         grade_af=9,
                         grade_ou=8,
@@ -276,6 +278,7 @@ class TestMergeFilter:
                 [
                     [
                         Route(
+                            1,
                             "AW",
                             grade_af=9,
                             grade_ou=8,
@@ -286,10 +289,11 @@ class TestMergeFilter:
                             grade="",
                         )
                     ],
-                    [Route("AW", grade="")],
+                    [Route(1, "AW", grade="")],
                 ],
                 [
                     Route(
+                        1,
                         "AW",
                         grade_af=9,
                         grade_ou=8,
@@ -306,15 +310,17 @@ class TestMergeFilter:
                 [
                     [
                         Route(
+                            1,
                             "AW",
                             star_count=2,
                             grade="",
                         )
                     ],
-                    [Route("AW", grade="")],
+                    [Route(1, "AW", grade="")],
                 ],
                 [
                     Route(
+                        1,
                         "AW",
                         star_count=2,
                         grade="",
@@ -326,15 +332,17 @@ class TestMergeFilter:
                 [
                     [
                         Route(
+                            1,
                             "AW",
                             dangerous=True,
                             grade="",
                         )
                     ],
-                    [Route("AW", grade="")],
+                    [Route(1, "AW", grade="")],
                 ],
                 [
                     Route(
+                        1,
                         "AW",
                         dangerous=True,
                         grade="",
@@ -346,6 +354,7 @@ class TestMergeFilter:
                 [
                     [
                         Route(
+                            1,
                             "AW",
                             grade_af=9,
                             grade_ou=8,
@@ -360,6 +369,7 @@ class TestMergeFilter:
                 * 2,
                 [
                     Route(
+                        1,
                         "AW",
                         grade_af=9,
                         grade_ou=8,
@@ -374,28 +384,30 @@ class TestMergeFilter:
             ),
             pytest.param(
                 [
-                    [Route("AW", grade="", star_count=1), Route("Talweg", grade="")],
-                    [Route("AW", grade=""), Route("SO-Rinne", grade="", star_count=2)],
+                    [Route(1, "AW", grade="", star_count=1), Route(1, "Talweg", grade="")],
+                    [Route(1, "AW", grade=""), Route(1, "SO-Rinne", grade="", star_count=2)],
                 ],
                 [
                     Route(
+                        1,
                         "AW",
                         star_count=1,
                         grade="",
                     ),
-                    Route("Talweg", grade=""),
-                    Route("SO-Rinne", grade="", star_count=2),
+                    Route(1, "Talweg", grade=""),
+                    Route(1, "SO-Rinne", grade="", star_count=2),
                 ],
                 id="Merge some of many routes",
             ),
             pytest.param(
                 [
-                    [Route("AW", grade="")],
-                    [Route("AW", grade="", star_count=1)],
-                    [Route("AW", grade="")],
+                    [Route(1, "AW", grade="")],
+                    [Route(1, "AW", grade="", star_count=1)],
+                    [Route(1, "AW", grade="")],
                 ],
                 [
                     Route(
+                        1,
                         "AW",
                         star_count=1,
                         grade="",
@@ -442,6 +454,7 @@ class TestMergeFilter:
     def test_merge_routes_different_summits(self) -> None:
         """Ensure that two routes with the same name on different summits are not merged."""
         route1 = Route(
+            1,
             "AW",
             grade_af=1,
             grade_ou=2,
@@ -452,6 +465,7 @@ class TestMergeFilter:
             grade="",
         )
         route2 = Route(
+            1,
             "AW",
             grade_af=9,
             grade_ou=8,
@@ -485,24 +499,24 @@ class TestMergeFilter:
         [
             pytest.param(
                 [
-                    Route("AW", grade_af=4, grade=""),
-                    Route("AW", grade_af=2, grade=""),
+                    Route(1, "AW", grade_af=4, grade=""),
+                    Route(1, "AW", grade_af=2, grade=""),
                 ],
                 MergeConflictError,
                 id="Conflicting af grade",
             ),
             pytest.param(
                 [
-                    Route("AW", grade_ou=4, grade=""),
-                    Route("AW", grade_rp=2, grade=""),
+                    Route(1, "AW", grade_ou=4, grade=""),
+                    Route(1, "AW", grade_rp=2, grade=""),
                 ],
                 MergeConflictError,
                 id="Conflicting ou/rp grade",
             ),
             pytest.param(
                 [
-                    Route("AW", star_count=2, grade=""),
-                    Route("AW", star_count=1, grade=""),
+                    Route(1, "AW", star_count=2, grade=""),
+                    Route(1, "AW", star_count=1, grade=""),
                 ],
                 MergeConflictError,
                 id="Conflicting star count",
@@ -580,7 +594,7 @@ class TestMergeFilter:
 
         for post in input_posts:
             summit_id = input_pipe.add_summit(Summit("Summit"))
-            route_id = input_pipe.add_route(summit_id, Route(route_name="Route", grade=""))
+            route_id = input_pipe.add_route(summit_id, Route(1, route_name="Route", grade=""))
             input_pipe.add_post(route_id, post)
 
         merge_filter = MergeFilter()

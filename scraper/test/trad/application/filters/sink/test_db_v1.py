@@ -69,6 +69,7 @@ class TestDbSchemaV1Filter:
         input_pipe.add_route(
             summit_id=summit_id,
             route=Route(
+                1,
                 route_name="Anxiety",
                 grade="VIIb",
                 grade_rp=8,
@@ -120,6 +121,7 @@ class TestDbSchemaV1Filter:
         route_id = input_pipe.add_route(
             summit_id=summit_id,
             route=Route(
+                1,
                 route_name="Anxiety",
                 grade="VIIb",
                 grade_rp=8,

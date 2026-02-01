@@ -69,7 +69,7 @@ def _compare_pipes(actual_pipe: Pipe, expected_pipe: Pipe) -> None:
 
 
 def _create_example_route(route_number: int) -> Route:
-    return Route(f"Route No. {route_number}", grade="III")
+    return Route(1, f"Route No. {route_number}", grade="III")
 
 
 def _create_example_post(post_number: int) -> Post:

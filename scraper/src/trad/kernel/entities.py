@@ -337,6 +337,17 @@ class Route:
     rating and without an upper bound. Each step in the corresponding scale system increases the
     value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
     0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
+
+    Routes come with a `conflict_rank` for determining which data to use in case of several
+    conflicting values. This is a positive integer with 1 being the most important rank. If two
+    Route objects describe the same route but differ in their grades, the data with the lower 'rank'
+    value will be used.
+    """
+
+    conflict_rank: int
+    """
+    Priority value for determining which route data to choose in case of conflicting values (from
+    different data sources). 1 is the most important rank.
     """
 
     route_name: str

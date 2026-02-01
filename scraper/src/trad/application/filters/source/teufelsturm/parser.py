@@ -30,6 +30,9 @@ if TYPE_CHECKING:
 
 _logger = getLogger(__name__)
 
+_ROUTE_DATA_RANK: Final = 2
+"""Priority/Accuracy of the route data retrieved from teufelsturm in case of conflicts."""
+
 
 @dataclass
 class PageData:
@@ -132,6 +135,7 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     return PageData(
         peak=peak,
         route=Route(
+            _ROUTE_DATA_RANK,
             route_name=route,
             grade=grade_label,
             grade_af=parsed_grade.af,

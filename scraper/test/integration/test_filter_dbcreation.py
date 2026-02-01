@@ -33,7 +33,10 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
 
     input_pipe = CollectedData()
     summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm"))
-    route_id = input_pipe.add_route(summit_id=summit_id, route=Route(route_name="AW", grade="II"))
+    route_id = input_pipe.add_route(
+        summit_id=summit_id,
+        route=Route(conflict_rank=1, route_name="AW", grade="II"),
+    )
     input_pipe.add_post(
         route_id=route_id,
         post=Post(
