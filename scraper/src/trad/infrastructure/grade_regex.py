@@ -78,7 +78,6 @@ class RegexBasedParser(GradeParser):
 
     def _get_af_grade(self, re_match: Match[str]) -> int:
         af = re_match.group("af1") or re_match.group("af2")
-
         return self._convert_saxon_grade(af)
 
     def _convert_saxon_grade(self, grade: str | None) -> int:
@@ -109,7 +108,10 @@ class RegexBasedParser(GradeParser):
             "XIIb": 23,
             "XIIc": 24,
         }
-        return grade_string_map[grade]
+        grade_number = grade_string_map.get(grade)
+        if grade_number is None:
+            raise ValueParseError("single climbing grade", str(grade))
+        return grade_number
 
     def _convert_jump_grade(self, grade: str | None) -> int:
         grade_string_map: Final = {
@@ -121,4 +123,7 @@ class RegexBasedParser(GradeParser):
             "5": 5,
             "6": 6,
         }
-        return grade_string_map[grade]
+        grade_number = grade_string_map.get(grade)
+        if grade_number is None:
+            raise ValueParseError("single jump grade", str(grade))
+        return grade_number
