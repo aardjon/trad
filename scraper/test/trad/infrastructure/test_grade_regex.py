@@ -35,6 +35,9 @@ all_grades: Final = [
     "XIIa",
     "XIIb",
     "XIIc",
+    "XIIIa",
+    "XIIIb",
+    "XIIIc",
 ]
 
 
@@ -103,7 +106,7 @@ def test_parse_saxon_grade_happy_paths(
         "7",
         "8",
         "9",
-        "XIIIa",
+        "XIVa",
     ],
 )
 def test_parse_saxon_grade_errors(grade_label: str) -> None:

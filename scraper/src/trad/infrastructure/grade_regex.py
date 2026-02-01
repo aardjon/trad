@@ -107,6 +107,9 @@ class RegexBasedParser(GradeParser):
             "XIIa": 22,
             "XIIb": 23,
             "XIIc": 24,
+            "XIIIa": 25,
+            "XIIIb": 26,
+            "XIIIc": 27,
         }
         grade_number = grade_string_map.get(grade)
         if grade_number is None:
