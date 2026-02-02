@@ -190,7 +190,7 @@ def _fix_erroneous_name(summit_name: str) -> str:
 def _ignore_wrong_position(peak_name: str) -> bool:
     """
     Checks if the peak with the given `peak_name` is known to have a wrong position on teufelsturm
-    which must therefore be ignored. Returns False if teh position value is okay and shall be used,
+    which must therefore be ignored. Returns False if the position value is okay and shall be used,
     or True if it must be ignored.
     """
     known_wrong_positions: Final = [
