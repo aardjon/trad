@@ -169,7 +169,14 @@ void main() {
     /// data to the actual UI implementation: Page (sub) title and data ID must be set correctly.
     test('showRouteDetails()', () {
       ApplicationWidePresenter presenter = ApplicationWidePresenter();
-      Route selectedRoute = Route(42, 'Via Exempli', 'V', 2.4);
+      Route selectedRoute = Route(
+        id: 42,
+        routeName: 'Via Exempli',
+        grade: Difficulty(af: 5),
+        stars: 0,
+        dangerous: false,
+        routeRating: 2.4,
+      );
       presenter.showRouteDetails(selectedRoute);
 
       Matcher routeModelMatcher = isA<RouteDetailsModel>()
@@ -178,10 +185,102 @@ void main() {
           .having(
             (RouteDetailsModel m) => m.pageSubTitle,
             'pageSubTitle',
-            selectedRoute.routeGrade,
+            'V',
           );
       verify(() => fakeUi.showRouteDetails(any(that: routeModelMatcher))).called(1);
     });
+  });
+
+  /// Ensure the correct grade labels are created for given input data.
+  group('SaxonGradeLabelCreator', () {
+    SaxonGradeLabelCreator creator = SaxonGradeLabelCreator();
+
+    const Map<int, String> gradeLabels = <int, String>{
+      1: 'I',
+      2: 'II',
+      3: 'III',
+      4: 'IV',
+      5: 'V',
+      6: 'VI',
+      7: 'VIIa',
+      8: 'VIIb',
+      9: 'VIIc',
+      10: 'VIIIa',
+      11: 'VIIIb',
+      12: 'VIIIc',
+      13: 'IXa',
+      14: 'IXb',
+      15: 'IXc',
+      16: 'Xa',
+      17: 'Xb',
+      18: 'Xc',
+      19: 'XIa',
+      20: 'XIb',
+      21: 'XIc',
+      22: 'XIIa',
+      23: 'XIIb',
+      24: 'XIIc',
+      25: 'XIIIa',
+      26: 'XIIIb',
+      27: 'XIIIc',
+      28: 'XIVa',
+      29: 'XIVb',
+      30: 'XIVc',
+    };
+
+    // All jump grades
+    List<(Difficulty, int, bool, String)> testParams = <(Difficulty, int, bool, String)>[];
+    for (int i = 1; i < 8; i++) {
+      testParams.add((Difficulty(jump: i), 0, false, '$i'));
+    }
+    // All climbing grades
+    for (int i = 1; i <= gradeLabels.length; i++) {
+      testParams.add((Difficulty(af: i), 0, false, gradeLabels[i]!));
+    }
+    for (int i = 1; i <= gradeLabels.length; i++) {
+      final String expectedLabel = gradeLabels[i]!;
+      testParams.add((Difficulty(ou: i), 0, false, '($expectedLabel)'));
+    }
+    for (int i = 1; i <= gradeLabels.length; i++) {
+      final String expectedLabel = gradeLabels[i]!;
+      testParams.add((Difficulty(ou: i), 0, false, '($expectedLabel)'));
+    }
+    // Stars and danger marks
+    testParams.addAll(<(Difficulty, int, bool, String)>[
+      (Difficulty(af: 7), 2, false, '** VIIa'),
+      (Difficulty(af: 5), 1, false, '* V'),
+      (Difficulty(af: 6), 0, true, '! VI'),
+      (Difficulty(af: 13), 1, true, '! * IXa'),
+      (Difficulty(af: 8), 2, true, '! ** VIIb'),
+    ]);
+    // Some Combinations
+    testParams.addAll(<(Difficulty, int, bool, String)>[
+      (Difficulty(af: 7, ou: 9), 0, false, 'VIIa (VIIc)'),
+      (Difficulty(af: 5, rp: 6), 0, false, 'V RP VI'),
+      (Difficulty(jump: 2, af: 3), 0, false, '2/III'),
+      (Difficulty(af: 10, ou: 11, rp: 9), 0, false, 'VIIIa (VIIIb) RP VIIc'),
+      (Difficulty(af: 3, ou: 5, rp: 4), 0, false, 'III (V) RP IV'),
+      (Difficulty(jump: 1, af: 4, ou: 5, rp: 3), 0, false, '1/IV (V) RP III'),
+      (Difficulty(jump: 3, af: 8, ou: 10, rp: 9), 0, false, '3/VIIb (VIIIa) RP VIIc'),
+      (Difficulty(af: 5, ou: 7, rp: 4), 1, true, '! * V (VIIa) RP IV'),
+    ]);
+
+    for (final (Difficulty, int, bool, String) params in testParams) {
+      Difficulty grade = params.$1;
+      int stars = params.$2;
+      bool danger = params.$3;
+      String expectedLabel = params.$4;
+      test('Combination: $grade', () {
+        Route route = Route(
+          id: 42,
+          routeName: 'Example Route',
+          grade: grade,
+          stars: stars,
+          dangerous: danger,
+        );
+        expect(creator.createGradeLabel(route), expectedLabel);
+      });
+    }
   });
 
   /// Ensure the correct behaviour of the showSettings() method, i.e. send the expected static data
