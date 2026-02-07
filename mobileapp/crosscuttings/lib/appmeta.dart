@@ -11,7 +11,7 @@ const String applicationName = 'trad';
 /// in the last tag.
 /// When incrementing this version number, please also change the 'version:' key in the global
 /// pubspec.yaml file (both values must always be equal)!
-const String applicationVersion = '0.2.0';
+const String applicationVersion = '0.2.1';
 
 /// The label of the current major version, as displayed to the user.
 const String majorVersionName = '[NONE]';
