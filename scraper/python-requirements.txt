@@ -2,4 +2,5 @@
 # required by the Scraper but only for managing the build/dev environment.
 # This file is NOT managed by pip-tools and can thus be edited manually.
 
+pip<26
 pip-tools>=7.5.2
