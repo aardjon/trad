@@ -4,6 +4,12 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Version 0.2.1 - 2026-02-07
+
+### Fixed Bugs:
+ - Mobile app sometimes displays wrong or strange grades
+
+
 ## Version 0.2.0 - 2026-01-24
 
 ### New/Improved Features:

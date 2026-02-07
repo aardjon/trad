@@ -31,6 +31,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
   /// Mapper for getting the icon definitions describing certain ratings.
   static const RatingIconFactory _ratingMapper = RatingIconFactory();
 
+  /// Creator for converting difficulty grades into display strings.
+  final SaxonGradeLabelCreator _labelCreator = SaxonGradeLabelCreator();
+
   @override
   void initUserInterface() {
     const String appName = 'Sandsteinklettern in Sachsen';
@@ -113,7 +116,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
       routeItems.add(
         ListViewItem(
           route.routeName,
-          subTitle: route.routeGrade,
+          subTitle: _labelCreator.createGradeLabel(route),
           endIcon: route.routeRating != null
               ? _ratingMapper.getDoubleRatingIcon(route.routeRating!)
               : null,
@@ -156,7 +159,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
     RouteDetailsModel model = RouteDetailsModel(
       selectedRoute.id,
       selectedRoute.routeName,
-      selectedRoute.routeGrade,
+      _labelCreator.createGradeLabel(selectedRoute),
     );
     ui.showRouteDetails(model);
   }
@@ -226,5 +229,69 @@ class ApplicationWidePresenter implements PresentationBoundary {
     );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.showSettings(settingsModel);
+  }
+}
+
+/// Creates difficulty labels ("grade labels") for routes. Separated from the Presenter to simplify
+/// testing, and to allow easier future extension in case we ever need other grade systems.
+class SaxonGradeLabelCreator {
+  /// Return a string describing the difficulty rating for the given [route].
+  String createGradeLabel(Route route) {
+    Difficulty difficulty = route.grade;
+
+    List<String> labels = <String>[];
+
+    if (route.dangerous) {
+      labels.add('!');
+    }
+    if (route.stars > 0) {
+      labels.add('*' * route.stars);
+    }
+
+    if (difficulty.jump > Difficulty.noGrade && difficulty.af > Difficulty.noGrade) {
+      labels.add('${_jumpGradeToString(difficulty.jump)}/${_climbingGradeToString(difficulty.af)}');
+    } else if (difficulty.jump > Difficulty.noGrade) {
+      labels.add(_jumpGradeToString(difficulty.jump));
+    } else if (difficulty.af > Difficulty.noGrade) {
+      labels.add(_climbingGradeToString(difficulty.af));
+    }
+
+    if (route.grade.ou > Difficulty.noGrade) {
+      labels.add('(${_climbingGradeToString(route.grade.ou)})');
+    }
+    if (route.grade.rp > Difficulty.noGrade) {
+      labels.add('RP ${_climbingGradeToString(route.grade.rp)}');
+    }
+
+    return labels.join(' ');
+  }
+
+  String _jumpGradeToString(int grade) {
+    // Only meant to be used for valid grades, i.e. positive, non-null, <10
+    return '$grade';
+  }
+
+  String _climbingGradeToString(int grade) {
+    if (grade == Difficulty.noGrade) {
+      throw ArgumentError('Cannot create a string for "no grade" value');
+    }
+    if (grade < 7) {
+      const List<String> romanNumbers = <String>['I', 'II', 'III', 'IV', 'V', 'VI'];
+      return romanNumbers[grade - 1];
+    }
+    const List<String> romanNumbers = <String>[
+      'VII',
+      'VIII',
+      'IX',
+      'X',
+      'XI',
+      'XII',
+      'XIII',
+      'XIV',
+    ];
+    const List<String> subGrades = <String>['a', 'b', 'c'];
+    String major = romanNumbers[((grade - 7) ~/ 3)];
+    String minor = subGrades[(grade - 1) % 3];
+    return '$major$minor';
   }
 }

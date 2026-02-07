@@ -249,7 +249,12 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       <String>[
         RoutesTable.columnId,
         RoutesTable.columnRouteName,
-        RoutesTable.columnRouteGrade,
+        RoutesTable.columnGradeAf,
+        RoutesTable.columnGradeOu,
+        RoutesTable.columnGradeRp,
+        RoutesTable.columnGradeJump,
+        RoutesTable.columnDanger,
+        RoutesTable.columnStars,
         "AVG(${PostsTable.columnRating}) AS '$averageRatingColumnName'",
       ],
     );
@@ -257,7 +262,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     query.groupByColumns = <String>[
       RoutesTable.columnId,
       RoutesTable.columnRouteName,
-      RoutesTable.columnRouteGrade,
+      RoutesTable.columnGradeAf,
     ];
     query.orderByColumns = orderByColumns;
 
@@ -267,12 +272,26 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     // Convert and return the result data
     List<Route> routes = <Route>[];
     for (final ResultRow dataRow in resultSet) {
-      int routeId = dataRow.getIntValue(RoutesTable.columnId);
-      String name = dataRow.getStringValue(RoutesTable.columnRouteName);
-      String grade = dataRow.getStringValue(RoutesTable.columnRouteGrade);
+      Difficulty grade = Difficulty(
+        af: dataRow.getIntValue(RoutesTable.columnGradeAf),
+        ou: dataRow.getIntValue(RoutesTable.columnGradeOu),
+        rp: dataRow.getIntValue(RoutesTable.columnGradeRp),
+        jump: dataRow.getIntValue(RoutesTable.columnGradeJump),
+      );
+
       // The returned 'rating' is null for routes with no posts at all
       double? rating = dataRow.getOptDoubleValue(averageRatingColumnName);
-      routes.add(Route(routeId, name, grade, rating));
+
+      routes.add(
+        Route(
+          id: dataRow.getIntValue(RoutesTable.columnId),
+          routeName: dataRow.getStringValue(RoutesTable.columnRouteName),
+          grade: grade,
+          stars: dataRow.getIntValue(RoutesTable.columnStars),
+          dangerous: dataRow.getIntValue(RoutesTable.columnDanger) != 0,
+          routeRating: rating,
+        ),
+      );
     }
     return routes;
   }
@@ -282,16 +301,29 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     Query query = Query.table(RoutesTable.tableName, <String>[
       RoutesTable.columnId,
       RoutesTable.columnRouteName,
-      RoutesTable.columnRouteGrade,
+      RoutesTable.columnGradeJump,
+      RoutesTable.columnGradeAf,
+      RoutesTable.columnGradeOu,
+      RoutesTable.columnGradeRp,
+      RoutesTable.columnStars,
+      RoutesTable.columnDanger,
     ]);
     query.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
 
     List<ResultRow> resultSet = await _repository.executeQuery(query);
 
-    int id = resultSet[0].getIntValue(RoutesTable.columnId);
-    String name = resultSet[0].getStringValue(RoutesTable.columnRouteName);
-    String grade = resultSet[0].getStringValue(RoutesTable.columnRouteGrade);
-    return Route(id, name, grade, 0);
+    return Route(
+      id: resultSet[0].getIntValue(RoutesTable.columnId),
+      routeName: resultSet[0].getStringValue(RoutesTable.columnRouteName),
+      grade: Difficulty(
+        af: resultSet[0].getIntValue(RoutesTable.columnGradeAf),
+        ou: resultSet[0].getIntValue(RoutesTable.columnGradeOu),
+        rp: resultSet[0].getIntValue(RoutesTable.columnGradeRp),
+        jump: resultSet[0].getIntValue(RoutesTable.columnGradeJump),
+      ),
+      dangerous: resultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
+      stars: resultSet[0].getIntValue(RoutesTable.columnStars),
+    );
   }
 
   @override

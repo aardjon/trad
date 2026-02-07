@@ -186,22 +186,6 @@ class ResultRow {
     return _getValue(columnName) as String?;
   }
 
-  /// Returns the value of the requested boolean column [columnName].
-  ///
-  /// If the requested column doesn't exist in the result row or is of a different type, an
-  /// [ArgumentError] is thrown (because this is usually a programming error).
-  bool getBoolValue(String columnName) {
-    return _getValue(columnName)! as bool;
-  }
-
-  /// Returns the value of the requested nullable boolean column [columnName].
-  ///
-  /// If the requested column doesn't exist in the result row or is of a different type, an
-  /// [ArgumentError] is thrown (because this is usually a programming error).
-  bool? getOptBoolValue(String columnName) {
-    return _getValue(columnName) as bool?;
-  }
-
   /// Initializes a new result row from raw data.
   ResultRow(this._resultData);
 

@@ -520,9 +520,9 @@ void main() {
     const RoutesFilterMode sortCriterion = RoutesFilterMode.grade;
     final Summit summit = Summit(42, 'Teufelsturm');
     final List<Route> routeList = <Route>[
-      Route(1, 'Route A', 'III', 1),
-      Route(2, 'Route B', 'II', 2),
-      Route(3, 'Route C', 'I', 3),
+      Route(id: 1, routeName: 'Route A', grade: Difficulty(af: 3), routeRating: 1),
+      Route(id: 2, routeName: 'Route B', grade: Difficulty(af: 2), routeRating: 2),
+      Route(id: 3, routeName: 'Route C', grade: Difficulty(af: 1), routeRating: 3),
     ];
 
     /// Ensures the correct behaviour of the showRouteListPage() method:
@@ -596,7 +596,12 @@ void main() {
     });
 
     const PostsFilterMode sortCriterion = PostsFilterMode.oldestFirst;
-    final Route route = Route(1337, 'Wanderweg', 'II', 1);
+    final Route route = Route(
+      id: 1337,
+      routeName: 'Wanderweg',
+      grade: Difficulty(af: 2),
+      routeRating: 1,
+    );
     final List<Post> postList = <Post>[
       Post('User 1', DateTime(2020), 'First Comment', 1),
       Post('User 2', DateTime(2021), 'Second Comment', 2),
