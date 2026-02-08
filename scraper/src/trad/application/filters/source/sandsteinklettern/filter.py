@@ -7,7 +7,6 @@ from typing import Final, override
 
 import pytz
 
-from trad.application.boundaries.grade_parser import GradeParser, SaxonGrade
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters._base import SourceFilter
 from trad.application.filters.source.sandsteinklettern.api import (
@@ -21,6 +20,8 @@ from trad.application.filters.source.sandsteinklettern.api import (
     JsonWegStatus,
     SandsteinkletternApiReceiver,
 )
+from trad.application.grades import GradeParser, SaxonGrade
+from trad.application.grades.regex import RegexBasedParser
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import DataProcessingError, ValueParseError
@@ -93,14 +94,14 @@ class SandsteinkletternDataFilter(SourceFilter):
     _timezone_berlin: Final = pytz.timezone("Europe/Berlin")
     """ Time zone from which all naive dates on the external system are assumed to be."""
 
-    def __init__(self, network_boundary: HttpNetworkingBoundary, grade_parser: GradeParser) -> None:
+    def __init__(self, network_boundary: HttpNetworkingBoundary) -> None:
         """
         Create a new SandsteinkletternDataFilter instance that retrieves data via the given
         [network_boundary].
         """
         super().__init__()
         self._api_receiver = SandsteinkletternApiReceiver(http_boundary=network_boundary)
-        self._grade_parser = grade_parser
+        self._grade_parser: GradeParser = RegexBasedParser()
 
         self._summit_id_map = _ExternalToPipeIdMap[SummitInstanceId]()
         self._route_id_map = _ExternalToPipeIdMap[RouteInstanceId]()

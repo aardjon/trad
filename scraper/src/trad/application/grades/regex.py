@@ -8,7 +8,7 @@ import re
 from re import Match
 from typing import Final, override
 
-from trad.application.boundaries.grade_parser import GradeParser, SaxonGrade
+from trad.application.grades import GradeParser, SaxonGrade
 from trad.kernel.errors import ValueParseError
 
 

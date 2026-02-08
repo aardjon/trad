@@ -19,7 +19,7 @@ from trad.application.filters.source.teufelsturm.parser import (
     parse_route_list,
     parse_user_name,
 )
-from trad.infrastructure.grade_regex import RegexBasedParser
+from trad.application.grades.regex import RegexBasedParser
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post
 
 posts_test_dict: Final = {

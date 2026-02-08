@@ -18,7 +18,7 @@ import pytz
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from trad.application.boundaries.grade_parser import GradeParser
+from trad.application.grades import GradeParser
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
 from trad.kernel.errors import DataProcessingError
 

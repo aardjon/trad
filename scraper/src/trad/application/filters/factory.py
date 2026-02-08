@@ -6,7 +6,6 @@ from collections.abc import Callable, Iterator
 from typing import Final, override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
-from trad.application.boundaries.grade_parser import GradeParser
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.regular.validation import DataValidationFilter
@@ -35,12 +34,10 @@ class AllFiltersFactory(FilterFactory):
                 dependency_provider.provide(HttpNetworkingBoundary)
             ),
             TeufelsturmDataFilter: lambda: TeufelsturmDataFilter(
-                dependency_provider.provide(HttpNetworkingBoundary),
-                dependency_provider.provide(GradeParser),
+                dependency_provider.provide(HttpNetworkingBoundary)
             ),
             SandsteinkletternDataFilter: lambda: SandsteinkletternDataFilter(
-                dependency_provider.provide(HttpNetworkingBoundary),
-                dependency_provider.provide(GradeParser),
+                dependency_provider.provide(HttpNetworkingBoundary)
             ),
             MergeFilter: MergeFilter,
             DataValidationFilter: DataValidationFilter,

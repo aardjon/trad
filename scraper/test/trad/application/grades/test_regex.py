@@ -1,13 +1,13 @@
 """
-Unit test for the trad.infrastructure.grade_regex module
+Unit test for the trad.application.grades.regex module
 """
 
 from typing import Final
 
 import pytest
 
-from trad.application.boundaries.grade_parser import SaxonGrade
-from trad.infrastructure.grade_regex import RegexBasedParser
+from trad.application.grades import SaxonGrade
+from trad.application.grades.regex import RegexBasedParser
 from trad.kernel.errors import ValueParseError
 
 all_grades: Final = [
