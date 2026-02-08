@@ -353,7 +353,7 @@ class Route:
     route_name: str
     """ The name of the route. """
 
-    grade: str
+    grade: str = ""
     """ String representing the grade. Deprecated, use the more fine-grained grade fields. """
 
     grade_af: int = NO_GRADE

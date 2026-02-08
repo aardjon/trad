@@ -71,7 +71,6 @@ class TestDbSchemaV1Filter:
             route=Route(
                 1,
                 route_name="Anxiety",
-                grade="VIIb",
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,
@@ -107,7 +106,7 @@ class TestDbSchemaV1Filter:
         )
         fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
-            query_parameters=["Mock Monument", "Anxiety", "VIIb", 10, 8, 9, 2, 1, True],
+            query_parameters=["Mock Monument", "Anxiety", "", 10, 8, 9, 2, 1, True],
         )
         self._check_database_finalization(fake_db_boundary)
 
@@ -123,7 +122,6 @@ class TestDbSchemaV1Filter:
             route=Route(
                 1,
                 route_name="Anxiety",
-                grade="VIIb",
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,

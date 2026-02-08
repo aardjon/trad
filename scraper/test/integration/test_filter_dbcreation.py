@@ -30,12 +30,13 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     expected_index_count: Final = (
         2  # 'summits' and 'routes' tables each have one user-defined index
     )
+    af_grade: Final = 2
 
     input_pipe = CollectedData()
     summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm"))
     route_id = input_pipe.add_route(
         summit_id=summit_id,
-        route=Route(conflict_rank=1, route_name="AW", grade="II"),
+        route=Route(conflict_rank=1, route_name="AW", grade_af=af_grade),
     )
     input_pipe.add_post(
         route_id=route_id,
@@ -61,10 +62,10 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     assert result_set[0][0] == "Falkenturm"
 
     # Ensure the route has been added
-    result_set = list(connection.execute("SELECT route_name, route_grade FROM routes"))
+    result_set = list(connection.execute("SELECT route_name, grade_af FROM routes"))
     assert len(result_set) == 1
     assert result_set[0][0] == "AW"
-    assert result_set[0][1] == "II"
+    assert result_set[0][1] == af_grade
 
     # Ensure the post has been added
     result_set = list(connection.execute("SELECT user_name, comment, post_date, rating FROM posts"))
