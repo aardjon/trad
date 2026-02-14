@@ -116,3 +116,20 @@ def test_parse_saxon_grade_errors(grade_label: str) -> None:
     parser = RegexBasedParser()
     with pytest.raises(ValueParseError):
         parser.parse_saxon_grade(grade_label)
+
+
+def test_reusability() -> None:
+    """
+    Ensures that Parser instances can be reused, i.e. reset their internal state for new labels.
+    """
+    parser = RegexBasedParser()
+
+    # First label has all parts set
+    assert parser.parse_saxon_grade("! * 3/V (VI) RP IV") == SaxonGrade(
+        jump=3, af=5, ou=6, rp=4, stars=1, danger=True
+    )
+
+    # Subsequent requests must also return the expected grade, even if they do not use the
+    # previously set parts.
+    assert parser.parse_saxon_grade("VIIa") == SaxonGrade(af=7)
+    assert parser.parse_saxon_grade("2") == SaxonGrade(jump=2)
