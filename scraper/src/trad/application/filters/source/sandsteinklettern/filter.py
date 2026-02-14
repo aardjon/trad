@@ -21,7 +21,7 @@ from trad.application.filters.source.sandsteinklettern.api import (
     SandsteinkletternApiReceiver,
 )
 from trad.application.grades import GradeParser, SaxonGrade
-from trad.application.grades.regex import RegexBasedParser
+from trad.application.grades.fuzzy import FuzzyParser
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
 from trad.kernel.entities import GeoPosition, Post, Route, Summit
 from trad.kernel.errors import DataProcessingError, ValueParseError
@@ -101,7 +101,7 @@ class SandsteinkletternDataFilter(SourceFilter):
         """
         super().__init__()
         self._api_receiver = SandsteinkletternApiReceiver(http_boundary=network_boundary)
-        self._grade_parser: GradeParser = RegexBasedParser()
+        self._grade_parser: GradeParser = FuzzyParser()
 
         self._summit_id_map = _ExternalToPipeIdMap[SummitInstanceId]()
         self._route_id_map = _ExternalToPipeIdMap[RouteInstanceId]()
@@ -214,7 +214,13 @@ class SandsteinkletternDataFilter(SourceFilter):
                 self._route_id_map.ignore_external_id(json_route.weg_id)
 
     def _import_route(self, output_pipe: Pipe, json_route: JsonWeg) -> None:
-        parsed_grade = self._parse_grade(json_route.schwierigkeit)
+        try:
+            parsed_grade = self._parse_grade(json_route.schwierigkeit)
+        except ValueParseError as e:
+            _logger.warning(
+                "Failed parsing the grade of route %s due to: %s", json_route.weg_id, str(e)
+            )
+            parsed_grade = SaxonGrade()
 
         pipe_id = output_pipe.add_route(
             summit_id=self._summit_id_map.get_pipe_id(json_route.gipfelid),
@@ -238,6 +244,9 @@ class SandsteinkletternDataFilter(SourceFilter):
 
         if self._summit_id_map.is_ignored(json_route.gipfelid):
             # Ignore because the whole summit has been ignored
+            return True
+        if self._check_erroneous_route(json_route.weg_id):
+            # Ignore because this route is known to be somehow wrong in the source
             return True
         if json_route.wegstatus not in allowed_status_values:
             # Ignore, because the route is not an officially allowed one
@@ -268,32 +277,6 @@ class SandsteinkletternDataFilter(SourceFilter):
         Background: On sandsteinklettern, users can enter any string as route grade.
         """
         normalized_grade = grade_label.strip()
-
-        # If a ! is somewhere than at the start, put it to the beginning
-        if "!" in normalized_grade[1:]:
-            normalized_grade = normalized_grade.replace("!", "")
-            normalized_grade = "!" + normalized_grade
-
-        # Fix the case of all relevant characters
-        for oldchar, newchar in (
-            ("i", "I"),
-            ("v", "V"),
-            ("x", "X"),
-            ("C", "c"),
-            ("B", "b"),
-            ("A", "a"),
-        ):
-            normalized_grade = normalized_grade.replace(oldchar, newchar)
-
-        # Remove all unwanted characters
-        allowed_characters: Final = "XVIabc123456789()/RP!* "
-        chars = [c for c in normalized_grade if c in allowed_characters]
-        normalized_grade = "".join(chars)
-
-        # Log any changes and start the actual parsing process
-        if normalized_grade != grade_label.strip():
-            _logger.info("Fixed grade label '%s' to '%s'", grade_label, normalized_grade)
-
         return self._grade_parser.parse_saxon_grade(normalized_grade)
 
     def _import_posts_of_sector(
@@ -376,3 +359,17 @@ class SandsteinkletternDataFilter(SourceFilter):
             "Zwergfels": "Zwerg",
         }
         return known_name_errors.get(summit_name, summit_name)
+
+    @staticmethod
+    def _check_erroneous_route(external_route_id: ApiItemIdType) -> bool:
+        """
+        Return True if the route with the given external ID (aka "wegid") must be ignored, or False
+        if not (the normal case).
+
+        Background: Sandsteinklettern contains some "route" entries that to not correspond to actual
+        routes (for different reasons) and therefore shall be ignored.
+        """
+        routes_to_ignore: Final = {
+            "77482",  # Müllerstein, "***Sockelwege:" (it's actually a kind of section title)
+        }
+        return external_route_id in routes_to_ignore
