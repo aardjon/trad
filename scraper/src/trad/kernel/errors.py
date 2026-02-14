@@ -91,7 +91,7 @@ class ValueParseError(DataProcessingError):
 
     @override
     def __str__(self) -> str:
-        return f"Value '{self._invalid_value}' is not a valid {self._value_type})."
+        return f"Value '{self._invalid_value}' is not a valid {self._value_type}."
 
 
 class PipeDataError(Exception):
