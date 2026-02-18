@@ -1,0 +1,278 @@
+{
+  "areas": [
+    {
+      "gebiet_ID": "11",
+      "gebiet": "Zittauer_Gebirge",
+      "land": "Deutschland"
+    },
+    {
+      "gebiet_ID": "12",
+      "gebiet": "Sächsische Schweiz",
+      "land": "Deutschland"
+    },
+    {
+      "gebiet_ID": "13",
+      "gebiet": "Vogtland",
+      "land": "Deutschland"
+    }
+  ],
+  "sectors": [
+    {
+        "sektor_ID": "21",
+        "gebietid": "12",
+        "sektorname_d": "Bielatal"
+    },
+    {
+        "sektor_ID": "22",
+        "gebietid": "12",
+        "sektorname_d": "Schrammsteine"
+    },
+    {
+        "sektor_ID": "23",
+        "gebietid": "13",
+        "sektorname_d": "Steinicht"
+    },
+    {
+        "sektor_ID": "24",
+        "gebietid": "12",
+        "sektorname_d": "Affensteine"
+    }
+  ],
+  "summits": [
+    {
+        "sektorid": "21",
+        "gipfel_ID": "31",
+        "gipfelname_d": "Summit 1",
+        "gipfelname_cz": "",
+        "status": "",
+        "typ": "G",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    },
+    {
+        "sektorid": "21",
+        "gipfel_ID": "32",
+        "gipfelname_d": "Summit 2",
+        "gipfelname_cz": "",
+        "status": "",
+        "typ": "G",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    },
+    {
+        "sektorid": "21",
+        "gipfel_ID": "33",
+        "gipfelname_d": "Summit 3",
+        "gipfelname_cz": "",
+        "status": "",
+        "typ": "G",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    },
+    {
+        "sektorid": "22",
+        "gipfel_ID": "34",
+        "gipfelname_d": "Summit 4",
+        "gipfelname_cz": "",
+        "status": "",
+        "typ": "G",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    },
+    {
+        "sektorid": "22",
+        "gipfel_ID": "35",
+        "gipfelname_d": "Summit 5",
+        "gipfelname_cz": "Ignored Summit (because of its typ value)",
+        "status": "",
+        "typ": "UNKNOWN",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    },
+    {
+        "sektorid": "23",
+        "gipfel_ID": "36",
+        "gipfelname_d": "Summit 6",
+        "gipfelname_cz": "",
+        "status": "",
+        "typ": "G",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    },
+    {
+        "sektorid": "23",
+        "gipfel_ID": "37",
+        "gipfelname_d": "Summit 7",
+        "gipfelname_cz": "Ignored summit (its in an ignored sector)",
+        "status": "",
+        "typ": "G",
+        "vgrd": "14.1106220",
+        "ngrd": "50.9013408"
+    }
+  ],
+  "routes": [
+    {
+      "sektorid": "21",
+      "gipfelid": "31",
+      "weg_ID": "41",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Route 1",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    },
+    {
+      "sektorid": "21",
+      "gipfelid": "31",
+      "weg_ID": "42",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Route 2",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    },
+    {
+      "sektorid": "21",
+      "gipfelid": "31",
+      "weg_ID": "43",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Route 3",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    },
+    {
+      "sektorid": "21",
+      "gipfelid": "32",
+      "weg_ID": "44",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Route 4",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    },
+    {
+      "sektorid": "21",
+      "gipfelid": "32",
+      "weg_ID": "45",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Route 5",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    },
+    {
+      "sektorid": "22",
+      "gipfelid": "34",
+      "weg_ID": "46",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Route 6",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    },
+    {
+      "sektorid": "22",
+      "gipfelid": "34",
+      "weg_ID": "47",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Ignored route (because of the wegstatus value)",
+      "wegname_d": "Route 7",
+      "wegname_cz": "",
+      "wegstatus": "4"
+    },
+    {
+      "sektorid": "22",
+      "gipfelid": "35",
+      "weg_ID": "48",
+      "schwierigkeit": "I",
+      "wegbeschr_d": "Ignored route (because of ignored summit)",
+      "wegname_d": "Route 8",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    }
+  ],
+  "posts": [
+    {
+      "sektorid": "21",
+      "wegid": "41",
+      "komment_ID": "51",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 1"
+    },
+    {
+      "sektorid": "21",
+      "wegid": "41",
+      "komment_ID": "52",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 2"
+    },
+    {
+      "sektorid": "21",
+      "wegid": "43",
+      "komment_ID": "53",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 3"
+    },
+    {
+      "sektorid": "21",
+      "wegid": "44",
+      "komment_ID": "54",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 4"
+    },
+    {
+      "sektorid": "22",
+      "wegid": "46",
+      "komment_ID": "55",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 5"
+    },
+    {
+      "sektorid": "22",
+      "wegid": "46",
+      "komment_ID": "55",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 6"
+    },
+    {
+      "sektorid": "22",
+      "wegid": "46",
+      "komment_ID": "55",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Some other comment",
+      "username": "Author 7"
+    },
+    {
+      "sektorid": "22",
+      "wegid": "47",
+      "komment_ID": "56",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Ignored comment (because of ignored route)",
+      "username": "Author 8"
+    },
+    {
+      "sektorid": "22",
+      "wegid": "48",
+      "komment_ID": "57",
+      "datum": "2004-05-13 00:04:06",
+      "qual": "2",
+      "kommentar": "Ignored comment (because of ignored summit)",
+      "username": "Author 9"
+    }
+  ]
+}
