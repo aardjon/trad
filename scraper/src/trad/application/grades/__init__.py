@@ -1,5 +1,7 @@
 """
-Common interface for different difficulty grade parser implementations.
+Component for parsing climbing difficulty (grade) strings.
+
+This module defines a common interface for different grade parser implementations.
 """
 
 from abc import ABC, abstractmethod
