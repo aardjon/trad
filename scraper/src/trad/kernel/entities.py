@@ -131,6 +131,10 @@ class GeoPosition:
         lon_str = f"{abs(self.longitude_decimal_degree):.7f}".rstrip("0").rstrip(".")
         return f"{lat_str}°{hemisphere_lat} {lon_str}°{hemisphere_lon}"
 
+    @override
+    def __repr__(self) -> str:
+        return str(self)
+
 
 UNDEFINED_GEOPOSITION: Final = GeoPosition(0, 0)
 """
