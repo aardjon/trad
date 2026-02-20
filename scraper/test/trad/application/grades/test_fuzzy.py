@@ -2,88 +2,32 @@
 Unit test for the trad.application.grades.fuzzy module
 """
 
-from typing import Final
-
 import pytest
 
 from trad.application.grades import SaxonGrade
 from trad.application.grades.fuzzy import FuzzyParser
 from trad.kernel.errors import ValueParseError
 
-all_grades: Final = [
-    "I",
-    "II",
-    "III",
-    "IV",
-    "V",
-    "VI",
-    "VIIa",
-    "VIIb",
-    "VIIc",
-    "VIIIa",
-    "VIIIb",
-    "VIIIc",
-    "IXa",
-    "IXb",
-    "IXc",
-    "Xa",
-    "Xb",
-    "Xc",
-    "XIa",
-    "XIb",
-    "XIc",
-    "XIIa",
-    "XIIb",
-    "XIIc",
-    "XIIIa",
-    "XIIIb",
-    "XIIIc",
-]
+from . import common_grade_parse_expectations, ensure_parser_resuability
 
 
 @pytest.mark.parametrize(
     ("grade_label", "expected_grade"),
-    [  # Not grade at all
+    [
+        *common_grade_parse_expectations,
+        # No grade at all
         ("", SaxonGrade()),
-    ]
-    # All "af" grades
-    + [(s, SaxonGrade(af=i + 1)) for i, s in enumerate(all_grades)]
-    # All "ou" grades
-    + [(f"({s})", SaxonGrade(ou=i + 1)) for i, s in enumerate(all_grades)]
-    # All "rp" grades
-    + [(f"RP {s}", SaxonGrade(rp=i + 1)) for i, s in enumerate(all_grades)]
-    # All jump grades
-    + [(str(j), SaxonGrade(jump=j)) for j in range(1, 6 + 1)]
-    + [
         # Stars and danger marks (also in combination)
-        ("! I", SaxonGrade(danger=True, af=1)),
-        ("* II", SaxonGrade(stars=1, af=2)),
-        ("! * III", SaxonGrade(danger=True, stars=1, af=3)),
-        ("** IV", SaxonGrade(stars=2, af=4)),
-        ("! ** V", SaxonGrade(danger=True, stars=2, af=5)),
         ("II !", SaxonGrade(danger=True, af=2)),
         ("* VIIb !", SaxonGrade(danger=True, stars=1, af=8)),
-    ]
-    + [  # Some combinations and permutations
-        ("** IXa (IXb) RP IXc", SaxonGrade(stars=2, af=13, ou=14, rp=15)),
+        # Some combinations and permutations
         ("IXa RP IXc (IXb)", SaxonGrade(af=13, ou=14, rp=15)),
-        ("! * VIIIb (VIIIc) RP IXa", SaxonGrade(danger=True, stars=1, af=11, ou=12, rp=13)),
-        ("** IXa (IXb) RP IXc", SaxonGrade(stars=2, af=13, ou=14, rp=15)),
-        ("VI RP VIIa", SaxonGrade(af=6, rp=7)),
-        ("V (VI)", SaxonGrade(af=5, ou=6)),
-        ("(IXc) RP Xa", SaxonGrade(ou=15, rp=16)),
-        ("3/VI", SaxonGrade(af=6, jump=3)),
-        ("1/VI (VIIa)", SaxonGrade(af=6, ou=7, jump=1)),
-        ("2/IXb RP IXc", SaxonGrade(af=14, rp=15, jump=2)),
-        ("! * 2/VIIb", SaxonGrade(danger=True, stars=1, af=8, jump=2)),
-    ]
-    + [  # ou or rp grades with jump
+        # ou or rp grades with jump
         ("VI (3/II)", SaxonGrade(af=6, ou=2)),
         ("4/VIIb (5/III)", SaxonGrade(jump=4, af=8, ou=3)),
         ("VIIIa RP 2/VIIIb", SaxonGrade(af=10, rp=11)),
         ("3/VIIb RP 3/VIIc", SaxonGrade(jump=3, af=8, rp=9)),
-    ]
-    + [  # More or less whitespaces
+        # More or less whitespaces
         ("4  ", SaxonGrade(jump=4)),
         ("4/I  ", SaxonGrade(jump=4, af=1)),
         ("3 / IV", SaxonGrade(jump=3, af=4)),
@@ -93,8 +37,7 @@ all_grades: Final = [
         ("VII b", SaxonGrade(af=8)),
         ("VI  (VIIIa) !", SaxonGrade(danger=True, af=6, ou=10)),
         ("VIIc (VIIIa )", SaxonGrade(af=9, ou=10)),
-    ]
-    + [  # Typos/Mistakes (close to real worls)
+        # Typos/Mistakes (close to real worls)
         ("VIib", SaxonGrade(af=8)),
         ("VIib (ViIIa) RPvIiIc", SaxonGrade(af=8, ou=10, rp=12)),
         ("lXA (lXC) RP lXB", SaxonGrade(af=13, rp=14, ou=15)),
@@ -126,17 +69,13 @@ all_grades: Final = [
         ("13a", SaxonGrade(af=25)),
         ("13b", SaxonGrade(af=26)),
         ("13c", SaxonGrade(af=27)),
-    ]
-    + [  # Additional remarks or characters (real-world examples)
+        # Additional remarks or characters (real-world examples)
         ("IV ! anstr.", SaxonGrade(danger=True, af=4)),
         ("VI anstr.", SaxonGrade(af=6)),
         ("VIIc brüchig", SaxonGrade(af=9)),
         ("VI (original VIIIb)", SaxonGrade(af=6, ou=11)),
         ("VIIIc ?", SaxonGrade(af=12)),
         ("IXb, RP IXa", SaxonGrade(af=14, rp=13)),
-    ]
-    + [  # The longest possible climbing grade label (already stripped), just for fun :)
-        ("!**3/VIIIa(VIIIb)RPVIIIc", SaxonGrade(danger=True, stars=2, af=10, ou=11, rp=12, jump=3)),
     ],
 )
 def test_parse_saxon_grade_happy_paths(
@@ -194,14 +133,4 @@ def test_reusability() -> None:
     """
     Ensures that Parser instances can be reused, i.e. reset their internal state for new labels.
     """
-    parser = FuzzyParser()
-
-    # First label has all parts set
-    assert parser.parse_saxon_grade("* ! 3/V (VI) RP IV") == SaxonGrade(
-        jump=3, af=5, ou=6, rp=4, stars=1, danger=True
-    )
-
-    # Subsequent requests must also return the expected grade, even if they do not use the
-    # previously set parts.
-    assert parser.parse_saxon_grade("VIIa") == SaxonGrade(af=7)
-    assert parser.parse_saxon_grade("2") == SaxonGrade(jump=2)
+    ensure_parser_resuability(FuzzyParser())
