@@ -580,6 +580,10 @@ ignore = [
   "TC002",  # Move third-party import into a type-checking block
   "TC003",  # Move built-in import into a type-checking block
 
+  # Disabled because we don't want to enforce quoted type expressions when using cast(). Quoting
+  # should not be necessary anymore with Pyhton 3.14.
+  "TC006",  # Don't use unquoted type expressions in typing.cast() calls
+
   # We don't want to create issues for every single TODO.
   "TD003",  # TODO: this link has no issue
 
