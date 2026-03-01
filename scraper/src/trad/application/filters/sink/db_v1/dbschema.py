@@ -72,6 +72,68 @@ class DatabaseMetadataTable(TableSchema):
         return []
 
 
+class ExternalDataSourcesTable(TableSchema):
+    """
+    References to all external sources the data contained in this route DB was extracted from.
+    """
+
+    TABLE_NAME = "external_data_sources"
+    """ Name of the table. """
+
+    COLUMN_ID: Final = "id"
+    """
+    The name of the 'id' INTEGER column:
+    Unique ID of this data source.
+    """
+
+    COLUMN_LABEL: Final = "label"
+    """
+    The name of the 'label' TEXT column:
+    Display name of this data source.
+    """
+
+    COLUMN_URL: Final = "url"
+    """
+    The name of the 'url' TEXT column:
+    Landing page URL (not an API endpoint!) a user may visit by browser to get further
+    information about this data source.
+    """
+
+    COLUMN_ATTRIBUTION: Final = "attribution"
+    """
+    The name of the 'attribution' TEXT column:
+    Attribution string (e.g. author names) for the data from this source.
+    """
+
+    COLUMN_LICENSE: Final = "license"
+    """
+    The name of the 'license' TEXT column:
+    Short, human-readable name of the licence which applies to all data from this source.
+    Using an abbreviation or SPDX identifier (e.g. "CC-BY-4.0" or "ODbL") instead of a longer
+    licence name is preferred. May be NULL if the license is unknown or doesn't apply.
+    """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
+        CREATE TABLE external_data_sources (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "label" TEXT UNIQUE NOT NULL,
+            "url" TEXT NOT NULL,
+            "attribution" TEXT NOT NULL,
+            "license" TEXT
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[SqlStatement]:
+        return []
+
+
 class SummitNamesTable(TableSchema):
     """
     All names of all summits.
@@ -329,6 +391,12 @@ class PostsTable(TableSchema):
     ID of the route this post is assigned to. Foreign key to the routes table.
     """
 
+    COLUMN_SOURCE_ID: Final = "source_id"
+    """
+    The name of the 'source_id' INTEGER column:
+    ID of the external data source this post originates from.
+    """
+
     COLUMN_USER_NAME: Final = "user_name"
     """
     The name of the 'user_name' TEXT column:
@@ -365,11 +433,13 @@ class PostsTable(TableSchema):
         CREATE TABLE posts (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "route_id" INTEGER NOT NULL,
+            "source_id" INTEGER NOT NULL,
             "user_name" TEXT NOT NULL,
             "post_date" TEXT NOT NULL,
             "comment" TEXT NOT NULL,
             "rating" INTEGER NOT NULL,
-            FOREIGN KEY("route_id") REFERENCES "routes" ("id") ON DELETE CASCADE
+            FOREIGN KEY("route_id") REFERENCES "routes" ("id") ON DELETE CASCADE,
+            FOREIGN KEY("source_id") REFERENCES "external_data_sources" ("id") ON DELETE CASCADE
         );
         """)
 
@@ -388,11 +458,11 @@ class DatabaseSchema:
     Major schema version.
 
     To be incremented for incompatible schema changes, i.e. the mobile app needs to be adapted to
-    work with the new database. For example, the removal or renaming of column or tables.
+    work with the new database. For example, the removal or renaming of columns or tables.
     When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
     """
 
-    _MINOR_VERSION: Final = 0
+    _MINOR_VERSION: Final = 1
     """
     Minor schema version.
 
@@ -408,6 +478,7 @@ class DatabaseSchema:
         """
         return (
             DatabaseMetadataTable(),
+            ExternalDataSourcesTable(),
             SummitNamesTable(),
             SummitsTable(),
             RoutesTable(),

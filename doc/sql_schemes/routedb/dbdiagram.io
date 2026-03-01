@@ -7,7 +7,7 @@ Project RouteDb {
   '''
 
   // The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
-  schema_version: "1.0"
+  schema_version: "1.1"
 
   // Unique constraints that stretch over multiple columns are not supported by DBML yet
   // (https://github.com/holistics/dbml/issues/68). So we use this workaround instead: The property
@@ -58,6 +58,43 @@ Table database_metadata {
     note: '''
     Vendor identification label of the database provider.
     This is an arbitrary (even empty) display string to distinguish different database sources.
+    '''
+  ]
+}
+
+
+Table external_data_sources {
+  Note: '''
+  References to all external sources the data contained in this route DB was extracted from.
+  '''
+  
+  id integer [
+    primary key,
+    increment,
+    note: 'Unique ID of this data source.'
+  ]
+  label text [
+    not null,
+    unique,
+    note: 'Display name of this data source.'
+  ]
+  url text [
+    not null,
+    note: '''
+      Landing page URL (not an API endpoint!) a user may visit by browser to get further
+      information about this data source.
+    '''
+  ]
+  attribution text [
+    not null,
+    note: 'Attribution string (e.g. author names) for the data from this source.'
+  ]
+  license text [
+    null,
+    note: '''
+      Short, human-readable name of the licence which applies to all data from this source.
+      Using an abbreviation or SPDX identifier (e.g. "CC-BY-4.0" or "ODbL") instead of a longer
+      licence name is preferred. May be NULL if the license is unknown or doesn't apply.
     '''
   ]
 }
@@ -243,6 +280,11 @@ Table posts {
     not null,
     note: 'ID of the route this post is assigned to. Foreign key to the routes table.'
   ]
+  
+  source_id integer [
+    not null,
+    note: 'ID of the external data source this post originates from.'
+  ]
 
   user_name text [
     not null,
@@ -272,3 +314,5 @@ Table posts {
 }
 // Foreign key posts -> routes
 Ref: routes.id < posts.route_id [delete: cascade]
+// Foreign key posts -> external_data_sources
+Ref: external_data_sources.id < posts.source_id [delete: cascade]

@@ -107,7 +107,7 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
 
     # Check schema version
     assert result_set[0][0] == 1
-    assert result_set[0][1] == 0
+    assert result_set[0][1] == 1
 
     # Check vendor string
     assert result_set[0][3] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
