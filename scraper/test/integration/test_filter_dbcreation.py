@@ -45,6 +45,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
             comment="This is great!",
             post_date=post_date,
             rating=post_rating,
+            source_label="Unit Test",
         ),
     )
 

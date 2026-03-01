@@ -23,7 +23,7 @@ from trad.application.filters.source.sandsteinklettern.api import (
 from trad.application.grades import GradeParser, SaxonGrade
 from trad.application.grades.fuzzy import FuzzyParser
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
-from trad.kernel.entities import GeoPosition, Post, Route, Summit
+from trad.kernel.entities import ExternalSource, GeoPosition, Post, Route, Summit
 from trad.kernel.errors import DataProcessingError, ValueParseError
 
 _logger = getLogger(__name__)
@@ -87,6 +87,12 @@ class SandsteinkletternDataFilter(SourceFilter):
     into the route name. There always seems to be only one star at the most for now, but we still
     count them to set the correct number if this changes in the future.
     """
+
+    _EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
+        label="Sandsteinklettern",
+        url="http://sandsteinklettern.de",
+        attribution="Jörg Brutscher",
+    )
 
     _ROUTE_DATA_RANK: Final = 3
     """Priority/Accuracy of the route data retrieved from sandsteinklettern in case of conflicts."""
@@ -312,6 +318,7 @@ class SandsteinkletternDataFilter(SourceFilter):
                 post_date=self._timezone_berlin.localize(json_post.datum),
                 comment=json_post.kommentar,
                 rating=self._parse_route_rating(json_post),
+                source_label=self._EXTERNAL_SOURCE_DESCRIPTION.label,
             ),
         )
 

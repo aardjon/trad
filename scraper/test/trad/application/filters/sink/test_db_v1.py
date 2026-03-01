@@ -137,6 +137,7 @@ class TestDbSchemaV1Filter:
                 post_date=datetime.fromisoformat("2023-12-24T13:14:00+01:00"),
                 comment="This is a great test!",
                 rating=2,
+                source_label="Testing",
             ),
         )
 

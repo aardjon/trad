@@ -79,6 +79,7 @@ def _create_example_post(post_number: int) -> Post:
         comment=f"This is comment #{post_number}",
         rating=0,
         post_date=datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, 0, tzinfo=dt.tzinfo),
+        source_label="Unit Test",
     )
 
 

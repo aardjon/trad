@@ -103,6 +103,7 @@ class TestCollectedData:
                     comment=f"Post #{post_number_base + i}",
                     post_date=datetime.now(tz=UTC),
                     rating=0,
+                    source_label="TestSource",
                 )
                 for i in range(post_count)
             ]
@@ -125,7 +126,7 @@ class TestCollectedData:
             ),
             (
                 lambda pipe: pipe.add_post(
-                    route_id=1337, post=Post("John Doe", datetime.now(tz=UTC), "", 0)
+                    route_id=1337, post=Post("John Doe", datetime.now(tz=UTC), "", 0, "TestSource")
                 ),
                 "Route",
             ),

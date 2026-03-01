@@ -732,6 +732,7 @@ def test_ignore_route(route_json_data: dict[str, str]) -> None:
                 post_date=ANY,
                 comment="Some comment",
                 rating=dest_rating,
+                source_label="Unit Test",
             ),
             id=f"rating='{src_rating}'",
         )
@@ -761,6 +762,7 @@ def test_ignore_route(route_json_data: dict[str, str]) -> None:
                 post_date=datetime(2004, 5, 12, 22, 4, 6, tzinfo=UTC),
                 comment="Some other comment",
                 rating=2,
+                source_label="Unit Test",
             ),
             id="correct timezone",
         ),
@@ -778,6 +780,7 @@ def test_ignore_route(route_json_data: dict[str, str]) -> None:
                 post_date=ANY,
                 comment="Yet another comment",
                 rating=2,
+                source_label="Unit Test",
             ),
             id="additional JSON field",
         ),

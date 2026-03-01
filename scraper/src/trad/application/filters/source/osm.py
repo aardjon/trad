@@ -24,7 +24,7 @@ from pydantic.type_adapter import TypeAdapter
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters._base import SourceFilter
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.entities import ExternalSource, GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError, MergeConflictError
 
 _logger = getLogger(__name__)
@@ -165,6 +165,13 @@ class OsmSummitDataFilter(SourceFilter):
     In general, this implementation tries to do as less OSM queries as possible, and to reduce the
     transfered data amount to a minimum.
     """
+
+    _EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
+        label="OpenStreetMap",
+        url="https://www.openstreetmap.org",
+        license_name="ODbL",
+        attribution="OSM Contributors",
+    )
 
     _OVERPASS_PEAK_NODE_TAGS: Final = {"natural": "peak"}
     """ OSM node tags by which we recognize a single summit point. """

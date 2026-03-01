@@ -19,7 +19,14 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from trad.application.grades import GradeParser
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
+from trad.kernel.entities import (
+    UNDEFINED_GEOPOSITION,
+    ExternalSource,
+    GeoPosition,
+    Post,
+    Route,
+    Summit,
+)
 from trad.kernel.errors import DataProcessingError
 
 if TYPE_CHECKING:
@@ -29,6 +36,12 @@ if TYPE_CHECKING:
     from pandas.core.series import Series
 
 _logger = getLogger(__name__)
+
+_EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
+    label="Teufelsturm",
+    url="https://www.teufelsturm.de/",
+    attribution="Andreas Lein",
+)
 
 _ROUTE_DATA_RANK: Final = 2
 """Priority/Accuracy of the route data retrieved from teufelsturm in case of conflicts."""
@@ -86,7 +99,13 @@ def parse_post(post: Series[Any] | DataFrame) -> Post:
     user = parse_user_name(str(post[0]))
     comment = str(post[1])
     rating = parse_rating(str(post[2]))
-    return Post(user_name=user[0], post_date=user[1], comment=comment, rating=rating)
+    return Post(
+        user_name=user[0],
+        post_date=user[1],
+        comment=comment,
+        rating=rating,
+        source_label=_EXTERNAL_SOURCE_DESCRIPTION.label,
+    )
 
 
 def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradeParser) -> PageData:

@@ -22,12 +22,14 @@ from trad.kernel.entities import Post, Route, Summit
                         comment="some comment",
                         rating=0,
                         post_date=datetime(2019, 4, 13, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                     Post(
                         user_name="maxmu",
                         comment="some other comment",
                         rating=2,
                         post_date=datetime(2021, 8, 5, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                 ]
             ],
@@ -41,12 +43,14 @@ from trad.kernel.entities import Post, Route, Summit
                         comment="",
                         rating=1,
                         post_date=datetime(2020, 7, 15, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                     Post(
                         user_name="johndoe",
                         comment="",
                         rating=1,
                         post_date=datetime(2020, 7, 15, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                 ]
             ],
@@ -60,12 +64,14 @@ from trad.kernel.entities import Post, Route, Summit
                         comment="some comment",
                         rating=0,
                         post_date=datetime(2019, 4, 13, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                     Post(
                         user_name="maxmu",
                         comment="some other comment",
                         rating=2,
                         post_date=datetime(2021, 8, 5, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                 ]
             ],
@@ -79,6 +85,7 @@ from trad.kernel.entities import Post, Route, Summit
                         comment="",
                         rating=1,
                         post_date=datetime(2020, 7, 15, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                 ],
                 [
@@ -87,6 +94,7 @@ from trad.kernel.entities import Post, Route, Summit
                         comment="",
                         rating=1,
                         post_date=datetime(2020, 7, 15, tzinfo=UTC),
+                        source_label="Unit Test",
                     ),
                 ],
             ],
