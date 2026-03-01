@@ -47,6 +47,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
+        ListViewItem('Über trad', icon: const IconDefinition(Glyph.logoAppInfo)),
         '$applicationName Version $applicationVersion',
       ),
     );
@@ -60,10 +61,25 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
     final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
+    final List<ListViewItem> dataSourceAttributions = <ListViewItem>[
+      ListViewItem(
+        'OpenStreetMap',
+        subTitle: 'OSM-Mitwirkende (ODbL)',
+        content: 'https://www.openstreetmap.org',
+      ),
+      ListViewItem('Teufelsturm', subTitle: 'Andreas Lein', content: 'https://teufelsturm.de'),
+      ListViewItem(
+        'Sandsteinklettern',
+        subTitle: 'Jörg Brutscher',
+        content: 'http://www.sandsteinklettern.de',
+      ),
+    ];
+
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
       activated: routeDatabaseDate != null,
       label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
+      dataSourceAttributions: routeDatabaseDate != null ? dataSourceAttributions : <ListViewItem>[],
       statusMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
   }
@@ -229,6 +245,32 @@ class ApplicationWidePresenter implements PresentationBoundary {
     );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.showSettings(settingsModel);
+  }
+
+  @override
+  void showAppInfo() {
+    AppInfoModel aboutModel = AppInfoModel(
+      pageTitle: 'Über trad',
+      versionLabel: 'Du verwendest $applicationName in Version $applicationVersion',
+      copyrightAttributionLabels: <String>[
+        '© Karsten & Thomas Wesenigk',
+        'Lizensiert unter der EUPL 1.2',
+      ],
+      websiteButtonLabel: 'Website aufrufen',
+      routeDataHeader: 'Wegedaten',
+      routeDataSourcesLabel:
+          'Die heruntergeladenen Gipfel- und Wegeinformationen stammen aus den folgenden Quellen:',
+      routeDataDisclaimer: 'Die Inhalte können veraltet, unvollständig oder falsch sein!',
+      noRouteDataMessage: 'Momentan liegen keine Wegedaten vor.',
+      supportHeader: 'Unterstützen',
+      supportLabels: <String>[
+        'Wir freuen uns über Fehlerhinweise und Verbesserungsvorschläge zu dieser App.',
+        'Kontaktmöglichkeiten findest du auf unserer Website.',
+        'Bitte hilf auch gern mit, die verwendeten Datenquellen zu verbessern oder zu erweitern.',
+      ],
+    );
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.showAppInfo(aboutModel);
   }
 }
 

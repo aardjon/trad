@@ -26,6 +26,7 @@ void main() {
         ListViewItem('[NoRouteDB]'),
         ListViewItem('[NoKnowledgebase]'),
         ListViewItem('[NoSettings]'),
+        ListViewItem('[NoAbout]'),
         'Application version 0.0.0',
       ),
     );
@@ -119,6 +120,7 @@ void main() {
             () => fakeUi.updateRouteDbStatus(
               activated: inputDate != null,
               label: expectedLabel,
+              dataSourceAttributions: any(named: 'dataSourceAttributions'),
               statusMessage: any(named: 'statusMessage', that: availabilityMessageMatcher),
             ),
           ).called(1);

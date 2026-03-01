@@ -55,6 +55,11 @@ class ApplicationWideController {
   void requestSwitchToSettings() {
     _globalUsecases.switchToSettings();
   }
+
+  /// The user requested a switch to the about domain.
+  void requestSwitchToAbout() {
+    _globalUsecases.switchToAbout();
+  }
 }
 
 /// Controller for transmitting knowledge base UI messages to the core.

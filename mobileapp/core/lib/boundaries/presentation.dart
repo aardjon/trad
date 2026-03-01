@@ -70,4 +70,7 @@ abstract interface class PresentationBoundary {
 
   /// Let the UI display the application settings (aka *settings* domain).
   void showSettings();
+
+  /// Let the UI display the application information (aka *appinfo* domain).
+  void showAppInfo();
 }
