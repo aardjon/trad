@@ -43,6 +43,9 @@ class MergeFilter(Filter):
 
     @override
     def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+        for source in input_pipe.get_sources():
+            output_pipe.add_source(source)
+
         summit_merger = _SummitMerger(self._merged_summit_data)
         for summit_id, summit in input_pipe.iter_summits():
             full_summit_data = _SummitRelatedData(summit=summit, routes=[])

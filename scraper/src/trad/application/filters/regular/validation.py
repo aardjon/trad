@@ -9,7 +9,7 @@ from typing import override
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId
 from trad.kernel.entities import Post, Route, Summit
-from trad.kernel.errors import IncompleteDataError
+from trad.kernel.errors import EntityNotFoundError, IncompleteDataError
 
 _logger = getLogger(__name__)
 
@@ -21,6 +21,9 @@ class DataValidationFilter(Filter):
      - Fix the problem automatically
      - Ignore this data set completely (i.e. don't write it into the output pipe)
      - Cancel the whole process
+
+    For ignoring a data set, the used `_validate_*()` method returns False. For cancelling the whole
+    process, it raises.
     """
 
     @override
@@ -29,6 +32,11 @@ class DataValidationFilter(Filter):
 
     @override
     def execute_filter(self, input_pipe: Pipe, output_pipe: Pipe) -> None:
+        known_source_labels: list[str] = []
+        for source in input_pipe.get_sources():
+            output_pipe.add_source(source)
+            known_source_labels.append(source.label)
+
         for input_summit_id, summit in input_pipe.iter_summits():
             if not self._validate_summit(summit):
                 continue
@@ -40,8 +48,21 @@ class DataValidationFilter(Filter):
                 if not self._validate_route(summit, route):
                     ignore_current_summit = True
                     break
+
+                ignore_current_route = False
+                current_route_posts: list[Post] = []
+                for post in input_pipe.iter_posts_of_route(route_id):
+                    if not self._validate_post(known_source_labels, post):
+                        ignore_current_route = True
+                        break
+                    current_route_posts.append(post)
+
+                if ignore_current_route:
+                    continue
+
+                # No error, so all data of this route seems to be valid
+                posts[route_id] = current_route_posts
                 routes[route_id] = route
-                posts[route_id] = list(input_pipe.iter_posts_of_route(route_id))
 
             if ignore_current_summit:
                 continue
@@ -75,6 +96,19 @@ class DataValidationFilter(Filter):
                 exc_info=e,
             )
             return False
+        return True
+
+    def _validate_post(self, known_source_labels: list[str], post: Post) -> bool:
+        """
+        Returns True if teh given Post data is valid (either because it was already, or it could
+        be fixed), False if not.
+
+        Raises if the data is invalid but must not be ignored.
+        """
+        if post.source_label not in known_source_labels:
+            # Cancel the scraper because this is probably a programming error (did we forgot to add
+            # the source somewhere else?).
+            raise EntityNotFoundError(post.source_label)
         return True
 
     def _write_summit_to_pipe(
