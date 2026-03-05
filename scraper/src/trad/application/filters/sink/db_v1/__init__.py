@@ -105,7 +105,7 @@ class DbSchemaV1Filter(SinkFilter):
         value_placeholders = self._get_value_placeholders(len(column_list))
 
         insert_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {DatabaseMetadataTable.TABLE_NAME} ({column_names}) "
+            f"INSERT INTO {DatabaseMetadataTable.TABLE_NAME} ({column_names}) "
             f"VALUES ({value_placeholders})"
         )
 
@@ -269,7 +269,7 @@ class DbSchemaV1Filter(SinkFilter):
         column_names = ", ".join(column_list)
         value_placeholders = self._get_value_placeholders(len(column_list) - 1)
         insert_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {RoutesTable.TABLE_NAME} ({column_names}) "
+            f"INSERT INTO {RoutesTable.TABLE_NAME} ({column_names}) "
             f"VALUES (({select_summit}), {value_placeholders})"
         )
         self.__database_boundary.execute_write(
@@ -317,7 +317,7 @@ class DbSchemaV1Filter(SinkFilter):
         value_placeholders = self._get_value_placeholders(len(column_list) - 2)
 
         insert_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {PostsTable.TABLE_NAME} ({column_names}) "
+            f"INSERT INTO {PostsTable.TABLE_NAME} ({column_names}) "
             f"VALUES (({select_route}), {value_placeholders}, ({select_source}))"
         )
 
