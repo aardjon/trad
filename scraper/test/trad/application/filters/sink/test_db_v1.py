@@ -105,7 +105,7 @@ class TestDbSchemaV1Filter:
         db_writer.execute_filter(input_pipe, output_pipe=Mock(Pipe))
 
         expected_sql_statement = (
-            f"INSERT OR IGNORE INTO {RoutesTable.TABLE_NAME} ("
+            f"INSERT INTO {RoutesTable.TABLE_NAME} ("
             f"{RoutesTable.COLUMN_SUMMIT_ID}, "
             f"{RoutesTable.COLUMN_ROUTE_NAME}, "
             f"{RoutesTable.COLUMN_ROUTE_GRADE}, "
@@ -167,7 +167,7 @@ class TestDbSchemaV1Filter:
         db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
 
         expected_sql_statement = (
-            f"INSERT OR IGNORE INTO {PostsTable.TABLE_NAME} ("
+            f"INSERT INTO {PostsTable.TABLE_NAME} ("
             f"{PostsTable.COLUMN_ROUTE_ID}, "
             f"{PostsTable.COLUMN_USER_NAME}, "
             f"{PostsTable.COLUMN_COMMENT}, "
