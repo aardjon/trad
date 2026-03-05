@@ -3,6 +3,7 @@ Filter implementation writing a route database with schema version 1.
 """
 
 import datetime
+from collections.abc import Collection
 from logging import getLogger
 from pathlib import Path
 from typing import Final, override
@@ -12,6 +13,7 @@ from trad.application.filters._base import SinkFilter
 from trad.application.filters.sink.db_v1.dbschema import (
     DatabaseMetadataTable,
     DatabaseSchema,
+    ExternalDataSourcesTable,
     NameUsage,
     PostsTable,
     RoutesTable,
@@ -20,7 +22,7 @@ from trad.application.filters.sink.db_v1.dbschema import (
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, Post, Route, Summit
+from trad.kernel.entities import UNDEFINED_GEOPOSITION, ExternalSource, Post, Route, Summit
 
 _logger = getLogger(__name__)
 
@@ -58,6 +60,8 @@ class DbSchemaV1Filter(SinkFilter):
         _logger.debug("Executing filter for writing into %s", self.__destination_file)
         self.__database_boundary.connect(self.__destination_file, overwrite=True)
         self._initialize_database()
+
+        self._write_external_sources_table(input_pipe.get_sources())
 
         # pylint: disable=duplicate-code
         for summit_id, summit in input_pipe.iter_summits():
@@ -116,6 +120,31 @@ class DbSchemaV1Filter(SinkFilter):
         self.__database_boundary.execute_write(SqlStatement("ANALYZE"))
         self.__database_boundary.execute_write(SqlStatement("VACUUM"))
 
+    def _write_external_sources_table(self, external_sources: Collection[ExternalSource]) -> None:
+        column_list = [
+            ExternalDataSourcesTable.COLUMN_LABEL,
+            ExternalDataSourcesTable.COLUMN_URL,
+            ExternalDataSourcesTable.COLUMN_ATTRIBUTION,
+            ExternalDataSourcesTable.COLUMN_LICENSE,
+        ]
+        column_names = ", ".join(column_list)
+        value_placeholders = self._get_value_placeholders(len(column_list))
+
+        for source in external_sources:
+            sql_statement = SqlStatement(
+                f"INSERT INTO {ExternalDataSourcesTable.TABLE_NAME} ({column_names}) "
+                f"VALUES ({value_placeholders})"
+            )
+            self.__database_boundary.execute_write(
+                query=sql_statement,
+                query_parameters=[
+                    source.label,
+                    source.url,
+                    source.attribution,
+                    source.license_name,
+                ],
+            )
+
     def _add_summit(self, summit: Summit) -> None:
         summit_id = self._write_to_summits_table(summit)
         self._write_to_summit_names_table(summit_id, summit)
@@ -131,7 +160,7 @@ class DbSchemaV1Filter(SinkFilter):
         column_updates = ", ".join(f"{col}=excluded.{col}" for col in column_list)
 
         sql_statement = SqlStatement(
-            f"INSERT INTO {SummitsTable.TABLE_NAME} ({column_names}) "
+            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ({column_names}) "
             f"VALUES ({value_placeholders}) ON CONFLICT DO UPDATE SET {column_updates} "
             f"WHERE {SummitsTable.COLUMN_LATITUDE}={UNDEFINED_GEOPOSITION.latitude_int} "
             f"AND {SummitsTable.COLUMN_LONGITUDE}={UNDEFINED_GEOPOSITION.longitude_int}"
@@ -237,6 +266,11 @@ class DbSchemaV1Filter(SinkFilter):
         )
 
     def _add_post(self, summit_name: str, route_name: str, post: Post) -> None:
+        select_source = (
+            f"SELECT {ExternalDataSourcesTable.COLUMN_ID} "
+            f"FROM {ExternalDataSourcesTable.TABLE_NAME} "
+            f"WHERE {ExternalDataSourcesTable.COLUMN_LABEL}=? LIMIT 1"
+        )
         select_summit = (
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
@@ -254,13 +288,15 @@ class DbSchemaV1Filter(SinkFilter):
             PostsTable.COLUMN_COMMENT,
             PostsTable.COLUMN_POST_DATE,
             PostsTable.COLUMN_RATING,
+            PostsTable.COLUMN_SOURCE_ID,
         ]
         column_names = ", ".join(column_list)
-        value_placeholders = self._get_value_placeholders(len(column_list) - 1)
+        # -2 because two column's values are provided separately
+        value_placeholders = self._get_value_placeholders(len(column_list) - 2)
 
         insert_statement = SqlStatement(
             f"INSERT OR IGNORE INTO {PostsTable.TABLE_NAME} ({column_names}) "
-            f"VALUES (({select_route}), {value_placeholders})"
+            f"VALUES (({select_route}), {value_placeholders}, ({select_source}))"
         )
 
         self.__database_boundary.execute_write(
@@ -272,6 +308,7 @@ class DbSchemaV1Filter(SinkFilter):
                 post.comment,
                 post.post_date.isoformat(),
                 post.rating,
+                post.source_label,
             ],
         )
 

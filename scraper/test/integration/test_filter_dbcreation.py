@@ -16,7 +16,7 @@ from trad.application.pipes import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import GeoPosition, Post, Route, Summit
+from trad.kernel.entities import ExternalSource, GeoPosition, Post, Route, Summit
 
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
@@ -48,6 +48,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
             source_label="Unit Test",
         ),
     )
+    input_pipe.add_source(ExternalSource("Unit Test", "[DOESNTMATTER]", "The AI"))
 
     db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
     db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
