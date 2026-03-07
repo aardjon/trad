@@ -172,6 +172,11 @@ class OsmSummitDataFilter(SourceFilter):
         license_name="ODbL",
         attribution="OSM Contributors",
     )
+    """
+    Source attribution for OSM.
+    Please note that (other than other filters) the OSM attribution is always added because we never
+    expect it to retrieve no data at all.
+    """
 
     _OVERPASS_PEAK_NODE_TAGS: Final = {"natural": "peak"}
     """ OSM node tags by which we recognize a single summit point. """
@@ -216,6 +221,10 @@ class OsmSummitDataFilter(SourceFilter):
         _logger.debug(
             "Processed summits from %d relations and %d nodes", len(osm_relations), len(osm_nodes)
         )
+
+        # Add the external source attribution
+        self.__store_external_source_attribution(output_pipe)
+
         _logger.debug("'%s' filter finished", self.get_name())
 
     def __get_area_id(self) -> int:
@@ -328,6 +337,9 @@ class OsmSummitDataFilter(SourceFilter):
                     summit_element.lat, summit_element.lon
                 ),
             )
+
+    def __store_external_source_attribution(self, pipe: Pipe) -> None:
+        pipe.add_source(self._EXTERNAL_SOURCE_DESCRIPTION)
 
     def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:
         for summit in summits:

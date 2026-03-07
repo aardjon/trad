@@ -109,6 +109,7 @@ class SandsteinkletternDataFilter(SourceFilter):
         self._api_receiver = SandsteinkletternApiReceiver(http_boundary=network_boundary)
         self._grade_parser: GradeParser = FuzzyParser()
 
+        self._summit_added = False  # Remember if at least one summit has been added (True) or not
         self._summit_id_map = _ExternalToPipeIdMap[SummitInstanceId]()
         self._route_id_map = _ExternalToPipeIdMap[RouteInstanceId]()
 
@@ -128,6 +129,9 @@ class SandsteinkletternDataFilter(SourceFilter):
             self._summit_id_map.clear()
             self._route_id_map.clear()
 
+        if self._summit_added:
+            self._import_source_attribution(output_pipe)
+
         _logger.debug("'%s' filter finished", self.get_name())
 
     def _get_all_sectors(self) -> list[JsonSektor]:
@@ -139,6 +143,9 @@ class SandsteinkletternDataFilter(SourceFilter):
             area.gebiet_id for area in iter(areas) if area.gebiet == _area_name
         )
         return self._api_receiver.retrieve_sectors(area_id=area_id_to_request)
+
+    def _import_source_attribution(self, output_pipe: Pipe) -> None:
+        output_pipe.add_source(self._EXTERNAL_SOURCE_DESCRIPTION)
 
     def _import_summits_of_sector(
         self,
@@ -166,6 +173,7 @@ class SandsteinkletternDataFilter(SourceFilter):
                 )
             )
             self._summit_id_map.set_pipe_id(json_summit.gipfel_id, pipe_id)
+            self._summit_added = True
 
     def _ignore_summit(self, json_summit: JsonGipfel) -> bool:
         """

@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 _logger = getLogger(__name__)
 
-_EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
+EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
     label="Teufelsturm",
     url="https://www.teufelsturm.de/",
     attribution="Andreas Lein",
@@ -104,7 +104,7 @@ def parse_post(post: Series[Any] | DataFrame) -> Post:
         post_date=user[1],
         comment=comment,
         rating=rating,
-        source_label=_EXTERNAL_SOURCE_DESCRIPTION.label,
+        source_label=EXTERNAL_SOURCE_DESCRIPTION.label,
     )
 
 

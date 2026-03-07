@@ -104,6 +104,60 @@ def test_import_happy_path() -> None:
     assert sorted(retrieved_post_authors) == [f"Author {n}" for n in range(1, 8)]
 
 
+@pytest.mark.parametrize(
+    ("summit_count", "expect_source_def"),
+    [
+        (1, True),
+        (3, True),
+        (0, False),
+    ],
+)
+def test_external_sources(summit_count: int, *, expect_source_def: bool) -> None:
+    """
+    Ensure that an external source is added along with imported data:
+     - The source definition must contain the correct data
+     - There must be exactly one source (if data was added at all)
+     - If no summit was added, the source must be omitted
+
+    :param summit_count: The number of Summits being imported.
+    :param expect_source_def: Whether an external source definition is expected to be added (True)
+        or not (False).
+    """
+    sample_json = _load_prepared_test_data("minimal_data_sample.json")
+    sample_json["summits"] = [
+        {
+            "sektorid": "2",
+            "gipfel_ID": str(i),
+            "gipfelname_d": f"Summit{i}",
+            "gipfelname_cz": "",
+            "status": "",
+            "typ": "G",
+            "vgrd": "14.04544",
+            "ngrd": "50.84041",
+        }
+        for i in range(summit_count)
+    ]
+    sample_json["routes"] = []
+    sample_json["posts"] = []
+    fake_network = _create_fake_network(sample_json)
+
+    data_filter = SandsteinkletternDataFilter(fake_network)
+
+    output_pipe = CollectedData()
+    data_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
+
+    # The resulting Pipe must contain either one external source definition or none at all
+    actual_sources = list(output_pipe.get_sources())
+    if expect_source_def:
+        assert len(actual_sources) == 1
+        assert actual_sources[0].label == "Sandsteinklettern"
+        assert actual_sources[0].url == "http://sandsteinklettern.de"
+        assert actual_sources[0].attribution == "Jörg Brutscher"
+        assert actual_sources[0].license_name is None
+    else:
+        assert not actual_sources
+
+
 _allowed_summit_types: Final = (JsonGipfelTyp.REGULAR, JsonGipfelTyp.CRAG)
 _allowed_summit_status: Final = (
     JsonGipfelStatus.OPEN,

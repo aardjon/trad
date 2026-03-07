@@ -8,6 +8,7 @@ from typing import Final, override
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters._base import SourceFilter
 from trad.application.filters.source.teufelsturm.parser import (
+    EXTERNAL_SOURCE_DESCRIPTION,
     SummitCache,
     parse_page,
     parse_route_list,
@@ -61,8 +62,13 @@ class TeufelsturmDataFilter(SourceFilter):
         _logger.debug("'%s' filter started", self.get_name())
         route_ids = self._collect_route_ids()
         self._perform_scan(output_pipe, route_ids)
+        if self._added_peak_name_hashes:
+            self._add_external_source_attribution(output_pipe)
         self._summit_cache.clear_cache()
         _logger.debug("'%s' filter finished", self.get_name())
+
+    def _add_external_source_attribution(self, pipe: Pipe) -> None:
+        pipe.add_source(EXTERNAL_SOURCE_DESCRIPTION)
 
     def _collect_route_ids(self) -> list[int]:
         """Returns the IDs of all available routes, collecting them from the routes list page."""
