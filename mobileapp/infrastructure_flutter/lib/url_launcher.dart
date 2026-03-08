@@ -21,4 +21,9 @@ class UrlLauncher implements ExternalAppsBoundary {
 
     await launchUrl(extendedUri);
   }
+
+  @override
+  Future<void> openWebUri(Uri webUri) async {
+    await launchUrl(webUri);
+  }
 }

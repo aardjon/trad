@@ -12,4 +12,10 @@ abstract interface class ExternalAppsBoundary {
   /// thrown). The actual app to open is chosen by the operating system, and the actual handling of
   /// the URI is up to this app.
   Future<void> openGeoUri(Uri geoUri);
+
+  /// Open an external browser app and request it to navigate to the given [webUri] page. [webUri]
+  /// must be a regular internet URI (e.g. HTTPS or FTP) that can be accessed by a browser. The
+  /// actual app to open is chosen by the operating system, and the actual handling of the URI is up
+  /// to this app.
+  Future<void> openWebUri(Uri webUri);
 }

@@ -6,6 +6,7 @@ library;
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/boundaries/storage/preferences.dart';
 import 'package:core/boundaries/storage/routedb.dart';
+import 'package:core/boundaries/sysenv.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/usecases/appwide.dart';
@@ -18,6 +19,8 @@ class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary 
 class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
 
 class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
+
+class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary{}
 
 /// Unit tests for the core.usecases.appwide.ApplicationWideUseCases component.
 void main() {
@@ -32,11 +35,13 @@ void main() {
   final RouteDbStorageBoundaryMock storageBoundaryMock = RouteDbStorageBoundaryMock();
   final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
   final AppPreferencesBoundaryMock preferencesBoundaryMock = AppPreferencesBoundaryMock();
+  final SystemEnvironmentBoundaryMock sysEnvBoundaryMock = SystemEnvironmentBoundaryMock();
 
   // Configure DI to provide the boundary mocks
   di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
   di.registerFactory<PresentationBoundary>(() => presentationBoundaryMock);
   di.registerFactory<AppPreferencesBoundary>(() => preferencesBoundaryMock);
+  di.registerFactory<SystemEnvironmentBoundary>(() => sysEnvBoundaryMock);
 
   tearDown(() {
     // Reset the mocks after each test case

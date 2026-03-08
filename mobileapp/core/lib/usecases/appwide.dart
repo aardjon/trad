@@ -9,6 +9,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
+import '../boundaries/sysenv.dart';
 import '../entities/data_source.dart';
 import 'routedb.dart';
 
@@ -27,6 +28,9 @@ class ApplicationWideUseCases {
   /// settings.
   final AppPreferencesBoundary _preferencesBoundary;
 
+  /// Interface to the operating system environment.
+  final SystemEnvironmentBoundary _systemEnvBoundary;
+
   /// Dependency provider for retrieving additional dependencies as necessary.
   final DependencyProvider _di;
 
@@ -37,6 +41,7 @@ class ApplicationWideUseCases {
     : _presentationBoundary = di.provide<PresentationBoundary>(),
       _routeDbBoundary = di.provide<RouteDbStorageBoundary>(),
       _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
+      _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>(),
       _di = di;
 
   /// Use case of starting the trad application as a whole.
@@ -89,5 +94,13 @@ class ApplicationWideUseCases {
   void switchToAbout() {
     _logger.info('Running use case switchToAbout()');
     _presentationBoundary.showAppInfo();
+  }
+
+  /// Open the trad home page in the default browser.
+  Future<void> openHomePage() async {
+    _logger.info('Running use case openHomePage()');
+    const String tradHomePageUrl = 'https://www.fomori.de/trad';
+    // TODO(aardjon): Can we take the URL from the pubspec file?
+    await _systemEnvBoundary.openWebPage(tradHomePageUrl);
   }
 }

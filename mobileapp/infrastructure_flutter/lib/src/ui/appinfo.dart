@@ -4,6 +4,7 @@
 library;
 
 import 'package:adapters/boundaries/ui.dart';
+import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +41,7 @@ class AppInfoPage extends StatelessWidget {
     }
     widgets.add(
       ElevatedButton(
-        onPressed: () {},
+        onPressed: _onShowHomepageClicked,
         child: Text(model.websiteButtonLabel),
       ),
     );
@@ -152,5 +153,11 @@ class AppInfoPage extends StatelessWidget {
       ),
       drawer: _appDrawer,
     );
+  }
+
+  /// Event handler for clicking the 'Open the trad web site' button.
+  void _onShowHomepageClicked() {
+    ApplicationWideController controller = ApplicationWideController();
+    controller.requestAppHomepage();
   }
 }

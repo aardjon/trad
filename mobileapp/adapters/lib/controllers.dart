@@ -60,6 +60,11 @@ class ApplicationWideController {
   void requestSwitchToAbout() {
     _globalUsecases.switchToAbout();
   }
+
+  /// The user requested to open trad's home page in a browser.
+  void requestAppHomepage() {
+    unawaited(_globalUsecases.openHomePage());
+  }
 }
 
 /// Controller for transmitting knowledge base UI messages to the core.
