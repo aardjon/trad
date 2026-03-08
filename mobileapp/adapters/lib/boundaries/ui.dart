@@ -169,12 +169,24 @@ class ListViewItem {
   /// Expect this to be a long, multi-line string.
   String? content;
 
+  /// Optional bottom line text, displayed least prominently (e.g. smaller and lighter) than
+  /// everything else. May be used for additional, less important remarks or notes.
+  String? bottomLine;
+
   /// Unique identifier of this item. If a list item is clicked, this ID is passed to the handler
   /// to identify the clicked item. Without an ID, the item cannot be clicked at all.
   ItemDataId? itemId;
 
   /// Constructor for directly initializing all members.
-  ListViewItem(this.mainTitle, {this.subTitle, this.icon, this.endIcon, this.content, this.itemId});
+  ListViewItem(
+    this.mainTitle, {
+    this.subTitle,
+    this.icon,
+    this.endIcon,
+    this.content,
+    this.bottomLine,
+    this.itemId,
+  });
 }
 
 /// Model that provides all static data needed to display the summit details page to the UI.

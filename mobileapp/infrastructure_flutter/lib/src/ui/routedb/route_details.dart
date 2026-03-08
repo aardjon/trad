@@ -44,6 +44,11 @@ class _PostItem extends StatelessWidget {
             Text(post.subTitle!),
             const SizedBox(height: 5),
             Text(post.content!),
+            const SizedBox(height: 5),
+            Text(
+              post.bottomLine!,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
+            ),
           ],
         ),
       ),

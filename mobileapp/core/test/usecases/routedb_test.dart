@@ -639,9 +639,9 @@ void main() {
       routeRating: 1,
     );
     final List<Post> postList = <Post>[
-      Post('User 1', DateTime(2020), 'First Comment', 1),
-      Post('User 2', DateTime(2021), 'Second Comment', 2),
-      Post('User 3', DateTime(2022), 'Third Comment', 3),
+      Post('User 1', DateTime(2020), 'First Comment', 'Unit Test', 1),
+      Post('User 2', DateTime(2021), 'Second Comment', 'Unit Test', 2),
+      Post('User 3', DateTime(2022), 'Third Comment', 'Unit Test', 3),
     ];
 
     /// Ensures the correct behaviour of the showPostsPage() method:

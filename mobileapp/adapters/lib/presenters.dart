@@ -193,6 +193,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
           post.userName,
           subTitle: formattedDate,
           content: post.comment,
+          bottomLine: '(Quelle: ${post.source})',
           endIcon: _ratingMapper.getIntRatingIcon(post.rating),
         ),
       );

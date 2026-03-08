@@ -369,13 +369,18 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       orderByColumn += 'ASC';
     }
 
-    Query query = Query.table(PostsTable.tableName, <String>[
-      PostsTable.columnId,
-      PostsTable.columnUserName,
-      PostsTable.columnPostDate,
-      PostsTable.columnComment,
-      PostsTable.columnRating,
-    ]);
+    Query query = Query.join(
+      <String>[PostsTable.tableName, ExternalDataSourcesTable.tableName],
+      <String>['${PostsTable.columnSourceId} = ${ExternalDataSourcesTable.columnId}'],
+      <String>[
+        PostsTable.columnId,
+        PostsTable.columnUserName,
+        PostsTable.columnPostDate,
+        PostsTable.columnComment,
+        PostsTable.columnRating,
+        ExternalDataSourcesTable.columnLabel,
+      ],
+    );
     query.setWhereCondition('${PostsTable.columnRouteId} = ?', <int>[routeId]);
     query.orderByColumns = <String>[orderByColumn];
 
@@ -388,9 +393,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       String name = dataRow.getStringValue(PostsTable.columnUserName);
       String timestamp = dataRow.getStringValue(PostsTable.columnPostDate);
       String comment = dataRow.getStringValue(PostsTable.columnComment);
+      String source = dataRow.getStringValue(ExternalDataSourcesTable.columnLabel);
       int rating = dataRow.getIntValue(PostsTable.columnRating);
       DateTime postDate = DateTime.parse(timestamp);
-      posts.add(Post(name, postDate, comment, rating));
+      posts.add(Post(name, postDate, comment, source, rating));
     }
     return posts;
   }
