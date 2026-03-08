@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:core/boundaries/ota.dart';
 import 'package:core/boundaries/sysenv.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:mocktail/mocktail.dart';
@@ -75,6 +76,9 @@ void main() {
     /// be installed successfully.
     test('importRouteDbFile() use case', () async {
       final DateTime fakeCreationDate = DateTime(2024, 8, 13);
+      final List<DataSourceAttribution> fakeAttributions = <DataSourceAttribution>[
+        DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+      ];
 
       di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
       di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
@@ -85,6 +89,9 @@ void main() {
       when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
       when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
         return fakeCreationDate;
+      });
+      when(storageBoundaryMock.getExternalDataSources).thenAnswer((_) async {
+        return fakeAttributions;
       });
 
       RouteDbUseCases usecases = RouteDbUseCases(di);
@@ -111,6 +118,11 @@ void main() {
       when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
       when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
         return DateTime(2023, 12, 25);
+      });
+      when(storageBoundaryMock.getExternalDataSources).thenAnswer((_) async {
+        return <DataSourceAttribution>[
+          DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+        ];
       });
       when(downloadBoundaryMock.getAvailableUpdateCandidates).thenAnswer((_) async {
         return <RouteDbUpdateCandidate>[
@@ -331,6 +343,9 @@ void main() {
       for (final bool stopStorageFirst in <bool>[false, true]) {
         test('installFromLocalFile() success, storage stopped: ${!stopStorageFirst}', () async {
           final DateTime fakeCreationDate = DateTime(2025, 7, 23);
+          final List<DataSourceAttribution> fakeAttributions = <DataSourceAttribution>[
+            DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+          ];
 
           // Setup the storage mock as if everything went well
           when(storageBoundaryMock.isStarted).thenReturn(stopStorageFirst);
@@ -339,6 +354,9 @@ void main() {
           when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
             return fakeCreationDate;
           });
+          when(storageBoundaryMock.getExternalDataSources).thenAnswer((_) async {
+            return fakeAttributions;
+          });
 
           RouteDbUseCases usecases = RouteDbUseCases(di);
           await usecases.importRouteDbFile(fakeFilePath);
@@ -346,7 +364,9 @@ void main() {
           if (stopStorageFirst) {
             // Make sure the started storage is stopped first
             verify(storageBoundaryMock.stopStorage).called(1);
-            verify(() => presentationBoundaryMock.updateRouteDbStatus(null)).called(1);
+            verify(
+              () => presentationBoundaryMock.updateRouteDbStatus(null, <DataSourceAttribution>[]),
+            ).called(1);
           } else {
             /// Make sure the storage is not explicitly stopped first
             verifyNever(storageBoundaryMock.stopStorage);
@@ -356,7 +376,9 @@ void main() {
           // Make sure the storage is started (again)
           verify(storageBoundaryMock.startStorage).called(1);
           // Make sure the UI gets the storage state update and the new creation date
-          verify(() => presentationBoundaryMock.updateRouteDbStatus(fakeCreationDate)).called(1);
+          verify(
+            () => presentationBoundaryMock.updateRouteDbStatus(fakeCreationDate, fakeAttributions),
+          ).called(1);
         });
       }
 
@@ -367,6 +389,10 @@ void main() {
       ///
       /// This kind of error can happen e.g. if the given file doesn't exist or is not readable.
       test('file operation error', () async {
+        final DateTime dummyCreationDate = DateTime(2025, 9, 3);
+        final List<DataSourceAttribution> dummyAttributions = <DataSourceAttribution>[
+          DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+        ];
         // Setup the storage mock to simulate an IO error during import
         when(storageBoundaryMock.isStarted).thenReturn(false);
         when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {
@@ -374,7 +400,10 @@ void main() {
         });
         when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
         when(storageBoundaryMock.getCreationDate).thenAnswer((_) async {
-          return DateTime(2025, 9, 3);
+          return dummyCreationDate;
+        });
+        when(storageBoundaryMock.getExternalDataSources).thenAnswer((_) async {
+          return dummyAttributions;
         });
 
         RouteDbUseCases usecases = RouteDbUseCases(di);
@@ -385,7 +414,12 @@ void main() {
         // Make sure the storage is started (again)
         verify(storageBoundaryMock.startStorage).called(1);
         // Make sure the UI gets the storage state update and the creation date
-        verify(() => presentationBoundaryMock.updateRouteDbStatus(any())).called(1);
+        verify(
+          () => presentationBoundaryMock.updateRouteDbStatus(
+            dummyCreationDate,
+            dummyAttributions,
+          ),
+        ).called(1);
       });
 
       /// Ensures the correct behaviour in case the new route db is invalid, e.g. missing, corrupt
@@ -413,7 +447,9 @@ void main() {
           // Make sure the storage is started (again)
           verify(storageBoundaryMock.startStorage).called(1);
           // Make sure the UI gets the storage state update
-          verify(() => presentationBoundaryMock.updateRouteDbStatus(null)).called(1);
+          verify(
+            () => presentationBoundaryMock.updateRouteDbStatus(null, <DataSourceAttribution>[]),
+          ).called(1);
         });
       }
     });
@@ -708,6 +744,21 @@ class _FakeStorageBoundary extends Fake implements RouteDbStorageBoundary {
       throw StateError('Storage not started');
     }
     return _dbCreationDate;
+  }
+
+  @override
+  Future<List<DataSourceAttribution>> getExternalDataSources() async {
+    if (!_isStarted) {
+      throw StateError('Storage not started');
+    }
+    return <DataSourceAttribution>[
+      DataSourceAttribution(
+        label: '[label]',
+        url: '[url]',
+        attribution: '[attribution]',
+        license: '[license]',
+      ),
+    ];
   }
 
   @override

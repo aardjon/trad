@@ -5,6 +5,7 @@ library;
 
 import 'dart:async';
 
+import '../../entities/data_source.dart';
 import '../../entities/post.dart';
 import '../../entities/route.dart';
 import '../../entities/sorting/posts_filter_mode.dart';
@@ -53,6 +54,11 @@ abstract interface class RouteDbStorageBoundary {
   ///
   /// This method must only be called on a STARTED storage.
   Future<DateTime> getCreationDate();
+
+  /// Returns a list of all external services use to create the current route database.
+  ///
+  /// This method must only be called on a STARTED storage.
+  Future<List<DataSourceAttribution>> getExternalDataSources();
 
   /// Retrieve all data of the single summit identified by [summitDataId].
   ///

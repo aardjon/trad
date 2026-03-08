@@ -5,6 +5,7 @@ library;
 
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/presenters.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/route.dart';
 import 'package:core/entities/summit.dart';
@@ -13,6 +14,22 @@ import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class FakeApplicationUi extends Mock implements ApplicationUiBoundary {}
+
+class FakeUi extends Fake implements ApplicationUiBoundary {
+  String dbLabel = '';
+  List<ListViewItem> dataSourceItems = <ListViewItem>[];
+
+  @override
+  void updateRouteDbStatus({
+    required bool activated,
+    required String label,
+    required List<ListViewItem> dataSourceAttributions,
+    String? statusMessage,
+  }) {
+    dbLabel = label;
+    dataSourceItems = dataSourceAttributions;
+  }
+}
 
 /// Unit tests for the adapters.presenters.ApplicationWidePresenter class.
 void main() {
@@ -98,7 +115,8 @@ void main() {
     ///    creation date as label and don't send a status message.
     ///  - If it gets null, deactivate the routeDB domain in the UI, send a special "No DB
     ///    available" label and send a status message.
-    group('updateRouteDbStatus()', () {
+    ///  - Provided data attributions must be forwarded correctly (if there is a DB at all)
+    group('updateRouteDbStatus(): creation date', () {
       /// Make sure the correct values are sent to the UI when the route DB status is changed. If
       /// there is a route DB date, the creation timestamp must be formatted correctly.
       final List<(DateTime?, String)> testParams = <(DateTime?, String)>[
@@ -113,17 +131,121 @@ void main() {
         String expectedLabel = args.$2;
         test('db date = $inputDate', () {
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          presenter.updateRouteDbStatus(inputDate);
+          presenter.updateRouteDbStatus(inputDate, <DataSourceAttribution>[]);
 
           final Matcher availabilityMessageMatcher = inputDate != null ? isNull : isNotEmpty;
           verify(
             () => fakeUi.updateRouteDbStatus(
               activated: inputDate != null,
               label: expectedLabel,
-              dataSourceAttributions: any(named: 'dataSourceAttributions'),
+              dataSourceAttributions: <ListViewItem>[],
               statusMessage: any(named: 'statusMessage', that: availabilityMessageMatcher),
             ),
           ).called(1);
+        });
+      }
+    });
+
+    group('updateRouteDbStatus(): data attribution', () {
+      tearDown(() async {
+        // Reset the mocks after each test case
+        await di.shutdown();
+        di.registerSingleton<ApplicationUiBoundary>(() => fakeUi);
+      });
+
+      /// Make sure the correct values are sent to the UI when the route DB status is changed. If
+      /// there is a route DB date, the data attribution must be forwarded correctly.
+      final DateTime fakeCreationDate = DateTime(2023, 12, 31, 23, 59);
+      final List<(List<DataSourceAttribution>, List<ListViewItem>)> testParams =
+          <(List<DataSourceAttribution>, List<ListViewItem>)>[
+            (
+              // All data fields of the attribution object must be handled correctly
+              <DataSourceAttribution>[
+                DataSourceAttribution(
+                  label: 'A great source of data',
+                  url: 'https://www.example.com',
+                  attribution: 'A cool content creator',
+                  license: 'EUPL',
+                ),
+              ],
+              <ListViewItem>[
+                ListViewItem(
+                  'A great source of data',
+                  subTitle: 'A cool content creator (EUPL)',
+                  content: 'https://www.example.com',
+                ),
+              ],
+            ),
+            (
+              // License is missing
+              <DataSourceAttribution>[
+                DataSourceAttribution(
+                  label: 'A great source of data',
+                  url: 'https://www.example.com',
+                  attribution: 'A cool content creator',
+                ),
+              ],
+              <ListViewItem>[
+                ListViewItem(
+                  'A great source of data',
+                  subTitle: 'A cool content creator',
+                  content: 'https://www.example.com',
+                ),
+              ],
+            ),
+            (
+              // No data at all
+              <DataSourceAttribution>[], <ListViewItem>[],
+            ),
+            (
+              // Multiple sources
+              <DataSourceAttribution>[
+                DataSourceAttribution(
+                  label: 'Source 1',
+                  url: '[url1]',
+                  attribution: 'Author 1',
+                  license: 'EUPL',
+                ),
+                DataSourceAttribution(
+                  label: 'Source 2',
+                  url: '[url2]',
+                  attribution: 'Author 2',
+                ),
+              ],
+              <ListViewItem>[
+                ListViewItem(
+                  'Source 1',
+                  subTitle: 'Author 1 (EUPL)',
+                  content: '[url1]',
+                ),
+                ListViewItem(
+                  'Source 2',
+                  subTitle: 'Author 2',
+                  content: '[url2]',
+                ),
+              ],
+            ),
+          ];
+
+      for (final (List<DataSourceAttribution>, List<ListViewItem>) args in testParams) {
+        List<DataSourceAttribution> inputAttribution = args.$1;
+        List<ListViewItem> expectedListItems = args.$2;
+        test('attribution = $inputAttribution', () async {
+          FakeUi ui = FakeUi();
+          await di.shutdown();
+          di.registerSingleton<ApplicationUiBoundary>(() => ui);
+
+          ApplicationWidePresenter presenter = ApplicationWidePresenter();
+          presenter.updateRouteDbStatus(fakeCreationDate, inputAttribution);
+
+          expect(ui.dataSourceItems.length, equals(expectedListItems.length));
+          for (int i = 0; i < ui.dataSourceItems.length; i++) {
+            ListViewItem outputItem = ui.dataSourceItems[i];
+            ListViewItem inputItem = expectedListItems[i];
+            expect(outputItem.mainTitle, equals(inputItem.mainTitle));
+            expect(outputItem.subTitle, equals(inputItem.subTitle));
+            expect(outputItem.content, equals(inputItem.content));
+          }
         });
       }
     });

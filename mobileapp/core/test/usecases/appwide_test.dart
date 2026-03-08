@@ -6,6 +6,7 @@ library;
 import 'package:core/boundaries/presentation.dart';
 import 'package:core/boundaries/storage/preferences.dart';
 import 'package:core/boundaries/storage/routedb.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
@@ -59,7 +60,9 @@ void main() {
     verify(presentationBoundaryMock.initUserInterface).called(1);
     verify(preferencesBoundaryMock.initStorage).called(1);
     // Make sure the UI was notified about the missing route DB
-    verify(() => presentationBoundaryMock.updateRouteDbStatus(null)).called(1);
+    verify(
+      () => presentationBoundaryMock.updateRouteDbStatus(null, <DataSourceAttribution>[]),
+    ).called(1);
     // Make sure the UI started in the settings domain
     verify(presentationBoundaryMock.showSettings).called(1);
   });

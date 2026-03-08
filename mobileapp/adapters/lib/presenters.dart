@@ -12,6 +12,7 @@ import 'package:crosscuttings/appmeta.dart';
 import 'package:intl/intl.dart';
 
 import 'package:core/boundaries/presentation.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/knowledgebase.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
@@ -54,26 +55,25 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteDbStatus(DateTime? routeDatabaseDate) {
+  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources) {
     const String noDbMessage =
         'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
         'indem du Wegedaten herunterlädst bzw. importierst.';
 
     final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
-    final List<ListViewItem> dataSourceAttributions = <ListViewItem>[
-      ListViewItem(
-        'OpenStreetMap',
-        subTitle: 'OSM-Mitwirkende (ODbL)',
-        content: 'https://www.openstreetmap.org',
-      ),
-      ListViewItem('Teufelsturm', subTitle: 'Andreas Lein', content: 'https://teufelsturm.de'),
-      ListViewItem(
-        'Sandsteinklettern',
-        subTitle: 'Jörg Brutscher',
-        content: 'http://www.sandsteinklettern.de',
-      ),
-    ];
+    final List<ListViewItem> dataSourceAttributions = <ListViewItem>[];
+    for (final DataSourceAttribution source in dataSources) {
+      dataSourceAttributions.add(
+        ListViewItem(
+          source.label,
+          subTitle: source.license != null
+              ? '${source.attribution} (${source.license})'
+              : source.attribution,
+          content: source.url,
+        ),
+      );
+    }
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(

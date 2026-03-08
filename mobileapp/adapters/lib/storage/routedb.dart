@@ -6,6 +6,7 @@ library;
 import 'dart:io';
 
 import 'package:core/boundaries/storage/routedb.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
@@ -161,6 +162,36 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     String dateStrValue = resultSet[0].getStringValue(DatabaseMetadataTable.columnCompileTime);
     return DateTime.parse(dateStrValue);
+  }
+
+  @override
+  Future<List<DataSourceAttribution>> getExternalDataSources() async {
+    if (!isStarted()) {
+      throw StateError('Cannot get external data sources while the storage is STOPPED.');
+    }
+
+    Query query = Query.table(ExternalDataSourcesTable.tableName, <String>[
+      ExternalDataSourcesTable.columnLabel,
+      ExternalDataSourcesTable.columnUrl,
+      ExternalDataSourcesTable.columnAttribution,
+      ExternalDataSourcesTable.columnLicense,
+    ]);
+
+    // Run the database query
+    final List<ResultRow> resultSet = await _repository.executeQuery(query);
+
+    List<DataSourceAttribution> sources = <DataSourceAttribution>[];
+    for (final ResultRow row in resultSet) {
+      sources.add(
+        DataSourceAttribution(
+          label: row.getStringValue(ExternalDataSourcesTable.columnLabel),
+          url: row.getStringValue(ExternalDataSourcesTable.columnUrl),
+          attribution: row.getStringValue(ExternalDataSourcesTable.columnAttribution),
+          license: row.getOptStringValue(ExternalDataSourcesTable.columnLicense),
+        ),
+      );
+    }
+    return sources;
   }
 
   @override

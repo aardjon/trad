@@ -9,6 +9,7 @@ import 'package:crosscuttings/logging/logger.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
+import '../entities/data_source.dart';
 import 'routedb.dart';
 
 /// Logger to be used in this library file.
@@ -54,10 +55,11 @@ class ApplicationWideUseCases {
     try {
       await _routeDbBoundary.startStorage();
       DateTime routeDbDate = await _routeDbBoundary.getCreationDate();
-      _presentationBoundary.updateRouteDbStatus(routeDbDate);
+      List<DataSourceAttribution> dataSources = await _routeDbBoundary.getExternalDataSources();
+      _presentationBoundary.updateRouteDbStatus(routeDbDate, dataSources);
     } on Exception {
       // No (usable) route database, notify the GUI and start with the settings page
-      _presentationBoundary.updateRouteDbStatus(null);
+      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
       switchToInitialDomain = switchToSettings;
     }
     // Finally, switch to the starting domain
