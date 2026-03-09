@@ -24,11 +24,9 @@ class AppInfoPage extends StatelessWidget {
   Widget _buildAppVersionLabel(BuildContext context, AppInfoModel model) {
     return Padding(
       padding: const EdgeInsets.only(top: 15, bottom: 5),
-      child: Center(
-        child: Text(
-          model.versionLabel,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+      child: Text(
+        model.versionLabel,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
@@ -37,8 +35,9 @@ class AppInfoPage extends StatelessWidget {
     final TextStyle? labelStyle = Theme.of(context).textTheme.bodyMedium;
     List<Widget> widgets = <Widget>[_buildAppVersionLabel(context, model)];
     for (final String label in model.copyrightAttributionLabels) {
-      widgets.add(Center(child: Text(label, style: labelStyle)));
+      widgets.add(Text(label, style: labelStyle));
     }
+    widgets.add(const SizedBox(height: 5));
     widgets.add(
       ElevatedButton(
         onPressed: _onShowHomepageClicked,
@@ -80,11 +79,9 @@ class AppInfoPage extends StatelessWidget {
     return <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 15, bottom: 5),
-        child: Center(
-          child: Text(
-            model.routeDataHeader,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+        child: Text(
+          model.routeDataHeader,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
       ChangeNotifierProvider<SettingsNotifier>.value(
@@ -92,22 +89,25 @@ class AppInfoPage extends StatelessWidget {
         child: Consumer<SettingsNotifier>(
           builder: (BuildContext context, SettingsNotifier state, Widget? child) {
             if (state.getDataSourceAttributions().isNotEmpty) {
-              List<Widget> widgetList = <Widget>[
-                Text(
-                  model.routeDataSourcesLabel,
-                  textAlign: TextAlign.start,
-                  style: labelStyle,
-                ),
-                Column(
-                  children: _buildRouteDbSourcesList(context, state),
-                ),
-                Text(
-                  model.routeDataDisclaimer,
-                  textAlign: TextAlign.start,
-                  style: labelStyle!.apply(fontSizeFactor: 0.8),
-                ),
-              ];
-              return Column(mainAxisAlignment: MainAxisAlignment.start, children: widgetList);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children:
+                    <Widget>[
+                      Text(
+                        model.routeDataSourcesLabel,
+                        //textAlign: TextAlign.start,
+                        style: labelStyle,
+                      ),
+                    ] +
+                    _buildRouteDbSourcesList(context, state) +
+                    <Widget>[
+                      Text(
+                        model.routeDataDisclaimer,
+                        //textAlign: TextAlign.start,
+                        style: labelStyle!.apply(fontSizeFactor: 0.8),
+                      ),
+                    ],
+              );
             }
             return Text(model.noRouteDataMessage, style: labelStyle);
           },
@@ -121,16 +121,14 @@ class AppInfoPage extends StatelessWidget {
     List<Widget> widgets = <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 15, bottom: 5),
-        child: Center(
-          child: Text(
-            model.supportHeader,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+        child: Text(
+          model.supportHeader,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
     ];
     for (final String line in model.supportLabels) {
-      widgets.add(Center(child: Text(line, style: labelStyle)));
+      widgets.add(Text(line, style: labelStyle));
     }
     return widgets;
   }
@@ -144,9 +142,9 @@ class AppInfoPage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(model.pageTitle),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(10),
         child: ListView(
-          shrinkWrap: true,
           children:
               _buildAppInfoWidgets(context, model) +
               _buildRouteDbInfoWidgets(context, model) +
@@ -154,6 +152,7 @@ class AppInfoPage extends StatelessWidget {
         ),
       ),
       drawer: _appDrawer,
+      drawerEnableOpenDragGesture: false,
     );
   }
 
