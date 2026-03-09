@@ -162,6 +162,7 @@ void main() {
               // All data fields of the attribution object must be handled correctly
               <DataSourceAttribution>[
                 DataSourceAttribution(
+                  id: 13,
                   label: 'A great source of data',
                   url: 'https://www.example.com',
                   attribution: 'A cool content creator',
@@ -173,6 +174,7 @@ void main() {
                   'A great source of data',
                   subTitle: 'A cool content creator (EUPL)',
                   content: 'https://www.example.com',
+                  itemId: 13,
                 ),
               ],
             ),
@@ -180,6 +182,7 @@ void main() {
               // License is missing
               <DataSourceAttribution>[
                 DataSourceAttribution(
+                  id: 42,
                   label: 'A great source of data',
                   url: 'https://www.example.com',
                   attribution: 'A cool content creator',
@@ -190,6 +193,7 @@ void main() {
                   'A great source of data',
                   subTitle: 'A cool content creator',
                   content: 'https://www.example.com',
+                  itemId: 42,
                 ),
               ],
             ),
@@ -201,12 +205,14 @@ void main() {
               // Multiple sources
               <DataSourceAttribution>[
                 DataSourceAttribution(
+                  id: 1,
                   label: 'Source 1',
                   url: '[url1]',
                   attribution: 'Author 1',
                   license: 'EUPL',
                 ),
                 DataSourceAttribution(
+                  id: 2,
                   label: 'Source 2',
                   url: '[url2]',
                   attribution: 'Author 2',
@@ -217,11 +223,13 @@ void main() {
                   'Source 1',
                   subTitle: 'Author 1 (EUPL)',
                   content: '[url1]',
+                  itemId: 1,
                 ),
                 ListViewItem(
                   'Source 2',
                   subTitle: 'Author 2',
                   content: '[url2]',
+                  itemId: 2,
                 ),
               ],
             ),
@@ -245,6 +253,7 @@ void main() {
             expect(outputItem.mainTitle, equals(inputItem.mainTitle));
             expect(outputItem.subTitle, equals(inputItem.subTitle));
             expect(outputItem.content, equals(inputItem.content));
+            expect(outputItem.itemId, equals(inputItem.itemId));
           }
         });
       }

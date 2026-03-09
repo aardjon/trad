@@ -171,6 +171,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     }
 
     Query query = Query.table(ExternalDataSourcesTable.tableName, <String>[
+      ExternalDataSourcesTable.columnId,
       ExternalDataSourcesTable.columnLabel,
       ExternalDataSourcesTable.columnUrl,
       ExternalDataSourcesTable.columnAttribution,
@@ -184,6 +185,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     for (final ResultRow row in resultSet) {
       sources.add(
         DataSourceAttribution(
+          id: row.getIntValue(ExternalDataSourcesTable.columnId),
           label: row.getStringValue(ExternalDataSourcesTable.columnLabel),
           url: row.getStringValue(ExternalDataSourcesTable.columnUrl),
           attribution: row.getStringValue(ExternalDataSourcesTable.columnAttribution),
@@ -192,6 +194,37 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       );
     }
     return sources;
+  }
+
+  @override
+  Future<DataSourceAttribution> getExternalDataSource(int sourceId) async {
+    if (!isStarted()) {
+      throw StateError('Cannot get external data sources while the storage is STOPPED.');
+    }
+
+    Query query = Query.table(ExternalDataSourcesTable.tableName, <String>[
+      ExternalDataSourcesTable.columnId,
+      ExternalDataSourcesTable.columnLabel,
+      ExternalDataSourcesTable.columnUrl,
+      ExternalDataSourcesTable.columnAttribution,
+      ExternalDataSourcesTable.columnLicense,
+    ]);
+    query.setWhereCondition('${ExternalDataSourcesTable.columnId} = ?', <int>[sourceId]);
+    query.limit = 1;
+
+    // Run the database query
+    final List<ResultRow> resultSet = await _repository.executeQuery(query);
+    if (resultSet.isEmpty) {
+      throw ArgumentError.value(sourceId, 'sourceId', 'External source not found.');
+    }
+    final ResultRow row = resultSet[0];
+    return DataSourceAttribution(
+      id: row.getIntValue(ExternalDataSourcesTable.columnId),
+      label: row.getStringValue(ExternalDataSourcesTable.columnLabel),
+      url: row.getStringValue(ExternalDataSourcesTable.columnUrl),
+      attribution: row.getStringValue(ExternalDataSourcesTable.columnAttribution),
+      license: row.getOptStringValue(ExternalDataSourcesTable.columnLicense),
+    );
   }
 
   @override

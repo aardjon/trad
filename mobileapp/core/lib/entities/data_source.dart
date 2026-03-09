@@ -5,8 +5,13 @@ library;
 
 /// Represents an external source from which data is imported.
 ///
-/// External sources are uniquely identified by their label.
+/// External sources are uniquely identified by their label, but still have an (internal) ID to
+/// allow fast and efficient access.
 class DataSourceAttribution {
+  /// Internal ID which globally identifies this external data source. Not meant to be shown to
+  /// users.
+  int id;
+
   /// Display name of this data source. This name must be unique within the route DB.
   String label;
 
@@ -23,6 +28,7 @@ class DataSourceAttribution {
 
   /// Constructor for directly initializing all members.
   DataSourceAttribution({
+    required this.id,
     required this.label,
     required this.url,
     required this.attribution,

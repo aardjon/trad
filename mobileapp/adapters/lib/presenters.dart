@@ -71,6 +71,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
               ? '${source.attribution} (${source.license})'
               : source.attribution,
           content: source.url,
+          itemId: source.id,
         ),
       );
     }

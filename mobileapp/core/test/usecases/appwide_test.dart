@@ -20,7 +20,7 @@ class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
 
 class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
 
-class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary{}
+class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
 
 /// Unit tests for the core.usecases.appwide.ApplicationWideUseCases component.
 void main() {

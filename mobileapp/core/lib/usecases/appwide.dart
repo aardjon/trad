@@ -103,4 +103,11 @@ class ApplicationWideUseCases {
     // TODO(aardjon): Can we take the URL from the pubspec file?
     await _systemEnvBoundary.openWebPage(tradHomePageUrl);
   }
+
+  /// Open the web site of the external data source identified by [sourceId] in the default browser.
+  Future<void> openExternalSourceHomePage(int sourceId) async {
+    _logger.info('Running use case openExternalSourceHomePage for sourceId $sourceId');
+    DataSourceAttribution dataSource = await _routeDbBoundary.getExternalDataSource(sourceId);
+    await _systemEnvBoundary.openWebPage(dataSource.url);
+  }
 }

@@ -77,7 +77,7 @@ void main() {
     test('importRouteDbFile() use case', () async {
       final DateTime fakeCreationDate = DateTime(2024, 8, 13);
       final List<DataSourceAttribution> fakeAttributions = <DataSourceAttribution>[
-        DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+        DataSourceAttribution(id: 1, label: 'Test', url: '[some url]', attribution: '[some name]'),
       ];
 
       di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
@@ -121,7 +121,12 @@ void main() {
       });
       when(storageBoundaryMock.getExternalDataSources).thenAnswer((_) async {
         return <DataSourceAttribution>[
-          DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+          DataSourceAttribution(
+            id: 1,
+            label: 'Test',
+            url: '[some url]',
+            attribution: '[some name]',
+          ),
         ];
       });
       when(downloadBoundaryMock.getAvailableUpdateCandidates).thenAnswer((_) async {
@@ -344,7 +349,12 @@ void main() {
         test('installFromLocalFile() success, storage stopped: ${!stopStorageFirst}', () async {
           final DateTime fakeCreationDate = DateTime(2025, 7, 23);
           final List<DataSourceAttribution> fakeAttributions = <DataSourceAttribution>[
-            DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+            DataSourceAttribution(
+              id: 1,
+              label: 'Test',
+              url: '[some url]',
+              attribution: '[some name]',
+            ),
           ];
 
           // Setup the storage mock as if everything went well
@@ -391,7 +401,12 @@ void main() {
       test('file operation error', () async {
         final DateTime dummyCreationDate = DateTime(2025, 9, 3);
         final List<DataSourceAttribution> dummyAttributions = <DataSourceAttribution>[
-          DataSourceAttribution(label: 'Test', url: '[some url]', attribution: '[some name]'),
+          DataSourceAttribution(
+            id: 1,
+            label: 'Test',
+            url: '[some url]',
+            attribution: '[some name]',
+          ),
         ];
         // Setup the storage mock to simulate an IO error during import
         when(storageBoundaryMock.isStarted).thenReturn(false);
@@ -753,6 +768,7 @@ class _FakeStorageBoundary extends Fake implements RouteDbStorageBoundary {
     }
     return <DataSourceAttribution>[
       DataSourceAttribution(
+        id: 1,
         label: '[label]',
         url: '[url]',
         attribution: '[attribution]',

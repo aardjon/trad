@@ -60,6 +60,12 @@ abstract interface class RouteDbStorageBoundary {
   /// This method must only be called on a STARTED storage.
   Future<List<DataSourceAttribution>> getExternalDataSources();
 
+  /// Return the external source identified by [sourceId] from the current route database. Throws if
+  /// the ID doesn't exist.
+  ///
+  /// This method must only be called on a STARTED storage.
+  Future<DataSourceAttribution> getExternalDataSource(int sourceId);
+
   /// Retrieve all data of the single summit identified by [summitDataId].
   ///
   /// This must only be called on a STARTED storage.

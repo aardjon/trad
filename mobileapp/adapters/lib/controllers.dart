@@ -65,6 +65,12 @@ class ApplicationWideController {
   void requestAppHomepage() {
     unawaited(_globalUsecases.openHomePage());
   }
+
+  /// The user requested to open the details of a certain external data source, identified by
+  /// [sourceId].
+  void requestExternalSource(int sourceId) {
+    unawaited(_globalUsecases.openExternalSourceHomePage(sourceId));
+  }
 }
 
 /// Controller for transmitting knowledge base UI messages to the core.

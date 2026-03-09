@@ -65,7 +65,9 @@ class AppInfoPage extends StatelessWidget {
           ),
           dense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-          onTap: () {},
+          onTap: () {
+            _onExternalSourceClicked(source.itemId!);
+          },
         ),
       );
     }
@@ -159,5 +161,12 @@ class AppInfoPage extends StatelessWidget {
   void _onShowHomepageClicked() {
     ApplicationWideController controller = ApplicationWideController();
     controller.requestAppHomepage();
+  }
+
+  /// Event handler for clicking a single data source list item. [sourceId] is the internal ID of
+  /// this source.
+  void _onExternalSourceClicked(int sourceId) {
+    ApplicationWideController controller = ApplicationWideController();
+    controller.requestExternalSource(sourceId);
   }
 }
