@@ -12,6 +12,7 @@ import 'package:crosscuttings/appmeta.dart';
 import 'package:intl/intl.dart';
 
 import 'package:core/boundaries/presentation.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/knowledgebase.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
@@ -47,23 +48,39 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
+        ListViewItem('Über trad', icon: const IconDefinition(Glyph.logoAppInfo)),
         '$applicationName Version $applicationVersion',
       ),
     );
   }
 
   @override
-  void updateRouteDbStatus(DateTime? routeDatabaseDate) {
+  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources) {
     const String noDbMessage =
         'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
         'indem du Wegedaten herunterlädst bzw. importierst.';
 
     final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
+    final List<ListViewItem> dataSourceAttributions = <ListViewItem>[];
+    for (final DataSourceAttribution source in dataSources) {
+      dataSourceAttributions.add(
+        ListViewItem(
+          source.label,
+          subTitle: source.license != null
+              ? '${source.attribution} (${source.license})'
+              : source.attribution,
+          content: source.url,
+          itemId: source.id,
+        ),
+      );
+    }
+
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
       activated: routeDatabaseDate != null,
       label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
+      dataSourceAttributions: routeDatabaseDate != null ? dataSourceAttributions : <ListViewItem>[],
       statusMessage: routeDatabaseDate != null ? null : noDbMessage,
     );
   }
@@ -177,6 +194,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
           post.userName,
           subTitle: formattedDate,
           content: post.comment,
+          bottomLine: '(Quelle: ${post.source})',
           endIcon: _ratingMapper.getIntRatingIcon(post.rating),
         ),
       );
@@ -229,6 +247,32 @@ class ApplicationWidePresenter implements PresentationBoundary {
     );
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.showSettings(settingsModel);
+  }
+
+  @override
+  void showAppInfo() {
+    AppInfoModel aboutModel = AppInfoModel(
+      pageTitle: 'Über trad',
+      versionLabel: 'Du verwendest $applicationName in Version $applicationVersion',
+      copyrightAttributionLabels: <String>[
+        '© Karsten & Thomas Wesenigk',
+        'Lizensiert unter der EUPL 1.2',
+      ],
+      websiteButtonLabel: 'Website aufrufen',
+      routeDataHeader: 'Wegedaten',
+      routeDataSourcesLabel:
+          'Die heruntergeladenen Gipfel- und Wegeinformationen stammen aus den folgenden Quellen:',
+      routeDataDisclaimer: 'Die Inhalte können veraltet, unvollständig oder falsch sein!',
+      noRouteDataMessage: 'Momentan liegen keine Wegedaten vor.',
+      supportHeader: 'Unterstützen',
+      supportLabels: <String>[
+        'Wir freuen uns über Fehlerhinweise und Verbesserungsvorschläge zu dieser App.',
+        'Kontaktmöglichkeiten findest du auf unserer Website.',
+        'Bitte hilf auch gern mit, die verwendeten Datenquellen zu verbessern oder zu erweitern.',
+      ],
+    );
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.showAppInfo(aboutModel);
   }
 }
 

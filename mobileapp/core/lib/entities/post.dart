@@ -17,9 +17,12 @@ class Post {
   /// The comment.
   String comment;
 
+  /// Name of the data source this post was published.
+  String source;
+
   /// The rating the author assigned to the entity this post corresponds to.
   int rating;
 
   /// Constructor for directly initializing all members.
-  Post(this.userName, this.postDate, this.comment, this.rating);
+  Post(this.userName, this.postDate, this.comment, this.source, this.rating);
 }

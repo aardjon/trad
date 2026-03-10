@@ -3,6 +3,7 @@
 ///
 library;
 
+import '../entities/data_source.dart';
 import '../entities/knowledgebase.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
@@ -19,8 +20,8 @@ abstract interface class PresentationBoundary {
   /// This may display some kind of "loading" or "splash" screen if appropriate.
   void initUserInterface();
 
-  /// Let the UI display/update the [routeDatabaseDate] as given.
-  void updateRouteDbStatus(DateTime? routeDatabaseDate);
+  /// Let the UI display/update the [routeDatabaseDate] and [dataSources] as given.
+  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources);
 
   /// Notify the UI about a running route database update.
   void routeDbUpdateTaskStarted();
@@ -70,4 +71,7 @@ abstract interface class PresentationBoundary {
 
   /// Let the UI display the application settings (aka *settings* domain).
   void showSettings();
+
+  /// Let the UI display the application information (aka *appinfo* domain).
+  void showAppInfo();
 }

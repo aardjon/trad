@@ -13,6 +13,7 @@ import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
 import '../boundaries/sysenv.dart';
+import '../entities/data_source.dart';
 import '../entities/errors.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
@@ -54,6 +55,7 @@ class RouteDbUseCases {
     _logger.debug('Running use case updateRouteDatabase()');
     _presentationBoundary.routeDbUpdateTaskStarted();
     DateTime? dbCreationDate;
+
     if (_storageBoundary.isStarted()) {
       dbCreationDate = await _storageBoundary.getCreationDate();
     }
@@ -79,7 +81,7 @@ class RouteDbUseCases {
   }) async {
     if (_storageBoundary.isStarted()) {
       _storageBoundary.stopStorage();
-      _presentationBoundary.updateRouteDbStatus(null);
+      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
     }
 
     String? filePath = await dbFileProvider.determineLocalFileToInstall();
@@ -97,10 +99,11 @@ class RouteDbUseCases {
       // Start again with the installed database. If the import failed, this is the previous one.
       await _storageBoundary.startStorage();
       DateTime routeDbDate = await _storageBoundary.getCreationDate();
-      _presentationBoundary.updateRouteDbStatus(routeDbDate);
+      List<DataSourceAttribution> dataSources = await _storageBoundary.getExternalDataSources();
+      _presentationBoundary.updateRouteDbStatus(routeDbDate, dataSources);
     } on StorageStartingException {
       // No or an invalid DB may have been there before already
-      _presentationBoundary.updateRouteDbStatus(null);
+      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
     }
   }
 

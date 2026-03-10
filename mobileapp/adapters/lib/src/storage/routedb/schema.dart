@@ -9,7 +9,7 @@ library;
 import '../version.dart';
 
 /// The schema version currently supported (and required) by this app.
-final Version supportedSchemaVersion = Version(1, 0);
+final Version supportedSchemaVersion = Version(1, 1);
 
 /// Table containing some static metadata about the database itself.
 ///
@@ -37,6 +37,35 @@ class DatabaseMetadataTable {
   /// Vendor identification label of the database provider.
   /// This is an arbitrary (even empty) display string to distinguish different database sources.
   static const String columnVendor = '$tableName.vendor';
+}
+
+/// References to all external sources the data contained in this route DB was extracted from.
+class ExternalDataSourcesTable {
+  /// Name of the table.
+  static const String tableName = 'external_data_sources';
+
+  /// The name of the 'id' INTEGER column:
+  /// Unique ID of this data source.
+  static const String columnId = '$tableName.id';
+
+  /// The name of the 'label' TEXT column:
+  /// Display name of this data source.
+  static const String columnLabel = '$tableName.label';
+
+  /// The name of the 'url' TEXT column:
+  /// Landing page URL (not an API endpoint!) a user may visit by browser to get further
+  /// information about this data source.
+  static const String columnUrl = '$tableName.url';
+
+  /// The name of the 'attribution' TEXT column:
+  /// Attribution string (e.g. author names) for the data from this source.
+  static const String columnAttribution = '$tableName.attribution';
+
+  /// The name of the 'license' TEXT column:
+  /// Short, human-readable name of the licence which applies to all data from this source.
+  /// Using an abbreviation or SPDX identifier (e.g. "CC-BY-4.0" or "ODbL") instead of a longer
+  /// licence name is preferred. May be NULL if the license is unknown or doesn't apply.
+  static const String columnLicense = '$tableName.license';
 }
 
 /// All names of all summits.
@@ -174,6 +203,10 @@ class PostsTable {
   /// The name of the 'route_id' INTEGER column:
   /// ID of the route this post is assigned to. Foreign key to the routes table.
   static const String columnRouteId = '$tableName.route_id';
+
+  /// The name of the 'source_id' INTEGER column:
+  /// ID of the external data source this post originates from.
+  static const String columnSourceId = '$tableName.source_id';
 
   /// The name of the 'user_name' TEXT column:
   /// Name of the post's author.

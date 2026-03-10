@@ -6,6 +6,7 @@ library;
 import 'dart:io';
 
 import 'package:core/boundaries/storage/routedb.dart';
+import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
@@ -161,6 +162,69 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     String dateStrValue = resultSet[0].getStringValue(DatabaseMetadataTable.columnCompileTime);
     return DateTime.parse(dateStrValue);
+  }
+
+  @override
+  Future<List<DataSourceAttribution>> getExternalDataSources() async {
+    if (!isStarted()) {
+      throw StateError('Cannot get external data sources while the storage is STOPPED.');
+    }
+
+    Query query = Query.table(ExternalDataSourcesTable.tableName, <String>[
+      ExternalDataSourcesTable.columnId,
+      ExternalDataSourcesTable.columnLabel,
+      ExternalDataSourcesTable.columnUrl,
+      ExternalDataSourcesTable.columnAttribution,
+      ExternalDataSourcesTable.columnLicense,
+    ]);
+
+    // Run the database query
+    final List<ResultRow> resultSet = await _repository.executeQuery(query);
+
+    List<DataSourceAttribution> sources = <DataSourceAttribution>[];
+    for (final ResultRow row in resultSet) {
+      sources.add(
+        DataSourceAttribution(
+          id: row.getIntValue(ExternalDataSourcesTable.columnId),
+          label: row.getStringValue(ExternalDataSourcesTable.columnLabel),
+          url: row.getStringValue(ExternalDataSourcesTable.columnUrl),
+          attribution: row.getStringValue(ExternalDataSourcesTable.columnAttribution),
+          license: row.getOptStringValue(ExternalDataSourcesTable.columnLicense),
+        ),
+      );
+    }
+    return sources;
+  }
+
+  @override
+  Future<DataSourceAttribution> getExternalDataSource(int sourceId) async {
+    if (!isStarted()) {
+      throw StateError('Cannot get external data sources while the storage is STOPPED.');
+    }
+
+    Query query = Query.table(ExternalDataSourcesTable.tableName, <String>[
+      ExternalDataSourcesTable.columnId,
+      ExternalDataSourcesTable.columnLabel,
+      ExternalDataSourcesTable.columnUrl,
+      ExternalDataSourcesTable.columnAttribution,
+      ExternalDataSourcesTable.columnLicense,
+    ]);
+    query.setWhereCondition('${ExternalDataSourcesTable.columnId} = ?', <int>[sourceId]);
+    query.limit = 1;
+
+    // Run the database query
+    final List<ResultRow> resultSet = await _repository.executeQuery(query);
+    if (resultSet.isEmpty) {
+      throw ArgumentError.value(sourceId, 'sourceId', 'External source not found.');
+    }
+    final ResultRow row = resultSet[0];
+    return DataSourceAttribution(
+      id: row.getIntValue(ExternalDataSourcesTable.columnId),
+      label: row.getStringValue(ExternalDataSourcesTable.columnLabel),
+      url: row.getStringValue(ExternalDataSourcesTable.columnUrl),
+      attribution: row.getStringValue(ExternalDataSourcesTable.columnAttribution),
+      license: row.getOptStringValue(ExternalDataSourcesTable.columnLicense),
+    );
   }
 
   @override
@@ -338,13 +402,18 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       orderByColumn += 'ASC';
     }
 
-    Query query = Query.table(PostsTable.tableName, <String>[
-      PostsTable.columnId,
-      PostsTable.columnUserName,
-      PostsTable.columnPostDate,
-      PostsTable.columnComment,
-      PostsTable.columnRating,
-    ]);
+    Query query = Query.join(
+      <String>[PostsTable.tableName, ExternalDataSourcesTable.tableName],
+      <String>['${PostsTable.columnSourceId} = ${ExternalDataSourcesTable.columnId}'],
+      <String>[
+        PostsTable.columnId,
+        PostsTable.columnUserName,
+        PostsTable.columnPostDate,
+        PostsTable.columnComment,
+        PostsTable.columnRating,
+        ExternalDataSourcesTable.columnLabel,
+      ],
+    );
     query.setWhereCondition('${PostsTable.columnRouteId} = ?', <int>[routeId]);
     query.orderByColumns = <String>[orderByColumn];
 
@@ -357,9 +426,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       String name = dataRow.getStringValue(PostsTable.columnUserName);
       String timestamp = dataRow.getStringValue(PostsTable.columnPostDate);
       String comment = dataRow.getStringValue(PostsTable.columnComment);
+      String source = dataRow.getStringValue(ExternalDataSourcesTable.columnLabel);
       int rating = dataRow.getIntValue(PostsTable.columnRating);
       DateTime postDate = DateTime.parse(timestamp);
-      posts.add(Post(name, postDate, comment, rating));
+      posts.add(Post(name, postDate, comment, source, rating));
     }
     return posts;
   }

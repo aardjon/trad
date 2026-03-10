@@ -60,6 +60,8 @@ class SettingsNotifier extends ChangeNotifier {
   /// The identifier of the currently used route database
   String _routeDbIdentifier = '';
 
+  List<ListViewItem> _dataSourceAttributions = <ListViewItem>[];
+
   /// Displays whether the route db is currently being updated in the background (true) or not
   /// (false).
   bool _routeDbUpdateInProgress = false;
@@ -72,6 +74,11 @@ class SettingsNotifier extends ChangeNotifier {
   /// Returns the identifying label of the current route database.
   String getRouteDbIdentifier() {
     return _routeDbIdentifier;
+  }
+
+  /// Returns the data source attribution information for the current route database.
+  List<ListViewItem> getDataSourceAttributions() {
+    return _dataSourceAttributions;
   }
 
   /// Returns the additional message about the route database that should be displayed to the user.
@@ -93,11 +100,13 @@ class SettingsNotifier extends ChangeNotifier {
   void updateRouteDbStatus({
     required bool routeDbActivationStatus,
     required String dbIdentifier,
+    required List<ListViewItem> dataSourceAttributions,
     String? availabilityMessage,
   }) {
     _routeDbActivationStatus = routeDbActivationStatus;
     _routeDbAvailabilityMessage = availabilityMessage;
     _routeDbIdentifier = dbIdentifier;
+    _dataSourceAttributions = dataSourceAttributions;
     notifyListeners();
   }
 
