@@ -52,7 +52,7 @@ class TestDbSchemaV1Filter:
         db_writer.execute_filter(input_pipe, output_pipe=Mock(Pipe))
 
         expected_summits_sql_statement = (
-            f"INSERT INTO {SummitsTable.TABLE_NAME} ("
+            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ("
             f"{SummitsTable.COLUMN_LATITUDE}, "
             f"{SummitsTable.COLUMN_LONGITUDE}"
             f") VALUES (?, ?) "
