@@ -4,6 +4,13 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Version 0.3.0 - 2026-03-??
+
+### New/Improved Features:
+ - Add an "About" page showing app and data source attribution information
+ - Display the original source of each post (#22)
+
+
 ## Version 0.2.1 - 2026-02-07
 
 ### Fixed Bugs:
