@@ -66,6 +66,12 @@ class TradDrawerFactory {
                   title: Text(_model.settingsItem.mainTitle),
                   onTap: _controller.requestSwitchToSettings,
                 ),
+                const Divider(),
+                ListTile(
+                  leading: _iconFactory.getIconWidget(_model.aboutItem.icon),
+                  title: Text(_model.aboutItem.mainTitle),
+                  onTap: _controller.requestSwitchToAbout,
+                ),
               ];
               return NavigationDrawer(
                 footer: Text(_model.applicationVersionLabel),

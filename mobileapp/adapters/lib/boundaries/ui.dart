@@ -21,6 +21,9 @@ class MainMenuModel {
   /// List item for the settings domain.
   final ListViewItem settingsItem;
 
+  /// List item for the about domain.
+  final ListViewItem aboutItem;
+
   /// Application version string to show.
   final String applicationVersionLabel;
 
@@ -31,6 +34,7 @@ class MainMenuModel {
     this.routedbItem,
     this.knowledgebaseItem,
     this.settingsItem,
+    this.aboutItem,
     this.applicationVersionLabel,
   );
 }
@@ -55,6 +59,9 @@ enum Glyph {
 
   /// Represents the logo for the application settings.
   logoSettings,
+
+  /// Represents the logo for the application information.
+  logoAppInfo,
 
   /// Represents the lowest possible score in some rating (e.g. "zero points").
   scoreLowest,
@@ -162,12 +169,24 @@ class ListViewItem {
   /// Expect this to be a long, multi-line string.
   String? content;
 
+  /// Optional bottom line text, displayed least prominently (e.g. smaller and lighter) than
+  /// everything else. May be used for additional, less important remarks or notes.
+  String? bottomLine;
+
   /// Unique identifier of this item. If a list item is clicked, this ID is passed to the handler
   /// to identify the clicked item. Without an ID, the item cannot be clicked at all.
   ItemDataId? itemId;
 
   /// Constructor for directly initializing all members.
-  ListViewItem(this.mainTitle, {this.subTitle, this.icon, this.endIcon, this.content, this.itemId});
+  ListViewItem(
+    this.mainTitle, {
+    this.subTitle,
+    this.icon,
+    this.endIcon,
+    this.content,
+    this.bottomLine,
+    this.itemId,
+  });
 }
 
 /// Model that provides all static data needed to display the summit details page to the UI.
@@ -246,6 +265,57 @@ class SettingsModel {
   });
 }
 
+/// Model that provides all static data needed to display the app info page to the UI.
+///
+/// "Static" means, that this data does not change while the page is shown, so it can be provided
+/// once during the initial page display. Certain UI implementations may choose to ignore some of
+/// those fields on certain platforms.
+class AppInfoModel {
+  /// Title of the settings page.
+  final String pageTitle;
+
+  /// The app version label to display.
+  final String versionLabel;
+
+  /// List of app copyright and attribution strings to be displayed.
+  final List<String> copyrightAttributionLabels;
+
+  /// Label of the "open app website" button/link.
+  final String websiteButtonLabel;
+
+  /// Header of the "route data base" section.
+  final String routeDataHeader;
+
+  /// Header of the external data sources list.
+  final String routeDataSourcesLabel;
+
+  /// Disclaimer to display after the data sources list.
+  final String routeDataDisclaimer;
+
+  /// Text to display in case there is no route database.
+  final String noRouteDataMessage;
+
+  /// Header of the "Support us" section.
+  final String supportHeader;
+
+  /// List of support info strings (each one describing a way to support us in making this app).
+  final List<String> supportLabels;
+
+  /// Constructor for directly initializing all members.
+  AppInfoModel({
+    required this.pageTitle,
+    required this.versionLabel,
+    required this.copyrightAttributionLabels,
+    required this.websiteButtonLabel,
+    required this.routeDataHeader,
+    required this.routeDataSourcesLabel,
+    required this.routeDataDisclaimer,
+    required this.noRouteDataMessage,
+    required this.supportHeader,
+    required this.supportLabels,
+  });
+}
+
 /// Boundary interface to the concrete, domain-independent part of the UI implementation.
 ///
 /// This interface provides general, application-wide UI operations. Domain specific concerns are
@@ -264,11 +334,14 @@ abstract interface class ApplicationUiBoundary {
   /// - [activated]: The activation status of the route database (true: enabled, false: disabled)
   /// - [label]: A label for identifying the current route database (may of course be something like
   ///   'None' if the route database is disabled)
+  /// - [dataSourceAttributions]: Information about all external data sources (and their
+  ///   attributions) the current route database was built from.
   /// - [statusMessage]: A message with more detailed information about the route database status.
   ///   Set to `null` to not display any additional hint at all.
   void updateRouteDbStatus({
     required bool activated,
     required String label,
+    required List<ListViewItem> dataSourceAttributions,
     String? statusMessage,
   });
 
@@ -319,4 +392,7 @@ abstract interface class ApplicationUiBoundary {
 
   /// Request the UI to display the *Settings* screen based on the provided [model].
   void showSettings(SettingsModel model);
+
+  /// Request the UI to display the *About* screen based on the provided [model].
+  void showAppInfo(AppInfoModel model);
 }

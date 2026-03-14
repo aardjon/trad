@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 
+import 'appinfo.dart';
 import 'drawer.dart';
 import 'journal.dart';
 import 'knowledgebase.dart';
@@ -101,6 +102,9 @@ class MainWidget extends StatelessWidget {
             _menuModel.settingsItem.mainTitle,
             _settingsState,
           );
+        },
+        UiRoute.appinfo.toRouteString(): (BuildContext context) {
+          return AppInfoPage(_appDrawerFactory.create(context), _settingsState);
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {
           return _SplashPage(_splashMessage);

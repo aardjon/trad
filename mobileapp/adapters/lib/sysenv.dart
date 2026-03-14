@@ -41,4 +41,10 @@ class SystemEnvironment implements SystemEnvironmentBoundary {
     Uri geoUri = Uri(scheme: 'geo', path: '${markPosition.latitude},${markPosition.longitude}');
     await _externalAppsBoundary.openGeoUri(geoUri);
   }
+
+  @override
+  Future<void> openWebPage(String webUrl) async {
+    Uri webUri = Uri.parse(webUrl);
+    await _externalAppsBoundary.openWebUri(webUri);
+  }
 }

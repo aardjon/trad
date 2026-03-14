@@ -29,7 +29,10 @@ enum UiRoute {
   knowledgebase,
 
   /// Route to the *Settings* screen.
-  settings;
+  settings,
+
+  /// Route to the *About* screen.
+  appinfo;
 
   /// Returns the concrete Flutter route/path string that corresponds to this item.
   ///
@@ -51,6 +54,8 @@ enum UiRoute {
         return '/knowledgebase';
       case settings:
         return '/settings';
+      case appinfo:
+        return '/appinfo';
     }
   }
 }

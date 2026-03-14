@@ -79,11 +79,13 @@ class ApplicationUI implements ApplicationUiBoundary {
   void updateRouteDbStatus({
     required bool activated,
     required String label,
+    required List<ListViewItem> dataSourceAttributions,
     String? statusMessage,
   }) {
     _settingsState.updateRouteDbStatus(
       routeDbActivationStatus: activated,
       dbIdentifier: label,
+      dataSourceAttributions: dataSourceAttributions,
       availabilityMessage: statusMessage,
     );
   }
@@ -146,6 +148,12 @@ class ApplicationUI implements ApplicationUiBoundary {
   void showSettings(SettingsModel model) {
     _logger.debug('Displaying settings page');
     _switchToRoute(UiRoute.settings.toRouteString(), isRoot: true, routeArguments: model);
+  }
+
+  @override
+  void showAppInfo(AppInfoModel model) {
+    _logger.debug('Displaying app info page');
+    _switchToRoute(UiRoute.appinfo.toRouteString(), isRoot: true, routeArguments: model);
   }
 
   /// Let the UI display the page with the given [routeString], forwarding the providing

@@ -21,4 +21,10 @@ abstract interface class SystemEnvironmentBoundary {
   /// up to the system.
   // TODO(aardjon): This request may fail, or the user may cancel it. Do we want to know this?
   Future<void> openExternalMapsApp(GeoPosition markPosition);
+
+  /// Requests the operating system to open the given [webUrl] in the default (external) browser
+  /// application. Which application is used (or how to choose between multiple options) is up to
+  /// the system.
+  // TODO(aardjon): This request may fail, or the user may cancel it. Do we want to know this?
+  Future<void> openWebPage(String webUrl);
 }

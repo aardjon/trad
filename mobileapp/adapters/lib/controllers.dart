@@ -55,6 +55,22 @@ class ApplicationWideController {
   void requestSwitchToSettings() {
     _globalUsecases.switchToSettings();
   }
+
+  /// The user requested a switch to the about domain.
+  void requestSwitchToAbout() {
+    _globalUsecases.switchToAbout();
+  }
+
+  /// The user requested to open trad's home page in a browser.
+  void requestAppHomepage() {
+    unawaited(_globalUsecases.openHomePage());
+  }
+
+  /// The user requested to open the details of a certain external data source, identified by
+  /// [sourceId].
+  void requestExternalSource(int sourceId) {
+    unawaited(_globalUsecases.openExternalSourceHomePage(sourceId));
+  }
 }
 
 /// Controller for transmitting knowledge base UI messages to the core.

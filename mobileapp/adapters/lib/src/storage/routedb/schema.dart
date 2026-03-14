@@ -9,7 +9,7 @@ library;
 import '../version.dart';
 
 /// The schema version currently supported (and required) by this app.
-final Version supportedSchemaVersion = Version(1, 0);
+final Version supportedSchemaVersion = Version(1, 1);
 
 /// Table containing some static metadata about the database itself.
 ///
@@ -37,6 +37,39 @@ class DatabaseMetadataTable {
   /// Vendor identification label of the database provider.
   /// This is an arbitrary (even empty) display string to distinguish different database sources.
   static const String columnVendor = '$tableName.vendor';
+
+  /// The name of the 'compiler' TEXT column:
+  /// Identifying label (e.g. name and version) of the compiler used to create this database.
+  static const String columnCompiler = '$tableName.compiler';
+}
+
+/// References to all external sources the data contained in this route DB was extracted from.
+class ExternalDataSourcesTable {
+  /// Name of the table.
+  static const String tableName = 'external_data_sources';
+
+  /// The name of the 'id' INTEGER column:
+  /// Unique ID of this data source.
+  static const String columnId = '$tableName.id';
+
+  /// The name of the 'label' TEXT column:
+  /// Display name of this data source.
+  static const String columnLabel = '$tableName.label';
+
+  /// The name of the 'url' TEXT column:
+  /// Landing page URL (not an API endpoint!) a user may visit by browser to get further
+  /// information about this data source.
+  static const String columnUrl = '$tableName.url';
+
+  /// The name of the 'attribution' TEXT column:
+  /// Attribution string (e.g. author names) for the data from this source.
+  static const String columnAttribution = '$tableName.attribution';
+
+  /// The name of the 'license' TEXT column:
+  /// Short, human-readable name of the licence which applies to all data from this source.
+  /// Using an abbreviation or SPDX identifier (e.g. "CC-BY-4.0" or "ODbL") instead of a longer
+  /// licence name is preferred. May be NULL if the license is unknown or doesn't apply.
+  static const String columnLicense = '$tableName.license';
 }
 
 /// All names of all summits.
@@ -133,8 +166,8 @@ class RoutesTable {
 
   /// The name of the 'grade_af' INTEGER column:
   /// The grade that applies when climbing this route in the AF ("alles frei", i.e. "all free")
-  /// style, i.e. without any belaying (no rope, no abseiling). Set to 0 when it is just a single
-  /// jump.
+  /// style. This is the main style which is always set as long as there is a climb at all. Set to 0
+  /// for pure jump routes.
   static const String columnGradeAf = '$tableName.grade_af';
 
   /// The name of the 'grade_rp' INTEGER column:
@@ -153,7 +186,7 @@ class RoutesTable {
   static const String columnGradeJump = '$tableName.grade_jump';
 
   /// The name of the 'stars' INTEGER column:
-  /// The count of official stars assigend to this route. An increasing number of stars marks a
+  /// The count of official stars assigned to this route. An increasing number of stars marks a
   /// route as "more beautiful". 0 is the default for regular routes.
   static const String columnStars = '$tableName.stars';
 
@@ -174,6 +207,10 @@ class PostsTable {
   /// The name of the 'route_id' INTEGER column:
   /// ID of the route this post is assigned to. Foreign key to the routes table.
   static const String columnRouteId = '$tableName.route_id';
+
+  /// The name of the 'source_id' INTEGER column:
+  /// ID of the external data source this post originates from.
+  static const String columnSourceId = '$tableName.source_id';
 
   /// The name of the 'user_name' TEXT column:
   /// Name of the post's author.
