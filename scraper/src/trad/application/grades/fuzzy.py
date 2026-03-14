@@ -220,9 +220,7 @@ class FuzzyParser(GradeParser):
         """
         unprocessed_string = single_grade
         found_labels = []
-        for label in sorted(
-            (g for g in self._grade_string_map if g), key=lambda s: len(s), reverse=True
-        ):
+        for label in sorted((g for g in self._grade_string_map if g), key=len, reverse=True):
             if unprocessed_string.count(label) > 0:
                 found_labels.append(label)
                 unprocessed_string = unprocessed_string.replace(label, "")

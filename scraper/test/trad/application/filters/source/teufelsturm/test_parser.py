@@ -159,8 +159,8 @@ def test_parse_rating(rating_text: str, expected_rating: int) -> None:
     ],
 )
 def test_parse_user(input_text: str) -> None:
-    expected_name = input_text.split("|")[0]
-    expected_date = input_text.split("|")[-1]
+    expected_name = input_text.split("|", maxsplit=1)[0]
+    expected_date = input_text.rsplit("|", maxsplit=1)[-1]
 
     parsed_name, parsed_date = parse_user_name(input_text)
 
