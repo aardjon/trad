@@ -87,7 +87,6 @@ jobs:
         working-directory: ./scraper
 
     steps:
-      - uses: FranzDiebold/github-env-vars-action@v2
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
