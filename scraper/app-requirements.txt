@@ -10,9 +10,9 @@ beautifulsoup4==4.14.3
     # via
     #   pandas
     #   trad_scraper (pyproject.toml)
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.5
     # via requests
 html5lib==1.1
     # via pandas
@@ -34,7 +34,7 @@ pydantic-core==2.41.5
     # via pydantic
 python-dateutil==2.9.0.post0
     # via pandas
-pytz==2025.2
+pytz==2026.1.post1
     # via pandas
 requests==2.32.5
     # via trad_scraper (pyproject.toml)

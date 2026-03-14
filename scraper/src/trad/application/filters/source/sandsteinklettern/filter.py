@@ -4,8 +4,7 @@ Provide a Filter implementation for importing data from sandsteinklettern.de.
 
 from logging import getLogger
 from typing import Final, override
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters._base import SourceFilter
@@ -97,7 +96,7 @@ class SandsteinkletternDataFilter(SourceFilter):
     _ROUTE_DATA_RANK: Final = 3
     """Priority/Accuracy of the route data retrieved from sandsteinklettern in case of conflicts."""
 
-    _timezone_berlin: Final = pytz.timezone("Europe/Berlin")
+    _timezone_berlin: Final = ZoneInfo("Europe/Berlin")
     """ Time zone from which all naive dates on the external system are assumed to be."""
 
     def __init__(self, network_boundary: HttpNetworkingBoundary) -> None:
@@ -323,7 +322,7 @@ class SandsteinkletternDataFilter(SourceFilter):
             route_id=self._route_id_map.get_pipe_id(json_post.wegid),
             post=Post(
                 user_name=json_post.username,
-                post_date=self._timezone_berlin.localize(json_post.datum),
+                post_date=json_post.datum.replace(tzinfo=self._timezone_berlin),
                 comment=json_post.kommentar,
                 rating=self._parse_route_rating(json_post),
                 source_label=self._EXTERNAL_SOURCE_DESCRIPTION.label,
