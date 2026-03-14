@@ -100,18 +100,21 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
 
     result_set = list(
         connection.execute(
-            "SELECT schema_version_major, schema_version_minor, compile_time, vendor "
+            "SELECT schema_version_major, schema_version_minor, compile_time, vendor, compiler "
             "FROM database_metadata"
         )
     )
     assert len(result_set) == 1
+    result = result_set[0]
 
     # Check schema version
-    assert result_set[0][0] == 1
-    assert result_set[0][1] == 1
+    assert result[0], result[1] == (1, 1)
 
     # Check vendor string
-    assert result_set[0][3] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
+    assert result[3] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
+
+    # Check compiler name
+    assert result[4] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
 
     # Compare the creation time. Since the test takes a small amount of time, we cannot simply check
     # for equality. Instead, check that the time difference is not too big instead, assuming that

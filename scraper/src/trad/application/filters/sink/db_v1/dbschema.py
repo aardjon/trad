@@ -51,6 +51,12 @@ class DatabaseMetadataTable(TableSchema):
     This is an arbitrary (even empty) display string to distinguish different database sources.
     """
 
+    COLUMN_COMPILER: Final = "compiler"
+    """
+    The name of the 'compiler' TEXT column:
+    Identifying label (e.g. name and version) of the compiler used to create this database.
+    """
+
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
@@ -63,7 +69,8 @@ class DatabaseMetadataTable(TableSchema):
             "schema_version_minor" INTEGER NOT NULL,
             "compile_time" TEXT NOT NULL,
             "vendor" TEXT NOT NULL,
-            UNIQUE(schema_version_major, schema_version_minor, compile_time, vendor)
+            "compiler" TEXT NOT NULL,
+            UNIQUE(schema_version_major, schema_version_minor, compile_time, vendor, compiler)
         );
         """)
 

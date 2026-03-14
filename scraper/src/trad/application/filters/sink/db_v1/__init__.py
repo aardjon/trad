@@ -94,6 +94,7 @@ class DbSchemaV1Filter(SinkFilter):
             DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MAJOR,
             DatabaseMetadataTable.COLUMN_SCHEMA_VERSION_MINOR,
             DatabaseMetadataTable.COLUMN_VENDOR,
+            DatabaseMetadataTable.COLUMN_COMPILER,
             DatabaseMetadataTable.COLUMN_COMPILE_TIME,
         ]
         column_names = ", ".join(column_list)
@@ -110,6 +111,7 @@ class DbSchemaV1Filter(SinkFilter):
             query_parameters=[
                 major,
                 minor,
+                f"{APPLICATION_NAME} {APPLICATION_VERSION}",
                 f"{APPLICATION_NAME} {APPLICATION_VERSION}",
                 datetime.datetime.now(tz=datetime.UTC).isoformat(),
             ],

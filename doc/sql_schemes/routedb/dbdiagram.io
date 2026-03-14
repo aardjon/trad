@@ -20,7 +20,7 @@ Project RouteDb {
             ["summit_id", "route_name", "route_grade"]
         ],
         "database_metadata": [
-            ["schema_version_major", "schema_version_minor", "compile_time", "vendor"]
+            ["schema_version_major", "schema_version_minor", "compile_time", "vendor", "compiler"]
         ]
     }
     '''
@@ -58,6 +58,13 @@ Table database_metadata {
     note: '''
     Vendor identification label of the database provider.
     This is an arbitrary (even empty) display string to distinguish different database sources.
+    '''
+  ]
+  
+  compiler text [
+    not null,
+    note: '''
+    Identifying label (e.g. name and version) of the compiler used to create this database.
     '''
   ]
 }
