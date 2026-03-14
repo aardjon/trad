@@ -165,12 +165,12 @@ Table summits {
     note: 'Summit ID, unique within this database.'
   ]
 
-  latitude INTEGER [
+  latitude integer [
     not null,
     note: 'The latitude value of the geographical position.'
   ]
 
-  longitude INTEGER [
+  longitude integer [
     not null,
     note: 'The longitude value of the geographical position.'
   ]
@@ -226,8 +226,8 @@ Table routes {
     not null,
     note: '''
     The grade that applies when climbing this route in the AF ("alles frei", i.e. "all free")
-    style, i.e. without any belaying (no rope, no abseiling). Set to 0 when it is just a single
-    jump.
+    style. This is the main style which is always set as long as there is a climb at all. Set to 0
+    for pure jump routes.
     '''
   ]
 
@@ -256,7 +256,7 @@ Table routes {
   stars integer [
     not null,
     note: '''
-    The count of official stars assigend to this route. An increasing number of stars marks a
+    The count of official stars assigned to this route. An increasing number of stars marks a
     route as "more beautiful". 0 is the default for regular routes.
     '''
   ]
