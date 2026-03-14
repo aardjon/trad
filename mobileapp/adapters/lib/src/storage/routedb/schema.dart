@@ -37,6 +37,10 @@ class DatabaseMetadataTable {
   /// Vendor identification label of the database provider.
   /// This is an arbitrary (even empty) display string to distinguish different database sources.
   static const String columnVendor = '$tableName.vendor';
+
+  /// The name of the 'compiler' TEXT column:
+  /// Identifying label (e.g. name and version) of the compiler used to create this database.
+  static const String columnCompiler = '$tableName.compiler';
 }
 
 /// References to all external sources the data contained in this route DB was extracted from.
@@ -162,8 +166,8 @@ class RoutesTable {
 
   /// The name of the 'grade_af' INTEGER column:
   /// The grade that applies when climbing this route in the AF ("alles frei", i.e. "all free")
-  /// style, i.e. without any belaying (no rope, no abseiling). Set to 0 when it is just a single
-  /// jump.
+  /// style. This is the main style which is always set as long as there is a climb at all. Set to 0
+  /// for pure jump routes.
   static const String columnGradeAf = '$tableName.grade_af';
 
   /// The name of the 'grade_rp' INTEGER column:
@@ -182,7 +186,7 @@ class RoutesTable {
   static const String columnGradeJump = '$tableName.grade_jump';
 
   /// The name of the 'stars' INTEGER column:
-  /// The count of official stars assigend to this route. An increasing number of stars marks a
+  /// The count of official stars assigned to this route. An increasing number of stars marks a
   /// route as "more beautiful". 0 is the default for regular routes.
   static const String columnStars = '$tableName.stars';
 
