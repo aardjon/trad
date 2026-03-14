@@ -5,10 +5,10 @@ Unit tests for the trad.application.filters.source.teufelsturm.parser module.
 import datetime
 from pathlib import Path
 from typing import Final
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pytest
-import pytz
 
 from trad.application.filters.source.teufelsturm.parser import (
     SummitCache,
@@ -76,7 +76,7 @@ posts_test_dict: Final = {
     },
 }
 
-timezone_berlin: Final = pytz.timezone("Europe/Berlin")
+timezone_berlin: Final = ZoneInfo("Europe/Berlin")
 
 
 def test_parse_post() -> None:
@@ -84,12 +84,10 @@ def test_parse_post() -> None:
     user_column_content = posts_test_dict[0][raw_data_index]
     expected_result_post = Post(
         user_name=user_column_content.split("|", maxsplit=1)[0],
-        post_date=timezone_berlin.localize(
-            datetime.datetime.strptime(
-                user_column_content.rsplit("|", maxsplit=1)[-1],
-                "%d.%m.%Y %H:%M",
-            )
-        ),
+        post_date=datetime.datetime.strptime(
+            user_column_content.rsplit("|", maxsplit=1)[-1],
+            "%d.%m.%Y %H:%M",
+        ).replace(tzinfo=timezone_berlin),
         comment=posts_test_dict[1][raw_data_index],
         rating=posts_test_dict[2][raw_data_index].count("+"),
         source_label="Teufelsturm",
@@ -105,9 +103,9 @@ def test_parse_posts() -> None:
     expected_results = [
         Post(
             user_name=posts_test_dict[0][i].split("|")[0],
-            post_date=timezone_berlin.localize(
-                datetime.datetime.strptime(posts_test_dict[0][i].split("|")[-1], "%d.%m.%Y %H:%M")
-            ),
+            post_date=datetime.datetime.strptime(
+                posts_test_dict[0][i].split("|")[-1], "%d.%m.%Y %H:%M"
+            ).replace(tzinfo=timezone_berlin),
             comment=posts_test_dict[1][i],
             rating=posts_test_dict[2][i].count("+"),
             source_label="Teufelsturm",
