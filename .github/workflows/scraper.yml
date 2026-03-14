@@ -11,8 +11,8 @@ jobs:
         working-directory: ./scraper
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
             python-version: '>=3.14.0 <3.15.0' 
 
@@ -27,7 +27,7 @@ jobs:
         run: invoke build
         
       - name: Archive build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: trad-scraper-linux
           path: scraper/artifacts/*
@@ -41,8 +41,8 @@ jobs:
         working-directory: ./scraper
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
             python-version: '>=3.14.0 <3.15.0'
 
@@ -64,8 +64,8 @@ jobs:
         working-directory: ./scraper
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
             python-version: '>=3.14.0 <3.15.0'
 
@@ -88,8 +88,8 @@ jobs:
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
             python-version: '>=3.14.0 <3.15.0'
 
@@ -109,7 +109,7 @@ jobs:
         run: invoke coverage
 
       - name: Archive build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: trad-coverage-report
           path: scraper/coverage/report/*
@@ -123,8 +123,8 @@ jobs:
         working-directory: .\scraper
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
             python-version: '>=3.14.0 <3.15.0'
 
