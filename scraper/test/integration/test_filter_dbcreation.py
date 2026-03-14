@@ -16,7 +16,7 @@ from trad.application.pipes import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import GeoPosition, Post, Route, Summit
+from trad.kernel.entities import ExternalSource, GeoPosition, Post, Route, Summit
 
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
@@ -30,10 +30,14 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     expected_index_count: Final = (
         2  # 'summits' and 'routes' tables each have one user-defined index
     )
+    af_grade: Final = 2
 
     input_pipe = CollectedData()
     summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm"))
-    route_id = input_pipe.add_route(summit_id=summit_id, route=Route(route_name="AW", grade="II"))
+    route_id = input_pipe.add_route(
+        summit_id=summit_id,
+        route=Route(conflict_rank=1, route_name="AW", grade_af=af_grade),
+    )
     input_pipe.add_post(
         route_id=route_id,
         post=Post(
@@ -41,8 +45,10 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
             comment="This is great!",
             post_date=post_date,
             rating=post_rating,
+            source_label="Unit Test",
         ),
     )
+    input_pipe.add_source(ExternalSource("Unit Test", "[DOESNTMATTER]", "The AI"))
 
     db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
     db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
@@ -58,10 +64,10 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     assert result_set[0][0] == "Falkenturm"
 
     # Ensure the route has been added
-    result_set = list(connection.execute("SELECT route_name, route_grade FROM routes"))
+    result_set = list(connection.execute("SELECT route_name, grade_af FROM routes"))
     assert len(result_set) == 1
     assert result_set[0][0] == "AW"
-    assert result_set[0][1] == "II"
+    assert result_set[0][1] == af_grade
 
     # Ensure the post has been added
     result_set = list(connection.execute("SELECT user_name, comment, post_date, rating FROM posts"))
@@ -94,18 +100,21 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
 
     result_set = list(
         connection.execute(
-            "SELECT schema_version_major, schema_version_minor, compile_time, vendor "
+            "SELECT schema_version_major, schema_version_minor, compile_time, vendor, compiler "
             "FROM database_metadata"
         )
     )
     assert len(result_set) == 1
+    result = result_set[0]
 
     # Check schema version
-    assert result_set[0][0] == 1
-    assert result_set[0][1] == 0
+    assert result[0], result[1] == (1, 1)
 
     # Check vendor string
-    assert result_set[0][3] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
+    assert result[3] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
+
+    # Check compiler name
+    assert result[4] == f"{APPLICATION_NAME} {APPLICATION_VERSION}"
 
     # Compare the creation time. Since the test takes a small amount of time, we cannot simply check
     # for equality. Instead, check that the time difference is not too big instead, assuming that

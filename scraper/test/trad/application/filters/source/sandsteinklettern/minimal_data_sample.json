@@ -1,0 +1,41 @@
+{
+  "areas": [
+    {
+      "gebiet_ID": "1",
+      "gebiet": "Sächsische Schweiz",
+      "land": "Deutschland"
+    }
+  ],
+  "sectors": [
+    {
+      "sektor_ID": "2",
+      "gebietid": "1",
+      "sektorname_d": "Bielatal"
+    }
+  ],
+  "summits": [
+    {
+      "sektorid": "2",
+      "gipfel_ID": "3",
+      "gipfelname_d": "Beispielberg",
+      "gipfelname_cz": "",
+      "status": "",
+      "typ": "G",
+      "vgrd": "14.04544",
+      "ngrd": "50.84041"
+    }
+  ],
+  "routes": [
+    {
+      "sektorid": "2",
+      "weg_ID": "4",
+      "gipfelid": "3",
+      "schwierigkeit": "V",
+      "wegbeschr_d": "Some description",
+      "wegname_d": "Test Route",
+      "wegname_cz": "",
+      "wegstatus": "1"
+    }
+  ],
+  "posts": []
+}

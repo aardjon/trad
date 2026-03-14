@@ -13,6 +13,7 @@ from trad.application.boundaries.database import (
 )
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.filters.sink.db_v1.dbschema import (
+    ExternalDataSourcesTable,
     PostsTable,
     RoutesTable,
     SummitNamesTable,
@@ -20,7 +21,14 @@ from trad.application.filters.sink.db_v1.dbschema import (
 )
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
+from trad.kernel.entities import (
+    UNDEFINED_GEOPOSITION,
+    ExternalSource,
+    GeoPosition,
+    Post,
+    Route,
+    Summit,
+)
 
 
 class TestDbSchemaV1Filter:
@@ -44,7 +52,7 @@ class TestDbSchemaV1Filter:
         db_writer.execute_filter(input_pipe, output_pipe=Mock(Pipe))
 
         expected_summits_sql_statement = (
-            f"INSERT INTO {SummitsTable.TABLE_NAME} ("
+            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ("
             f"{SummitsTable.COLUMN_LATITUDE}, "
             f"{SummitsTable.COLUMN_LONGITUDE}"
             f") VALUES (?, ?) "
@@ -69,8 +77,8 @@ class TestDbSchemaV1Filter:
         input_pipe.add_route(
             summit_id=summit_id,
             route=Route(
+                1,
                 route_name="Anxiety",
-                grade="VIIb",
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,
@@ -106,7 +114,7 @@ class TestDbSchemaV1Filter:
         )
         fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
-            query_parameters=["Mock Monument", "Anxiety", "VIIb", 10, 8, 9, 2, 1, True],
+            query_parameters=["Mock Monument", "Anxiety", "", 10, 8, 9, 2, 1, True],
         )
         self._check_database_finalization(fake_db_boundary)
 
@@ -116,12 +124,13 @@ class TestDbSchemaV1Filter:
         database operation (2) and provides all query parameters separately (3).
         """
         input_pipe = CollectedData()
+        input_pipe.add_source(ExternalSource("Testing", "[DOESNTMATTER]", "trad Authors"))
         summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument"))
         route_id = input_pipe.add_route(
             summit_id=summit_id,
             route=Route(
+                1,
                 route_name="Anxiety",
-                grade="VIIb",
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,
@@ -137,6 +146,7 @@ class TestDbSchemaV1Filter:
                 post_date=datetime.fromisoformat("2023-12-24T13:14:00+01:00"),
                 comment="This is a great test!",
                 rating=2,
+                source_label="Testing",
             ),
         )
 
@@ -154,14 +164,19 @@ class TestDbSchemaV1Filter:
             f"{PostsTable.COLUMN_USER_NAME}, "
             f"{PostsTable.COLUMN_COMMENT}, "
             f"{PostsTable.COLUMN_POST_DATE}, "
-            f"{PostsTable.COLUMN_RATING}"
+            f"{PostsTable.COLUMN_RATING}, "
+            f"{PostsTable.COLUMN_SOURCE_ID}"
             f") VALUES (("
             f"SELECT {RoutesTable.COLUMN_ID} FROM {RoutesTable.TABLE_NAME} WHERE "
             f"{RoutesTable.COLUMN_SUMMIT_ID}=("
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
             f") AND {RoutesTable.COLUMN_ROUTE_NAME}=? LIMIT 1"
-            f"), ?, ?, ?, ?)"
+            f"), ?, ?, ?, ?, ("
+            f"SELECT {ExternalDataSourcesTable.COLUMN_ID} "
+            f"FROM {ExternalDataSourcesTable.TABLE_NAME} "
+            f"WHERE {ExternalDataSourcesTable.COLUMN_LABEL}=? LIMIT 1"
+            "))"
         )
         fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
@@ -172,6 +187,7 @@ class TestDbSchemaV1Filter:
                 "This is a great test!",
                 "2023-12-24T13:14:00+01:00",
                 2,
+                "Testing",
             ],
         )
         self._check_database_finalization(fake_db_boundary)

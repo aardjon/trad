@@ -10,7 +10,7 @@ import pytest
 
 from trad.application.pipes import AllPipesFactory, CollectedData
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import Post, Route, Summit
+from trad.kernel.entities import ExternalSource, Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
 
@@ -18,6 +18,29 @@ class TestCollectedData:
     """
     Unit tests for the CollectedData Pipe class.
     """
+
+    @pytest.mark.parametrize("source_count", [0, 1, 3])
+    def test_source_storage_roundtrip(self, source_count: int) -> None:
+        """
+        Ensure that all registered external sources can be retrieved again.
+
+        :param source_count: Number of external sources to register.
+        """
+        pipe = CollectedData()
+
+        sources = {
+            ExternalSource(
+                label=f"Source #{i}",
+                url="http://www.example.com",
+                attribution=f"Contributor #{i}",
+            )
+            for i in range(source_count)
+        }
+        for source in sources:
+            pipe.add_source(source)
+
+        returned_sources = pipe.get_sources()
+        assert returned_sources == sources
 
     @pytest.mark.parametrize("summit_count", [0, 1, 3])
     def test_summit_storage_roundtrip(self, summit_count: int) -> None:
@@ -60,7 +83,7 @@ class TestCollectedData:
             summit_id = pipe.add_summit(Mock(Summit, name=f"Summit #{summit_idx}"))
 
             routes_of_summits[summit_id] = [
-                Route(f"Route #{route_number_base + i}", "I") for i in range(route_count)
+                Route(1, f"Route #{route_number_base + i}", "I") for i in range(route_count)
             ]
             for route in routes_of_summits[summit_id]:
                 pipe.add_route(summit_id, route)
@@ -103,6 +126,7 @@ class TestCollectedData:
                     comment=f"Post #{post_number_base + i}",
                     post_date=datetime.now(tz=UTC),
                     rating=0,
+                    source_label="TestSource",
                 )
                 for i in range(post_count)
             ]
@@ -120,12 +144,12 @@ class TestCollectedData:
         ("invalid_id_operation", "expected_error_message"),
         [
             (
-                lambda pipe: pipe.add_route(summit_id=1337, route=Route("Route 1", "V")),
+                lambda pipe: pipe.add_route(summit_id=1337, route=Route(1, "Route 1", "V")),
                 "Summit",
             ),
             (
                 lambda pipe: pipe.add_post(
-                    route_id=1337, post=Post("John Doe", datetime.now(tz=UTC), "", 0)
+                    route_id=1337, post=Post("John Doe", datetime.now(tz=UTC), "", 0, "TestSource")
                 ),
                 "Route",
             ),
@@ -167,6 +191,16 @@ class TestCollectedData:
         pipe = CollectedData()
         full_result_data = list(invalid_id_operation(pipe))
         assert not full_result_data
+
+    def test_same_source_twice(self) -> None:
+        """
+        Ensures that adding the same external source twice raises an exception. Source are
+        identified by their label only.
+        """
+        pipe = CollectedData()
+        pipe.add_source(ExternalSource("ExtSourceName", "url1", "attribution1", "license1"))
+        with pytest.raises(ValueError, match="'ExtSourceName'"):
+            pipe.add_source(ExternalSource("ExtSourceName", "url2", "attribution2", "license2"))
 
 
 def test_pipe_factory() -> None:

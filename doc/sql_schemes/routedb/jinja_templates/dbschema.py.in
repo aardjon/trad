@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from enum import IntEnum
 from typing import Final, override
 
-from trad.adapters.boundaries.database import EntityName, SqlStatement
+from trad.application.boundaries.database import EntityName, SqlStatement
 from trad.application.filters.sink._schemabase import TableSchema
 {% for table in tables %}
 
@@ -88,7 +88,7 @@ class DatabaseSchema:
     Major schema version.
 
     To be incremented for incompatible schema changes, i.e. the mobile app needs to be adapted to
-    work with the new database. For example, the removal or renaming of column or tables.
+    work with the new database. For example, the removal or renaming of columns or tables.
     When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
     """
 

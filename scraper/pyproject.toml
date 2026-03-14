@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "trad_scraper"
 # Attention: When incrementing the scraper version number, please also change the
 # 'APPLICATION_VERSION' constant in the kernel/appmeta.dart file (both values must always be equal)!
-version = "0.1.2"
+version = "0.2.0"
 description = "Route data scraper for the trad mobile application."
 authors = [
   {name = "Karsten Wesenigk"},
@@ -579,6 +579,10 @@ ignore = [
   "TC001",  # Move application import into a type-checking block
   "TC002",  # Move third-party import into a type-checking block
   "TC003",  # Move built-in import into a type-checking block
+
+  # Disabled because we don't want to enforce quoted type expressions when using cast(). Quoting
+  # should not be necessary anymore with Pyhton 3.14.
+  "TC006",  # Don't use unquoted type expressions in typing.cast() calls
 
   # We don't want to create issues for every single TODO.
   "TD003",  # TODO: this link has no issue

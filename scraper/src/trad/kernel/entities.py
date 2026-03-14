@@ -131,6 +131,10 @@ class GeoPosition:
         lon_str = f"{abs(self.longitude_decimal_degree):.7f}".rstrip("0").rstrip(".")
         return f"{lat_str}°{hemisphere_lat} {lon_str}°{hemisphere_lon}"
 
+    @override
+    def __repr__(self) -> str:
+        return str(self)
+
 
 UNDEFINED_GEOPOSITION: Final = GeoPosition(0, 0)
 """
@@ -333,12 +337,23 @@ class Route:
     rating and without an upper bound. Each step in the corresponding scale system increases the
     value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
     0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
+
+    Routes come with a `conflict_rank` for determining which data to use in case of several
+    conflicting values. This is a positive integer with 1 being the most important rank. If two
+    Route objects describe the same route but differ in their grades, the data with the lower 'rank'
+    value will be used.
+    """
+
+    conflict_rank: int
+    """
+    Priority value for determining which route data to choose in case of conflicting values (from
+    different data sources). 1 is the most important rank.
     """
 
     route_name: str
     """ The name of the route. """
 
-    grade: str
+    grade: str = ""
     """ String representing the grade. Deprecated, use the more fine-grained grade fields. """
 
     grade_af: int = NO_GRADE
@@ -414,3 +429,44 @@ class Post:
     The rating the author assigned to the entity this post corresponds to. This is a signed integer
     value in the range between -3 (extremely bad/dangerous) to 3 (extremely outstanding/great).
     """
+
+    source_label: str
+    """
+    Label ("name") of the external data source this post was retrieved from.
+    """
+
+
+@dataclass
+class ExternalSource:
+    """
+    Represents an external source from which data is imported. External sources are uniquely
+    identified by their label.
+    """
+
+    label: str
+    """ Display name of this data source. This name must be unique within the route DB. """
+
+    url: str
+    """
+    Landing page URL (not an API endpoint!) a user may visit by browser to get further
+    information about this data source.
+    """
+
+    attribution: str
+    """ Attribution string (e.g. author names) for the data from this source. """
+
+    license_name: str | None = None
+    """
+    Short, human readable name of the data license, if any. None if there is no explicit license
+    (but e.g. some individual agreement).
+    """
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ExternalSource):
+            return NotImplemented
+        return self.label == other.label
+
+    @override
+    def __hash__(self) -> int:
+        return hash(self.label)

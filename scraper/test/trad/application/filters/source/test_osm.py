@@ -11,6 +11,7 @@ import pytest
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters.source.osm import OsmSummitDataFilter
+from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
@@ -415,6 +416,55 @@ class TestOsmSummitDataFilter:
                 sorted(expected_summits, key=lambda s: s.name), stored_summits, strict=True
             )
         )
+
+    @pytest.mark.parametrize("summit_count", [1, 3, 0])
+    def test_external_sources(self, summit_count: int) -> None:
+        """
+        Ensure that an external source is added along with imported data:
+         - The source definition must contain the correct data
+         - There must be exactly one source
+
+        :param summit_count: The number of Summits being imported.
+        """
+        dummy_area_id: Final = 4711
+
+        retrieve_json_resource_side_effects = [
+            json.dumps([{"osm_id": dummy_area_id}]),  # Nominatim response
+            json.dumps(
+                {
+                    "elements": [
+                        {
+                            "id": i,
+                            "type": "node",
+                            "lat": 13.37,
+                            "lon": 47.11,
+                            "tags": {
+                                "name": f"Summit{i}",
+                            },
+                        }
+                        for i in range(summit_count)
+                    ]
+                },
+            ),  # Response of the Overpass area query
+        ]
+
+        mocked_network_boundary = Mock(HttpNetworkingBoundary)
+        mocked_network_boundary.retrieve_json_resource.side_effect = (
+            retrieve_json_resource_side_effects
+        )
+
+        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
+
+        output_pipe = CollectedData()
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
+
+        # The resulting Pipe must contain exactly one external source definition
+        actual_sources = list(output_pipe.get_sources())
+        assert len(actual_sources) == 1
+        assert actual_sources[0].label == "OpenStreetMap"
+        assert actual_sources[0].url == "https://www.openstreetmap.org"
+        assert actual_sources[0].attribution == "OSM Contributors"
+        assert actual_sources[0].license_name == "ODbL"
 
     @staticmethod
     def _summits_equal(summit1: Summit, summit2: Summit) -> bool:

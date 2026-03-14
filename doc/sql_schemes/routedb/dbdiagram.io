@@ -7,7 +7,7 @@ Project RouteDb {
   '''
 
   // The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
-  schema_version: "1.0"
+  schema_version: "1.1"
 
   // Unique constraints that stretch over multiple columns are not supported by DBML yet
   // (https://github.com/holistics/dbml/issues/68). So we use this workaround instead: The property
@@ -20,7 +20,7 @@ Project RouteDb {
             ["summit_id", "route_name", "route_grade"]
         ],
         "database_metadata": [
-            ["schema_version_major", "schema_version_minor", "compile_time", "vendor"]
+            ["schema_version_major", "schema_version_minor", "compile_time", "vendor", "compiler"]
         ]
     }
     '''
@@ -58,6 +58,50 @@ Table database_metadata {
     note: '''
     Vendor identification label of the database provider.
     This is an arbitrary (even empty) display string to distinguish different database sources.
+    '''
+  ]
+  
+  compiler text [
+    not null,
+    note: '''
+    Identifying label (e.g. name and version) of the compiler used to create this database.
+    '''
+  ]
+}
+
+
+Table external_data_sources {
+  Note: '''
+  References to all external sources the data contained in this route DB was extracted from.
+  '''
+  
+  id integer [
+    primary key,
+    increment,
+    note: 'Unique ID of this data source.'
+  ]
+  label text [
+    not null,
+    unique,
+    note: 'Display name of this data source.'
+  ]
+  url text [
+    not null,
+    note: '''
+      Landing page URL (not an API endpoint!) a user may visit by browser to get further
+      information about this data source.
+    '''
+  ]
+  attribution text [
+    not null,
+    note: 'Attribution string (e.g. author names) for the data from this source.'
+  ]
+  license text [
+    null,
+    note: '''
+      Short, human-readable name of the licence which applies to all data from this source.
+      Using an abbreviation or SPDX identifier (e.g. "CC-BY-4.0" or "ODbL") instead of a longer
+      licence name is preferred. May be NULL if the license is unknown or doesn't apply.
     '''
   ]
 }
@@ -121,12 +165,12 @@ Table summits {
     note: 'Summit ID, unique within this database.'
   ]
 
-  latitude INTEGER [
+  latitude integer [
     not null,
     note: 'The latitude value of the geographical position.'
   ]
 
-  longitude INTEGER [
+  longitude integer [
     not null,
     note: 'The longitude value of the geographical position.'
   ]
@@ -182,8 +226,8 @@ Table routes {
     not null,
     note: '''
     The grade that applies when climbing this route in the AF ("alles frei", i.e. "all free")
-    style, i.e. without any belaying (no rope, no abseiling). Set to 0 when it is just a single
-    jump.
+    style. This is the main style which is always set as long as there is a climb at all. Set to 0
+    for pure jump routes.
     '''
   ]
 
@@ -212,7 +256,7 @@ Table routes {
   stars integer [
     not null,
     note: '''
-    The count of official stars assigend to this route. An increasing number of stars marks a
+    The count of official stars assigned to this route. An increasing number of stars marks a
     route as "more beautiful". 0 is the default for regular routes.
     '''
   ]
@@ -243,6 +287,11 @@ Table posts {
     not null,
     note: 'ID of the route this post is assigned to. Foreign key to the routes table.'
   ]
+  
+  source_id integer [
+    not null,
+    note: 'ID of the external data source this post originates from.'
+  ]
 
   user_name text [
     not null,
@@ -272,3 +321,5 @@ Table posts {
 }
 // Foreign key posts -> routes
 Ref: routes.id < posts.route_id [delete: cascade]
+// Foreign key posts -> external_data_sources
+Ref: external_data_sources.id < posts.source_id [delete: cascade]

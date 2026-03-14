@@ -1,6 +1,7 @@
 """
-Boundary interface from the `application` ring to the grade parser component in the `infrastructure`
-ring.
+Component for parsing climbing difficulty (grade) strings.
+
+This module defines a common interface for different grade parser implementations.
 """
 
 from abc import ABC, abstractmethod

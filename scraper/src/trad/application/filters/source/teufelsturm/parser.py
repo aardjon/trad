@@ -18,8 +18,15 @@ import pytz
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from trad.application.boundaries.grade_parser import GradeParser
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post, Route, Summit
+from trad.application.grades import GradeParser
+from trad.kernel.entities import (
+    UNDEFINED_GEOPOSITION,
+    ExternalSource,
+    GeoPosition,
+    Post,
+    Route,
+    Summit,
+)
 from trad.kernel.errors import DataProcessingError
 
 if TYPE_CHECKING:
@@ -29,6 +36,15 @@ if TYPE_CHECKING:
     from pandas.core.series import Series
 
 _logger = getLogger(__name__)
+
+EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
+    label="Teufelsturm",
+    url="https://www.teufelsturm.de/",
+    attribution="Andreas Lein",
+)
+
+_ROUTE_DATA_RANK: Final = 2
+"""Priority/Accuracy of the route data retrieved from teufelsturm in case of conflicts."""
 
 
 @dataclass
@@ -83,7 +99,13 @@ def parse_post(post: Series[Any] | DataFrame) -> Post:
     user = parse_user_name(str(post[0]))
     comment = str(post[1])
     rating = parse_rating(str(post[2]))
-    return Post(user_name=user[0], post_date=user[1], comment=comment, rating=rating)
+    return Post(
+        user_name=user[0],
+        post_date=user[1],
+        comment=comment,
+        rating=rating,
+        source_label=EXTERNAL_SOURCE_DESCRIPTION.label,
+    )
 
 
 def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradeParser) -> PageData:
@@ -132,6 +154,7 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     return PageData(
         peak=peak,
         route=Route(
+            _ROUTE_DATA_RANK,
             route_name=route,
             grade=grade_label,
             grade_af=parsed_grade.af,
@@ -190,7 +213,7 @@ def _fix_erroneous_name(summit_name: str) -> str:
 def _ignore_wrong_position(peak_name: str) -> bool:
     """
     Checks if the peak with the given `peak_name` is known to have a wrong position on teufelsturm
-    which must therefore be ignored. Returns False if teh position value is okay and shall be used,
+    which must therefore be ignored. Returns False if the position value is okay and shall be used,
     or True if it must be ignored.
     """
     known_wrong_positions: Final = [

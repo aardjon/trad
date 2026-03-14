@@ -8,7 +8,7 @@ import re
 from re import Match
 from typing import Final, override
 
-from trad.application.boundaries.grade_parser import GradeParser, SaxonGrade
+from trad.application.grades import GradeParser, SaxonGrade
 from trad.kernel.errors import ValueParseError
 
 
@@ -78,7 +78,6 @@ class RegexBasedParser(GradeParser):
 
     def _get_af_grade(self, re_match: Match[str]) -> int:
         af = re_match.group("af1") or re_match.group("af2")
-
         return self._convert_saxon_grade(af)
 
     def _convert_saxon_grade(self, grade: str | None) -> int:
@@ -108,8 +107,14 @@ class RegexBasedParser(GradeParser):
             "XIIa": 22,
             "XIIb": 23,
             "XIIc": 24,
+            "XIIIa": 25,
+            "XIIIb": 26,
+            "XIIIc": 27,
         }
-        return grade_string_map[grade]
+        grade_number = grade_string_map.get(grade)
+        if grade_number is None:
+            raise ValueParseError("single climbing grade", str(grade))
+        return grade_number
 
     def _convert_jump_grade(self, grade: str | None) -> int:
         grade_string_map: Final = {
@@ -121,4 +126,7 @@ class RegexBasedParser(GradeParser):
             "5": 5,
             "6": 6,
         }
-        return grade_string_map[grade]
+        grade_number = grade_string_map.get(grade)
+        if grade_number is None:
+            raise ValueParseError("single jump grade", str(grade))
+        return grade_number

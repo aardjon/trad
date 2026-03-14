@@ -2,11 +2,11 @@
 Implementation of the Pipe interface.
 """
 
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from typing import override
 
 from trad.kernel.boundaries.pipes import Pipe, PipeFactory, RouteInstanceId, SummitInstanceId
-from trad.kernel.entities import Post, Route, Summit
+from trad.kernel.entities import ExternalSource, Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
 
@@ -17,12 +17,19 @@ class CollectedData(Pipe):
 
     def __init__(self) -> None:
         """Initialize a new CollectedData instance."""
+        self._sources: set[ExternalSource] = set()
         self._summits: list[Summit] = []
         self._routes: list[Route] = []
         self._posts: list[Post] = []
 
         self._routes2summits: dict[SummitInstanceId, list[RouteInstanceId]] = {}
         self._posts2routes: dict[RouteInstanceId, list[int]] = {}
+
+    @override
+    def add_source(self, external_data_source: ExternalSource) -> None:
+        if external_data_source in self._sources:
+            raise ValueError(f"ExternalSource '{external_data_source.label}' is already available")
+        self._sources.add(external_data_source)
 
     @override
     def add_summit(self, summit: Summit) -> SummitInstanceId:
@@ -47,6 +54,10 @@ class CollectedData(Pipe):
         self._posts.append(post)
         post_idx = len(self._posts) - 1
         self._posts2routes.setdefault(route_id, []).append(post_idx)
+
+    @override
+    def get_sources(self) -> Collection[ExternalSource]:
+        return self._sources
 
     @override
     def iter_summits(self) -> Iterator[tuple[SummitInstanceId, Summit]]:

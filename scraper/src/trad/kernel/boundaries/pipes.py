@@ -3,10 +3,10 @@ Boundary interface to the `pipes` component.
 """
 
 from abc import ABCMeta, abstractmethod
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from typing import NewType
 
-from trad.kernel.entities import Post, Route, Summit
+from trad.kernel.entities import ExternalSource, Post, Route, Summit
 
 SummitInstanceId = NewType("SummitInstanceId", int)
 """
@@ -34,6 +34,14 @@ class Pipe(metaclass=ABCMeta):
     """
 
     @abstractmethod
+    def add_source(self, external_data_source: ExternalSource) -> None:
+        """
+        Add the given [external_data_source]. Each external source must be registered exactly once,
+        but is is not necessary to do this before adding the first referencing entity. Raises
+        ValueError if the given source is registered already.
+        """
+
+    @abstractmethod
     def add_summit(self, summit: Summit) -> SummitInstanceId:
         """
         Add the given [summit] data to the pipe. Returns the assigned ID for the newly added summit.
@@ -59,6 +67,12 @@ class Pipe(metaclass=ABCMeta):
         Add the given [post] to the pipe, assigning it to the route identified by [route_id].
         Existing data is never dropped or replaced.
         Raises EntityNotFoundError if the given `route_id` doesn't exist.
+        """
+
+    @abstractmethod
+    def get_sources(self) -> Collection[ExternalSource]:
+        """
+        Return all registered external sources.
         """
 
     @abstractmethod

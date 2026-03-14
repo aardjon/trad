@@ -24,7 +24,7 @@ from pydantic.type_adapter import TypeAdapter
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters._base import SourceFilter
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.entities import ExternalSource, GeoPosition, Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError, MergeConflictError
 
 _logger = getLogger(__name__)
@@ -166,6 +166,18 @@ class OsmSummitDataFilter(SourceFilter):
     transfered data amount to a minimum.
     """
 
+    _EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
+        label="OpenStreetMap",
+        url="https://www.openstreetmap.org",
+        license_name="ODbL",
+        attribution="OSM Contributors",
+    )
+    """
+    Source attribution for OSM.
+    Please note that (other than other filters) the OSM attribution is always added because we never
+    expect it to retrieve no data at all.
+    """
+
     _OVERPASS_PEAK_NODE_TAGS: Final = {"natural": "peak"}
     """ OSM node tags by which we recognize a single summit point. """
 
@@ -209,6 +221,10 @@ class OsmSummitDataFilter(SourceFilter):
         _logger.debug(
             "Processed summits from %d relations and %d nodes", len(osm_relations), len(osm_nodes)
         )
+
+        # Add the external source attribution
+        self.__store_external_source_attribution(output_pipe)
+
         _logger.debug("'%s' filter finished", self.get_name())
 
     def __get_area_id(self) -> int:
@@ -322,6 +338,9 @@ class OsmSummitDataFilter(SourceFilter):
                 ),
             )
 
+    def __store_external_source_attribution(self, pipe: Pipe) -> None:
+        pipe.add_source(self._EXTERNAL_SOURCE_DESCRIPTION)
+
     def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:
         for summit in summits:
             try:
@@ -334,7 +353,7 @@ class OsmApiReceiver:
     """
     Represents an endpoint for querying the OpenStreetMap API. Responsible for choosing the correct
     API for the requested usecase, for providing/creating all necessary options, query strings etc.
-    and vor parsing/validating the reponses. All methods of this class return Pydantic model objects
+    and for parsing/validating the reponses. All methods of this class return Pydantic model objects
     (derived from _ReadOnlyPydanticModel), never plain JSON strings.
     """
 

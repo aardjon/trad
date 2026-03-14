@@ -4,6 +4,7 @@ Unit tests for the trad.application.filters.regular.validation module
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Final
 from unittest.mock import Mock
 
 import pytest
@@ -11,8 +12,8 @@ import pytest
 from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
-from trad.kernel.entities import Post, Route, Summit
-from trad.kernel.errors import IncompleteDataError
+from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.errors import EntityNotFoundError, IncompleteDataError
 
 
 def _prepare_pipe(
@@ -26,6 +27,7 @@ def _prepare_pipe(
     `input_posts` items is the corresponding index in the `input_routes` list.
     """
     pipe = CollectedData()
+    pipe.add_source(ExternalSource("Unit Test", "[some_url]", "[some attribution]"))
     summit_idx_to_id: dict[int, SummitInstanceId] = {}
     for summit_idx, summit in enumerate(input_summits):
         summit_id = pipe.add_summit(summit)
@@ -69,7 +71,7 @@ def _compare_pipes(actual_pipe: Pipe, expected_pipe: Pipe) -> None:
 
 
 def _create_example_route(route_number: int) -> Route:
-    return Route(f"Route No. {route_number}", grade="III")
+    return Route(1, f"Route No. {route_number}", grade_af=3)
 
 
 def _create_example_post(post_number: int) -> Post:
@@ -79,6 +81,7 @@ def _create_example_post(post_number: int) -> Post:
         comment=f"This is comment #{post_number}",
         rating=0,
         post_date=datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, 0, tzinfo=dt.tzinfo),
+        source_label="Unit Test",
     )
 
 
@@ -244,3 +247,31 @@ def test_valid_data(
     )
 
     _compare_pipes(output_pipe, expected_output_pipe)
+
+
+def test_invalid_post() -> None:
+    """
+    Ensure the validation raises if a post refers to an unknown external source.
+    """
+    unknown_source_label: Final = "UNKNOWN SOURCE"
+
+    input_pipe = _prepare_pipe(
+        [Summit(official_name="Summit")],
+        [(Route(conflict_rank=0, route_name="Route"), 0)],
+        [
+            (
+                Post(
+                    user_name="User",
+                    post_date=datetime.now(tz=UTC),
+                    comment="",
+                    rating=2,
+                    source_label=unknown_source_label,
+                ),
+                0,
+            )
+        ],
+    )
+
+    data_filter = DataValidationFilter()
+    with pytest.raises(EntityNotFoundError, match=unknown_source_label):
+        data_filter.execute_filter(input_pipe, CollectedData())

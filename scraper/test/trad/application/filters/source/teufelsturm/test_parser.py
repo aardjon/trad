@@ -19,7 +19,7 @@ from trad.application.filters.source.teufelsturm.parser import (
     parse_route_list,
     parse_user_name,
 )
-from trad.infrastructure.grade_regex import RegexBasedParser
+from trad.application.grades.regex import RegexBasedParser
 from trad.kernel.entities import UNDEFINED_GEOPOSITION, GeoPosition, Post
 
 posts_test_dict: Final = {
@@ -92,6 +92,7 @@ def test_parse_post() -> None:
         ),
         comment=posts_test_dict[1][raw_data_index],
         rating=posts_test_dict[2][raw_data_index].count("+"),
+        source_label="Teufelsturm",
     )
     posts_table = pd.DataFrame.from_dict(posts_test_dict)
 
@@ -109,6 +110,7 @@ def test_parse_posts() -> None:
             ),
             comment=posts_test_dict[1][i],
             rating=posts_test_dict[2][i].count("+"),
+            source_label="Teufelsturm",
         )
         for i in range(1, len(posts_test_dict[0]))
     ]

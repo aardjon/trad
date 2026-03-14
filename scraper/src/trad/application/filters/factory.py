@@ -6,12 +6,12 @@ from collections.abc import Callable, Iterator
 from typing import Final, override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary
-from trad.application.boundaries.grade_parser import GradeParser
 from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.filters.source.osm import OsmSummitDataFilter
+from trad.application.filters.source.sandsteinklettern.filter import SandsteinkletternDataFilter
 from trad.application.filters.source.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory
 from trad.kernel.boundaries.settings import SettingsBoundary
@@ -34,8 +34,10 @@ class AllFiltersFactory(FilterFactory):
                 dependency_provider.provide(HttpNetworkingBoundary)
             ),
             TeufelsturmDataFilter: lambda: TeufelsturmDataFilter(
-                dependency_provider.provide(HttpNetworkingBoundary),
-                dependency_provider.provide(GradeParser),
+                dependency_provider.provide(HttpNetworkingBoundary)
+            ),
+            SandsteinkletternDataFilter: lambda: SandsteinkletternDataFilter(
+                dependency_provider.provide(HttpNetworkingBoundary)
             ),
             MergeFilter: MergeFilter,
             DataValidationFilter: DataValidationFilter,
@@ -47,7 +49,7 @@ class AllFiltersFactory(FilterFactory):
         """ Mapping of all concrete Filter classes and their creation function. """
 
         self._stages: Final[list[list[type[Filter]]]] = [
-            [OsmSummitDataFilter, TeufelsturmDataFilter],
+            [OsmSummitDataFilter, SandsteinkletternDataFilter, TeufelsturmDataFilter],
             [MergeFilter],
             [DataValidationFilter],
             [DbSchemaV1Filter],
