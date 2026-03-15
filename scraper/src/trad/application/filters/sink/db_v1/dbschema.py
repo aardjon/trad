@@ -141,6 +141,51 @@ class ExternalDataSourcesTable(TableSchema):
         return []
 
 
+class AreasTable(TableSchema):
+    """
+    All climbing areas/sectors.
+
+    An area or sector is a geographic area containing several summits. Each summit is assigned to
+    one.
+    """
+
+    TABLE_NAME = "areas"
+    """ Name of the table. """
+
+    COLUMN_ID: Final = "id"
+    """
+    The name of the 'id' INTEGER column:
+    Unique ID of this area/sector.
+    """
+
+    COLUMN_NAME: Final = "name"
+    """
+    The name of the 'name' TEXT column:
+    Name of this area/sector.
+    """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
+        CREATE TABLE areas (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "name" TEXT UNIQUE NOT NULL
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[SqlStatement]:
+        return [
+            SqlStatement(
+                'CREATE INDEX "IdxAreaName" ON "areas" (name);',
+            ),
+        ]
+
+
 class SummitNamesTable(TableSchema):
     """
     All names of all summits.
@@ -224,6 +269,12 @@ class SummitsTable(TableSchema):
     Summit ID, unique within this database.
     """
 
+    COLUMN_AREA_ID: Final = "area_id"
+    """
+    The name of the 'area_id' INTEGER column:
+    ID of the area/sector this summit belongs to.
+    """
+
     COLUMN_LATITUDE: Final = "latitude"
     """
     The name of the 'latitude' INTEGER column:
@@ -245,8 +296,10 @@ class SummitsTable(TableSchema):
         return SqlStatement("""
         CREATE TABLE summits (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "area_id" INTEGER NOT NULL,
             "latitude" INTEGER NOT NULL,
-            "longitude" INTEGER NOT NULL
+            "longitude" INTEGER NOT NULL,
+            FOREIGN KEY("area_id") REFERENCES "areas" ("id") ON DELETE CASCADE
         );
         """)
 
@@ -469,7 +522,7 @@ class DatabaseSchema:
     When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
     """
 
-    _MINOR_VERSION: Final = 1
+    _MINOR_VERSION: Final = 2
     """
     Minor schema version.
 
@@ -486,6 +539,7 @@ class DatabaseSchema:
         return (
             DatabaseMetadataTable(),
             ExternalDataSourcesTable(),
+            AreasTable(),
             SummitNamesTable(),
             SummitsTable(),
             RoutesTable(),
