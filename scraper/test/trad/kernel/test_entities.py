@@ -255,6 +255,14 @@ class TestSummit:
     Unit tests for the Summit class.
     """
 
+    @pytest.mark.parametrize("sector_name", [None, "Bielatal", "Großer Zschand"])
+    def test_sector(self, sector_name: str | None) -> None:
+        """
+        Ensures that the provided sector name can be retrieved again.
+        """
+        summit = Summit(official_name="Mt Dummy", sector=sector_name)
+        assert summit.sector == sector_name
+
     @pytest.mark.parametrize(
         ("summit", "expected_return_value"),
         [

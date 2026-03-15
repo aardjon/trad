@@ -237,6 +237,11 @@ class Summit:
     meters) to the actual `high_grade_position`, though.
     """
 
+    sector: str | None = None
+    """
+    Name of the sector this summit belongs to. None if the sector is unknown.
+    """
+
     def __post_init__(self) -> None:
         # Make sure that at least one name has been provided
         if not self.official_name and not self.alternate_names and not self.unspecified_names:
