@@ -337,32 +337,32 @@ class TestSummit:
         ("input_summit", "expected_output_summit"),
         [
             # Happy paths: Summit data is valid
-            (Summit("No position"), Summit("No position")),
+            (Summit("No position", sector="Area 21"), Summit("No position", sector="Area 21")),
             (
-                Summit("With Position", high_grade_position=_example_position_1),
-                Summit("With Position", high_grade_position=_example_position_1),
+                Summit("With Position", high_grade_position=_example_position_1, sector="Area 22"),
+                Summit("With Position", high_grade_position=_example_position_1, sector="Area 22"),
             ),
             (
-                Summit("With Position", low_grade_position=_example_position_1),
-                Summit("With Position", low_grade_position=_example_position_1),
+                Summit("With Position", low_grade_position=_example_position_1, sector="Area 23"),
+                Summit("With Position", low_grade_position=_example_position_1, sector="Area 23"),
             ),
             (
-                Summit("Official", alternate_names=["alt1", "alt2"]),
-                Summit("Official", alternate_names=["alt1", "alt2"]),
+                Summit("Official", alternate_names=["alt1", "alt2"], sector="Area 24"),
+                Summit("Official", alternate_names=["alt1", "alt2"], sector="Area 24"),
             ),
             (
-                Summit("Official", unspecified_names=["unspec_name"]),
-                Summit("Official", unspecified_names=["unspec_name"]),
+                Summit("Official", unspecified_names=["unspec_name"], sector="Area 25"),
+                Summit("Official", unspecified_names=["unspec_name"], sector="Area 25"),
             ),
             # Auto-Fix paths: invalid data that can be fixed automatically
             # Official name is missing: Use the next best name as the ONLY one
             (
-                Summit(alternate_names=["alt_name1", "alt_name2"]),
-                Summit(official_name="alt_name1"),
+                Summit(alternate_names=["alt_name1", "alt_name2"], sector="Sector A"),
+                Summit(official_name="alt_name1", sector="Sector A"),
             ),
             (
-                Summit(unspecified_names=["unspec_name1", "unspec_name2"]),
-                Summit(official_name="unspec_name1"),
+                Summit(unspecified_names=["unspec_name1", "unspec_name2"], sector="Sector B"),
+                Summit(official_name="unspec_name1", sector="Sector B"),
             ),
         ],
     )

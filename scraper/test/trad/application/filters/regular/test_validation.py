@@ -115,19 +115,23 @@ class PipeData:
         ),
         (  # Single summit with a route and and post
             PipeData(
-                [Summit("Example Summit")],
+                [Summit("Example Summit", sector="Climbing Sector")],
                 [(_create_example_route(13), 0)],
                 [(_create_example_post(42), 0)],
             ),
             PipeData(
-                [Summit("Example Summit")],
+                [Summit("Example Summit", sector="Climbing Sector")],
                 [(_create_example_route(13), 0)],
                 [(_create_example_post(42), 0)],
             ),
         ),
         (  # Multiple summits and routes
             PipeData(
-                [Summit("Summit 1"), Summit("Summit 2"), Summit("Summit 3")],
+                [
+                    Summit("Summit 1", sector="Sector A"),
+                    Summit("Summit 2", sector="Sector B"),
+                    Summit("Summit 3", sector="Sector B"),
+                ],
                 [
                     (_create_example_route(1), 0),
                     (_create_example_route(2), 0),
@@ -140,7 +144,11 @@ class PipeData:
                 ],
             ),
             PipeData(
-                [Summit("Summit 1"), Summit("Summit 2"), Summit("Summit 3")],
+                [
+                    Summit("Summit 1", sector="Sector A"),
+                    Summit("Summit 2", sector="Sector B"),
+                    Summit("Summit 3", sector="Sector B"),
+                ],
                 [
                     (_create_example_route(1), 0),
                     (_create_example_route(2), 0),
@@ -177,7 +185,7 @@ class PipeData:
         ),
         (  # Invalid Route data (ignore the whole summit)
             PipeData(
-                [Summit("Summit")],
+                [Summit("Summit", sector="Climbing Sector")],
                 [
                     (
                         Mock(
@@ -210,13 +218,13 @@ class PipeData:
                             )
                         },
                     ),
-                    Summit("Good Summit"),
+                    Summit("Good Summit", sector="Climbing Sector"),
                 ],
                 [],
                 [],
             ),
             PipeData(
-                [Summit("Good Summit")],
+                [Summit("Good Summit", sector="Climbing Sector")],
                 [],
                 [],
             ),
@@ -256,7 +264,7 @@ def test_invalid_post() -> None:
     unknown_source_label: Final = "UNKNOWN SOURCE"
 
     input_pipe = _prepare_pipe(
-        [Summit(official_name="Summit")],
+        [Summit(official_name="Summit", sector="Example Sector")],
         [(Route(conflict_rank=0, route_name="Route"), 0)],
         [
             (

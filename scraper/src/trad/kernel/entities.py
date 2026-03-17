@@ -321,6 +321,10 @@ class Summit:
             self.alternate_names.clear()
             self.unspecified_names.clear()
 
+        if self.sector is None:
+            # All summits must be assigned to a sector!
+            raise IncompleteDataError(self, "sector")
+
 
 @dataclass
 class Route:
