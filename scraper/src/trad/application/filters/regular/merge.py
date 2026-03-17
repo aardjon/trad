@@ -245,6 +245,7 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
         _SummitMerger._enrich_alternate_names(target, source)
         _SummitMerger._enrich_unspecified_names(target, source)
         _SummitMerger._enrich_position(target, source)
+        _SummitMerger._enrich_sector(target, source)
 
     @staticmethod
     def _enrich_official_name(target: Summit, source: Summit) -> None:
@@ -290,6 +291,13 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
         # Use the low-grade position only if none is set already - otherwise, ignore the other one
         if target.low_grade_position == UNDEFINED_GEOPOSITION:
             target.low_grade_position = source.low_grade_position
+
+    @staticmethod
+    def _enrich_sector(target: Summit, source: Summit) -> None:
+        if target.sector is None:
+            target.sector = source.sector
+        elif source.sector not in (None, target.sector):
+            raise MergeConflictError("summit", source.name, "sector")
 
 
 class _RouteMerger(_EntityMerger[_RouteRelatedData]):
