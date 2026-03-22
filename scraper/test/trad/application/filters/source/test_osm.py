@@ -3,13 +3,12 @@ Unit tests for the 'trad.application.filters.source.osm' module.
 """
 
 import json
-from collections.abc import Callable
-from typing import Final
+from typing import Final, override
 from unittest.mock import Mock
 
 import pytest
 
-from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
+from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
 from trad.application.filters.source.osm import OsmSummitDataFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
@@ -209,12 +208,12 @@ class TestOsmSummitDataFilter:
         assert '["natural"="peak"]' in id_query_content
 
     @pytest.mark.parametrize(
-        ("nominatim_response_factory"),
+        ("nominatim_response"),
         [
             # Minimal valid Nominatim response data
-            lambda area_id: [{"osm_id": area_id}],
+            [{"osm_id": 1337}],
             # Nominatim response containing additional fields
-            lambda area_id: [{"copyright": "OSM contributors", "osm_id": area_id}],
+            [{"copyright": "OSM contributors", "osm_id": 1337}],
         ],
     )
     @pytest.mark.parametrize(
@@ -425,7 +424,7 @@ class TestOsmSummitDataFilter:
     )
     def test_normal_execution(
         self,
-        nominatim_response_factory: Callable[[int], list[dict[str, object]]],
+        nominatim_response: list[dict[str, object]],
         overpass_responses: list[dict[str, object]],
         expected_summits: list[Summit],
     ) -> None:
@@ -436,30 +435,23 @@ class TestOsmSummitDataFilter:
          - It must work with nodes, with relations, and both
          - Everything must still work if the Nominatim response contains additional (ignored) data
         """
-        dummy_area_id: Final = 1337
+        fake_network_boundary = _FakeNetwork(
+            nominatim_response=nominatim_response,
+            overpass_area_query_response=overpass_responses[0],
+            overpass_missing_nodes_query_response=overpass_responses[1]
+            if len(overpass_responses) > 1
+            else None,
+        )
+        osm_filter = OsmSummitDataFilter(fake_network_boundary)
 
         output_pipe = CollectedData()
-        retrieve_json_resource_side_effects = [
-            json.dumps(nominatim_response_factory(dummy_area_id)),  # Nominatim response
-            json.dumps(overpass_responses[0]),  # Response of the Overpass area query
-        ]
-        if len(overpass_responses) > 1:
-            # Response of the Overpass node ID query, if any
-            retrieve_json_resource_side_effects.append(json.dumps(overpass_responses[1]))
-
-        mocked_network_boundary = Mock(HttpNetworkingBoundary)
-        mocked_network_boundary.retrieve_json_resource.side_effect = (
-            retrieve_json_resource_side_effects
-        )
-
-        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
 
         # Make sure that the expected number of summits has been sent to the Pipe
         actual_summits = list(output_pipe.iter_summits())
         assert len(actual_summits) == len(expected_summits)
 
-        # Make sure all sent summit data matches our expectation
+        # Make sure all imported summits match our expectation
         stored_summits: list[Summit] = sorted(
             (summit for _id, summit in actual_summits),
             key=lambda s: s.name,
@@ -467,7 +459,9 @@ class TestOsmSummitDataFilter:
         assert all(
             self._summits_equal(s1, s2)
             for s1, s2 in zip(
-                sorted(expected_summits, key=lambda s: s.name), stored_summits, strict=True
+                sorted(expected_summits, key=lambda s: s.name),
+                stored_summits,
+                strict=True,
             )
         )
 
@@ -480,34 +474,24 @@ class TestOsmSummitDataFilter:
 
         :param summit_count: The number of Summits being imported.
         """
-        dummy_area_id: Final = 4711
-
-        retrieve_json_resource_side_effects = [
-            json.dumps([{"osm_id": dummy_area_id}]),  # Nominatim response
-            json.dumps(
-                {
-                    "elements": [
-                        {
-                            "id": i,
-                            "type": "node",
-                            "lat": 13.37,
-                            "lon": 47.11,
-                            "tags": {
-                                "name": f"Summit{i}",
-                            },
-                        }
-                        for i in range(summit_count)
-                    ]
-                },
-            ),  # Response of the Overpass area query
-        ]
-
-        mocked_network_boundary = Mock(HttpNetworkingBoundary)
-        mocked_network_boundary.retrieve_json_resource.side_effect = (
-            retrieve_json_resource_side_effects
+        fake_network_boundary = _FakeNetwork(
+            nominatim_response=[{"osm_id": 4711}],
+            overpass_area_query_response={
+                "elements": [
+                    {
+                        "id": i,
+                        "type": "node",
+                        "lat": 13.37,
+                        "lon": 47.11,
+                        "tags": {
+                            "name": f"Summit{i}",
+                        },
+                    }
+                    for i in range(summit_count)
+                ]
+            },
         )
-
-        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
+        osm_filter = OsmSummitDataFilter(fake_network_boundary)
 
         output_pipe = CollectedData()
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
@@ -533,3 +517,48 @@ class TestOsmSummitDataFilter:
             and summit1.high_grade_position.is_equal_to(summit2.high_grade_position)
             and summit1.low_grade_position.is_equal_to(summit2.low_grade_position)
         )
+
+
+class _FakeNetwork(HttpNetworkingBoundary):
+    """
+    Fake HTTP networking component to be used by unit test cases.
+
+    Allow to inject certain HTTP query response data.
+    """
+
+    def __init__(
+        self,
+        nominatim_response: list[dict[str, object]],
+        overpass_area_query_response: dict[str, object] | None = None,
+        overpass_missing_nodes_query_response: dict[str, object] | None = None,
+    ):
+        self._nominatim_response = JsonData(json.dumps(nominatim_response))
+        self._overpass_responses = [
+            JsonData(json.dumps(response)) if response is not None else JsonData("")
+            for response in (overpass_area_query_response, overpass_missing_nodes_query_response)
+        ]
+        self._overpass_query_count = 0
+
+    @override
+    def retrieve_text_resource(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None = None,
+    ) -> str:
+        # The OSM filter shouldn't access any text resources
+        raise NotImplementedError("OSM filter unexpectedly accessed a text resource")
+
+    @override
+    def retrieve_json_resource(
+        self,
+        url: str,
+        url_params: dict[str, str | int] | None = None,
+        query_content: str | None = None,
+    ) -> JsonData:
+        if "nominatim" in url:
+            return self._nominatim_response
+        if "overpass" in url:
+            response = self._overpass_responses[self._overpass_query_count]
+            self._overpass_query_count += 1
+            return response
+        raise NotImplementedError(f"OSM filter requested unexpected URL {url}")
