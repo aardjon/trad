@@ -7,9 +7,10 @@ For further information about the JSON format sent by the Overpass API, please r
      - https://wiki.openstreetmap.org/wiki/OSM_JSON
      - https://dev.overpass-api.de/output_formats.html#json
      - https://wiki.openstreetmap.org/wiki/API_v0.6#JSON_Format
+Interactive Overpass query editor: https://overpass-turbo.eu/
 """
 
-from collections.abc import Collection, Iterable, Iterator
+from collections.abc import Callable, Collection, Iterable, Iterator
 from enum import StrEnum
 from itertools import chain
 from logging import getLogger
@@ -128,6 +129,7 @@ class _OverpassRelationMember(_ReadOnlyPydanticModel):
 
 
 class _OverpassRelation(_ReadOnlyPydanticModel):
+    id: int
     type: Literal[_OsmObjectTypes.relation]
     members: list[_OverpassRelationMember]
     tags: _OverpassTags
@@ -154,6 +156,10 @@ class _OverpassElementsResponse(_ReadOnlyPydanticModel):
 
 class _OverpassNodesResponse(_ReadOnlyPydanticModel):
     elements: list[_OverpassNode]
+
+
+class _OverpassRelationsResponse(_ReadOnlyPydanticModel):
+    elements: list[_OverpassRelation]
 
 
 class OsmSummitDataFilter(SourceFilter):
@@ -202,14 +208,26 @@ class OsmSummitDataFilter(SourceFilter):
     @override
     def _execute_source_filter(self, output_pipe: Pipe) -> None:
         _logger.debug("'%s' filter started", self.get_name())
+        # Add the external source attribution
+        self.__store_external_source_attribution(output_pipe)
+
+        # Get the OSM ID of the geographical area to query
         area_id = self.__get_area_id()
 
         # Get all OSM nodes and relations for that area
         osm_elements = self.__get_osm_summit_elements(area_id)
         _logger.debug("Retrieved %d OSM elements", len(osm_elements))
+        if not osm_elements:
+            return
 
         # Separate nodes and relations
         osm_nodes, osm_relations = self.__separate_elements_by_type(osm_elements)
+
+        # Get all parent relations (=sectors) of the given node and relation IDs
+        sector_names, sector_map = self.__retrieve_sector_relations(
+            osm_nodes.keys(),
+            [rel.id for rel in osm_relations],
+        )
 
         # Retrieve all missing peak nodes (relation members)
         self.__retrieve_missing_nodes(osm_nodes, osm_relations)
@@ -221,21 +239,26 @@ class OsmSummitDataFilter(SourceFilter):
         # trying to process such a relation fails with an exception.
         self.__remove_forbidden_nodes(osm_nodes)
 
+        def get_sector_name(osm_id: int) -> str | None:
+            sector_id = sector_map.get(osm_id)
+            if sector_id is not None:
+                return sector_names.get(sector_id)
+            return None
+
         # Create Summit objects for all relations
         # This removes all processed nodes from osm_nodes because we don't want to create another
         # Summit object for them later.
-        summits_from_relations = self.__create_summits_from_relations(osm_nodes, osm_relations)
+        summits_from_relations = self.__create_summits_from_relations(
+            osm_nodes, osm_relations, get_sector_name
+        )
         # Create Summit objects for all left-over peak nodes (which do not belong to any relation)
-        summits_from_nodes = self.__create_summits_from_nodes(osm_nodes.values())
+        summits_from_nodes = self.__create_summits_from_nodes(osm_nodes.values(), get_sector_name)
 
         # Send all summits to the pipe
         self.__store_summits(output_pipe, chain(summits_from_relations, summits_from_nodes))
         _logger.debug(
             "Processed summits from %d relations and %d nodes", len(osm_relations), len(osm_nodes)
         )
-
-        # Add the external source attribution
-        self.__store_external_source_attribution(output_pipe)
 
         _logger.debug("'%s' filter finished", self.get_name())
 
@@ -268,6 +291,27 @@ class OsmSummitDataFilter(SourceFilter):
                 len(osm_elements) - len(osm_nodes) - len(osm_relations),
             )
         return osm_nodes, osm_relations
+
+    def __retrieve_sector_relations(
+        self, node_ids: Collection[int], relation_ids: Collection[int]
+    ) -> tuple[dict[int, str], dict[int, int]]:
+        """
+        Retrieves the sectors the given OSM elements belong to. The first returned value is a dict
+        of sector ID and sector name, the second value is a dict of element IDs (dict key) and the
+        ID of the sector they belong to (dict value).
+        """
+        parent_relation_elements = self._osm_api_receiver.retrieve_parent_relations(
+            node_ids, relation_ids, rel_filter={"climbing": "area", "type": "site"}
+        )
+        sector_names = {rel.id: rel.tags.name for rel in parent_relation_elements}
+        all_member_ids = set(list(node_ids) + list(relation_ids))
+        sector_assignment = {
+            member.ref: sector_relation.id
+            for sector_relation in parent_relation_elements
+            for member in sector_relation.members
+            if member.ref in all_member_ids
+        }
+        return sector_names, sector_assignment
 
     def __retrieve_missing_nodes(
         self, osm_nodes: dict[int, _OverpassNode], osm_relations: Collection[_OverpassRelation]
@@ -317,7 +361,10 @@ class OsmSummitDataFilter(SourceFilter):
             del osm_nodes[node_id]
 
     def __create_summits_from_relations(
-        self, osm_nodes: dict[int, _OverpassNode], osm_relations: Collection[_OverpassRelation]
+        self,
+        osm_nodes: dict[int, _OverpassNode],
+        osm_relations: Collection[_OverpassRelation],
+        get_sector_name: Callable[[int], str | None],
     ) -> Iterator[Summit]:
         """
         Creates (and yields) a Summit object for each relation in `osm_relations`, using the peaks
@@ -353,11 +400,16 @@ class OsmSummitDataFilter(SourceFilter):
                 official_name=relation.tags.name,
                 alternate_names=relation.tags.get_alternate_names(),
                 high_grade_position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
+                sector=get_sector_name(relation.id),
             )
             # Remove this peak node from osm_nodes because it is not needed anymore
             osm_nodes.pop(peak_node.id)
 
-    def __create_summits_from_nodes(self, osm_nodes: Iterable[_OverpassNode]) -> Iterator[Summit]:
+    def __create_summits_from_nodes(
+        self,
+        osm_nodes: Iterable[_OverpassNode],
+        get_sector_name: Callable[[int], str | None],
+    ) -> Iterator[Summit]:
         """
         Creates (and yields) a Summit object for each node in `osm_nodes`.
         """
@@ -368,6 +420,7 @@ class OsmSummitDataFilter(SourceFilter):
                 high_grade_position=GeoPosition.from_decimal_degree(
                     summit_element.lat, summit_element.lon
                 ),
+                sector=get_sector_name(summit_element.id),
             )
 
     def __store_external_source_attribution(self, pipe: Pipe) -> None:
@@ -517,6 +570,65 @@ class OsmApiReceiver:
 
         try:
             osm_response = _OverpassNodesResponse.model_validate_json(json_data, strict=True)
+        except ValidationError as e:
+            raise DataProcessingError("Retrieved unexpected node data from Overpass") from e
+
+        return osm_response.elements
+
+    def retrieve_parent_relations(
+        self,
+        node_ids: Collection[int],
+        relation_ids: Collection[int],
+        rel_filter: dict[str, str],
+    ) -> list[_OverpassRelation]:
+        """
+        Request and return the relation objects that are the parents of the node and relation
+        objects identified by `node_ids` and `relation_ids`. This is done by querying the Overpass
+        API. `rel_filter` defines the OSM tags (dict keys) and values (dict values) a relation must
+        provide to be returned.
+
+        Returns an empty list if no matches were found. Raises DataProcessingError in case of any
+        data processing error, or DataRetrievalError in case of network/connection problems.
+        """
+        _logger.debug(
+            "Querying parent relations of %d IDs from Overpass, using filter %s",
+            len(node_ids) + len(relation_ids),
+            rel_filter,
+        )
+
+        tag_filter = "".join(f'["{t}"="{v}"]' for t, v in rel_filter.items())
+        relation_id_str = ", ".join(str(i) for i in relation_ids)
+        node_id_str = ", ".join(str(i) for i in node_ids)
+        query = self.__build_overpass_query(
+            f"""
+            (
+                relation(id: {relation_id_str});
+            )->.rels;
+            (
+                node(id: {node_id_str});
+            )->.nodes;
+
+            (
+                rel(br.rels);
+                rel(bn.nodes);
+            )->.all;
+
+            relation.all{tag_filter}->.filtered;
+            .filtered
+            """
+        )
+
+        try:
+            json_data = self._http_boundary.retrieve_json_resource(
+                url=self._OVERPASS_API_ENDPOINT,
+                url_params={},
+                query_content=f"data={query}",
+            )
+        except HttpRequestError as e:
+            raise DataRetrievalError("Parent relation Overpass request failed") from e
+
+        try:
+            osm_response = _OverpassRelationsResponse.model_validate_json(json_data, strict=True)
         except ValidationError as e:
             raise DataProcessingError("Retrieved unexpected node data from Overpass") from e
 

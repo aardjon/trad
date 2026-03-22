@@ -114,7 +114,7 @@ class TestOsmSummitDataFilter:
          - All Overpass queries contain the expected tag filters
         """
         dummy_area_id: Final = 1337
-        expected_network_request_count: Final = 3  # 1x Nomination + 2x Overpass
+        expected_network_request_count: Final = 4  # 1x Nomination + 2x Overpass
 
         retrieve_json_resource_side_effects = [
             json.dumps([{"osm_id": dummy_area_id}]),  # Nominatim response
@@ -127,6 +127,19 @@ class TestOsmSummitDataFilter:
                             "type": "relation",
                             "tags": {"name": "Mt Mock"},
                             "members": [{"type": "node", "ref": 43}],
+                        },
+                    ]
+                },
+            ),
+            json.dumps(
+                # Response of the Overpass parent relations ID query
+                {
+                    "elements": [
+                        {
+                            "id": 123,
+                            "type": "relation",
+                            "tags": {"name": "Mock Area"},
+                            "members": [{"type": "relation", "ref": 42}],
                         },
                     ]
                 },
@@ -193,8 +206,24 @@ class TestOsmSummitDataFilter:
         assert '["climbing:trad"="yes"]' in area_query_content
         assert '["sport"="climbing"]' in area_query_content
 
-        # 2. Overpass node  ID query
-        id_query = mocked_network_boundary.retrieve_json_resource.call_args_list[2]
+        # 2. Overpass parent relation query
+        parent_query = mocked_network_boundary.retrieve_json_resource.call_args_list[2]
+
+        # The query must have been sent to the expected endpoint
+        assert parent_query.kwargs["url"] == expected_overpass_endpoint
+
+        parent_query_content = parent_query.kwargs["query_content"]
+        # The body must start with "data="
+        assert parent_query_content.startswith("data=")
+        # The query must contain the requested element type
+        assert "node" in parent_query_content
+        assert "relation" in parent_query_content
+        # The query must contain the necessary tag filters
+        assert '["climbing"="area"]' in parent_query_content
+        assert '["type"="site"]' in parent_query_content
+
+        # 3. Overpass node ID query
+        id_query = mocked_network_boundary.retrieve_json_resource.call_args_list[3]
 
         # The query must have been sent to the expected endpoint
         assert id_query.kwargs["url"] == expected_overpass_endpoint
@@ -237,10 +266,22 @@ class TestOsmSummitDataFilter:
                             }
                         ]
                     },
+                    {
+                        "elements": [
+                            {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Mock Area"},
+                                "members": [{"type": "node", "ref": 42}],
+                            },
+                        ]
+                    },
                 ],
                 [
                     Summit(
-                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                        "Mt Mock",
+                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        sector="Mock Area",
                     )
                 ],
             ),
@@ -259,6 +300,16 @@ class TestOsmSummitDataFilter:
                     {
                         "elements": [
                             {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Mock Area"},
+                                "members": [{"type": "node", "ref": 42}],
+                            },
+                        ]
+                    },
+                    {
+                        "elements": [
+                            {
                                 "id": 1,
                                 "type": "node",
                                 "lat": 13.37,
@@ -270,7 +321,9 @@ class TestOsmSummitDataFilter:
                 ],
                 [
                     Summit(
-                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                        "Mt Mock",
+                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        sector="Mock Area",
                     )
                 ],
             ),
@@ -293,10 +346,22 @@ class TestOsmSummitDataFilter:
                             },
                         ]
                     },
+                    {
+                        "elements": [
+                            {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Mock Area"},
+                                "members": [{"type": "node", "ref": 42}],
+                            },
+                        ]
+                    },
                 ],
                 [
                     Summit(
-                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                        "Mt Mock",
+                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        sector="Mock Area",
                     )
                 ],
             ),
@@ -310,15 +375,31 @@ class TestOsmSummitDataFilter:
                                 "lon": 47.11,
                                 "id": 42,
                                 "user": "nobody",
-                                "tags": {"name": "Mt Mock", "climbing:summit_log": "yes"},
+                                "tags": {
+                                    "name": "Mt Mock",
+                                    "climbing:summit_log": "yes",
+                                    "some_other_tag": "value",
+                                },
                             }
                         ],
                         "osm3s": {"copyright": "OSM constributors"},
                     },
+                    {
+                        "elements": [
+                            {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Mock Area"},
+                                "members": [{"type": "node", "ref": 42}],
+                            },
+                        ]
+                    },
                 ],
                 [
                     Summit(
-                        "Mt Mock", high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11)
+                        "Mt Mock",
+                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        sector="Mock Area",
                     )
                 ],
             ),
@@ -349,19 +430,32 @@ class TestOsmSummitDataFilter:
                             },
                         ]
                     },
+                    {
+                        "elements": [
+                            {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Zahlengebiet"},
+                                "members": [{"type": "node", "ref": i} for i in range(1, 4)],
+                            },
+                        ]
+                    },
                 ],
                 [
                     Summit(
                         "Einserspitze",
                         high_grade_position=GeoPosition.from_decimal_degree(12.34, 9.87),
+                        sector="Zahlengebiet",
                     ),
                     Summit(
                         "Zweierturm",
                         high_grade_position=GeoPosition.from_decimal_degree(56.78, 65.43),
+                        sector="Zahlengebiet",
                     ),
                     Summit(
                         "Dreierwand",
                         high_grade_position=GeoPosition.from_decimal_degree(90.00, 21.10),
+                        sector="Zahlengebiet",
                     ),
                 ],
             ),
@@ -386,12 +480,23 @@ class TestOsmSummitDataFilter:
                             },
                         ]
                     },
+                    {
+                        "elements": [
+                            {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Mock Area"},
+                                "members": [{"type": "node", "ref": 11}],
+                            },
+                        ]
+                    },
                 ],
                 [
                     Summit(
                         official_name="name",
                         alternate_names=["alt", "official", "nick", "short", "loc"],
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        sector="Mock Area",
                     )
                 ],
             ),
@@ -411,12 +516,23 @@ class TestOsmSummitDataFilter:
                             },
                         ]
                     },
+                    {
+                        "elements": [
+                            {
+                                "id": 123,
+                                "type": "relation",
+                                "tags": {"name": "Mock Area"},
+                                "members": [{"type": "node", "ref": 22}],
+                            },
+                        ]
+                    },
                 ],
                 [
                     Summit(
                         official_name="name",
                         alternate_names=["alt1", "alt2", "alt3"],
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        sector="Mock Area",
                     )
                 ],
             ),
@@ -436,11 +552,8 @@ class TestOsmSummitDataFilter:
          - Everything must still work if the Nominatim response contains additional (ignored) data
         """
         fake_network_boundary = _FakeNetwork(
-            nominatim_response=nominatim_response,
-            overpass_area_query_response=overpass_responses[0],
-            overpass_missing_nodes_query_response=overpass_responses[1]
-            if len(overpass_responses) > 1
-            else None,
+            nominatim_response,
+            *overpass_responses,
         )
         osm_filter = OsmSummitDataFilter(fake_network_boundary)
 
@@ -474,17 +587,24 @@ class TestOsmSummitDataFilter:
         have any routes or other infrastructure that needs to be grouped. That's why checking for
         forbidden "relation peaks" is not tested.
         """
-        json_node = {
+        json_peak_node = {
             "id": 22,
             "type": "node",
             "lat": 13.37,
             "lon": 47.11,
             "tags": {"name": "Mock Summit", "access": access_tag},
         }
+        json_parent_relation = {
+            "id": 32,
+            "type": "relation",
+            "tags": {"name": "Mock Area"},
+            "members": [{"type": "node", "ref": 22}],
+        }
 
         fake_network_boundary = _FakeNetwork(
             nominatim_response=[{"osm_id": 1337}],
-            overpass_area_query_response={"elements": [json_node]},
+            overpass_area_query_response={"elements": [json_peak_node]},
+            overpass_parent_relations_query_response={"elements": [json_parent_relation]},
         )
         osm_filter = OsmSummitDataFilter(fake_network_boundary)
 
@@ -519,6 +639,16 @@ class TestOsmSummitDataFilter:
                     for i in range(summit_count)
                 ]
             },
+            overpass_parent_relations_query_response={
+                "elements": [
+                    {
+                        "id": 123,
+                        "type": "relation",
+                        "tags": {"name": "Test Sector"},
+                        "members": [{"type": "relation", "ref": i} for i in range(summit_count)],
+                    },
+                ]
+            },
         )
         osm_filter = OsmSummitDataFilter(fake_network_boundary)
 
@@ -545,6 +675,7 @@ class TestOsmSummitDataFilter:
             and sorted(summit1.unspecified_names) == sorted(summit2.unspecified_names)
             and summit1.high_grade_position.is_equal_to(summit2.high_grade_position)
             and summit1.low_grade_position.is_equal_to(summit2.low_grade_position)
+            and summit1.sector == summit2.sector
         )
 
 
@@ -559,12 +690,17 @@ class _FakeNetwork(HttpNetworkingBoundary):
         self,
         nominatim_response: list[dict[str, object]],
         overpass_area_query_response: dict[str, object] | None = None,
+        overpass_parent_relations_query_response: dict[str, object] | None = None,
         overpass_missing_nodes_query_response: dict[str, object] | None = None,
     ):
         self._nominatim_response = JsonData(json.dumps(nominatim_response))
         self._overpass_responses = [
             JsonData(json.dumps(response)) if response is not None else JsonData("")
-            for response in (overpass_area_query_response, overpass_missing_nodes_query_response)
+            for response in (
+                overpass_area_query_response,
+                overpass_parent_relations_query_response,
+                overpass_missing_nodes_query_response,
+            )
         ]
         self._overpass_query_count = 0
 
