@@ -5,7 +5,7 @@ Unit tests for the 'trad.application.filters.source.osm' module.
 import json
 from collections.abc import Callable
 from typing import Final
-from unittest.mock import ANY, Mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -106,22 +106,126 @@ class TestOsmSummitDataFilter:
             == expected_network_request_count
         )
 
+    def test_network_usage(self) -> None:
+        """
+        Ensure that the OSM filter uses the external network correctly (in the "happy path" case):
+         - All network boundary calls go to the expected endpoint
+         - The correct query parameters are sent, if important (esp. for limiting ones)
+         - The number of network requests is as expected (don't DOS a service due to a bug ^^)
+         - All Overpass queries contain the expected tag filters
+        """
+        dummy_area_id: Final = 1337
+        expected_network_request_count: Final = 3  # 1x Nomination + 2x Overpass
+
+        retrieve_json_resource_side_effects = [
+            json.dumps([{"osm_id": dummy_area_id}]),  # Nominatim response
+            json.dumps(
+                # Response of the Overpass area query
+                {
+                    "elements": [
+                        {
+                            "id": 42,
+                            "type": "relation",
+                            "tags": {"name": "Mt Mock"},
+                            "members": [{"type": "node", "ref": 43}],
+                        },
+                    ]
+                },
+            ),
+            json.dumps(
+                # Response of the Overpass node ID query
+                {
+                    "elements": [
+                        {
+                            "id": 43,
+                            "type": "node",
+                            "lat": 13.37,
+                            "lon": 47.11,
+                            "tags": {"name": "Mt Mock"},
+                        },
+                    ]
+                },
+            ),
+        ]
+
+        mocked_network_boundary = Mock(HttpNetworkingBoundary)
+        mocked_network_boundary.retrieve_json_resource.side_effect = (
+            retrieve_json_resource_side_effects
+        )
+
+        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
+
+        expected_nominatim_endpoint: Final = "https://nominatim.openstreetmap.org/search"
+        expected_overpass_endpoint: Final = "https://overpass-api.de/api/interpreter"
+        expected_nominatim_search_string: Final = "Sächsische Schweiz"
+
+        # Check the total number of network requests
+        assert (
+            mocked_network_boundary.retrieve_json_resource.call_count
+            == expected_network_request_count
+        )
+        # Check the Nominatim request parameters: Request the correct area and limit the result
+        # count to one
+        mocked_network_boundary.retrieve_json_resource.assert_any_call(
+            url=expected_nominatim_endpoint,
+            url_params={"q": expected_nominatim_search_string, "limit": 1, "format": "jsonv2"},
+        )
+
+        # Check the Overpass requests
+
+        # 1. Overpass area query
+        area_query = mocked_network_boundary.retrieve_json_resource.call_args_list[1]
+
+        # The query must have been sent to the expected endpoint
+        assert area_query.kwargs["url"] == expected_overpass_endpoint
+
+        area_query_content = area_query.kwargs["query_content"]
+        # The body must start with "data="
+        assert area_query_content.startswith("data=")
+        # The query must request the area ID provided by Nominatim
+        assert f"area({dummy_area_id})->.searchArea;" in area_query_content
+        # The query must contain the requested element types
+        assert "node" in area_query_content
+        assert "relation" in area_query_content
+        # The query must contain the necessary tag filters
+        assert '["natural"="peak"]' in area_query_content
+        assert '["type"="site"]' in area_query_content
+        assert '["climbing:trad"="yes"]' in area_query_content
+        assert '["sport"="climbing"]' in area_query_content
+
+        # 2. Overpass node  ID query
+        id_query = mocked_network_boundary.retrieve_json_resource.call_args_list[2]
+
+        # The query must have been sent to the expected endpoint
+        assert id_query.kwargs["url"] == expected_overpass_endpoint
+
+        id_query_content = id_query.kwargs["query_content"]
+        # The body must start with "data="
+        assert id_query_content.startswith("data=")
+        # The query must contain the requested element type
+        assert "node" in id_query_content
+        # The query must contain the necessary tag filters
+        assert '["natural"="peak"]' in id_query_content
+
     @pytest.mark.parametrize(
-        ("nominatim_response_factory", "overpass_responses", "expected_summits"),
+        ("nominatim_response_factory"),
+        [
+            # Minimal valid Nominatim response data
+            lambda area_id: [{"osm_id": area_id}],
+            # Nominatim response containing additional fields
+            lambda area_id: [{"copyright": "OSM contributors", "osm_id": area_id}],
+        ],
+    )
+    @pytest.mark.parametrize(
+        ("overpass_responses", "expected_summits"),
         [
             (  # Minimal valid response data, no summits at all
-                lambda area_id: [{"osm_id": area_id}],
-                [{"elements": []}],
-                [],
-            ),
-            (  # Nominatim response contains additional fields
-                lambda area_id: [{"copyright": "OSM contributors", "osm_id": area_id}],
                 [{"elements": []}],
                 [],
             ),
             # Single summit (minimal data)
             (
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -142,7 +246,6 @@ class TestOsmSummitDataFilter:
                 ],
             ),
             (
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -173,7 +276,6 @@ class TestOsmSummitDataFilter:
                 ],
             ),
             (  # Relation summit for which the referenced node is already available
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -200,7 +302,6 @@ class TestOsmSummitDataFilter:
                 ],
             ),
             (  # Single summit with additional data
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -223,7 +324,6 @@ class TestOsmSummitDataFilter:
                 ],
             ),
             (  # Multiple summits
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -268,7 +368,6 @@ class TestOsmSummitDataFilter:
             ),
             # Summits with multiple names (in different variants)
             (
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -298,7 +397,6 @@ class TestOsmSummitDataFilter:
                 ],
             ),
             (
-                lambda area_id: [{"osm_id": area_id}],
                 [
                     {
                         "elements": [
@@ -333,15 +431,14 @@ class TestOsmSummitDataFilter:
     ) -> None:
         """
         Ensure the correct behaviour if no errors occur:
-         - All network boundary calls get the expected parameters
          - The correct number of summits is sent to the Pipe
          - The Summit data is correctly parsed and forwarded
          - It must work with nodes, with relations, and both
+         - Everything must still work if the Nominatim response contains additional (ignored) data
         """
         dummy_area_id: Final = 1337
-        expected_network_request_count: Final = len(overpass_responses) + 1
 
-        mocked_pipe = Mock(Pipe)
+        output_pipe = CollectedData()
         retrieve_json_resource_side_effects = [
             json.dumps(nominatim_response_factory(dummy_area_id)),  # Nominatim response
             json.dumps(overpass_responses[0]),  # Response of the Overpass area query
@@ -356,58 +453,15 @@ class TestOsmSummitDataFilter:
         )
 
         osm_filter = OsmSummitDataFilter(mocked_network_boundary)
-        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=mocked_pipe)
-
-        # Check the number of network requests
-        assert (
-            mocked_network_boundary.retrieve_json_resource.call_count
-            == expected_network_request_count
-        )
-        # Check the Nominatim request parameters
-        mocked_network_boundary.retrieve_json_resource.assert_any_call(
-            url="https://nominatim.openstreetmap.org/search",
-            url_params={"q": "Sächsische Schweiz", "limit": 1, "format": "jsonv2"},
-        )
-        # Check the Overpass requests parameters
-        mocked_network_boundary.retrieve_json_resource.assert_called_with(
-            url="https://overpass-api.de/api/interpreter",
-            url_params={},
-            query_content=ANY,
-        )
-
-        # Do some checks on the query contents (i.e. the OverpassQL strings)
-        area_query_content = mocked_network_boundary.retrieve_json_resource.call_args_list[
-            1
-        ].kwargs["query_content"]
-        # The body must start with "data="
-        assert area_query_content.startswith("data=")
-        # The query must request the area ID provided by Nominatim
-        assert f"area({dummy_area_id})->.searchArea;" in area_query_content
-        # The query must contain the requested element types
-        assert "node" in area_query_content
-        assert "relation" in area_query_content
-        # The query must contain the necessary tag filters
-        assert '["natural"="peak"]' in area_query_content
-        assert '["type"="site"]' in area_query_content
-        assert '["climbing:trad"="yes"]' in area_query_content
-        assert '["sport"="climbing"]' in area_query_content
-
-        if len(overpass_responses) > 1:
-            id_query_content = mocked_network_boundary.retrieve_json_resource.call_args_list[
-                2
-            ].kwargs["query_content"]
-            # The body must start with "data="
-            assert id_query_content.startswith("data=")
-            # The query must contain the requested element type
-            assert "node" in id_query_content
-            # The query must contain the necessary tag filters
-            assert '["natural"="peak"]' in id_query_content
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
 
         # Make sure that the expected number of summits has been sent to the Pipe
-        assert mocked_pipe.add_summit.call_count == len(expected_summits)
+        actual_summits = list(output_pipe.iter_summits())
+        assert len(actual_summits) == len(expected_summits)
+
         # Make sure all sent summit data matches our expectation
         stored_summits: list[Summit] = sorted(
-            (call.args[0] for call in mocked_pipe.add_summit.call_args_list),
+            (summit for _id, summit in actual_summits),
             key=lambda s: s.name,
         )
         assert all(
