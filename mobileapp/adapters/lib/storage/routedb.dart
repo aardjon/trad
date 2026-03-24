@@ -292,6 +292,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   @override
   Future<List<Route>> retrieveRoutesOfSummit(int summitId, RoutesFilterMode sortCriterion) async {
     const String averageRatingColumnName = 'rating'; // Name of the virtual column from the join
+    const String gradeOrderColumnName = 'grade_order'; // Name of the virtual sorting column
 
     /// Configure the query
     List<String> orderByColumns;
@@ -300,34 +301,44 @@ class RouteDbStorage implements RouteDbStorageBoundary {
         orderByColumns = <String>['${RoutesTable.columnRouteName} ASC'];
       case RoutesFilterMode.grade:
         orderByColumns = <String>[
-          '${RoutesTable.columnGradeAf} ASC',
+          '$gradeOrderColumnName ASC',
           '${RoutesTable.columnGradeJump} ASC',
         ];
       case RoutesFilterMode.rating:
         orderByColumns = <String>['$averageRatingColumnName DESC'];
     }
 
-    Query query = Query.join(
-      <String>[RoutesTable.tableName, PostsTable.tableName],
-      <String>['${RoutesTable.columnId} = ${PostsTable.columnRouteId}'],
-      <String>[
-        RoutesTable.columnId,
-        RoutesTable.columnRouteName,
-        RoutesTable.columnGradeAf,
-        RoutesTable.columnGradeOu,
-        RoutesTable.columnGradeRp,
-        RoutesTable.columnGradeJump,
-        RoutesTable.columnDanger,
-        RoutesTable.columnStars,
-        "AVG(${PostsTable.columnRating}) AS '$averageRatingColumnName'",
-      ],
-    );
-    query.setWhereCondition('${RoutesTable.columnSummitId} = ?', <Object>[summitId]);
-    query.groupByColumns = <String>[
+    List<String> columnsToSelect = <String>[
       RoutesTable.columnId,
       RoutesTable.columnRouteName,
       RoutesTable.columnGradeAf,
+      RoutesTable.columnGradeOu,
+      RoutesTable.columnGradeRp,
+      RoutesTable.columnGradeJump,
+      RoutesTable.columnDanger,
+      RoutesTable.columnStars,
+      "AVG(${PostsTable.columnRating}) AS '$averageRatingColumnName'",
     ];
+
+    if (sortCriterion == RoutesFilterMode.grade) {
+      List<String> coalesceParams = <String>[];
+      for (final String column in <String>[
+        RoutesTable.columnGradeAf,
+        RoutesTable.columnGradeRp,
+        RoutesTable.columnGradeOu,
+      ]) {
+        coalesceParams.add('NULLIF($column, 0)');
+      }
+      columnsToSelect.add("COALESCE(${coalesceParams.join(', ')}) AS '$gradeOrderColumnName'");
+    }
+
+    Query query = Query.join(
+      <String>[RoutesTable.tableName, PostsTable.tableName],
+      <String>['${RoutesTable.columnId} = ${PostsTable.columnRouteId}'],
+      columnsToSelect,
+    );
+    query.setWhereCondition('${RoutesTable.columnSummitId} = ?', <Object>[summitId]);
+    query.groupByColumns = <String>[RoutesTable.columnId];
     query.orderByColumns = orderByColumns;
 
     // Execute the query
