@@ -80,6 +80,12 @@ class _OverpassTags(_ReadOnlyPydanticModel):
     nickname: str | None = None
     short_name: str | None = None
 
+    access: str | None = None
+    """
+    Legal access restrictions, if any (as of https://wiki.openstreetmap.org/wiki/Key:access). If
+    missing, everyone is officially allowed to climb here.
+    """
+
     def get_alternate_names(self) -> list[str]:
         """
         Return a list of all "alternate" (i.e. non-official) names assigned to this object.
@@ -209,6 +215,12 @@ class OsmSummitDataFilter(SourceFilter):
         self.__retrieve_missing_nodes(osm_nodes, osm_relations)
         _logger.debug("Retrieved referenced OSM peak nodes")
 
+        # Remove all peak nodes that must never be accessed at all
+        # Note: We don't expect such nodes to be part of a crag relation because it doesn't seem to
+        # make sense, that's why we purposely don't handle this case. If it does happen, though,
+        # trying to process such a relation fails with an exception.
+        self.__remove_forbidden_nodes(osm_nodes)
+
         # Create Summit objects for all relations
         # This removes all processed nodes from osm_nodes because we don't want to create another
         # Summit object for them later.
@@ -264,6 +276,8 @@ class OsmSummitDataFilter(SourceFilter):
         Retrieves all peak node elements that are referenced by the relations within `osm_relations`
         and adds them into `osm_nodes`. Does only one OSM request, and does not re-retrieve nodes
         that are already there.
+
+        :param osm_nodes: Maps OSM node instances to their OSM ID. Will be extended.
         """
         # Get all relation member node IDs that are not already available.
         missing_nodes = [
@@ -285,12 +299,30 @@ class OsmSummitDataFilter(SourceFilter):
             else {}
         )
 
+    def __remove_forbidden_nodes(self, osm_nodes: dict[int, _OverpassNode]) -> None:
+        """
+        Removes all peak nodes that may never be climbed on from `osm_nodes`. The check is done by
+        means of legal restrictions, i.e. the 'access' tag.
+        Nodes with partial (e.g. seasonal) restrictions are *not* removed because they can be
+        accessed legally (just not always).
+        """
+        total_access_restrictions: Final = ["no", "private"]
+
+        ids_to_delete: list[int] = [
+            node_id
+            for node_id, node in osm_nodes.items()
+            if node.tags.access in total_access_restrictions
+        ]
+        for node_id in ids_to_delete:
+            del osm_nodes[node_id]
+
     def __create_summits_from_relations(
         self, osm_nodes: dict[int, _OverpassNode], osm_relations: Collection[_OverpassRelation]
     ) -> Iterator[Summit]:
         """
-        Creates (and yields) a Summit object for each relation in `osm_relations`. The node elements
-        that correspond to the processed relations are removed from `osm_nodes`.
+        Creates (and yields) a Summit object for each relation in `osm_relations`, using the peaks
+        from `osm_nodes`. The peak node elements that correspond to the processed relations are
+        removed from `osm_nodes`.
         """
         # Create Summit objects for all relations
         for relation in osm_relations:

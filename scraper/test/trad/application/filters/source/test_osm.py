@@ -465,6 +465,35 @@ class TestOsmSummitDataFilter:
             )
         )
 
+    @pytest.mark.parametrize("access_tag", ["no", "private"])
+    def test_ignore_inaccessible_summits(self, access_tag: str) -> None:
+        """
+        Ensure that peak nodes that are not accessible at all are not imported.
+
+        Note: We currently don't expect totally forbidden peaks to be a relation, because they won't
+        have any routes or other infrastructure that needs to be grouped. That's why checking for
+        forbidden "relation peaks" is not tested.
+        """
+        json_node = {
+            "id": 22,
+            "type": "node",
+            "lat": 13.37,
+            "lon": 47.11,
+            "tags": {"name": "Mock Summit", "access": access_tag},
+        }
+
+        fake_network_boundary = _FakeNetwork(
+            nominatim_response=[{"osm_id": 1337}],
+            overpass_area_query_response={"elements": [json_node]},
+        )
+        osm_filter = OsmSummitDataFilter(fake_network_boundary)
+
+        output_pipe = CollectedData()
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
+
+        imported_summits = [s for _id, s in output_pipe.iter_summits()]
+        assert not imported_summits
+
     @pytest.mark.parametrize("summit_count", [1, 3, 0])
     def test_external_sources(self, summit_count: int) -> None:
         """
