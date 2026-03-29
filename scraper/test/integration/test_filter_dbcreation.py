@@ -28,12 +28,12 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     post_date: Final = datetime.datetime.now(tz=datetime.UTC)
     post_rating: Final = 2
     expected_index_count: Final = (
-        2  # 'summits' and 'routes' tables each have one user-defined index
+        3  # 'summits', 'routes' and 'areas' tables each have one user-defined index
     )
     af_grade: Final = 2
 
     input_pipe = CollectedData()
-    summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm"))
+    summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm", sector="Example Area"))
     route_id = input_pipe.add_route(
         summit_id=summit_id,
         route=Route(conflict_rank=1, route_name="AW", grade_af=af_grade),
@@ -59,9 +59,18 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     connection = connect(str(expected_db_file))
 
     # Ensure the summit has been added
+    result_set = list(connection.execute("SELECT area_id FROM summits"))
+    assert len(result_set) == 1
+    assert result_set[0][0] is not None
+
     result_set = list(connection.execute("SELECT name FROM summit_names"))
     assert len(result_set) == 1
     assert result_set[0][0] == "Falkenturm"
+
+    # Ensure the area has been added
+    result_set = list(connection.execute("SELECT name FROM areas"))
+    assert len(result_set) == 1
+    assert result_set[0][0] == "Example Area"
 
     # Ensure the route has been added
     result_set = list(connection.execute("SELECT route_name, grade_af FROM routes"))
@@ -130,12 +139,16 @@ def test_data_enrichment(tmp_path: Path) -> None:
     Ensures that existing data is correctly enriched (updated) by several subsequent
     `add_()` calls.
     """
-    summit1 = Summit(official_name="Beispielturm")
+    summit1 = Summit(official_name="Beispielturm", sector="Test Sector")
     summit2 = Summit(
-        official_name="Beispielturm", high_grade_position=GeoPosition(470000000, 110000000)
+        official_name="Beispielturm",
+        high_grade_position=GeoPosition(470000000, 110000000),
+        sector="Test Sector",
     )
     summit3 = Summit(
-        official_name="Beispielturm", low_grade_position=GeoPosition(470000011, 110000037)
+        official_name="Beispielturm",
+        low_grade_position=GeoPosition(470000011, 110000037),
+        sector="Test Sector",
     )
 
     input_pipe = CollectedData()

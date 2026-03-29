@@ -159,7 +159,7 @@ class FakeNetwork(HttpNetworkingBoundary):
         # Make sure no content is sent with requests
         assert not query_content
 
-        predefined_responses = self._predefined_responses.get(url.split("/")[-1], None)
+        predefined_responses = self._predefined_responses.get(url.rsplit("/", maxsplit=1)[-1], None)
         assert predefined_responses is not None, f"Requesting an unexpected API end point '{url}'"
 
         del url_params["app"]
