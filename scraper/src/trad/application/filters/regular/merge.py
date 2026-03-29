@@ -175,7 +175,7 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
     Concrete implementation for merging Summit objects.
     """
 
-    _match_search_radius: Final = 200
+    _match_search_radius: Final = 250
     """
     The radius (in meters) within which two Summits with the same same are considered to be the
     same.
