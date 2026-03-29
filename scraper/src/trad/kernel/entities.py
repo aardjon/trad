@@ -242,6 +242,11 @@ class Summit:
     Name of the sector this summit belongs to. None if the sector is unknown.
     """
 
+    sector_fallback: str | None = None
+    """
+    Fallback sector name in case the official one ('sector' attribute) is missing.
+    """
+
     def __post_init__(self) -> None:
         # Make sure that at least one name has been provided
         if not self.official_name and not self.alternate_names and not self.unspecified_names:
@@ -322,8 +327,16 @@ class Summit:
             self.unspecified_names.clear()
 
         if self.sector is None:
-            # All summits must be assigned to a sector!
-            raise IncompleteDataError(self, "sector")
+            if self.sector_fallback:
+                self.sector = self.sector_fallback
+                _logger.warning(
+                    "Summit '%s' is not assigned to a sector, using fallback '%s'",
+                    self.official_name,
+                    self.sector,
+                )
+            else:
+                # All summits must be assigned to a sector!
+                raise IncompleteDataError(self, "sector")
 
 
 @dataclass

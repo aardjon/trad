@@ -298,6 +298,8 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
             target.sector = source.sector
         elif source.sector not in (None, target.sector):
             raise MergeConflictError("summit", source.name, "sector")
+        if target.sector_fallback is None:
+            target.sector_fallback = source.sector_fallback
 
 
 class _RouteMerger(_EntityMerger[_RouteRelatedData]):
