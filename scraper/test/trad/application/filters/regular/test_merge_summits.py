@@ -229,6 +229,32 @@ def test_summit_merge_conflict(
 @pytest.mark.parametrize(
     ("existing_summit", "summit_to_merge", "expected_summit", "failure_context"),
     [
+        # Merge sector name into an existing summit
+        (
+            Summit("Summit", sector=None),
+            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector="Sector"),
+            nullcontext(),
+        ),
+        (
+            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=None),
+            Summit("Summit", sector="Sector"),
+            nullcontext(),
+        ),
+        # Merging equal sector names must not raise an error
+        (
+            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector="Sector"),
+            nullcontext(),
+        ),
+        (
+            Summit("Summit", sector=None),
+            Summit("Summit", sector=None),
+            Summit("Summit", sector=None),
+            nullcontext(),
+        ),
         # Merge position data into an existing summit
         (
             Summit("Summit 1"),
@@ -303,6 +329,12 @@ def test_summit_merge_conflict(
             Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
             pytest.raises(MergeConflictError),
         ),
+        (
+            Summit("Summit", sector="Sector 1"),
+            Summit("Summit", sector="Sector 2"),
+            Summit("Summit", sector="Sector 1"),
+            pytest.raises(MergeConflictError),
+        ),
     ],
 )
 def test_enrich_summit(
@@ -318,6 +350,7 @@ def test_enrich_summit(
     - The official name is set if it is not already
     - All alternate and unspecified names are added to the existing Summit
     - The official name must not be included in the alternate names list
+    - Sector name is added if there is none already
     - Unresolvable merge conflicts raise a MergeConflictError (preserving existing data)
     """
     with failure_context:
@@ -331,3 +364,4 @@ def test_enrich_summit(
         assert existing_summit.high_grade_position.is_equal_to(expected_summit.high_grade_position)
 
         assert existing_summit.low_grade_position.is_equal_to(expected_summit.low_grade_position)
+        assert existing_summit.sector == expected_summit.sector

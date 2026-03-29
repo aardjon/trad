@@ -11,6 +11,7 @@ from typing import Final, override
 from trad.application.boundaries.database import RelationalDatabaseBoundary, SqlStatement
 from trad.application.filters._base import SinkFilter
 from trad.application.filters.sink.db_v1.dbschema import (
+    AreasTable,
     DatabaseMetadataTable,
     DatabaseSchema,
     ExternalDataSourcesTable,
@@ -22,7 +23,8 @@ from trad.application.filters.sink.db_v1.dbschema import (
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import UNDEFINED_GEOPOSITION, ExternalSource, Post, Route, Summit
+from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.errors import IncompleteDataError
 
 _logger = getLogger(__name__)
 
@@ -47,6 +49,8 @@ class DbSchemaV1Filter(SinkFilter):
         super().__init__()
         self.__destination_file = output_directory.joinpath(self._DB_FILE_NAME)
         self.__database_boundary = database_boundary
+        self._seen_sectors: list[str] = []
+        """ Remember seen sector names because each one must be written to the DB only once. """
 
     @override
     def get_name(self) -> str:
@@ -148,24 +152,39 @@ class DbSchemaV1Filter(SinkFilter):
             )
 
     def _add_summit(self, summit: Summit) -> None:
+        if summit.sector not in self._seen_sectors:
+            if summit.sector is None:
+                raise IncompleteDataError(summit, "sector")
+            self._seen_sectors.append(summit.sector)
+            self._write_to_areas_table(summit.sector)
         summit_id = self._write_to_summits_table(summit)
         self._write_to_summit_names_table(summit_id, summit)
+
+    def _write_to_areas_table(self, sector_name: str) -> None:
+        """Add the given sector to the `areas` table."""
+        sql_statement = SqlStatement(
+            f"INSERT INTO {AreasTable.TABLE_NAME} ({AreasTable.COLUMN_NAME}) VALUES (?)"
+        )
+        self.__database_boundary.execute_write(
+            query=sql_statement,
+            query_parameters=[sector_name],
+        )
 
     def _write_to_summits_table(self, summit: Summit) -> int:
         """Add the given Summit to the `summits` table and return the ID of the new record."""
         column_list = [
             SummitsTable.COLUMN_LATITUDE,
             SummitsTable.COLUMN_LONGITUDE,
+            SummitsTable.COLUMN_AREA_ID,
         ]
         column_names = ", ".join(column_list)
-        value_placeholders = self._get_value_placeholders(len(column_list))
-        column_updates = ", ".join(f"{col}=excluded.{col}" for col in column_list)
-
+        value_placeholders = self._get_value_placeholders(len(column_list) - 1)
         sql_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ({column_names}) "
-            f"VALUES ({value_placeholders}) ON CONFLICT DO UPDATE SET {column_updates} "
-            f"WHERE {SummitsTable.COLUMN_LATITUDE}={UNDEFINED_GEOPOSITION.latitude_int} "
-            f"AND {SummitsTable.COLUMN_LONGITUDE}={UNDEFINED_GEOPOSITION.longitude_int}"
+            f"INSERT INTO {SummitsTable.TABLE_NAME} ({column_names}) "
+            f"VALUES ({value_placeholders}, ("
+            f"SELECT {AreasTable.COLUMN_ID} FROM {AreasTable.TABLE_NAME} "
+            f"WHERE {AreasTable.COLUMN_NAME} = ? LIMIT 1"
+            f"))"
         )
 
         self.__database_boundary.execute_write(
@@ -173,6 +192,7 @@ class DbSchemaV1Filter(SinkFilter):
             query_parameters=[
                 summit.high_grade_position.latitude_int,
                 summit.high_grade_position.longitude_int,
+                summit.sector,
             ],
         )
         row_ids = self.__database_boundary.execute_read(

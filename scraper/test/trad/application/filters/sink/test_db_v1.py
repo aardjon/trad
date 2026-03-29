@@ -13,6 +13,7 @@ from trad.application.boundaries.database import (
 )
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.filters.sink.db_v1.dbschema import (
+    AreasTable,
     ExternalDataSourcesTable,
     PostsTable,
     RoutesTable,
@@ -22,7 +23,6 @@ from trad.application.filters.sink.db_v1.dbschema import (
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities import (
-    UNDEFINED_GEOPOSITION,
     ExternalSource,
     GeoPosition,
     Post,
@@ -42,6 +42,7 @@ class TestDbSchemaV1Filter:
             Summit(
                 official_name="Foobar Rock",
                 high_grade_position=GeoPosition.from_decimal_degree(13, 37),
+                sector="Test",
             )
         )
 
@@ -52,19 +53,26 @@ class TestDbSchemaV1Filter:
         db_writer.execute_filter(input_pipe, output_pipe=Mock(Pipe))
 
         expected_summits_sql_statement = (
-            f"INSERT OR IGNORE INTO {SummitsTable.TABLE_NAME} ("
+            f"INSERT INTO {SummitsTable.TABLE_NAME} ("
             f"{SummitsTable.COLUMN_LATITUDE}, "
-            f"{SummitsTable.COLUMN_LONGITUDE}"
-            f") VALUES (?, ?) "
-            f"ON CONFLICT DO UPDATE SET "
-            f"{SummitsTable.COLUMN_LATITUDE}=excluded.{SummitsTable.COLUMN_LATITUDE}, "
-            f"{SummitsTable.COLUMN_LONGITUDE}=excluded.{SummitsTable.COLUMN_LONGITUDE} "
-            f"WHERE {SummitsTable.COLUMN_LATITUDE}={UNDEFINED_GEOPOSITION.latitude_int} "
-            f"AND {SummitsTable.COLUMN_LONGITUDE}={UNDEFINED_GEOPOSITION.longitude_int}"
+            f"{SummitsTable.COLUMN_LONGITUDE}, "
+            f"{SummitsTable.COLUMN_AREA_ID}"
+            f") VALUES (?, ?, ("
+            f"SELECT {AreasTable.COLUMN_ID} FROM {AreasTable.TABLE_NAME} "
+            f"WHERE {AreasTable.COLUMN_NAME} = ? LIMIT 1"
+            "))"
         )
         fake_db_boundary.execute_write.assert_any_call(
-            query=expected_summits_sql_statement, query_parameters=[130000000, 370000000]
+            query=expected_summits_sql_statement, query_parameters=[130000000, 370000000, "Test"]
         )
+
+        expected_sectors_sql_statement = (
+            f"INSERT INTO {AreasTable.TABLE_NAME} ({AreasTable.COLUMN_NAME}) VALUES (?)"
+        )
+        fake_db_boundary.execute_write.assert_any_call(
+            query=expected_sectors_sql_statement, query_parameters=["Test"]
+        )
+
         self._check_database_finalization(fake_db_boundary)
 
     def test_add_route(self, tmp_path: Path) -> None:
@@ -73,7 +81,7 @@ class TestDbSchemaV1Filter:
         database operation (2) and provides all query parameters separately (3).
         """
         input_pipe = CollectedData()
-        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument"))
+        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument", sector="Test"))
         input_pipe.add_route(
             summit_id=summit_id,
             route=Route(
@@ -125,7 +133,7 @@ class TestDbSchemaV1Filter:
         """
         input_pipe = CollectedData()
         input_pipe.add_source(ExternalSource("Testing", "[DOESNTMATTER]", "trad Authors"))
-        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument"))
+        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument", sector="Test"))
         route_id = input_pipe.add_route(
             summit_id=summit_id,
             route=Route(

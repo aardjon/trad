@@ -7,7 +7,7 @@ Project RouteDb {
   '''
 
   // The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
-  schema_version: "1.1"
+  schema_version: "1.2"
 
   // Unique constraints that stretch over multiple columns are not supported by DBML yet
   // (https://github.com/holistics/dbml/issues/68). So we use this workaround instead: The property
@@ -107,6 +107,32 @@ Table external_data_sources {
 }
 
 
+Table areas {
+  Note: '''
+  All climbing areas/sectors.
+  
+  An area or sector is a geographic area containing several summits. Each summit is assigned to
+  one.
+  '''
+  
+  id integer [
+    primary key,
+    increment,
+    note: 'Unique ID of this area/sector.'
+  ]
+
+  name text [
+    not null,
+    unique,
+    note: 'Name of this area/sector.'
+  ]
+  
+  indexes {
+    name [name: 'IdxAreaName']
+  }
+}
+
+
 Table summit_names {
   Note: '''
   All names of all summits.
@@ -164,6 +190,11 @@ Table summits {
     increment,
     note: 'Summit ID, unique within this database.'
   ]
+  
+  area_id integer [
+    not null,
+    note: 'ID of the area/sector this summit belongs to.'
+  ]
 
   latitude integer [
     not null,
@@ -175,6 +206,8 @@ Table summits {
     note: 'The longitude value of the geographical position.'
   ]
 }
+// Foreign key summits -> areas
+Ref: areas.id < summits.area_id [delete: cascade]
 
 
 Table routes {

@@ -169,6 +169,7 @@ class SandsteinkletternDataFilter(SourceFilter):
                         latitude=float(json_summit.ngrd),
                         longitude=float(json_summit.vgrd),
                     ),
+                    sector_fallback=sector.sektorname_d,
                 )
             )
             self._summit_id_map.set_pipe_id(json_summit.gipfel_id, pipe_id)
