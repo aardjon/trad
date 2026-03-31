@@ -1,0 +1,32 @@
+name: routedb-creation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 3 * * 3'
+
+jobs:
+  routedb-creation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Download latest scraper release
+        run: |
+          curl -L `curl -s https://api.github.com/repos/aardjon/trad/releases/latest | grep browser_download_url | grep trad-scraper-ubuntu | cut -d \" -f 4` --output trad-scraper-latest
+          chmod u+x trad-scraper-latest
+
+      - name: Create route database
+        run: |
+          mkdir artifacts
+          ./trad-scraper-latest -l artifacts/trad-scraper.log artifacts
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: routedb
+          path: artifacts/*
+          retention-days: 7
