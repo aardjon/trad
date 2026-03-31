@@ -243,9 +243,6 @@ jobs:
           name: trad-coverage-report
           path: report
 
-      - name: IP
-        run: dig @resolver4.opendns.com myip.opendns.com +short
-
       - name: Publish HTML coverage report
         uses: sebastianpopp/ftp-action@releases/v2
         with:
