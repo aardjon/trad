@@ -338,6 +338,17 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
 
         # Lower-case the whole string
         normalized_name = normalized_name.lower()
+
+        # Replace umlauts (do it after the abbreviation replacement on purpose, to also support
+        # combinations like "Südwand"/"S-Wand")
+        for umlaut, replacement in (
+            ("ä", "ae"),
+            ("ö", "oe"),
+            ("ü", "ue"),
+            ("ß", "ss"),
+        ):
+            normalized_name = normalized_name.replace(umlaut, replacement)
+
         # Remove non-ASCII characters
         normalized_name = "".join(c for c in normalized_name if c in string.printable)
         # Replace punctuation characters with spaces
