@@ -18,6 +18,7 @@ from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post, Route, Summit
 
 
@@ -35,7 +36,9 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     af_grade: Final = 2
 
     input_pipe = CollectedData()
-    summit_id = input_pipe.add_summit(Summit(official_name="Falkenturm", sector="Example Area"))
+    summit_id = input_pipe.add_summit(
+        Summit(official_name="Falkenturm", sector=RankedValue.create_valid("Example Area", 1))
+    )
     route_id = input_pipe.add_route(
         summit_id=summit_id,
         route=Route(conflict_rank=1, route_name="AW", grade_af=af_grade),
@@ -141,16 +144,17 @@ def test_data_enrichment(tmp_path: Path) -> None:
     Ensures that existing data is correctly enriched (updated) by several subsequent
     `add_()` calls.
     """
-    summit1 = Summit(official_name="Beispielturm", sector="Test Sector")
+    example_sector = RankedValue.create_valid("Test Sector", 1)
+    summit1 = Summit(official_name="Beispielturm", sector=example_sector)
     summit2 = Summit(
         official_name="Beispielturm",
         high_grade_position=GeoPosition(470000000, 110000000),
-        sector="Test Sector",
+        sector=example_sector,
     )
     summit3 = Summit(
         official_name="Beispielturm",
         low_grade_position=GeoPosition(470000011, 110000037),
-        sector="Test Sector",
+        sector=example_sector,
     )
 
     input_pipe = CollectedData()

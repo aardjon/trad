@@ -203,7 +203,7 @@ class OsmSummitDataFilter(SourceFilter):
         """
         super().__init__()
         self._osm_api_receiver = OsmApiReceiver(http_boundary=network_boundary)
-        self._route_data_factory = RouteDataFactory()
+        self._route_data_factory = RouteDataFactory(summit_sector_rank=1)
 
     @override
     def get_name(self) -> str:

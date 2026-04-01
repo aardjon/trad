@@ -289,12 +289,13 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
 
     @staticmethod
     def _enrich_sector(target: Summit, source: Summit) -> None:
-        if target.sector is None:
+        if target.sector.is_null():
             target.sector = source.sector
-        elif source.sector not in (None, target.sector):
-            raise MergeConflictError("summit", source.name, "sector")
-        if target.sector_fallback is None:
-            target.sector_fallback = source.sector_fallback
+        elif not source.sector.is_null() and source.sector != target.sector:
+            if source.sector.rank < target.sector.rank:
+                target.sector = source.sector
+            elif source.sector.rank == target.sector.rank:
+                raise MergeConflictError("summit", source.name, "ranked_sector")
 
 
 class _RouteMerger(_EntityMerger[_RouteRelatedData]):

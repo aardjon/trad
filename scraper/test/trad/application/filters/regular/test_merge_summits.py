@@ -12,6 +12,7 @@ from trad.application.filters.regular.merge import (
 )
 from trad.application.pipes import CollectedData
 from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import MergeConflictError
 
@@ -232,28 +233,41 @@ def test_summit_merge_conflict(
     [
         # Merge sector name into an existing summit
         (
-            Summit("Summit", sector=None),
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 2)),
             nullcontext(),
         ),
         (
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector=None),
-            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 7)),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 7)),
+            nullcontext(),
+        ),
+        # Merge sector names of different ranks
+        (
+            Summit("Summit", sector=RankedValue.create_valid("Sector 1", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 2", 1)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 2", 1)),
+            nullcontext(),
+        ),
+        (
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 7)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 5)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 5)),
             nullcontext(),
         ),
         # Merging equal sector names must not raise an error
         (
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 3)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 3)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 3)),
             nullcontext(),
         ),
         (
-            Summit("Summit", sector=None),
-            Summit("Summit", sector=None),
-            Summit("Summit", sector=None),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_null()),
             nullcontext(),
         ),
         # Merge position data into an existing summit
@@ -331,9 +345,9 @@ def test_summit_merge_conflict(
             pytest.raises(MergeConflictError),
         ),
         (
-            Summit("Summit", sector="Sector 1"),
-            Summit("Summit", sector="Sector 2"),
-            Summit("Summit", sector="Sector 1"),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 1", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 2", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 1", 2)),
             pytest.raises(MergeConflictError),
         ),
     ],

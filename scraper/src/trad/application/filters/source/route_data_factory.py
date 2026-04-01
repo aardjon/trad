@@ -5,6 +5,7 @@ Provides functionality for easily creating route data domain objects (e.g. Summi
 from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
 from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import NO_GRADE, Route, Summit
+from trad.kernel.errors import InvalidStateError
 
 
 class RouteDataFactory:
@@ -17,10 +18,12 @@ class RouteDataFactory:
     configured only once and in a single place for each source.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, summit_sector_rank: int | None = None) -> None:
         """
-        Create a new data factory which uses the given ranks when creating data objects.
+        Create a new data factory which uses the given ranks when creating data objects. For
+        undefined ranks, no value can be created - trying to do so will raise an InvalidStateError.
         """
+        self._summit_sector_rank = summit_sector_rank
 
     def create_summit(  # noqa: PLR0913
         self,
@@ -30,7 +33,6 @@ class RouteDataFactory:
         high_grade_position: GeoPosition = UNDEFINED_GEOPOSITION,
         low_grade_position: GeoPosition = UNDEFINED_GEOPOSITION,
         sector: str | None = None,
-        sector_fallback: str | None = None,
     ) -> Summit:
         """
         Create a new `Summit` instance with the given data. See there for detailled parameter
@@ -42,8 +44,7 @@ class RouteDataFactory:
             unspecified_names=unspecified_names or [],
             high_grade_position=high_grade_position,
             low_grade_position=low_grade_position,
-            sector=sector,
-            sector_fallback=sector_fallback,
+            sector=self._create_ranked_value(sector, self._summit_sector_rank),
         )
 
     def create_route(  # noqa: PLR0913
@@ -75,14 +76,16 @@ class RouteDataFactory:
             dangerous=dangerous,
         )
 
-    def _create_ranked_value[T](self, value: T | None, rank: int) -> RankedValue[T]:
+    def _create_ranked_value[T](self, value: T | None, rank: int | None) -> RankedValue[T]:
         """
         Create a RankedValue instance with the given `value` and `rank`. Returns a null object if
         `value` is None.
         """
         if value is not None:
-            return RankedValue(
-                value=value,
-                rank=rank,
-            )
+            if rank is not None:
+                return RankedValue(
+                    value=value,
+                    rank=rank,
+                )
+            raise InvalidStateError("No rank has been defined in this factory instance.")
         return RankedValue.create_null()
