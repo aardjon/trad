@@ -8,6 +8,7 @@ import pytest
 
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.names import NormalizedName
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Summit
 
 # Two example points that can be used by some test cases.
@@ -20,13 +21,20 @@ class TestSummit:
     Unit tests for the Summit class.
     """
 
+    @staticmethod
+    def _create_sector(sector_name: str | None) -> RankedValue[str]:
+        if sector_name:
+            return RankedValue.create_valid(sector_name, 4)
+        return RankedValue.create_null()
+
     @pytest.mark.parametrize("sector_name", [None, "Bielatal", "Großer Zschand"])
     def test_sector(self, sector_name: str | None) -> None:
         """
         Ensures that the provided sector name can be retrieved again.
         """
-        summit = Summit(official_name="Mt Dummy", sector=sector_name)
-        assert summit.sector == sector_name
+        summit = Summit(official_name="Mt Dummy", sector=self._create_sector(sector_name))
+
+        assert summit.sector == self._create_sector(sector_name)
 
     @pytest.mark.parametrize(
         ("summit", "expected_return_value"),
@@ -102,32 +110,64 @@ class TestSummit:
         ("input_summit", "expected_output_summit"),
         [
             # Happy paths: Summit data is valid
-            (Summit("No position", sector="Area 21"), Summit("No position", sector="Area 21")),
             (
-                Summit("With Position", high_grade_position=_example_position_1, sector="Area 22"),
-                Summit("With Position", high_grade_position=_example_position_1, sector="Area 22"),
+                Summit("No position", sector=_create_sector("Area 21")),
+                Summit("No position", sector=_create_sector("Area 21")),
             ),
             (
-                Summit("With Position", low_grade_position=_example_position_1, sector="Area 23"),
-                Summit("With Position", low_grade_position=_example_position_1, sector="Area 23"),
+                Summit(
+                    "With Position",
+                    high_grade_position=_example_position_1,
+                    sector=_create_sector("Area 22"),
+                ),
+                Summit(
+                    "With Position",
+                    high_grade_position=_example_position_1,
+                    sector=_create_sector("Area 22"),
+                ),
             ),
             (
-                Summit("Official", alternate_names=["alt1", "alt2"], sector="Area 24"),
-                Summit("Official", alternate_names=["alt1", "alt2"], sector="Area 24"),
+                Summit(
+                    "With Position",
+                    low_grade_position=_example_position_1,
+                    sector=_create_sector("Area 23"),
+                ),
+                Summit(
+                    "With Position",
+                    low_grade_position=_example_position_1,
+                    sector=_create_sector("Area 23"),
+                ),
             ),
             (
-                Summit("Official", unspecified_names=["unspec_name"], sector="Area 25"),
-                Summit("Official", unspecified_names=["unspec_name"], sector="Area 25"),
+                Summit(
+                    "Official", alternate_names=["alt1", "alt2"], sector=_create_sector("Area 24")
+                ),
+                Summit(
+                    "Official", alternate_names=["alt1", "alt2"], sector=_create_sector("Area 24")
+                ),
+            ),
+            (
+                Summit(
+                    "Official", unspecified_names=["unspec_name"], sector=_create_sector("Area 25")
+                ),
+                Summit(
+                    "Official", unspecified_names=["unspec_name"], sector=_create_sector("Area 25")
+                ),
             ),
             # Auto-Fix paths: invalid data that can be fixed automatically
             # Official name is missing: Use the next best name as the ONLY one
             (
-                Summit(alternate_names=["alt_name1", "alt_name2"], sector="Sector A"),
-                Summit(official_name="alt_name1", sector="Sector A"),
+                Summit(
+                    alternate_names=["alt_name1", "alt_name2"], sector=_create_sector("Sector A")
+                ),
+                Summit(official_name="alt_name1", sector=_create_sector("Sector A")),
             ),
             (
-                Summit(unspecified_names=["unspec_name1", "unspec_name2"], sector="Sector B"),
-                Summit(official_name="unspec_name1", sector="Sector B"),
+                Summit(
+                    unspecified_names=["unspec_name1", "unspec_name2"],
+                    sector=_create_sector("Sector B"),
+                ),
+                Summit(official_name="unspec_name1", sector=_create_sector("Sector B")),
             ),
         ],
     )

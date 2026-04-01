@@ -110,7 +110,7 @@ class SandsteinkletternDataFilter(SourceFilter):
         super().__init__()
         self._api_receiver = SandsteinkletternApiReceiver(http_boundary=network_boundary)
         self._grade_parser: GradeParser = FuzzyParser()
-        self._route_data_factory = RouteDataFactory()
+        self._route_data_factory = RouteDataFactory(summit_sector_rank=2)
 
         self._summit_added = False  # Remember if at least one summit has been added (True) or not
         self._summit_id_map = _ExternalToPipeIdMap[SummitInstanceId]()
@@ -173,7 +173,7 @@ class SandsteinkletternDataFilter(SourceFilter):
                         latitude=float(json_summit.ngrd),
                         longitude=float(json_summit.vgrd),
                     ),
-                    sector_fallback=sector.sektorname_d,
+                    sector=sector.sektorname_d,
                 )
             )
             self._summit_id_map.set_pipe_id(json_summit.gipfel_id, pipe_id)

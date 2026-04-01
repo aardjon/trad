@@ -9,6 +9,7 @@ from typing import Final
 
 from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
 from trad.kernel.entities.names import NormalizedName
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.errors import IncompleteDataError
 
 _logger = getLogger(__name__)
@@ -59,14 +60,9 @@ class Summit:
     meters) to the actual `high_grade_position`, though.
     """
 
-    sector: str | None = None
+    sector: RankedValue[str] = field(default_factory=RankedValue[str].create_null)
     """
-    Name of the sector this summit belongs to. None if the sector is unknown.
-    """
-
-    sector_fallback: str | None = None
-    """
-    Fallback sector name in case the official one ('sector' attribute) is missing.
+    Name of the sector this summit belongs to. Null value means that the sector is unknown.
     """
 
     def __post_init__(self) -> None:
@@ -148,17 +144,9 @@ class Summit:
             self.alternate_names.clear()
             self.unspecified_names.clear()
 
-        if self.sector is None:
-            if self.sector_fallback:
-                self.sector = self.sector_fallback
-                _logger.warning(
-                    "Summit '%s' is not assigned to a sector, using fallback '%s'",
-                    self.official_name,
-                    self.sector,
-                )
-            else:
-                # All summits must be assigned to a sector!
-                raise IncompleteDataError(self, "sector")
+        if self.sector.is_null() or not self.sector.is_production_quality():
+            # All summits must be assigned to a sector!
+            raise IncompleteDataError(self, "sector")
 
 
 @dataclass
