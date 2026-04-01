@@ -6,7 +6,8 @@ from collections.abc import Collection, Iterator
 from typing import override
 
 from trad.kernel.boundaries.pipes import Pipe, PipeFactory, RouteInstanceId, SummitInstanceId
-from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
 

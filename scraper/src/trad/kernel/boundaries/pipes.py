@@ -6,7 +6,8 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Collection, Iterator
 from typing import NewType
 
-from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.routedata import Post, Route, Summit
 
 SummitInstanceId = NewType("SummitInstanceId", int)
 """

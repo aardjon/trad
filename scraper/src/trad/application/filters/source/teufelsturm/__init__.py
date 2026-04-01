@@ -16,7 +16,7 @@ from trad.application.filters.source.teufelsturm.parser import (
 from trad.application.grades import GradeParser
 from trad.application.grades.regex import RegexBasedParser
 from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
-from trad.kernel.entities import Summit
+from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import DataProcessingError
 
 _logger = getLogger(__name__)

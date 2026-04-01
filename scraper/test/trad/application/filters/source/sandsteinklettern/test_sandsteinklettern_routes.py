@@ -11,7 +11,7 @@ from typing import Final
 import pytest
 
 from trad.application.filters.source.sandsteinklettern.api import JsonWegStatus
-from trad.kernel.entities import Route
+from trad.kernel.entities.routedata import Route
 
 from .conftest import JsonTestData, PreparedFilterRunner
 

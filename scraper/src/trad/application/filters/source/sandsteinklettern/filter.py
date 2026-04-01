@@ -22,7 +22,9 @@ from trad.application.filters.source.sandsteinklettern.api import (
 from trad.application.grades import GradeParser, SaxonGrade
 from trad.application.grades.fuzzy import FuzzyParser
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
-from trad.kernel.entities import ExternalSource, GeoPosition, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import DataProcessingError, ValueParseError
 
 _logger = getLogger(__name__)

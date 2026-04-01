@@ -12,7 +12,8 @@ from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequest
 from trad.application.filters.source.osm import OsmSummitDataFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 

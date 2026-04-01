@@ -23,7 +23,8 @@ from trad.application.filters.sink.db_v1.dbschema import (
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import IncompleteDataError
 
 _logger = getLogger(__name__)

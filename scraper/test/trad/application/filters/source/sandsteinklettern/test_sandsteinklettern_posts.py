@@ -11,7 +11,7 @@ from unittest.mock import ANY
 
 import pytest
 
-from trad.kernel.entities import Post
+from trad.kernel.entities.routedata import Post
 
 from .conftest import JsonTestData, PreparedFilterRunner
 
