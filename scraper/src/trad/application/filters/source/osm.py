@@ -24,6 +24,7 @@ from pydantic.type_adapter import TypeAdapter
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters._base import SourceFilter
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
@@ -202,6 +203,7 @@ class OsmSummitDataFilter(SourceFilter):
         """
         super().__init__()
         self._osm_api_receiver = OsmApiReceiver(http_boundary=network_boundary)
+        self._route_data_factory = RouteDataFactory()
 
     @override
     def get_name(self) -> str:
@@ -398,7 +400,7 @@ class OsmSummitDataFilter(SourceFilter):
                 )
             peak_node = osm_nodes[found_peak_nodes[0]]
 
-            yield Summit(
+            yield self._route_data_factory.create_summit(
                 official_name=relation.tags.name,
                 alternate_names=relation.tags.get_alternate_names(),
                 high_grade_position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
@@ -416,7 +418,7 @@ class OsmSummitDataFilter(SourceFilter):
         Creates (and yields) a Summit object for each node in `osm_nodes`.
         """
         for summit_element in osm_nodes:
-            yield Summit(
+            yield self._route_data_factory.create_summit(
                 official_name=summit_element.tags.name,
                 alternate_names=summit_element.tags.get_alternate_names(),
                 high_grade_position=GeoPosition.from_decimal_degree(

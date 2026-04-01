@@ -18,6 +18,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.application.grades import GradeParser
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
@@ -40,6 +41,9 @@ EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
 
 _ROUTE_DATA_RANK: Final = 2
 """Priority/Accuracy of the route data retrieved from teufelsturm in case of conflicts."""
+
+
+_route_data_factory: Final = RouteDataFactory()
 
 
 @dataclass
@@ -148,7 +152,7 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
 
     return PageData(
         peak=peak,
-        route=Route(
+        route=_route_data_factory.create_route(
             _ROUTE_DATA_RANK,
             route_name=route,
             grade=grade_label,
@@ -275,7 +279,10 @@ def _parse_summit_page(page_text: str) -> Summit:
     # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
     # 'unspecified'. Also, the position values are known to be quite inaccurate, that's why we use
     # them for assistance only.
-    return Summit(unspecified_names=[peak_name], low_grade_position=position)
+    return _route_data_factory.create_summit(
+        unspecified_names=[peak_name],
+        low_grade_position=position,
+    )
 
 
 class SummitCache:
