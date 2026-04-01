@@ -10,7 +10,7 @@ from trad.application.filters.regular.merge import (
     MergeFilter,
 )
 from trad.application.pipes import CollectedData
-from trad.kernel.entities import Route, Summit
+from trad.kernel.entities.routedata import Route, Summit
 from trad.kernel.errors import MergeConflictError
 
 

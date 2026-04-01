@@ -25,7 +25,9 @@ from pydantic.type_adapter import TypeAdapter
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters._base import SourceFilter
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import ExternalSource, GeoPosition, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError, MergeConflictError
 
 _logger = getLogger(__name__)

@@ -10,7 +10,8 @@ import pytest
 
 from trad.application.pipes import AllPipesFactory, CollectedData
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError
 
 

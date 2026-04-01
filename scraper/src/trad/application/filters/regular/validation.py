@@ -8,7 +8,7 @@ from typing import override
 
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId
-from trad.kernel.entities import Post, Route, Summit
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError, IncompleteDataError
 
 _logger = getLogger(__name__)

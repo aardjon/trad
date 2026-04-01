@@ -7,7 +7,7 @@ This implementation can be used for evaluating free text user input.
 from typing import Final, override
 
 from trad.application.grades import GradeParser, SaxonGrade
-from trad.kernel.entities import NO_GRADE
+from trad.kernel.entities.routedata import NO_GRADE
 from trad.kernel.errors import ValueParseError
 
 
