@@ -9,7 +9,7 @@ from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.filters import Filter
-from trad.kernel.entities import ExternalSource
+from trad.kernel.entities.datasources import ExternalSource
 
 
 @pytest.mark.parametrize("filter_class", [MergeFilter, DataValidationFilter])

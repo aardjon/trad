@@ -12,7 +12,8 @@ import pytest
 from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
-from trad.kernel.entities import ExternalSource, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError, IncompleteDataError
 
 

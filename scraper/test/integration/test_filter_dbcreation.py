@@ -16,7 +16,9 @@ from trad.application.pipes import CollectedData
 from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import ExternalSource, GeoPosition, Post, Route, Summit
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.routedata import Post, Route, Summit
 
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:

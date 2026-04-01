@@ -11,7 +11,8 @@ from trad.application.filters.regular.merge import (
     _SummitMerger,
 )
 from trad.application.pipes import CollectedData
-from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import MergeConflictError
 
 

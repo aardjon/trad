@@ -12,14 +12,9 @@ from typing import Final, override
 
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import (
-    NO_GRADE,
-    UNDEFINED_GEOPOSITION,
-    NormalizedName,
-    Post,
-    Route,
-    Summit,
-)
+from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION
+from trad.kernel.entities.names import NormalizedName
+from trad.kernel.entities.routedata import NO_GRADE, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
 
 _logger = getLogger(__name__)

@@ -19,14 +19,9 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from trad.application.grades import GradeParser
-from trad.kernel.entities import (
-    UNDEFINED_GEOPOSITION,
-    ExternalSource,
-    GeoPosition,
-    Post,
-    Route,
-    Summit,
-)
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import DataProcessingError
 
 if TYPE_CHECKING:

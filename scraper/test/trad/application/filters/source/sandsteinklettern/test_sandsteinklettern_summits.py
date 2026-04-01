@@ -11,7 +11,8 @@ from typing import Final
 import pytest
 
 from trad.application.filters.source.sandsteinklettern.api import JsonGipfelStatus, JsonGipfelTyp
-from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.routedata import Summit
 
 from .conftest import JsonTestData, PreparedFilterRunner
 
