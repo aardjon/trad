@@ -24,10 +24,13 @@ from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post, Route, Summit
 
 
 class TestDbSchemaV1Filter:
+    _example_sector = RankedValue.create_valid("Test", 1)
+
     def test_add_summit(self, tmp_path: Path) -> None:
         """
         Ensures that add_summit() executes the expected SQL statement (1), does it in exactly one
@@ -38,7 +41,7 @@ class TestDbSchemaV1Filter:
             Summit(
                 official_name="Foobar Rock",
                 high_grade_position=GeoPosition.from_decimal_degree(13, 37),
-                sector="Test",
+                sector=self._example_sector,
             )
         )
 
@@ -59,14 +62,15 @@ class TestDbSchemaV1Filter:
             "))"
         )
         fake_db_boundary.execute_write.assert_any_call(
-            query=expected_summits_sql_statement, query_parameters=[130000000, 370000000, "Test"]
+            query=expected_summits_sql_statement,
+            query_parameters=[130000000, 370000000, self._example_sector.value],
         )
 
         expected_sectors_sql_statement = (
             f"INSERT INTO {AreasTable.TABLE_NAME} ({AreasTable.COLUMN_NAME}) VALUES (?)"
         )
         fake_db_boundary.execute_write.assert_any_call(
-            query=expected_sectors_sql_statement, query_parameters=["Test"]
+            query=expected_sectors_sql_statement, query_parameters=[self._example_sector.value]
         )
 
         self._check_database_finalization(fake_db_boundary)
@@ -77,7 +81,9 @@ class TestDbSchemaV1Filter:
         database operation (2) and provides all query parameters separately (3).
         """
         input_pipe = CollectedData()
-        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument", sector="Test"))
+        summit_id = input_pipe.add_summit(
+            Summit(official_name="Mock Monument", sector=self._example_sector)
+        )
         input_pipe.add_route(
             summit_id=summit_id,
             route=Route(
@@ -129,7 +135,9 @@ class TestDbSchemaV1Filter:
         """
         input_pipe = CollectedData()
         input_pipe.add_source(ExternalSource("Testing", "[DOESNTMATTER]", "trad Authors"))
-        summit_id = input_pipe.add_summit(Summit(official_name="Mock Monument", sector="Test"))
+        summit_id = input_pipe.add_summit(
+            Summit(official_name="Mock Monument", sector=self._example_sector)
+        )
         route_id = input_pipe.add_route(
             summit_id=summit_id,
             route=Route(

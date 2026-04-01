@@ -13,11 +13,21 @@ from trad.application.filters.source.osm import OsmSummitDataFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 
 class TestOsmSummitDataFilter:
+    _expected_sector_rank: Final = 1
+    """
+    The expected rank of the summit.sector attribute.
+    """
+
+    # Some example sector value as expected to be created by the OSM filter.
+    _example_sector1: Final = RankedValue[str].create_valid("Mock Area", _expected_sector_rank)
+    _example_sector2: Final = RankedValue[str].create_valid("Zahlengebiet", _expected_sector_rank)
+
     def test_name(self) -> None:
         """
         Ensures the filter name to be correct.
@@ -272,7 +282,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Mock Area"},
+                                "tags": {"name": _example_sector1.value},
                                 "members": [{"type": "node", "ref": 42}],
                             },
                         ]
@@ -282,7 +292,7 @@ class TestOsmSummitDataFilter:
                     Summit(
                         "Mt Mock",
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
-                        sector="Mock Area",
+                        sector=_example_sector1,
                     )
                 ],
             ),
@@ -303,7 +313,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Mock Area"},
+                                "tags": {"name": _example_sector1.value},
                                 "members": [{"type": "node", "ref": 42}],
                             },
                         ]
@@ -324,7 +334,7 @@ class TestOsmSummitDataFilter:
                     Summit(
                         "Mt Mock",
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
-                        sector="Mock Area",
+                        sector=_example_sector1,
                     )
                 ],
             ),
@@ -352,7 +362,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Mock Area"},
+                                "tags": {"name": _example_sector1.value},
                                 "members": [{"type": "node", "ref": 42}],
                             },
                         ]
@@ -362,7 +372,7 @@ class TestOsmSummitDataFilter:
                     Summit(
                         "Mt Mock",
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
-                        sector="Mock Area",
+                        sector=_example_sector1,
                     )
                 ],
             ),
@@ -390,7 +400,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Mock Area"},
+                                "tags": {"name": _example_sector1.value},
                                 "members": [{"type": "node", "ref": 42}],
                             },
                         ]
@@ -400,7 +410,7 @@ class TestOsmSummitDataFilter:
                     Summit(
                         "Mt Mock",
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
-                        sector="Mock Area",
+                        sector=_example_sector1,
                     )
                 ],
             ),
@@ -446,17 +456,17 @@ class TestOsmSummitDataFilter:
                     Summit(
                         "Einserspitze",
                         high_grade_position=GeoPosition.from_decimal_degree(12.34, 9.87),
-                        sector="Zahlengebiet",
+                        sector=_example_sector2,
                     ),
                     Summit(
                         "Zweierturm",
                         high_grade_position=GeoPosition.from_decimal_degree(56.78, 65.43),
-                        sector="Zahlengebiet",
+                        sector=_example_sector2,
                     ),
                     Summit(
                         "Dreierwand",
                         high_grade_position=GeoPosition.from_decimal_degree(90.00, 21.10),
-                        sector="Zahlengebiet",
+                        sector=_example_sector2,
                     ),
                 ],
             ),
@@ -486,7 +496,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Mock Area"},
+                                "tags": {"name": _example_sector1.value},
                                 "members": [{"type": "node", "ref": 11}],
                             },
                         ]
@@ -497,7 +507,7 @@ class TestOsmSummitDataFilter:
                         official_name="name",
                         alternate_names=["alt", "official", "nick", "short", "loc"],
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
-                        sector="Mock Area",
+                        sector=_example_sector1,
                     )
                 ],
             ),
@@ -522,7 +532,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Mock Area"},
+                                "tags": {"name": _example_sector1.value},
                                 "members": [{"type": "node", "ref": 22}],
                             },
                         ]
@@ -533,7 +543,7 @@ class TestOsmSummitDataFilter:
                         official_name="name",
                         alternate_names=["alt1", "alt2", "alt3"],
                         high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
-                        sector="Mock Area",
+                        sector=_example_sector1,
                     )
                 ],
             ),

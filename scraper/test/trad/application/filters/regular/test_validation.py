@@ -13,8 +13,17 @@ from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
 from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import EntityNotFoundError, IncompleteDataError
+
+
+def _create_sector(sector_name: str) -> RankedValue[str]:
+    """
+    Create a RankedValue for a sector. The rank itself doesn't matter in this test, so any value
+    will do.
+    """
+    return RankedValue.create_valid(sector_name, 3)
 
 
 def _prepare_pipe(
@@ -116,12 +125,12 @@ class PipeData:
         ),
         (  # Single summit with a route and and post
             PipeData(
-                [Summit("Example Summit", sector="Climbing Sector")],
+                [Summit("Example Summit", sector=_create_sector("Climbing Sector"))],
                 [(_create_example_route(13), 0)],
                 [(_create_example_post(42), 0)],
             ),
             PipeData(
-                [Summit("Example Summit", sector="Climbing Sector")],
+                [Summit("Example Summit", sector=_create_sector("Climbing Sector"))],
                 [(_create_example_route(13), 0)],
                 [(_create_example_post(42), 0)],
             ),
@@ -129,9 +138,9 @@ class PipeData:
         (  # Multiple summits and routes
             PipeData(
                 [
-                    Summit("Summit 1", sector="Sector A"),
-                    Summit("Summit 2", sector="Sector B"),
-                    Summit("Summit 3", sector="Sector B"),
+                    Summit("Summit 1", sector=_create_sector("Sector A")),
+                    Summit("Summit 2", sector=_create_sector("Sector B")),
+                    Summit("Summit 3", sector=_create_sector("Sector B")),
                 ],
                 [
                     (_create_example_route(1), 0),
@@ -146,9 +155,9 @@ class PipeData:
             ),
             PipeData(
                 [
-                    Summit("Summit 1", sector="Sector A"),
-                    Summit("Summit 2", sector="Sector B"),
-                    Summit("Summit 3", sector="Sector B"),
+                    Summit("Summit 1", sector=_create_sector("Sector A")),
+                    Summit("Summit 2", sector=_create_sector("Sector B")),
+                    Summit("Summit 3", sector=_create_sector("Sector B")),
                 ],
                 [
                     (_create_example_route(1), 0),
@@ -186,7 +195,7 @@ class PipeData:
         ),
         (  # Invalid Route data (ignore the whole summit)
             PipeData(
-                [Summit("Summit", sector="Climbing Sector")],
+                [Summit("Summit", sector=_create_sector("Climbing Sector"))],
                 [
                     (
                         Mock(
@@ -219,13 +228,13 @@ class PipeData:
                             )
                         },
                     ),
-                    Summit("Good Summit", sector="Climbing Sector"),
+                    Summit("Good Summit", sector=_create_sector("Climbing Sector")),
                 ],
                 [],
                 [],
             ),
             PipeData(
-                [Summit("Good Summit", sector="Climbing Sector")],
+                [Summit("Good Summit", sector=_create_sector("Climbing Sector"))],
                 [],
                 [],
             ),
@@ -265,7 +274,7 @@ def test_invalid_post() -> None:
     unknown_source_label: Final = "UNKNOWN SOURCE"
 
     input_pipe = _prepare_pipe(
-        [Summit(official_name="Summit", sector="Example Sector")],
+        [Summit(official_name="Summit", sector=_create_sector("Example Sector"))],
         [(Route(conflict_rank=0, route_name="Route"), 0)],
         [
             (
