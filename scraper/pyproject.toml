@@ -225,7 +225,7 @@ disable = [
 
   # Disable all rules that are checked by ruff or mypy, to avoid unnecessary double checks
   # Comparison table: https://github.com/astral-sh/ruff/issues/970
-  # Last checked: 2024-12-15
+  # Last checked: 2026-04-03
   "anomalous-backslash-in-string",
   "assert-on-string-literal",
   "assert-on-tuple",
@@ -236,6 +236,7 @@ disable = [
   "bad-dunder-name",
   "bad-format-character",
   "bad-format-string",
+  "bad-indentation",
   "bad-open-mode",
   "bad-staticmethod-argument",
   "bad-string-format-type",
@@ -252,6 +253,7 @@ disable = [
   "consider-alternative-union-syntax",
   "consider-iterating-dictionary",
   "consider-merging-isinstance",
+  "consider-swap-variables",
   "consider-ternary-expression",
   "consider-using-alias",
   "consider-using-any-or-all",
@@ -266,6 +268,7 @@ disable = [
   "consider-using-min-builtin",
   "consider-using-set-comprehension",
   "consider-using-sys-exit",
+  "consider-using-ternary",
   "consider-using-with",
   "continue-in-finally",
   "dangerous-default-value",
@@ -390,6 +393,7 @@ disable = [
   "too-many-format-args",
   "too-many-locals",
   "too-many-nested-blocks",
+  "too-many-positional-arguments",
   "too-many-public-methods",
   "too-many-return-statements",
   "too-many-star-expressions",
@@ -411,6 +415,7 @@ disable = [
   "unnecessary-dict-index-lookup",
   "unnecessary-direct-lambda-call",
   "unnecessary-dunder-call",
+  "unnecessary-ellipsis",
   "unnecessary-lambda",
   "unnecessary-lambda-assignment",
   "unnecessary-list-index-lookup",
@@ -424,6 +429,7 @@ disable = [
   "unused-import",
   "unused-variable",
   "use-a-generator",
+  "used-before-assignment",
   "use-dict-literal",
   "used-prior-global-declaration",
   "use-implicit-booleaness-not-len",
@@ -433,8 +439,10 @@ disable = [
   "useless-return",
   "useless-with-lock",
   "use-list-literal",
+  "use-maxsplit-arg",
   "use-sequence-for-iteration",
   "use-set-for-membership",
+  "use-yield-from",
   "wildcard-import",
   "wrong-import-order",
   "wrong-import-position",
