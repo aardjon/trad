@@ -40,7 +40,7 @@ class TestDbSchemaV1Filter:
         input_pipe.add_summit(
             Summit(
                 official_name="Foobar Rock",
-                high_grade_position=GeoPosition.from_decimal_degree(13, 37),
+                position=RankedValue.create_valid(GeoPosition.from_decimal_degree(13, 37), 3),
                 sector=self._example_sector,
             )
         )

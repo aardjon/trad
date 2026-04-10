@@ -123,15 +123,3 @@ class GeoPosition:
     @override
     def __repr__(self) -> str:
         return str(self)
-
-
-UNDEFINED_GEOPOSITION: Final = GeoPosition(0, 0)
-"""
-Special value representing an "undefined" GeoPosition instance. Used when the position information
-is missing but we still want valid (but useless) data so that the application can continue normally
-without having to check for this case over and over again (Null Object Pattern).
-
-Please note that this geographical position is not *invalid*, it is just a point somewhere in the
-Atlantic Ocean where we do not expect a climbing rock. It may be changed if a new island is
-discovered there, of course ;)
-"""

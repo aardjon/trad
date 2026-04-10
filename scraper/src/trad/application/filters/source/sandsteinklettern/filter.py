@@ -25,6 +25,7 @@ from trad.application.grades.fuzzy import FuzzyParser
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post
 from trad.kernel.errors import DataProcessingError, ValueParseError
 
@@ -110,7 +111,10 @@ class SandsteinkletternDataFilter(SourceFilter):
         super().__init__()
         self._api_receiver = SandsteinkletternApiReceiver(http_boundary=network_boundary)
         self._grade_parser: GradeParser = FuzzyParser()
-        self._route_data_factory = RouteDataFactory(summit_sector_rank=2)
+        self._route_data_factory = RouteDataFactory(
+            summit_sector_rank=2,
+            summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 1,
+        )
 
         self._summit_added = False  # Remember if at least one summit has been added (True) or not
         self._summit_id_map = _ExternalToPipeIdMap[SummitInstanceId]()
@@ -169,7 +173,7 @@ class SandsteinkletternDataFilter(SourceFilter):
             pipe_id = output_pipe.add_summit(
                 self._route_data_factory.create_summit(
                     unspecified_names=summit_names,
-                    low_grade_position=GeoPosition.from_decimal_degree(
+                    position=GeoPosition.from_decimal_degree(
                         latitude=float(json_summit.ngrd),
                         longitude=float(json_summit.vgrd),
                     ),

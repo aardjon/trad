@@ -148,12 +148,12 @@ def test_data_enrichment(tmp_path: Path) -> None:
     summit1 = Summit(official_name="Beispielturm", sector=example_sector)
     summit2 = Summit(
         official_name="Beispielturm",
-        high_grade_position=GeoPosition(470000000, 110000000),
+        position=RankedValue(GeoPosition(470000000, 110000000), rank=1),
         sector=example_sector,
     )
     summit3 = Summit(
         official_name="Beispielturm",
-        low_grade_position=GeoPosition(470000011, 110000037),
+        position=RankedValue(GeoPosition(470000011, 110000037), rank=11),
         sector=example_sector,
     )
 

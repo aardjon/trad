@@ -183,6 +183,10 @@ Table summits {
   stored as (509170936, 141992389).
 
   See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
+  
+  The special coordinates of 0/0 are used in case no position is available at all. This value is
+  not *invalid* by itself, it is just a point somewhere in the Atlantic Ocean where we do not
+  expect a climbing rock. It may be changed if a new island is discovered there, of course ;)
   '''
 
   id integer [

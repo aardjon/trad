@@ -20,7 +20,7 @@ from trad.application.filters.source.teufelsturm.parser import (
     parse_user_name,
 )
 from trad.application.grades.regex import RegexBasedParser
-from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
+from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.routedata import Post
 
 posts_test_dict: Final = {
@@ -78,6 +78,8 @@ posts_test_dict: Final = {
 }
 
 timezone_berlin: Final = ZoneInfo("Europe/Berlin")
+
+_expected_position_rank: Final = 12
 
 
 def test_parse_post() -> None:
@@ -199,8 +201,8 @@ def test_parse_page(sample_route_page_file: str) -> None:
     page_data = parse_page(page_text, summit_cache, RegexBasedParser())
 
     assert page_data.peak.name == expected_summit_name
-    assert page_data.peak.high_grade_position is UNDEFINED_GEOPOSITION
-    assert page_data.peak.low_grade_position.is_equal_to(expected_summit_position)
+    assert page_data.peak.position.rank == _expected_position_rank
+    assert page_data.peak.position.value.is_equal_to(expected_summit_position)
     assert page_data.route.route_name == "Loremweg"
     assert page_data.route.grade == "** II"
     assert len(page_data.posts) == 1

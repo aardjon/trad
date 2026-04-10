@@ -24,6 +24,7 @@ from trad.application.filters.sink.db_v1.dbschema import (
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post, Route, Summit
 
@@ -190,11 +191,17 @@ class DbSchemaV1Filter(SinkFilter):
             f"))"
         )
 
+        summit_position = (
+            summit.position.value
+            if not summit.position.is_null()
+            else GeoPosition(0, 0)  # (0, 0) is a special value for a missing position
+        )
+
         self.__database_boundary.execute_write(
             query=sql_statement,
             query_parameters=[
-                summit.high_grade_position.latitude_int,
-                summit.high_grade_position.longitude_int,
+                summit_position.latitude_int,
+                summit_position.longitude_int,
                 summit.sector.value,
             ],
         )

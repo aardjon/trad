@@ -24,6 +24,11 @@ class TestOsmSummitDataFilter:
     The expected rank of the summit.sector attribute.
     """
 
+    _expected_position_rank: Final = 1
+    """
+    The expected rank of the summit.position attribute.
+    """
+
     # Some example sector value as expected to be created by the OSM filter.
     _example_sector1: Final = RankedValue[str].create_valid("Mock Area", _expected_sector_rank)
     _example_sector2: Final = RankedValue[str].create_valid("Zahlengebiet", _expected_sector_rank)
@@ -291,7 +296,10 @@ class TestOsmSummitDataFilter:
                 [
                     Summit(
                         "Mt Mock",
-                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(13.37, 47.11),
+                            _expected_position_rank,
+                        ),
                         sector=_example_sector1,
                     )
                 ],
@@ -333,7 +341,10 @@ class TestOsmSummitDataFilter:
                 [
                     Summit(
                         "Mt Mock",
-                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(13.37, 47.11),
+                            _expected_position_rank,
+                        ),
                         sector=_example_sector1,
                     )
                 ],
@@ -371,7 +382,10 @@ class TestOsmSummitDataFilter:
                 [
                     Summit(
                         "Mt Mock",
-                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(13.37, 47.11),
+                            _expected_position_rank,
+                        ),
                         sector=_example_sector1,
                     )
                 ],
@@ -409,7 +423,10 @@ class TestOsmSummitDataFilter:
                 [
                     Summit(
                         "Mt Mock",
-                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(13.37, 47.11),
+                            _expected_position_rank,
+                        ),
                         sector=_example_sector1,
                     )
                 ],
@@ -455,17 +472,23 @@ class TestOsmSummitDataFilter:
                 [
                     Summit(
                         "Einserspitze",
-                        high_grade_position=GeoPosition.from_decimal_degree(12.34, 9.87),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(12.34, 9.87), _expected_position_rank
+                        ),
                         sector=_example_sector2,
                     ),
                     Summit(
                         "Zweierturm",
-                        high_grade_position=GeoPosition.from_decimal_degree(56.78, 65.43),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(56.78, 65.43), _expected_position_rank
+                        ),
                         sector=_example_sector2,
                     ),
                     Summit(
                         "Dreierwand",
-                        high_grade_position=GeoPosition.from_decimal_degree(90.00, 21.10),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(90.00, 21.10), _expected_position_rank
+                        ),
                         sector=_example_sector2,
                     ),
                 ],
@@ -506,7 +529,10 @@ class TestOsmSummitDataFilter:
                     Summit(
                         official_name="name",
                         alternate_names=["alt", "official", "nick", "short", "loc"],
-                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(13.37, 47.11),
+                            _expected_position_rank,
+                        ),
                         sector=_example_sector1,
                     )
                 ],
@@ -542,7 +568,10 @@ class TestOsmSummitDataFilter:
                     Summit(
                         official_name="name",
                         alternate_names=["alt1", "alt2", "alt3"],
-                        high_grade_position=GeoPosition.from_decimal_degree(13.37, 47.11),
+                        position=RankedValue.create_valid(
+                            GeoPosition.from_decimal_degree(13.37, 47.11),
+                            _expected_position_rank,
+                        ),
                         sector=_example_sector1,
                     )
                 ],
@@ -680,14 +709,18 @@ class TestOsmSummitDataFilter:
         Returns True if the given summits are equal (by value), otherwise False.
         This compares by value, i.e. two different instances with the same values are equal.
         """
-        return (
+        ret_val = (
             summit1.official_name == summit2.official_name
             and sorted(summit1.alternate_names) == sorted(summit2.alternate_names)
             and sorted(summit1.unspecified_names) == sorted(summit2.unspecified_names)
-            and summit1.high_grade_position.is_equal_to(summit2.high_grade_position)
-            and summit1.low_grade_position.is_equal_to(summit2.low_grade_position)
             and summit1.sector == summit2.sector
         )
+        if ret_val:
+            if summit1.position.is_null() == summit2.position.is_null():
+                ret_val = True
+            else:
+                ret_val = summit1.position.value.is_equal_to(summit2.position.value)
+        return ret_val
 
 
 class _FakeNetwork(HttpNetworkingBoundary):
