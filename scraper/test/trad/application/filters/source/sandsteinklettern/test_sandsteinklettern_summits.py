@@ -12,6 +12,7 @@ import pytest
 
 from trad.application.filters.source.sandsteinklettern.api import JsonGipfelStatus, JsonGipfelTyp
 from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Summit
 
 from .conftest import JsonTestData, PreparedFilterRunner
@@ -22,6 +23,10 @@ _allowed_summit_status: Final = (
     JsonGipfelStatus.PARTIALLY_CLOSED,
     JsonGipfelStatus.OCCASIONALLY_CLOSED,
 )
+
+
+def _create_position(lat: float, lon: float) -> RankedValue[GeoPosition]:
+    return RankedValue.create_valid(GeoPosition.from_decimal_degree(lat, lon), 11)
 
 
 @pytest.mark.parametrize(
@@ -39,7 +44,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Mons Exempli"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.89023, 14.04374),
+                position=_create_position(50.89023, 14.04374),
             ),
             id="single name (german)",
         ),
@@ -55,7 +60,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Mons Exempli"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.89023, 14.04374),
+                position=_create_position(50.89023, 14.04374),
             ),
             id="single name (czech)",
         ),
@@ -71,7 +76,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Einserturm", "Zweierturm"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.89023, 14.04374),
+                position=_create_position(50.89023, 14.04374),
             ),
             id="multiple names",
         ),
@@ -87,7 +92,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Schneekoppe", "Sněžka"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.735989, 15.73965),
+                position=_create_position(50.735989, 15.73965),
             ),
             id="different languages",
         ),
@@ -103,7 +108,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Schneekoppe", "Riesenkoppe", "Sněžka", "Śnieżka"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.735989, 15.73965),
+                position=_create_position(50.735989, 15.73965),
             ),
             id="multiple languages and names",
         ),
@@ -121,7 +126,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Mons Exempli"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.89023, 14.04374),
+                position=_create_position(50.89023, 14.04374),
             ),
             id=f"typ={typ.value}",
         )
@@ -140,7 +145,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Mons Exempli"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.89023, 14.04374),
+                position=_create_position(50.89023, 14.04374),
             ),
             id=f"status={status.value}",
         )
@@ -159,7 +164,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Zwerg"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.9013408, 14.1106220),
+                position=_create_position(50.9013408, 14.1106220),
             ),
             id="fix wrong name",
         )
@@ -178,7 +183,7 @@ _allowed_summit_status: Final = (
             },
             Summit(
                 unspecified_names=["Schneekoppe", "Sněžka"],
-                low_grade_position=GeoPosition.from_decimal_degree(50.735989, 15.73965),
+                position=_create_position(50.735989, 15.73965),
             ),
             id="additional JSON field",
         ),
@@ -195,7 +200,7 @@ def test_import_summit(
      - Summit names in different variants and combinations
      - All status value for at least sometimes accessible
      - "regular" and "crag" summit types
-     - Summit position (tested implicitly with oter test cases, because coordinates are mandatory)
+     - Summit position (tested implicitly with other test cases, because coordinates are mandatory)
      - Certain summit names are known to be wrong in the external source, and thus must be fixed
 
     The 'summit_json_data' input parameter is the (external) JSON representaion of the summit being
@@ -216,8 +221,7 @@ def test_import_summit(
     assert actual_summit.official_name == expected_summit.official_name
     assert sorted(actual_summit.alternate_names) == sorted(expected_summit.alternate_names)
     assert sorted(actual_summit.unspecified_names) == sorted(expected_summit.unspecified_names)
-    assert actual_summit.high_grade_position.is_equal_to(expected_summit.high_grade_position)
-    assert actual_summit.low_grade_position.is_equal_to(expected_summit.low_grade_position)
+    assert actual_summit.position.value.is_equal_to(expected_summit.position.value)
 
 
 @pytest.mark.parametrize(

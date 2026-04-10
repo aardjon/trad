@@ -7,7 +7,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import Final
 
-from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
+from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.names import NormalizedName
 from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.errors import IncompleteDataError
@@ -48,16 +48,10 @@ class Summit:
     official. These names do not end up in the created route database.
     """
 
-    high_grade_position: GeoPosition = UNDEFINED_GEOPOSITION
-    """ Geographical position of this summit. """
-
-    low_grade_position: GeoPosition = UNDEFINED_GEOPOSITION
+    position: RankedValue[GeoPosition] = field(default_factory=RankedValue[GeoPosition].create_null)
     """
-    Additional, low-grade geographical position with e.g. bad precision or otherwise unclear
-    quality. It is used as a fallback, e.g. for mapping/merging different Summit objects when no
-    good position data is available (yet), but is not written into the created route dataabse. It
-    can be trusted to be at least more or less "close" (i.e. in the vicinity of a few hundred
-    meters) to the actual `high_grade_position`, though.
+    Geographical position of this summit. May legally be a null object if no exact position is
+    known.
     """
 
     sector: RankedValue[str] = field(default_factory=RankedValue[str].create_null)
@@ -88,22 +82,6 @@ class Summit:
         if not name:
             name = next(iter(self.unspecified_names))
         return name
-
-    @property
-    def position(self) -> GeoPosition:
-        """
-        Returns the best available geographical position for this summit.
-
-        It returns the `high_grade_position` if available, otherwise the `low_grade_position` (and
-        `UNDEFINED_GEOPOSITION` if none of them is set). May be useful if you just need a rough
-        position for e.g. displaying it or estimating a distance. If you need certainty about its
-        quality, use one of the specialized properties instead.
-        """
-        return (
-            self.high_grade_position
-            if self.high_grade_position != UNDEFINED_GEOPOSITION
-            else self.low_grade_position
-        )
 
     @property
     def normalized_name(self) -> NormalizedName:
@@ -147,6 +125,14 @@ class Summit:
         if self.sector.is_null() or not self.sector.is_production_quality():
             # All summits must be assigned to a sector!
             raise IncompleteDataError(self, "sector")
+
+        if not self.position.is_null() and not self.position.is_production_quality():
+            # Ignore low-quality position data
+            _logger.warning(
+                "Discarding low-quality position data of Summit '%s'",
+                self.official_name,
+            )
+            self.position = RankedValue.create_null()
 
 
 @dataclass

@@ -27,6 +27,12 @@ class TestSummit:
             return RankedValue.create_valid(sector_name, 4)
         return RankedValue.create_null()
 
+    @staticmethod
+    def _create_position(position: GeoPosition | None) -> RankedValue[GeoPosition]:
+        if position:
+            return RankedValue.create_valid(position, 2)
+        return RankedValue.create_null()
+
     @pytest.mark.parametrize("sector_name", [None, "Bielatal", "Großer Zschand"])
     def test_sector(self, sector_name: str | None) -> None:
         """
@@ -61,28 +67,18 @@ class TestSummit:
         ("summit", "expected_return_value"),
         [
             (
-                Summit("Dummy", high_grade_position=GeoPosition(504620000, 147390000)),
-                GeoPosition(504620000, 147390000),
-            ),
-            (
-                Summit("Dummy", low_grade_position=GeoPosition(504620000, 147390000)),
-                GeoPosition(504620000, 147390000),
-            ),
-            (
                 Summit(
-                    "Dummy",
-                    high_grade_position=GeoPosition(147390000, 504620000),
-                    low_grade_position=GeoPosition(504620000, 147390000),
+                    "Dummy", position=RankedValue.create_valid(GeoPosition(504620000, 147390000), 1)
                 ),
-                GeoPosition(147390000, 504620000),
+                GeoPosition(504620000, 147390000),
             ),
         ],
     )
     def test_position(self, summit: Summit, expected_return_value: GeoPosition) -> None:
         """
-        Tests the `position` property, i.e. that the correct position value is returned.
+        Tests the `position` property, i.e. that the defined position value is returned.
         """
-        assert summit.position.is_equal_to(expected_return_value)
+        assert summit.position.value.is_equal_to(expected_return_value)
 
     @pytest.mark.parametrize(
         ("summit", "expected_id_base"),
@@ -117,25 +113,24 @@ class TestSummit:
             (
                 Summit(
                     "With Position",
-                    high_grade_position=_example_position_1,
+                    position=_create_position(_example_position_1),
                     sector=_create_sector("Area 22"),
                 ),
                 Summit(
                     "With Position",
-                    high_grade_position=_example_position_1,
+                    position=_create_position(_example_position_1),
                     sector=_create_sector("Area 22"),
                 ),
             ),
             (
                 Summit(
-                    "With Position",
-                    low_grade_position=_example_position_1,
-                    sector=_create_sector("Area 23"),
+                    "With bad position",
+                    position=RankedValue(_example_position_1, rank=13),
+                    sector=_create_sector("Dummy Sector"),
                 ),
                 Summit(
-                    "With Position",
-                    low_grade_position=_example_position_1,
-                    sector=_create_sector("Area 23"),
+                    "With bad position",
+                    sector=_create_sector("Dummy Sector"),
                 ),
             ),
             (

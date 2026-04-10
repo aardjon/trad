@@ -2,7 +2,7 @@
 Provides functionality for easily creating route data domain objects (e.g. Summit or Route).
 """
 
-from trad.kernel.entities.geotypes import UNDEFINED_GEOPOSITION, GeoPosition
+from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import NO_GRADE, Route, Summit
 from trad.kernel.errors import InvalidStateError
@@ -18,20 +18,24 @@ class RouteDataFactory:
     configured only once and in a single place for each source.
     """
 
-    def __init__(self, summit_sector_rank: int | None = None) -> None:
+    def __init__(
+        self,
+        summit_sector_rank: int | None = None,
+        summit_position_rank: int | None = None,
+    ) -> None:
         """
         Create a new data factory which uses the given ranks when creating data objects. For
         undefined ranks, no value can be created - trying to do so will raise an InvalidStateError.
         """
         self._summit_sector_rank = summit_sector_rank
+        self._summit_position_rank = summit_position_rank
 
-    def create_summit(  # noqa: PLR0913
+    def create_summit(
         self,
         official_name: str | None = None,
         alternate_names: list[str] | None = None,
         unspecified_names: list[str] | None = None,
-        high_grade_position: GeoPosition = UNDEFINED_GEOPOSITION,
-        low_grade_position: GeoPosition = UNDEFINED_GEOPOSITION,
+        position: GeoPosition | None = None,
         sector: str | None = None,
     ) -> Summit:
         """
@@ -42,8 +46,7 @@ class RouteDataFactory:
             official_name=official_name,
             alternate_names=alternate_names or [],
             unspecified_names=unspecified_names or [],
-            high_grade_position=high_grade_position,
-            low_grade_position=low_grade_position,
+            position=self._create_ranked_value(position, self._summit_position_rank),
             sector=self._create_ranked_value(sector, self._summit_sector_rank),
         )
 
