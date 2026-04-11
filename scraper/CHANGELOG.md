@@ -1,6 +1,7 @@
 # Scraper & Route Database Changelog
 
-## Next Version
+
+## Version 0.3.1 - 2026-04-11
 
 ### Fixed Bugs:
  - Normalize umlauts when merging route names (#41)
