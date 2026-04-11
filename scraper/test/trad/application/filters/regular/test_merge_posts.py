@@ -8,7 +8,7 @@ import pytest
 
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.pipes import CollectedData
-from trad.kernel.entities import Post, Route, Summit
+from trad.kernel.entities.routedata import Post, Route, Summit
 
 
 @pytest.mark.parametrize(

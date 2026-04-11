@@ -76,11 +76,12 @@ class RequestsHttp(HttpNetworkingBoundary):
         callers may do additional checks, if necessary). Raises HttpRequestError in case of any
         errors.
         """
+        headers = self._USER_AGENT_HEADER | additional_headers
         try:
             response = requests.get(
                 url=url,
                 params=url_params,
-                headers=self._USER_AGENT_HEADER | additional_headers,
+                headers=headers,
                 data=query_content,
                 timeout=self._REQUEST_TIMEOUT,
             )

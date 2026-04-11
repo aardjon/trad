@@ -23,8 +23,10 @@ from trad.application.filters.sink.db_v1.dbschema import (
 )
 from trad.kernel.appmeta import APPLICATION_NAME, APPLICATION_VERSION
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import ExternalSource, Post, Route, Summit
-from trad.kernel.errors import IncompleteDataError
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
+from trad.kernel.entities.routedata import Post, Route, Summit
 
 _logger = getLogger(__name__)
 
@@ -50,7 +52,11 @@ class DbSchemaV1Filter(SinkFilter):
         self.__destination_file = output_directory.joinpath(self._DB_FILE_NAME)
         self.__database_boundary = database_boundary
         self._seen_sectors: list[str] = []
-        """ Remember seen sector names because each one must be written to the DB only once. """
+        """
+        Remember seen sector names because each one must be written to the DB only once.
+        Storing the actual string value only, because different summits may be assigned to the same
+        area but with a different rank (e.g. regular peaks vs. 'massive').
+        """
 
     @override
     def get_name(self) -> str:
@@ -105,7 +111,7 @@ class DbSchemaV1Filter(SinkFilter):
         value_placeholders = self._get_value_placeholders(len(column_list))
 
         insert_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {DatabaseMetadataTable.TABLE_NAME} ({column_names}) "
+            f"INSERT INTO {DatabaseMetadataTable.TABLE_NAME} ({column_names}) "
             f"VALUES ({value_placeholders})"
         )
 
@@ -152,22 +158,20 @@ class DbSchemaV1Filter(SinkFilter):
             )
 
     def _add_summit(self, summit: Summit) -> None:
-        if summit.sector not in self._seen_sectors:
-            if summit.sector is None:
-                raise IncompleteDataError(summit, "sector")
-            self._seen_sectors.append(summit.sector)
+        if summit.sector.value not in self._seen_sectors:
+            self._seen_sectors.append(summit.sector.value)
             self._write_to_areas_table(summit.sector)
         summit_id = self._write_to_summits_table(summit)
         self._write_to_summit_names_table(summit_id, summit)
 
-    def _write_to_areas_table(self, sector_name: str) -> None:
+    def _write_to_areas_table(self, sector_name: RankedValue[str]) -> None:
         """Add the given sector to the `areas` table."""
         sql_statement = SqlStatement(
             f"INSERT INTO {AreasTable.TABLE_NAME} ({AreasTable.COLUMN_NAME}) VALUES (?)"
         )
         self.__database_boundary.execute_write(
             query=sql_statement,
-            query_parameters=[sector_name],
+            query_parameters=[sector_name.value],
         )
 
     def _write_to_summits_table(self, summit: Summit) -> int:
@@ -187,12 +191,18 @@ class DbSchemaV1Filter(SinkFilter):
             f"))"
         )
 
+        summit_position = (
+            summit.position.value
+            if not summit.position.is_null()
+            else GeoPosition(0, 0)  # (0, 0) is a special value for a missing position
+        )
+
         self.__database_boundary.execute_write(
             query=sql_statement,
             query_parameters=[
-                summit.high_grade_position.latitude_int,
-                summit.high_grade_position.longitude_int,
-                summit.sector,
+                summit_position.latitude_int,
+                summit_position.longitude_int,
+                summit.sector.value,
             ],
         )
         row_ids = self.__database_boundary.execute_read(
@@ -269,7 +279,7 @@ class DbSchemaV1Filter(SinkFilter):
         column_names = ", ".join(column_list)
         value_placeholders = self._get_value_placeholders(len(column_list) - 1)
         insert_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {RoutesTable.TABLE_NAME} ({column_names}) "
+            f"INSERT INTO {RoutesTable.TABLE_NAME} ({column_names}) "
             f"VALUES (({select_summit}), {value_placeholders})"
         )
         self.__database_boundary.execute_write(
@@ -317,7 +327,7 @@ class DbSchemaV1Filter(SinkFilter):
         value_placeholders = self._get_value_placeholders(len(column_list) - 2)
 
         insert_statement = SqlStatement(
-            f"INSERT OR IGNORE INTO {PostsTable.TABLE_NAME} ({column_names}) "
+            f"INSERT INTO {PostsTable.TABLE_NAME} ({column_names}) "
             f"VALUES (({select_route}), {value_placeholders}, ({select_source}))"
         )
 

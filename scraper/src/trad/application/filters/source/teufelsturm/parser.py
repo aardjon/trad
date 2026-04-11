@@ -18,15 +18,12 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.application.grades import GradeParser
-from trad.kernel.entities import (
-    UNDEFINED_GEOPOSITION,
-    ExternalSource,
-    GeoPosition,
-    Post,
-    Route,
-    Summit,
-)
+from trad.kernel.entities.datasources import ExternalSource
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import DataProcessingError
 
 if TYPE_CHECKING:
@@ -45,6 +42,17 @@ EXTERNAL_SOURCE_DESCRIPTION: Final = ExternalSource(
 
 _ROUTE_DATA_RANK: Final = 2
 """Priority/Accuracy of the route data retrieved from teufelsturm in case of conflicts."""
+
+
+_route_data_factory: Final = RouteDataFactory(
+    summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 2
+)
+"""
+Factory for creating route data objects.
+Positional data at teufelsturm is known to be very inaccurate sometimes, that's why it is never
+written into the created route database. But it can still be used as a fallback, e.g. for
+mapping/merging different Summit objects when no good position data is available (yet).
+"""
 
 
 @dataclass
@@ -153,7 +161,7 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
 
     return PageData(
         peak=peak,
-        route=Route(
+        route=_route_data_factory.create_route(
             _ROUTE_DATA_RANK,
             route_name=route,
             grade=grade_label,
@@ -250,7 +258,7 @@ def _parse_summit_page(page_text: str) -> Summit:
     peak_name = _fix_erroneous_name(peak_name)
 
     # Get the summit's geo position
-    position = UNDEFINED_GEOPOSITION
+    position = None
     if not _ignore_wrong_position(peak_name):
         positions_table = soup.find_all("table")[-1]
         lat = None
@@ -266,7 +274,7 @@ def _parse_summit_page(page_text: str) -> Summit:
 
         if not (lat and lon):
             _logger.warning("Cannot find summit coordinates on details page of %s", peak_name)
-            position = UNDEFINED_GEOPOSITION
+            position = None
         else:
             try:
                 position = GeoPosition.from_decimal_degree(
@@ -280,7 +288,10 @@ def _parse_summit_page(page_text: str) -> Summit:
     # Teufelsturm doesn't provide information about name usage, that's why we have to set them as
     # 'unspecified'. Also, the position values are known to be quite inaccurate, that's why we use
     # them for assistance only.
-    return Summit(unspecified_names=[peak_name], low_grade_position=position)
+    return _route_data_factory.create_summit(
+        unspecified_names=[peak_name],
+        position=position,
+    )
 
 
 class SummitCache:

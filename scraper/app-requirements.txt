@@ -12,7 +12,7 @@ beautifulsoup4==4.14.3
     #   trad_scraper (pyproject.toml)
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.5
+charset-normalizer==3.4.7
     # via requests
 html5lib==1.1
     # via pandas
@@ -20,7 +20,7 @@ idna==3.11
     # via requests
 lidipy==0.3.2
     # via trad_scraper (pyproject.toml)
-lxml==6.0.2
+lxml==6.0.3
     # via pandas
 numpy==2.3.5
     # via
@@ -36,7 +36,7 @@ python-dateutil==2.9.0.post0
     # via pandas
 pytz==2026.1.post1
     # via pandas
-requests==2.32.5
+requests==2.33.1
     # via trad_scraper (pyproject.toml)
 six==1.17.0
     # via
@@ -52,7 +52,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-tzdata==2025.3
+tzdata==2026.1
     # via pandas
 urllib3==2.6.3
     # via requests

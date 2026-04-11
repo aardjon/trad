@@ -10,7 +10,7 @@ from trad.application.filters.regular.merge import (
     MergeFilter,
 )
 from trad.application.pipes import CollectedData
-from trad.kernel.entities import Route, Summit
+from trad.kernel.entities.routedata import Route, Summit
 from trad.kernel.errors import MergeConflictError
 
 
@@ -317,6 +317,28 @@ def test_dont_merge_routes_of_different_summits() -> None:
             ("S-Weg", "Südweg"),
             ("O-Kamin", "Ostkamin"),
             ("W-Kante", "Westkante"),
+        )
+    ]
+    + [
+        pytest.param(
+            Route(1, name1),
+            Route(1, name2),
+            True,
+            id=f"Umlauts: '{name1}'=='{name2}'",
+        )
+        for name1, name2 in (
+            ("Ostriss", "Ostriß"),
+            ("Übers Gewölbe", "Uebers Gewoelbe"),
+            ("ÄÖÜ", "AEOEUE"),
+            ("äöü", "aeoeue"),
+        )
+    ]
+    + [
+        pytest.param(
+            Route(1, "S-Riß"),
+            Route(1, "südriss"),
+            True,
+            id="Combination: 'S-Riß'=='südriss'",
         )
     ],
 )

@@ -11,8 +11,14 @@ from trad.application.filters.regular.merge import (
     _SummitMerger,
 )
 from trad.application.pipes import CollectedData
-from trad.kernel.entities import GeoPosition, Summit
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
+from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import MergeConflictError
+
+
+def _create_position(lat: int, lon: int, rank: int) -> RankedValue[GeoPosition]:
+    return RankedValue.create_valid(GeoPosition(lat, lon), rank)
 
 
 @pytest.mark.parametrize(
@@ -33,18 +39,17 @@ from trad.kernel.errors import MergeConflictError
         ),
         # Merge different name variants
         (
-            [Summit("Mons Permuta", low_grade_position=GeoPosition(504620000, 147390000))],
-            Summit("Permuta, Mons", high_grade_position=GeoPosition(504620000, 147390000)),
+            [Summit("Mons Permuta", position=_create_position(504620000, 147390000, 1))],
+            Summit("Permuta, Mons", position=_create_position(504620000, 147390000, 11)),
             [
                 Summit(
                     "Mons Permuta",
-                    high_grade_position=GeoPosition(504620000, 147390000),
-                    low_grade_position=GeoPosition(504620000, 147390000),
+                    position=_create_position(504620000, 147390000, 1),
                 )
             ],
         ),
         # Merge multiple Summits into one if new information reveals that this is necessary
-        (
+        pytest.param(
             [Summit(unspecified_names=["Name1"]), Summit(unspecified_names=["Name2"])],
             Summit(official_name="Name1", alternate_names=["Name2"]),
             [
@@ -54,97 +59,93 @@ from trad.kernel.errors import MergeConflictError
                     unspecified_names=["Name1", "Name2"],
                 )
             ],
+            id="Merge existing Summits: New name information",
         ),
         # ... at least it their positions are close together
-        (
+        pytest.param(
             [
                 Summit(
                     unspecified_names=["Name1"],
-                    low_grade_position=GeoPosition(404620000, 247390000),
+                    position=_create_position(404620000, 247390000, 12),
                 ),
                 Summit(
                     unspecified_names=["Name2"],
-                    low_grade_position=GeoPosition(404621000, 247389000),
+                    position=_create_position(404621000, 247389000, 13),
                 ),
             ],
             Summit(
                 official_name="Name1",
                 alternate_names=["Name2"],
-                high_grade_position=GeoPosition(404620000, 247390000),
+                position=_create_position(404620000, 247390000, 2),
             ),
             [
                 Summit(
                     official_name="Name1",
                     alternate_names=["Name2"],
                     unspecified_names=["Name1", "Name2"],
-                    high_grade_position=GeoPosition(404620000, 247390000),
-                    low_grade_position=GeoPosition(404620000, 247390000),
+                    position=_create_position(404620000, 247390000, 2),
                 )
             ],
+            id="Merge existing Summits: New name information and close positions",
         ),
         # Two summits with the same name that are too far away from each other must not be
         # merged
         (
-            [Summit(official_name="Name1", high_grade_position=GeoPosition(304620000, 547390000))],
-            Summit(official_name="Name1", high_grade_position=GeoPosition(547390000, 304620000)),
+            [Summit(official_name="Name1", position=_create_position(304620000, 547390000, 1))],
+            Summit(official_name="Name1", position=_create_position(547390000, 304620000, 1)),
             [
-                Summit(
-                    official_name="Name1", high_grade_position=GeoPosition(304620000, 547390000)
-                ),
-                Summit(
-                    official_name="Name1", high_grade_position=GeoPosition(547390000, 304620000)
-                ),
+                Summit(official_name="Name1", position=_create_position(304620000, 547390000, 1)),
+                Summit(official_name="Name1", position=_create_position(547390000, 304620000, 1)),
             ],
         ),
         (
             [
                 Summit(
                     unspecified_names=["Name2"],
-                    low_grade_position=GeoPosition(404630000, 247380000),
+                    position=_create_position(404630000, 247380000, 11),
                 ),
             ],
             Summit(
                 official_name="Name1",
                 alternate_names=["Name2"],
-                high_grade_position=GeoPosition(247390000, 404620000),
+                position=_create_position(247390000, 404620000, 2),
             ),
             [
                 Summit(
                     unspecified_names=["Name2"],
-                    low_grade_position=GeoPosition(404630000, 247380000),
+                    position=_create_position(404630000, 247380000, 11),
                 ),
                 Summit(
                     official_name="Name1",
                     alternate_names=["Name2"],
-                    high_grade_position=GeoPosition(247390000, 404620000),
+                    position=_create_position(247390000, 404620000, 2),
                 ),
             ],
         ),
         # Don't change other existing summits
         (
-            [Summit("S1"), Summit("S2", high_grade_position=GeoPosition(404620000, 247390000))],
-            Summit("S3", high_grade_position=GeoPosition(504620000, 147390000)),
+            [Summit("S1"), Summit("S2", position=_create_position(404620000, 247390000, 1))],
+            Summit("S3", position=_create_position(504620000, 147390000, 1)),
             [
                 Summit("S1"),
-                Summit("S2", high_grade_position=GeoPosition(404620000, 247390000)),
-                Summit("S3", high_grade_position=GeoPosition(504620000, 147390000)),
+                Summit("S2", position=_create_position(404620000, 247390000, 1)),
+                Summit("S3", position=_create_position(504620000, 147390000, 1)),
             ],
         ),
         (
             [
-                Summit("S1", low_grade_position=GeoPosition(304620000, 347390000)),
-                Summit("S2", low_grade_position=GeoPosition(504620000, 147391000)),
-                Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
+                Summit("S1", position=_create_position(304620000, 347390000, 12)),
+                Summit("S2", position=_create_position(504620000, 147391000, 12)),
+                Summit("S3", position=_create_position(404620000, 247390000, 2)),
             ],
-            Summit("S2", high_grade_position=GeoPosition(504620000, 147390000)),
+            Summit("S2", position=_create_position(504620000, 147390000, 2)),
             [
-                Summit("S1", low_grade_position=GeoPosition(304620000, 347390000)),
+                Summit("S1", position=_create_position(304620000, 347390000, 12)),
                 Summit(
                     "S2",
-                    high_grade_position=GeoPosition(504620000, 147390000),
-                    low_grade_position=GeoPosition(504620000, 147391000),
+                    position=_create_position(504620000, 147390000, 2),
                 ),
-                Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
+                Summit("S3", position=_create_position(404620000, 247390000, 2)),
             ],
         ),
     ],
@@ -179,15 +180,18 @@ def test_merge_summits(
 
     # Check the resulting summit list and data
     for real, expected in zip(
-        (s for i, s in output_pipe.iter_summits()),
-        expected_summit_list,
+        sorted((s for i, s in output_pipe.iter_summits()), key=lambda s: s.official_name or ""),
+        sorted(expected_summit_list, key=lambda s: s.official_name or ""),
         strict=True,
     ):
         assert real.official_name == expected.official_name
         assert sorted(real.alternate_names) == sorted(expected.alternate_names)
         assert sorted(real.unspecified_names) == sorted(expected.unspecified_names)
-        assert real.high_grade_position.is_equal_to(expected.high_grade_position)
-        assert real.low_grade_position.is_equal_to(expected.low_grade_position)
+        assert real.position.rank == expected.position.rank
+        assert real.position.is_null() == expected.position.is_null()
+        assert real.position.rank == expected.position.rank
+        if not expected.position.is_null():
+            assert real.position.value.is_equal_to(expected.position.value)
 
 
 @pytest.mark.parametrize(
@@ -198,9 +202,9 @@ def test_merge_summits(
         (
             [
                 Summit("S1"),
-                Summit("S2", high_grade_position=GeoPosition(304620000, 547390000)),
-                Summit("S3", high_grade_position=GeoPosition(404620000, 247390000)),
-                Summit("S2", high_grade_position=GeoPosition(304621000, 547389000)),
+                Summit("S2", position=_create_position(304620000, 547390000, 1)),
+                Summit("S3", position=_create_position(404620000, 247390000, 1)),
+                Summit("S2", position=_create_position(304621000, 547389000, 1)),
             ],
             MergeConflictError,
         ),
@@ -231,71 +235,81 @@ def test_summit_merge_conflict(
     [
         # Merge sector name into an existing summit
         (
-            Summit("Summit", sector=None),
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 2)),
             nullcontext(),
         ),
         (
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector=None),
-            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 7)),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 7)),
+            nullcontext(),
+        ),
+        # Merge sector names of different ranks
+        (
+            Summit("Summit", sector=RankedValue.create_valid("Sector 1", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 2", 1)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 2", 1)),
+            nullcontext(),
+        ),
+        (
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 7)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 5)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 5)),
             nullcontext(),
         ),
         # Merging equal sector names must not raise an error
         (
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector="Sector"),
-            Summit("Summit", sector="Sector"),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 3)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 3)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector", 3)),
             nullcontext(),
         ),
         (
-            Summit("Summit", sector=None),
-            Summit("Summit", sector=None),
-            Summit("Summit", sector=None),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_null()),
+            Summit("Summit", sector=RankedValue.create_null()),
             nullcontext(),
         ),
         # Merge position data into an existing summit
         (
             Summit("Summit 1"),
-            Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
-            Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+            Summit("Summit 1", position=_create_position(504620000, 147390000, 1)),
+            Summit("Summit 1", position=_create_position(504620000, 147390000, 1)),
             nullcontext(),
         ),
         (
             Summit("Summit 1"),
-            Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
-            Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
+            Summit("Summit 1", position=_create_position(504620000, 147390000, 12)),
+            Summit("Summit 1", position=_create_position(504620000, 147390000, 12)),
             nullcontext(),
         ),
         (
-            Summit("Summit 1", high_grade_position=GeoPosition(504567000, 147650000)),
-            Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
-            Summit(
-                "Summit 1",
-                high_grade_position=GeoPosition(504567000, 147650000),
-                low_grade_position=GeoPosition(504620000, 147390000),
-            ),
+            Summit("Summit 1", position=_create_position(504567000, 147650000, 2)),
+            Summit("Summit 1", position=_create_position(504620000, 147390000, 13)),
+            Summit("Summit 1", position=_create_position(504567000, 147650000, 2)),
             nullcontext(),
         ),
-        (
-            Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
-            Summit("Summit 1", low_grade_position=GeoPosition(504620000, 147390000)),
-            Summit("Summit 1", low_grade_position=GeoPosition(504567000, 147650000)),
+        pytest.param(
+            Summit("Summit", position=_create_position(504620000, 147390000, 2)),
+            Summit("Summit", position=_create_position(504620000, 147390000, 5)),
+            Summit("Summit", position=_create_position(504620000, 147390000, 2)),
             nullcontext(),
+            id="Position: Same value, different rank",
         ),
         # Merging equal position datá must not raise an error
         (
-            Summit("Summit 1", high_grade_position=GeoPosition(504620000, 147390000)),
+            Summit("Summit 1", position=_create_position(504620000, 147390000, 2)),
             Summit(
                 "Summit 1",
                 alternate_names=["Summit 2"],
-                high_grade_position=GeoPosition(504620000, 147390000),
+                position=_create_position(504620000, 147390000, 2),
             ),
             Summit(
                 "Summit 1",
                 alternate_names=["Summit 2"],
-                high_grade_position=GeoPosition(504620000, 147390000),
+                position=_create_position(504620000, 147390000, 2),
             ),
             nullcontext(),
         ),
@@ -324,15 +338,15 @@ def test_summit_merge_conflict(
         ),
         # Error Cases
         (
-            Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
-            Summit("Summit", high_grade_position=GeoPosition(404620000, 247390000)),
-            Summit("Summit", high_grade_position=GeoPosition(504620000, 147390000)),
+            Summit("Summit", position=_create_position(504620000, 147390000, 1)),
+            Summit("Summit", position=_create_position(404620000, 247390000, 1)),
+            Summit("Summit", position=_create_position(504620000, 147390000, 1)),
             pytest.raises(MergeConflictError),
         ),
         (
-            Summit("Summit", sector="Sector 1"),
-            Summit("Summit", sector="Sector 2"),
-            Summit("Summit", sector="Sector 1"),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 1", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 2", 2)),
+            Summit("Summit", sector=RankedValue.create_valid("Sector 1", 2)),
             pytest.raises(MergeConflictError),
         ),
     ],
@@ -361,7 +375,8 @@ def test_enrich_summit(
         assert sorted(existing_summit.unspecified_names) == sorted(
             expected_summit.unspecified_names
         )
-        assert existing_summit.high_grade_position.is_equal_to(expected_summit.high_grade_position)
-
-        assert existing_summit.low_grade_position.is_equal_to(expected_summit.low_grade_position)
+        assert existing_summit.position.is_null() == expected_summit.position.is_null()
+        assert existing_summit.position.rank == expected_summit.position.rank
+        if not existing_summit.position.is_null():
+            assert existing_summit.position.value.is_equal_to(expected_summit.position.value)
         assert existing_summit.sector == expected_summit.sector

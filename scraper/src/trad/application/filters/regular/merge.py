@@ -12,14 +12,8 @@ from typing import Final, override
 
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe
-from trad.kernel.entities import (
-    NO_GRADE,
-    UNDEFINED_GEOPOSITION,
-    NormalizedName,
-    Post,
-    Route,
-    Summit,
-)
+from trad.kernel.entities.names import NormalizedName
+from trad.kernel.entities.routedata import NO_GRADE, Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
 
 _logger = getLogger(__name__)
@@ -201,13 +195,13 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
         return bool(
             new_summit_normalized_names.intersection(existing_summit.get_all_normalized_names())
             and (
-                (
-                    existing_summit.position is UNDEFINED_GEOPOSITION
-                    or new_summit.position is UNDEFINED_GEOPOSITION
-                )
-                or existing_summit.position.is_within_radius(
-                    new_summit.position,
-                    self._match_search_radius,
+                (existing_summit.position.is_null() or new_summit.position.is_null())
+                or (
+                    (not existing_summit.position.is_null() and not new_summit.position.is_null())
+                    and existing_summit.position.value.is_within_radius(
+                        new_summit.position.value,
+                        self._match_search_radius,
+                    )
                 )
             )
         )
@@ -281,25 +275,25 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
     @staticmethod
     def _enrich_position(target: Summit, source: Summit) -> None:
         # Merge the high grade position
-        if target.high_grade_position == UNDEFINED_GEOPOSITION:
-            target.high_grade_position = source.high_grade_position
-        elif source.high_grade_position != UNDEFINED_GEOPOSITION and (
-            not target.high_grade_position.is_equal_to(source.high_grade_position)
-        ):
-            raise MergeConflictError("summit", source.name, "high_grade_position")
-
-        # Use the low-grade position only if none is set already - otherwise, ignore the other one
-        if target.low_grade_position == UNDEFINED_GEOPOSITION:
-            target.low_grade_position = source.low_grade_position
+        if target.position.is_null():
+            target.position = source.position
+        elif not source.position.is_null():
+            if source.position.rank < target.position.rank:
+                target.position = source.position
+            elif source.position.rank == target.position.rank and (
+                not target.position.value.is_equal_to(source.position.value)
+            ):
+                raise MergeConflictError("summit", source.name, "position")
 
     @staticmethod
     def _enrich_sector(target: Summit, source: Summit) -> None:
-        if target.sector is None:
+        if target.sector.is_null():
             target.sector = source.sector
-        elif source.sector not in (None, target.sector):
-            raise MergeConflictError("summit", source.name, "sector")
-        if target.sector_fallback is None:
-            target.sector_fallback = source.sector_fallback
+        elif not source.sector.is_null() and source.sector != target.sector:
+            if source.sector.rank < target.sector.rank:
+                target.sector = source.sector
+            elif source.sector.rank == target.sector.rank:
+                raise MergeConflictError("summit", source.name, "ranked_sector")
 
 
 class _RouteMerger(_EntityMerger[_RouteRelatedData]):
@@ -338,6 +332,17 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
 
         # Lower-case the whole string
         normalized_name = normalized_name.lower()
+
+        # Replace umlauts (do it after the abbreviation replacement on purpose, to also support
+        # combinations like "Südwand"/"S-Wand")
+        for umlaut, replacement in (
+            ("ä", "ae"),
+            ("ö", "oe"),
+            ("ü", "ue"),
+            ("ß", "ss"),
+        ):
+            normalized_name = normalized_name.replace(umlaut, replacement)
+
         # Remove non-ASCII characters
         normalized_name = "".join(c for c in normalized_name if c in string.printable)
         # Replace punctuation characters with spaces
