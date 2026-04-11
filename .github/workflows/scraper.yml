@@ -19,7 +19,7 @@ jobs:
       - name: Setup environment
         run: |
              echo "--- Install Invoke"
-             pip install invoke
+             pip install `grep invoke dev-requirements.txt`
              echo "--- Install requirements"
              invoke bootstrap
 
@@ -49,7 +49,7 @@ jobs:
       - name: Setup environment
         run: |
              echo "--- Install Invoke"
-             pip install invoke
+             pip install `grep invoke dev-requirements.txt`
              echo "--- Install requirements"
              invoke bootstrap
 
@@ -72,7 +72,7 @@ jobs:
       - name: Setup environment
         run: |
              echo "--- Install Invoke"
-             pip install invoke
+             pip install `grep invoke dev-requirements.txt`
              echo "--- Install requirements"
              invoke bootstrap
 
@@ -95,7 +95,7 @@ jobs:
       - name: Setup environment
         run: |
              echo "--- Install Invoke"
-             pip install invoke
+             pip install `grep invoke dev-requirements.txt`
              echo "--- Install requirements"
              invoke bootstrap
              echo "--- Install coverage tools"
@@ -130,7 +130,7 @@ jobs:
       - name: Setup environment
         run: |
              echo "--- Install Invoke"
-             pip install invoke
+             pip install `grep invoke dev-requirements.txt`
              echo "--- Install requirements"
              invoke bootstrap
 
