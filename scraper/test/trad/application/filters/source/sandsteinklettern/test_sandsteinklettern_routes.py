@@ -10,12 +10,16 @@ from typing import Final
 
 import pytest
 
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.application.filters.source.sandsteinklettern.api import JsonWegStatus
 from trad.kernel.entities.routedata import Route
 
 from .conftest import JsonTestData, PreparedFilterRunner
 
 _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_CLOSED)
+
+
+_entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
 
 
 @pytest.mark.parametrize(
@@ -30,7 +34,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": status.value,
             },
-            Route(conflict_rank=3, route_name="Musterweg", grade_af=5),
+            _entity_factory.create_route(route_name="Musterweg", grade_af=5),
             id=f"status='{status.value}'",
         )
         for status in JsonWegStatus
@@ -46,7 +50,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "0",
             },
-            Route(conflict_rank=3, route_name="Musterweg", grade_af=5),
+            _entity_factory.create_route(route_name="Musterweg", grade_af=5),
             id="status='0'",
         )
     ]
@@ -60,8 +64,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
-            Route(
-                conflict_rank=3,
+            _entity_factory.create_route(
                 route_name="Schwierig...",
                 grade_jump=3,
                 grade_af=5,
@@ -83,8 +86,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
-            Route(
-                conflict_rank=3,
+            _entity_factory.create_route(
                 route_name="Testing",
                 grade_af=7,
                 star_count=0,
@@ -101,8 +103,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
-            Route(
-                conflict_rank=3,
+            _entity_factory.create_route(
                 route_name="Testing",
                 grade_af=7,
                 star_count=1,
@@ -118,8 +119,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
-            Route(
-                conflict_rank=3,
+            _entity_factory.create_route(
                 route_name="Testing",
                 grade_af=7,
                 star_count=2,
@@ -137,8 +137,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
-            Route(
-                conflict_rank=3,
+            _entity_factory.create_route(
                 route_name="Test Route",
             ),
             id="invalid grade",
@@ -155,8 +154,7 @@ _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_C
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
-            Route(
-                conflict_rank=3,
+            _entity_factory.create_route(
                 route_name="Test Route",
             ),
             id="additional JSON field",
@@ -178,7 +176,7 @@ def test_import_route(
      - Stars and danger marks
      - All route data has conflict rank 3 (tested implicitly because it is mandatory)
 
-    The 'route_json_data' input parameter is the (external) JSON representaion of the route being
+    The 'route_json_data' input parameter is the (external) JSON representation of the route being
     imported (the 'sektorid' attribute is added automatically), the 'expected_route'
     parameter is the expected Route object.
     """

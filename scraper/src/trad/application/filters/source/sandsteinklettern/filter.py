@@ -114,6 +114,7 @@ class SandsteinkletternDataFilter(SourceFilter):
         self._route_data_factory = RouteDataFactory(
             summit_sector_rank=2,
             summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 1,
+            route_grade_conflict_rank=self._ROUTE_DATA_RANK,
         )
 
         self._summit_added = False  # Remember if at least one summit has been added (True) or not
@@ -247,7 +248,6 @@ class SandsteinkletternDataFilter(SourceFilter):
         pipe_id = output_pipe.add_route(
             summit_id=self._summit_id_map.get_pipe_id(json_route.gipfelid),
             route=self._route_data_factory.create_route(
-                self._ROUTE_DATA_RANK,
                 route_name=self._parse_route_name(json_route),
                 grade=json_route.schwierigkeit,
                 grade_af=parsed_grade.af,

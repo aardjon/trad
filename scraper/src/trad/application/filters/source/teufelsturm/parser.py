@@ -45,7 +45,8 @@ _ROUTE_DATA_RANK: Final = 2
 
 
 _route_data_factory: Final = RouteDataFactory(
-    summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 2
+    summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 2,
+    route_grade_conflict_rank=_ROUTE_DATA_RANK,
 )
 """
 Factory for creating route data objects.
@@ -162,7 +163,6 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     return PageData(
         peak=peak,
         route=_route_data_factory.create_route(
-            _ROUTE_DATA_RANK,
             route_name=route,
             grade=grade_label,
             grade_af=parsed_grade.af,

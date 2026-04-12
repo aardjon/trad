@@ -22,6 +22,7 @@ class RouteDataFactory:
         self,
         summit_sector_rank: int | None = None,
         summit_position_rank: int | None = None,
+        route_grade_conflict_rank: int | None = None,
     ) -> None:
         """
         Create a new data factory which uses the given ranks when creating data objects. For
@@ -29,6 +30,9 @@ class RouteDataFactory:
         """
         self._summit_sector_rank = summit_sector_rank
         self._summit_position_rank = summit_position_rank
+        self._route_grade_conflict_rank = (
+            route_grade_conflict_rank or RankedValue.create_null().rank
+        )
 
     def create_summit(
         self,
@@ -52,7 +56,6 @@ class RouteDataFactory:
 
     def create_route(  # noqa: PLR0913
         self,
-        conflict_rank: int,
         route_name: str,
         *,
         grade: str = "",
@@ -68,7 +71,7 @@ class RouteDataFactory:
         explanation.
         """
         return Route(
-            conflict_rank=conflict_rank,
+            conflict_rank=self._route_grade_conflict_rank,
             route_name=route_name,
             grade=grade,
             grade_af=grade_af,
