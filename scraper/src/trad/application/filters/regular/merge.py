@@ -293,7 +293,7 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
             if source.sector.rank < target.sector.rank:
                 target.sector = source.sector
             elif source.sector.rank == target.sector.rank:
-                raise MergeConflictError("summit", source.name, "ranked_sector")
+                raise MergeConflictError("summit", source.name, "sector")
 
 
 class _RouteMerger(_EntityMerger[_RouteRelatedData]):
