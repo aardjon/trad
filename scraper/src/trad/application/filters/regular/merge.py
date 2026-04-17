@@ -361,6 +361,9 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
         target_route = target_entity.route
         source_route = source_entity.route
 
+        # Merge direction data
+        target_route.directions.extend(source_route.directions)
+
         # Merge grade data
         target_grade = (
             target_route.grade_af,

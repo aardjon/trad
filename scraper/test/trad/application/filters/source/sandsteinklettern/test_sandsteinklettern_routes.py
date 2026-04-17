@@ -19,7 +19,7 @@ from .conftest import JsonTestData, PreparedFilterRunner
 _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_CLOSED)
 
 
-_entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
+_entity_factory = RouteDataFactory(source_label="Sandsteinklettern", route_grade_conflict_rank=3)
 
 
 @pytest.mark.parametrize(
@@ -34,7 +34,9 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
                 "wegname_cz": "",
                 "wegstatus": status.value,
             },
-            _entity_factory.create_route(route_name="Musterweg", grade_af=5),
+            _entity_factory.create_route(
+                route_name="Musterweg", directions="Some description", grade_af=5
+            ),
             id=f"status='{status.value}'",
         )
         for status in JsonWegStatus
@@ -50,7 +52,9 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
                 "wegname_cz": "",
                 "wegstatus": "0",
             },
-            _entity_factory.create_route(route_name="Musterweg", grade_af=5),
+            _entity_factory.create_route(
+                route_name="Musterweg", directions="Some description", grade_af=5
+            ),
             id="status='0'",
         )
     ]
@@ -66,6 +70,7 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
             },
             _entity_factory.create_route(
                 route_name="Schwierig...",
+                directions="Some description",
                 grade_jump=3,
                 grade_af=5,
                 grade_ou=6,
@@ -81,13 +86,14 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
             {
                 "weg_ID": "123",
                 "schwierigkeit": "**VIIa",
-                "wegbeschr_d": "Some description",
+                "wegbeschr_d": "Some other description",
                 "wegname_d": "Testing",
                 "wegname_cz": "",
                 "wegstatus": "1",
             },
             _entity_factory.create_route(
                 route_name="Testing",
+                directions="Some other description",
                 grade_af=7,
                 star_count=0,
             ),
@@ -105,6 +111,7 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
             },
             _entity_factory.create_route(
                 route_name="Testing",
+                directions="Some description",
                 grade_af=7,
                 star_count=1,
             ),
@@ -121,10 +128,46 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
             },
             _entity_factory.create_route(
                 route_name="Testing",
+                directions="Some description",
                 grade_af=7,
                 star_count=2,
             ),
             id="use stars from name: 2",
+        ),
+    ]
+    + [  # Check different descriptions
+        pytest.param(
+            {
+                "weg_ID": "123",
+                "schwierigkeit": "VIIa",
+                "wegbeschr_d": "Non-Empty Description ",
+                "wegname_d": "**Testing",
+                "wegname_cz": "",
+                "wegstatus": "1",
+            },
+            _entity_factory.create_route(
+                route_name="Testing",
+                directions="Non-Empty Description",
+                grade_af=7,
+                star_count=2,
+            ),
+            id="Non-Empty Description",
+        ),
+        pytest.param(
+            {
+                "weg_ID": "123",
+                "schwierigkeit": "VIIa",
+                "wegbeschr_d": "",
+                "wegname_d": "**Testing",
+                "wegname_cz": "",
+                "wegstatus": "1",
+            },
+            _entity_factory.create_route(
+                route_name="Testing",
+                grade_af=7,
+                star_count=2,
+            ),
+            id="Empty Description",
         ),
     ]
     + [  # Invalid grade
@@ -139,6 +182,7 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
             },
             _entity_factory.create_route(
                 route_name="Test Route",
+                directions="Some description",
             ),
             id="invalid grade",
         ),
@@ -156,6 +200,7 @@ _entity_factory = RouteDataFactory(route_grade_conflict_rank=3)
             },
             _entity_factory.create_route(
                 route_name="Test Route",
+                directions="Some description",
             ),
             id="additional JSON field",
         ),

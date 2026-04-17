@@ -4,7 +4,7 @@ Provides functionality for easily creating route data domain objects (e.g. Summi
 
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import NO_GRADE, Route, Summit
+from trad.kernel.entities.routedata import NO_GRADE, Route, RouteDirections, Summit
 from trad.kernel.errors import InvalidStateError
 
 
@@ -20,14 +20,17 @@ class RouteDataFactory:
 
     def __init__(
         self,
+        source_label: str | None = None,
         summit_sector_rank: int | None = None,
         summit_position_rank: int | None = None,
         route_grade_conflict_rank: int | None = None,
     ) -> None:
         """
-        Create a new data factory which uses the given ranks when creating data objects. For
-        undefined ranks, no value can be created - trying to do so will raise an InvalidStateError.
+        Create a new data factory which uses the given rank and source information when creating
+        data objects. For undefined values, no value can be created - trying to do so will raise an
+        InvalidStateError.
         """
+        self._source_label = source_label
         self._summit_sector_rank = summit_sector_rank
         self._summit_position_rank = summit_position_rank
         self._route_grade_conflict_rank = (
@@ -58,6 +61,7 @@ class RouteDataFactory:
         self,
         route_name: str,
         *,
+        directions: str | None = None,
         grade: str = "",
         grade_af: int = NO_GRADE,
         grade_rp: int = NO_GRADE,
@@ -70,9 +74,18 @@ class RouteDataFactory:
         Create a new `Route` instance with the given data. See there for detailled parameter
         explanation.
         """
+        if self._source_label is None:
+            raise InvalidStateError("No source label has been defined in this factory instance.")
+        route_directions = (
+            [RouteDirections(directions=directions, source_label=self._source_label)]
+            if directions
+            else []
+        )
+
         return Route(
             conflict_rank=self._route_grade_conflict_rank,
             route_name=route_name,
+            directions=route_directions,
             grade=grade,
             grade_af=grade_af,
             grade_rp=grade_rp,
@@ -95,3 +108,10 @@ class RouteDataFactory:
                 )
             raise InvalidStateError("No rank has been defined in this factory instance.")
         return RankedValue.create_null()
+
+    def _ensure_source_label(self) -> None:
+        """
+        Ensures that there is a source_label.
+        """
+        if self._source_label is None:
+            raise InvalidStateError("No source label has been defined in this factory instance.")

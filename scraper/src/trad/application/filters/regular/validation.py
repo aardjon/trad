@@ -45,7 +45,7 @@ class DataValidationFilter(Filter):
             routes = {}
             posts = {}
             for route_id, route in input_pipe.iter_routes_of_summit(input_summit_id):
-                if not self._validate_route(summit, route):
+                if not self._validate_route(known_source_labels, summit, route):
                     ignore_current_summit = True
                     break
 
@@ -82,7 +82,7 @@ class DataValidationFilter(Filter):
             return False
         return True
 
-    def _validate_route(self, summit: Summit, route: Route) -> bool:
+    def _validate_route(self, known_source_labels: list[str], summit: Summit, route: Route) -> bool:
         """
         Returns True if the given Route data is valid (either because it was already, or it could
         be fixed), False if not.
@@ -96,6 +96,14 @@ class DataValidationFilter(Filter):
                 exc_info=e,
             )
             return False
+
+        # Make sure all referenced external sources really exist
+        for directions in route.directions:
+            if directions.source_label not in known_source_labels:
+                # Cancel the scraper because this is probably a programming error (did we forgot to
+                # add the source somewhere else?).
+                raise EntityNotFoundError(directions.source_label)
+
         return True
 
     def _validate_post(self, known_source_labels: list[str], post: Post) -> bool:
