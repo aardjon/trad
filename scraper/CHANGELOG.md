@@ -1,6 +1,15 @@
 # Scraper & Route Database Changelog
 
 
+## Version 0.3.2 - 2026-04-19
+
+### Fixed Bugs:
+ - Retry failed HTTP requests to make the OSM filter more robust [#35]
+
+### New/Improved Features:
+ - Improve performance of network requests
+
+
 ## Version 0.3.1 - 2026-04-11
 
 ### Fixed Bugs:
