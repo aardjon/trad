@@ -91,16 +91,12 @@ class TeufelsturmDataFilter(SourceFilter):
         return route_ids
 
     def _perform_scan(self, pipe: Pipe, page_ids: list[int]) -> None:
-        count: Final = len(page_ids)
-        for idx, page_id in enumerate(page_ids):
+        for page_id in page_ids:
             if self._check_ignore_route(page_id):
                 # Don't even retrieve the data for ignored routes
                 _logger.info("Ignoring forbidden route %d", page_id)
                 continue
 
-            if (idx + 1) % 25 == 0:
-                # Don't log every single route index
-                _logger.debug("Importing route %d of %d", idx + 1, count)
             page_text = self._get_page_text(page_id)
             try:
                 post_data = parse_page(page_text, self._summit_cache, self._grade_parser)

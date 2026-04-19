@@ -90,8 +90,6 @@ class ApplicationBootstrap:
 
         # The statement_creator logs all executed SQL statements on DEBUG level
         configure_log_channel("trad.infrastructure.sqlite3db.statement_creator", logging.INFO)
-        # urllib3 logs every single HTTP request
-        configure_log_channel("urllib3", logging.WARNING)
 
     def __setup_dependencies(self) -> None:
         """
