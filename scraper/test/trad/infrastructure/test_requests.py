@@ -4,7 +4,7 @@ Unit tests for the trad.infrastructure.requests module.
 
 from collections.abc import Callable, Iterator
 from typing import Final
-from unittest.mock import Mock
+from unittest.mock import ANY, Mock
 from urllib.parse import urlsplit
 
 import pytest
@@ -326,6 +326,41 @@ class TestRequestsHttp:
 
             # Remember the host for the next iteration
             found_hosts.append(hostname)
+
+    def test_retry_config(self, requests_session: Mock) -> None:
+        """
+        Ensures that HTTP requests is configured to retry on certain errors.
+
+        The retry itself is done by the `requests` library, that's why we don't explicitly test it
+        here (assuming that the library works). Instead, we just verify the retry configuration of
+        the used session.
+        """
+        # Do a dummy request to create the session
+        requests_session.get.return_value = Mock(Response, status_code=200, text="")
+        http_component = RequestsHttp(lambda: requests_session)
+        http_component.retrieve_json_resource(url=self._TEST_BASE_URL)
+
+        expected_prefixes: Final = ["http://", "https://"]
+        expected_retry_count: Final = 5
+        expect_retry_on_status_codes: Final = [429, 504]
+
+        # Ensure that a connection adapter with the expected retry configuration was mounted into
+        # the session for all protocols
+        assert requests_session.mount.call_count == len(expected_prefixes)
+        for prefix in expected_prefixes:
+            requests_session.mount.assert_any_call(prefix=prefix, adapter=ANY)
+            mounted_adapter = next(
+                c.kwargs["adapter"]
+                for c in requests_session.mount.call_args_list
+                if c.kwargs["prefix"] == prefix
+            )
+            # Retry on status codes 429 and 504
+            for status_code in expect_retry_on_status_codes:
+                assert status_code in mounted_adapter.max_retries.status_forcelist
+            # Allow the expected total count of tries
+            assert mounted_adapter.max_retries.total == expected_retry_count
+            # Respect "Retry-After" header, if any
+            assert mounted_adapter.max_retries.respect_retry_after_header is True
 
 
 @pytest.fixture
