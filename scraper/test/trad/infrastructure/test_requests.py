@@ -210,6 +210,34 @@ class TestRequestsHttp:
             send_request(http_component, self._TEST_BASE_URL)
 
     @pytest.mark.parametrize(
+        "send_request",
+        [
+            lambda component, url: component.retrieve_text_resource(url=url),
+            lambda component, url: component.retrieve_json_resource(url=url),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "invalid_url",
+        [
+            "http:///someting/is/wrong",
+            "file:///path/to/local/file.txt",
+        ],
+    )
+    def test_invalid_url(
+        self,
+        send_request: Callable[[RequestsHttp, str], str],
+        invalid_url: str,
+        requests_session: Mock,
+    ) -> None:
+        """
+        Ensures the correct behaviour in case an invalid URL (=without a network host name) is
+        requested.
+        """
+        http_component = RequestsHttp(lambda: requests_session)
+        with pytest.raises(HttpRequestError, match="invalid URL"):
+            send_request(http_component, invalid_url)
+
+    @pytest.mark.parametrize(
         ("request_resources", "expected_session_calls"),
         [
             pytest.param(

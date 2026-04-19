@@ -138,7 +138,7 @@ class RequestsHttp(HttpNetworkingBoundary):
         """
         host = urlsplit(url).hostname
         if not host:
-            raise ValueError(f"Unable to parse hostname from URL {url}")
+            raise HttpRequestError(f"Cannot request invalid URL: {url}")
 
         session = self._sessions.get(host)
         if session is None:
