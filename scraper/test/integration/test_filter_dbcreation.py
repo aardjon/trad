@@ -21,6 +21,8 @@ from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post, Route, Summit
 
+DB_FILE_NAME: Final = f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).date().today().strftime('%Y-%m-%d')}.sqlite"
+
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
     """
@@ -58,7 +60,7 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
     db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
 
-    expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
+    expected_db_file = tmp_path.joinpath(DB_FILE_NAME)
     assert expected_db_file.exists()
 
     connection = connect(str(expected_db_file))
@@ -107,7 +109,7 @@ def test_schema_v1_metadata_creation(tmp_path: Path) -> None:
     db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
     db_writer.execute_filter(input_pipe=pipe, output_pipe=Mock(Pipe))
 
-    expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
+    expected_db_file = tmp_path.joinpath(DB_FILE_NAME)
     assert expected_db_file.exists()
 
     connection = connect(str(expected_db_file))
@@ -172,7 +174,7 @@ def test_data_enrichment(tmp_path: Path) -> None:
     output_filter = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=Sqlite3Database())
     output_filter.execute_filter(input_pipe=intermediate_pipe, output_pipe=Mock(Pipe))
 
-    expected_db_file = tmp_path.joinpath("routedb_v1.sqlite")
+    expected_db_file = tmp_path.joinpath(DB_FILE_NAME)
     assert expected_db_file.exists()
 
     # Ensure that the Summit exists with the coordinates from the second call
