@@ -38,6 +38,9 @@ favourite language.
 
 ## Similar tools
 
-A possible alternative is [YacGuide](https://github.com/YacGroup/yacguide) which also provides a
-personal climbing journal and works offline but is solely based on (and optimized for)
-[sandsteinklettern.de](http://www.sandsteinklettern.de).
+- [GibblApp](https://gibbl.de/)
+  - Provides similar functionality, including offline support
+  - Is a pure web application running in your browser (no app installation needed)
+- [YacGuide](https://github.com/YacGroup/yacguide)
+  - Also provides a personal climbing journal
+  - Is solely based on (and optimized for) [sandsteinklettern.de](http://www.sandsteinklettern.de)
