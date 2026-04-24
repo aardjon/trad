@@ -48,7 +48,14 @@ void main() {
       ),
     );
     registerFallbackValue(SummitListModel('[NoPageTitle]', '[NoSearchBarHint]'));
-    registerFallbackValue(SummitDetailsModel(0xFFFFFF, '[NoPageTitle]', canShowOnMap: false));
+    registerFallbackValue(
+      SummitDetailsModel(
+        0xFFFFFF,
+        '[NoPageTitle]',
+        '[NoPageSubTitle]',
+        canShowOnMap: false,
+      ),
+    );
     registerFallbackValue(RouteDetailsModel(0xFFFFFF, '[NoPageTitle]', '[NoPageSubTitle]'));
     registerFallbackValue(
       SettingsModel(
@@ -286,11 +293,16 @@ void main() {
 
         test(summitPosition.toString(), () {
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          Summit summit = Summit(42, 'Mount Mock', summitPosition);
+          Summit summit = Summit(42, 'Mount Mock', 'Mock Area', summitPosition);
           presenter.showSummitDetails(summit);
 
           Matcher summitModelMatcher = isA<SummitDetailsModel>()
               .having((SummitDetailsModel m) => m.pageTitle, 'pageTitle', equals(summit.name))
+              .having(
+                (SummitDetailsModel m) => m.pageSubTitle,
+                'pageSubTitle',
+                equals(summit.sector),
+              )
               .having((SummitDetailsModel m) => m.summitDataId, 'dataID', equals(summit.id))
               .having((SummitDetailsModel m) => m.canShowOnMap, 'canShowOnMap', equals(expectMap));
           verify(() => fakeUi.showSummitDetails(any(that: summitModelMatcher))).called(1);

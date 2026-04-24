@@ -9,7 +9,7 @@ library;
 import '../version.dart';
 
 /// The schema version currently supported (and required) by this app.
-final Version supportedSchemaVersion = Version(1, 1);
+final Version supportedSchemaVersion = Version(1, 2);
 
 /// Table containing some static metadata about the database itself.
 ///
@@ -72,6 +72,23 @@ class ExternalDataSourcesTable {
   static const String columnLicense = '$tableName.license';
 }
 
+/// All climbing areas/sectors.
+///
+/// An area or sector is a geographic area containing several summits. Each summit is assigned to
+/// one.
+class AreasTable {
+  /// Name of the table.
+  static const String tableName = 'areas';
+
+  /// The name of the 'id' INTEGER column:
+  /// Unique ID of this area/sector.
+  static const String columnId = '$tableName.id';
+
+  /// The name of the 'name' TEXT column:
+  /// Name of this area/sector.
+  static const String columnName = '$tableName.name';
+}
+
 /// All names of all summits.
 ///
 /// As a single summit can have multiple names, this table assigns specific names strings to summits.
@@ -109,6 +126,10 @@ class SummitNamesTable {
 /// stored as (509170936, 141992389).
 ///
 /// See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
+///
+/// The special coordinates of 0/0 are used in case no position is available at all. This value is
+/// not *invalid* by itself, it is just a point somewhere in the Atlantic Ocean where we do not
+/// expect a climbing rock. It may be changed if a new island is discovered there, of course ;)
 class SummitsTable {
   /// Name of the table.
   static const String tableName = 'summits';
@@ -116,6 +137,10 @@ class SummitsTable {
   /// The name of the 'id' INTEGER column:
   /// Summit ID, unique within this database.
   static const String columnId = '$tableName.id';
+
+  /// The name of the 'area_id' INTEGER column:
+  /// ID of the area/sector this summit belongs to.
+  static const String columnAreaId = '$tableName.area_id';
 
   /// The name of the 'latitude' INTEGER column:
   /// The latitude value of the geographical position.
