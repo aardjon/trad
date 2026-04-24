@@ -236,12 +236,16 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     const double coordinateValuePrecision = 10000000;
 
     Query query = Query.join(
-      <String>[SummitsTable.tableName, SummitNamesTable.tableName],
-      <String>['${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}'],
+      <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
+      <String>[
+        '${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}',
+        '${SummitsTable.columnAreaId}=${AreasTable.columnId}',
+      ],
       <String>[
         SummitNamesTable.columnName,
         SummitsTable.columnLatitude,
         SummitsTable.columnLongitude,
+        AreasTable.columnName,
       ],
     );
     query.setWhereCondition(
@@ -252,22 +256,32 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     String name = resultSet[0].getStringValue(SummitNamesTable.columnName);
+    String sector = resultSet[0].getStringValue(AreasTable.columnName);
     int lat = resultSet[0].getIntValue(SummitsTable.columnLatitude);
     int lon = resultSet[0].getIntValue(SummitsTable.columnLongitude);
     GeoPosition? position;
     if ((lat, lon) != undefinedCoordinates) {
       position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
     }
-    return Summit(summitDataId, name, position);
+    return Summit(summitDataId, name, sector, position);
   }
 
   @override
   Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
     // Configure the query
-    Query query = Query.table(SummitNamesTable.tableName, <String>[
-      SummitNamesTable.columnSummitId,
-      SummitNamesTable.columnName,
-    ]);
+    Query query = Query.join(
+      <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
+      <String>[
+        '${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}',
+        '${SummitsTable.columnAreaId}=${AreasTable.columnId}',
+      ],
+      <String>[
+        SummitNamesTable.columnSummitId,
+        SummitNamesTable.columnName,
+        AreasTable.columnName,
+      ],
+    );
+
     if (nameFilter != null) {
       _logger.debug('Retrieving filtered summit list for "$nameFilter"');
       query.setWhereCondition('${SummitNamesTable.columnName} LIKE ?', <String>['%$nameFilter%']);
@@ -284,7 +298,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     for (final ResultRow dataRow in resultSet) {
       int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
       String name = dataRow.getStringValue(SummitNamesTable.columnName);
-      summits.add(Summit(id, name));
+      String area = dataRow.getStringValue(AreasTable.columnName);
+      summits.add(Summit(id, name, area));
     }
     return summits;
   }
