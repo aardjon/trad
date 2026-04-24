@@ -53,7 +53,12 @@ class SummitDetailsView extends StatelessWidget {
 
   AppBar _appBar(SummitDetailsModel model, RouteListNotifier state, BuildContext context) {
     return AppBar(
-      title: Text(model.pageTitle),
+      title: Column(
+        children: <Widget>[
+          Text(model.pageTitle),
+          Text(model.pageSubTitle, style: Theme.of(context).textTheme.bodyMedium),
+        ],
+      ),
       centerTitle: true,
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[

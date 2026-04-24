@@ -16,6 +16,9 @@ class Summit {
   /// The name of the summit.
   String name;
 
+  /// The name of the sector (area) this summit is assigned to.
+  String sector;
+
   /// The geographical position of this summit, if known. May be missing in cases without a useful,
   /// single "summit" point, which is a rare corner case that will hopefully be eliminated in the
   /// future.
@@ -23,7 +26,7 @@ class Summit {
   final GeoPosition? position;
 
   /// Constructor for directly initializing all members.
-  Summit(this.id, this.name, [this.position]);
+  Summit(this.id, this.name, this.sector, [this.position]);
 
   @override
   String toString() {
