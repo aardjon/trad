@@ -4,6 +4,13 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Next Version
+
+### New/Improved Features:
+
+ - Display the sector to which a selected summit is assigned (#20)
+
+
 ## Version 0.3.1 - 2026-03-29
 
 ### Fixed Bugs:
