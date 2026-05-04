@@ -9,6 +9,7 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
 ### New/Improved Features:
 
  - Display the sector to which a selected summit is assigned (#20)
+ - Show route directions on the route details page (#24)
 
 
 ## Version 0.3.1 - 2026-03-29
