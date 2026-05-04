@@ -19,7 +19,7 @@ from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Post, Route, Summit
+from trad.kernel.entities.routedata import Post, Route, RouteDirections, Summit
 
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:
@@ -41,7 +41,12 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     )
     route_id = input_pipe.add_route(
         summit_id=summit_id,
-        route=Route(conflict_rank=1, route_name="AW", grade_af=af_grade),
+        route=Route(
+            conflict_rank=1,
+            route_name="AW",
+            directions=[RouteDirections("Beschreibung", "Unit Test")],
+            grade_af=af_grade,
+        ),
     )
     input_pipe.add_post(
         route_id=route_id,
@@ -82,6 +87,10 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     assert len(result_set) == 1
     assert result_set[0][0] == "AW"
     assert result_set[0][1] == af_grade
+
+    result_set = list(connection.execute("SELECT directions FROM route_directions"))
+    assert len(result_set) == 1
+    assert result_set[0][0] == "Beschreibung"
 
     # Ensure the post has been added
     result_set = list(connection.execute("SELECT user_name, comment, post_date, rating FROM posts"))

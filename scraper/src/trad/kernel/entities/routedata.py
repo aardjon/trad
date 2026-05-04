@@ -136,6 +136,21 @@ class Summit:
 
 
 @dataclass
+class RouteDirections:
+    """
+    A (short) textual description of a climbing route.
+    """
+
+    directions: str
+    """ The actual description. """
+
+    source_label: str
+    """
+    Label ("name") of the external data source these directions were retrieved from.
+    """
+
+
+@dataclass
 class Route:
     """
     A single climbing route.
@@ -170,6 +185,11 @@ class Route:
 
     route_name: str
     """ The name of the route. """
+
+    directions: list[RouteDirections] = field(default_factory=list)
+    """
+    Textual descriptions of the route (potentially several of them from different sources).
+    """
 
     grade: str = ""
     """ String representing the grade. Deprecated, use the more fine-grained grade fields. """

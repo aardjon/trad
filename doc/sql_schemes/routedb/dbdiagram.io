@@ -311,6 +311,37 @@ Table routes {
 Ref: summits.id < routes.summit_id [delete: cascade]
 
 
+Table route_directions {
+  Note: 'Table containing directions (textual description) for climbing a route.'
+  
+  route_id int [
+    not null,
+    note: 'ID of the route that these directions describe. Foreign key to the routes table.'
+  ]
+  
+  source_id int [
+    not null,
+    note: '''
+      ID of the external source these directions orignate from. Foreign key to the
+      external_data_sources table.
+    '''
+  ]
+  
+  directions text [
+    not null,
+    note: 'Textual description of this route.'
+  ]
+  
+  indexes {
+    route_id [name: 'IdxRouteId']
+  }
+}
+// Foreign key route_directions -> routes
+Ref: routes.id < route_directions.route_id [delete: cascade]
+// Foreign key route_directions -> external_data_sources
+Ref: external_data_sources.id < route_directions.source_id [delete: cascade]
+
+
 Table posts {
   Note: 'Table containing all posts that have been assigned to routes.'
 

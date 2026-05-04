@@ -258,6 +258,10 @@ class SummitsTable(TableSchema):
     stored as (509170936, 141992389).
 
     See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
+
+    The special coordinates of 0/0 are used in case no position is available at all. This value is
+    not *invalid* by itself, it is just a point somewhere in the Atlantic Ocean where we do not
+    expect a climbing rock. It may be changed if a new island is discovered there, of course ;)
     """
 
     TABLE_NAME = "summits"
@@ -431,6 +435,58 @@ class RoutesTable(TableSchema):
         ]
 
 
+class RouteDirectionsTable(TableSchema):
+    """
+    Table containing directions (textual description) for climbing a route.
+    """
+
+    TABLE_NAME = "route_directions"
+    """ Name of the table. """
+
+    COLUMN_ROUTE_ID: Final = "route_id"
+    """
+    The name of the 'route_id' INT column:
+    ID of the route that these directions describe. Foreign key to the routes table.
+    """
+
+    COLUMN_SOURCE_ID: Final = "source_id"
+    """
+    The name of the 'source_id' INT column:
+    ID of the external source these directions orignate from. Foreign key to the
+    external_data_sources table.
+    """
+
+    COLUMN_DIRECTIONS: Final = "directions"
+    """
+    The name of the 'directions' TEXT column:
+    Textual description of this route.
+    """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
+        CREATE TABLE route_directions (
+            "route_id" INT NOT NULL,
+            "source_id" INT NOT NULL,
+            "directions" TEXT NOT NULL,
+            FOREIGN KEY("route_id") REFERENCES "routes" ("id") ON DELETE CASCADE,
+            FOREIGN KEY("source_id") REFERENCES "external_data_sources" ("id") ON DELETE CASCADE
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[SqlStatement]:
+        return [
+            SqlStatement(
+                'CREATE INDEX "IdxRouteId" ON "route_directions" (route_id);',
+            ),
+        ]
+
+
 class PostsTable(TableSchema):
     """
     Table containing all posts that have been assigned to routes.
@@ -543,6 +599,7 @@ class DatabaseSchema:
             SummitNamesTable(),
             SummitsTable(),
             RoutesTable(),
+            RouteDirectionsTable(),
             PostsTable(),
         )
 
