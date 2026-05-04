@@ -166,7 +166,7 @@ class RouteDbUseCases {
     Route selectedRoute = await _storageBoundary.retrieveRoute(routeId);
     _presentationBoundary.showRouteDetails(selectedRoute);
     List<Post> postList = await _storageBoundary.retrievePostsOfRoute(routeId, sortCriterion);
-    _presentationBoundary.updatePostList(postList, sortCriterion);
+    _presentationBoundary.updatePostList(_removeEmptyPosts(postList), sortCriterion);
   }
 
   /// Use Case: Sort the post list by a certain criterion.
@@ -174,7 +174,19 @@ class RouteDbUseCases {
     _logger.info('Running use case sortPostList($routeId, $sortCriterion)');
     unawaited(_preferencesBoundary.setInitialPostsSortCriterion(sortCriterion));
     List<Post> postList = await _storageBoundary.retrievePostsOfRoute(routeId, sortCriterion);
-    _presentationBoundary.updatePostList(postList, sortCriterion);
+    _presentationBoundary.updatePostList(_removeEmptyPosts(postList), sortCriterion);
+  }
+
+  /// Remove all posts without a comment from the given [postList], and return a new, filtered list.
+  /// Empty posts allow rating without commenting, but we don't want to display them.
+  List<Post> _removeEmptyPosts(List<Post> postList) {
+    List<Post> filteredList = <Post>[];
+    for (final Post post in postList) {
+      if (post.comment.trim().isNotEmpty) {
+        filteredList.add(post);
+      }
+    }
+    return filteredList;
   }
 }
 

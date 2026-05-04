@@ -11,6 +11,9 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
  - Display the sector to which a selected summit is assigned (#20)
  - Show route directions on the route details page (#24)
 
+### Fixed Bugs:
+ - Don't display empty posts (#50)
+
 
 ## Version 0.3.1 - 2026-03-29
 
