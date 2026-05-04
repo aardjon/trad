@@ -7,7 +7,7 @@ Project RouteDb {
   '''
 
   // The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
-  schema_version: "1.2"
+  schema_version: "1.3"
 
   // Unique constraints that stretch over multiple columns are not supported by DBML yet
   // (https://github.com/holistics/dbml/issues/68). So we use this workaround instead: The property

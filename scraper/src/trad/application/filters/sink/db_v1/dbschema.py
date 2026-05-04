@@ -599,7 +599,7 @@ class DatabaseSchema:
     When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
     """
 
-    _MINOR_VERSION: Final = 2
+    _MINOR_VERSION: Final = 3
     """
     Minor schema version.
 
