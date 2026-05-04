@@ -25,7 +25,7 @@ from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Post, Route, Summit
+from trad.kernel.entities.routedata import Post, Route, RouteDirections, Summit
 
 
 class TestDbSchemaV1Filter:
@@ -89,6 +89,7 @@ class TestDbSchemaV1Filter:
             route=Route(
                 1,
                 route_name="Anxiety",
+                directions=[RouteDirections(directions="Don't go down!", source_label="Unit Test")],
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,

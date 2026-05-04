@@ -258,6 +258,10 @@ class SummitsTable(TableSchema):
     stored as (509170936, 141992389).
 
     See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
+
+    The special coordinates of 0/0 are used in case no position is available at all. This value is
+    not *invalid* by itself, it is just a point somewhere in the Atlantic Ocean where we do not
+    expect a climbing rock. It may be changed if a new island is discovered there, of course ;)
     """
 
     TABLE_NAME = "summits"
@@ -327,6 +331,13 @@ class RoutesTable(TableSchema):
     rating and without an upper bound. Each step in the corresponding scale system increases the
     value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
     0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
+
+    To store geographical coordinate values as integer values, their decimal representation is
+    multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+    ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+    stored as (509170936, 141992389).
+
+    See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
     """
 
     TABLE_NAME = "routes"
@@ -399,6 +410,18 @@ class RoutesTable(TableSchema):
     True if the route is officially marked as "dangerous", false if not.
     """
 
+    COLUMN_ENTRY_LATITUDE: Final = "entry_latitude"
+    """
+    The name of the 'entry_latitude' INTEGER column:
+    The latitude value of the route entry point.
+    """
+
+    COLUMN_ENTRY_LONGITUDE: Final = "entry_longitude"
+    """
+    The name of the 'entry_longitude' INTEGER column:
+    The longitude value of the route entry point.
+    """
+
     @override
     def table_name(self) -> EntityName:
         return self.TABLE_NAME
@@ -417,6 +440,8 @@ class RoutesTable(TableSchema):
             "grade_jump" INTEGER NOT NULL,
             "stars" INTEGER NOT NULL,
             "danger" BOOLEAN NOT NULL,
+            "entry_latitude" INTEGER,
+            "entry_longitude" INTEGER,
             UNIQUE(summit_id, route_name, route_grade),
             FOREIGN KEY("summit_id") REFERENCES "summits" ("id") ON DELETE CASCADE
         );
@@ -427,6 +452,58 @@ class RoutesTable(TableSchema):
         return [
             SqlStatement(
                 'CREATE INDEX "IdxRouteName" ON "routes" (route_name);',
+            ),
+        ]
+
+
+class RouteDirectionsTable(TableSchema):
+    """
+    Table containing directions (textual description) for climbing a route.
+    """
+
+    TABLE_NAME = "route_directions"
+    """ Name of the table. """
+
+    COLUMN_ROUTE_ID: Final = "route_id"
+    """
+    The name of the 'route_id' INT column:
+    ID of the route that these directions describe. Foreign key to the routes table.
+    """
+
+    COLUMN_SOURCE_ID: Final = "source_id"
+    """
+    The name of the 'source_id' INT column:
+    ID of the external source these directions orignate from. Foreign key to the
+    external_data_sources table.
+    """
+
+    COLUMN_DIRECTIONS: Final = "directions"
+    """
+    The name of the 'directions' TEXT column:
+    Textual description of this route.
+    """
+
+    @override
+    def table_name(self) -> EntityName:
+        return self.TABLE_NAME
+
+    @override
+    def table_ddl(self) -> SqlStatement:
+        return SqlStatement("""
+        CREATE TABLE route_directions (
+            "route_id" INT NOT NULL,
+            "source_id" INT NOT NULL,
+            "directions" TEXT NOT NULL,
+            FOREIGN KEY("route_id") REFERENCES "routes" ("id") ON DELETE CASCADE,
+            FOREIGN KEY("source_id") REFERENCES "external_data_sources" ("id") ON DELETE CASCADE
+        );
+        """)
+
+    @override
+    def index_ddl(self) -> list[SqlStatement]:
+        return [
+            SqlStatement(
+                'CREATE INDEX "IdxRouteId" ON "route_directions" (route_id);',
             ),
         ]
 
@@ -522,7 +599,7 @@ class DatabaseSchema:
     When incrementing [_MAJOR_VERSION], set [_MINOR_VERSION] back to 0.
     """
 
-    _MINOR_VERSION: Final = 2
+    _MINOR_VERSION: Final = 3
     """
     Minor schema version.
 
@@ -543,6 +620,7 @@ class DatabaseSchema:
             SummitNamesTable(),
             SummitsTable(),
             RoutesTable(),
+            RouteDirectionsTable(),
             PostsTable(),
         )
 

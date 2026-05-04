@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import re
 import urllib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from io import StringIO
@@ -45,7 +46,9 @@ _ROUTE_DATA_RANK: Final = 2
 
 
 _route_data_factory: Final = RouteDataFactory(
-    summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 2
+    source_label=EXTERNAL_SOURCE_DESCRIPTION.label,
+    summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 2,
+    route_grade_conflict_rank=_ROUTE_DATA_RANK,
 )
 """
 Factory for creating route data objects.
@@ -156,14 +159,26 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     df_list = pd.read_html(
         StringIO(page_text.replace("<br>", "|"))
     )  # this parses all the tables in webpages to a list
+    ext_route_data_table = _find_route_info_table(df_list)
+    directions = None
+    if ext_route_data_table is not None:
+        try:
+            directions = _parse_route_directions(ext_route_data_table)
+        except DataProcessingError as e:
+            _logger.warning(
+                "Cannot parse directions from route '%s' due to: %s",
+                f"{peak.name} - {route}",
+                str(e),
+            )
+
     posts_table = _find_posts_table(df_list)
     posts = parse_posts(posts_table)
 
     return PageData(
         peak=peak,
         route=_route_data_factory.create_route(
-            _ROUTE_DATA_RANK,
             route_name=route,
+            directions=directions,
             grade=grade_label,
             grade_af=parsed_grade.af,
             grade_ou=parsed_grade.ou,
@@ -176,7 +191,20 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     )
 
 
-def _find_posts_table(dataframes: list[DataFrame]) -> DataFrame:
+def _find_route_info_table(dataframes: Sequence[DataFrame]) -> DataFrame | None:
+    """
+    Search the given HTML table dataframes and return the one representing the table containing
+    extended information about this route, e.g. directions to the name of the one who did the first
+    ascend. Returns None in case no such table can be found (it is not always there, so this is a
+    normal case).
+    """
+    for table_df in reversed(dataframes):
+        if "Wegbeschreibung:" in str(table_df):
+            return table_df
+    return None
+
+
+def _find_posts_table(dataframes: Sequence[DataFrame]) -> DataFrame:
     """
     Search the given HTML table dataframes and return the one representing the one containing all
     user posts/comments. Raises DataProcessingError if no matching table can be found.
@@ -186,6 +214,16 @@ def _find_posts_table(dataframes: list[DataFrame]) -> DataFrame:
         if " ".join(header).startswith("Benutzer Kommentar Bewertung"):
             return table_df
     raise DataProcessingError("Page doesn't contain a posts table")
+
+
+def _parse_route_directions(dataframe: DataFrame) -> str | None:
+    for row_idx in range(len(dataframe)):
+        row = dataframe.loc[row_idx]
+        if row[0].strip() == "Wegbeschreibung:":
+            if not isinstance(row[1], str):
+                raise DataProcessingError("Route description is not a string value")
+            return row[1].strip() or None
+    return None
 
 
 def _fix_erroneous_name(summit_name: str) -> str:

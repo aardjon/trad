@@ -7,7 +7,7 @@ Project RouteDb {
   '''
 
   // The schema version uses semantic versioning (https://semver.org/) without the PATCH level.
-  schema_version: "1.2"
+  schema_version: "1.3"
 
   // Unique constraints that stretch over multiple columns are not supported by DBML yet
   // (https://github.com/holistics/dbml/issues/68). So we use this workaround instead: The property
@@ -233,6 +233,13 @@ Table routes {
   rating and without an upper bound. Each step in the corresponding scale system increases the
   value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
   0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
+  
+  To store geographical coordinate values as integer values, their decimal representation is
+  multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+  ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+  stored as (509170936, 141992389).
+
+  See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
   '''
 
   id integer [
@@ -302,6 +309,16 @@ Table routes {
     not null,
     note: 'True if the route is officially marked as "dangerous", false if not.'
   ]
+  
+  entry_latitude integer [
+    null,
+    note: 'The latitude value of the route entry point.'
+  ]
+
+  entry_longitude integer [
+    null,
+    note: 'The longitude value of the route entry point.'
+  ]
 
   indexes {
     route_name [name: 'IdxRouteName']
@@ -309,6 +326,37 @@ Table routes {
 }
 // Foreign key routes -> summits
 Ref: summits.id < routes.summit_id [delete: cascade]
+
+
+Table route_directions {
+  Note: 'Table containing directions (textual description) for climbing a route.'
+  
+  route_id int [
+    not null,
+    note: 'ID of the route that these directions describe. Foreign key to the routes table.'
+  ]
+  
+  source_id int [
+    not null,
+    note: '''
+      ID of the external source these directions orignate from. Foreign key to the
+      external_data_sources table.
+    '''
+  ]
+  
+  directions text [
+    not null,
+    note: 'Textual description of this route.'
+  ]
+  
+  indexes {
+    route_id [name: 'IdxRouteId']
+  }
+}
+// Foreign key route_directions -> routes
+Ref: routes.id < route_directions.route_id [delete: cascade]
+// Foreign key route_directions -> external_data_sources
+Ref: external_data_sources.id < route_directions.source_id [delete: cascade]
 
 
 Table posts {

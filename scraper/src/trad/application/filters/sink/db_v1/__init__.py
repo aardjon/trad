@@ -17,6 +17,7 @@ from trad.application.filters.sink.db_v1.dbschema import (
     ExternalDataSourcesTable,
     NameUsage,
     PostsTable,
+    RouteDirectionsTable,
     RoutesTable,
     SummitNamesTable,
     SummitsTable,
@@ -260,6 +261,10 @@ class DbSchemaV1Filter(SinkFilter):
             )
 
     def _add_route(self, summit_name: str, route: Route) -> None:
+        route_id = self._write_to_routes_table(summit_name, route)
+        self._write_to_route_directions_table(route_id, route)
+
+    def _write_to_routes_table(self, summit_name: str, route: Route) -> int:
         select_summit = (
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
@@ -296,6 +301,38 @@ class DbSchemaV1Filter(SinkFilter):
                 route.dangerous,
             ],
         )
+        row_ids = self.__database_boundary.execute_read(
+            SqlStatement("SELECT last_insert_rowid() as rowid")
+        )
+        return row_ids[0].get_int_value("rowid")
+
+    def _write_to_route_directions_table(self, route_id: int, route: Route) -> None:
+        select_source = (
+            f"SELECT {ExternalDataSourcesTable.COLUMN_ID} "
+            f"FROM {ExternalDataSourcesTable.TABLE_NAME} "
+            f"WHERE {ExternalDataSourcesTable.COLUMN_LABEL}=? LIMIT 1"
+        )
+        column_list = [
+            RouteDirectionsTable.COLUMN_SOURCE_ID,
+            RouteDirectionsTable.COLUMN_ROUTE_ID,
+            RouteDirectionsTable.COLUMN_DIRECTIONS,
+        ]
+        column_names = ", ".join(column_list)
+        # -1 because the route_id column's value is provided separately
+        value_placeholders = self._get_value_placeholders(len(column_list) - 1)
+        insert_statement = SqlStatement(
+            f"INSERT INTO {RouteDirectionsTable.TABLE_NAME} ({column_names}) "
+            f"VALUES (({select_source}), {value_placeholders})"
+        )
+        for directions in route.directions:
+            self.__database_boundary.execute_write(
+                query=insert_statement,
+                query_parameters=[
+                    directions.source_label,
+                    route_id,
+                    directions.directions,
+                ],
+            )
 
     def _add_post(self, summit_name: str, route_name: str, post: Post) -> None:
         select_source = (

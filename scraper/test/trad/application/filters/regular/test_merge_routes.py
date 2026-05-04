@@ -10,7 +10,7 @@ from trad.application.filters.regular.merge import (
     MergeFilter,
 )
 from trad.application.pipes import CollectedData
-from trad.kernel.entities.routedata import Route, Summit
+from trad.kernel.entities.routedata import Route, RouteDirections, Summit
 from trad.kernel.errors import MergeConflictError
 
 
@@ -243,6 +243,7 @@ def test_dont_merge_routes_of_different_summits() -> None:
             Route(
                 1,
                 "AW",
+                directions=[RouteDirections("Example1", "Source 2")],
                 grade_af=4,
                 grade_ou=5,
                 grade_rp=6,
@@ -253,6 +254,7 @@ def test_dont_merge_routes_of_different_summits() -> None:
             Route(
                 2,
                 "AW",
+                directions=[RouteDirections("Example2", "Source 3")],
                 grade_af=4,
                 grade_ou=3,
                 grade_rp=2,
@@ -351,7 +353,6 @@ def test_merge_routes_equality_check(
     """
     Ensures that testing if several Route objects are actually the same physical route works as
     expected. For this test, all given Route objects are from different Summit instances.
-    merged properly.
 
     Whether two routes are actually "the same" is determined by their (normalized) name, the
     "af" grade and the conflict rank.
@@ -359,7 +360,11 @@ def test_merge_routes_equality_check(
     - For same names:
         - If the 'af' grades are equal, they are equal regardless of their rank
         - If the 'af' grades differ but the ranks are different, they are equal
-    - Names are normalized before comparing:
+    - Names are normalized before comparing, eliminating:
+        - Common abbreviations ("NW")
+        - Slightly different spellings (e.g. lower-/uppercase, punctuation)
+        - Permutations
+        - Umlauts (ä, ß)
     """
     input_pipe = CollectedData()
     output_pipe = CollectedData()
@@ -407,7 +412,7 @@ def test_merge_routes_equality_check(
                 star_count=0,
                 dangerous=True,
             ),
-            id="Data missing on lower rank (lower first)",
+            id="Grade data missing on lower rank (lower first)",
         ),
         pytest.param(
             [
@@ -433,7 +438,7 @@ def test_merge_routes_equality_check(
                 star_count=0,
                 dangerous=True,
             ),
-            id="Data missing on lower rank (higher first)",
+            id="Grade data missing on lower rank (higher first)",
         ),
         pytest.param(
             [
@@ -459,7 +464,7 @@ def test_merge_routes_equality_check(
                 star_count=0,
                 dangerous=True,
             ),
-            id="Data missing on higher rank (lower first)",
+            id="Grade data missing on higher rank (lower first)",
         ),
         pytest.param(
             [
@@ -485,7 +490,7 @@ def test_merge_routes_equality_check(
                 star_count=0,
                 dangerous=True,
             ),
-            id="Data missing on higher rank (higher first)",
+            id="Grade data missing on higher rank (higher first)",
         ),
         pytest.param(
             [
@@ -511,7 +516,7 @@ def test_merge_routes_equality_check(
                 star_count=0,
                 dangerous=True,
             ),
-            id="Equal data, same rank",
+            id="Equal data, same ranks",
         ),
         pytest.param(
             [
@@ -546,14 +551,13 @@ def test_merge_routes_equality_check(
                 star_count=0,
                 dangerous=True,
             ),
-            id="Equal data, different rank",
+            id="Equal data, different ranks",
         ),
         pytest.param(
             [
                 Route(
                     1,
                     "My Route",
-                    "",
                     grade_jump=1,
                     grade_af=2,
                     grade_ou=3,
@@ -564,7 +568,6 @@ def test_merge_routes_equality_check(
                 Route(
                     2,
                     "My Route",
-                    "",
                     grade_jump=4,
                     grade_af=3,
                     grade_ou=2,
@@ -576,7 +579,6 @@ def test_merge_routes_equality_check(
             Route(
                 1,
                 "My Route",
-                "",
                 grade_jump=1,
                 grade_af=2,
                 grade_ou=3,
@@ -584,14 +586,13 @@ def test_merge_routes_equality_check(
                 dangerous=True,
                 star_count=1,
             ),
-            id="Conflicting data, higher rank first",
+            id="Conflicting data, different ranks #1",
         ),
         pytest.param(
             [
                 Route(
                     2,
                     "My Route",
-                    "",
                     grade_jump=1,
                     grade_af=2,
                     grade_ou=3,
@@ -602,7 +603,6 @@ def test_merge_routes_equality_check(
                 Route(
                     1,
                     "My Route",
-                    "",
                     grade_jump=4,
                     grade_af=3,
                     grade_ou=2,
@@ -614,7 +614,6 @@ def test_merge_routes_equality_check(
             Route(
                 1,
                 "My Route",
-                "",
                 grade_jump=4,
                 grade_af=3,
                 grade_ou=2,
@@ -622,7 +621,46 @@ def test_merge_routes_equality_check(
                 dangerous=False,
                 star_count=2,
             ),
-            id="Conflicting data, higher rank second",
+            id="Conflicting data, different ranks #2",
+        ),
+        pytest.param(
+            [
+                Route(1, "AW"),
+                Route(1, "AW", directions=[RouteDirections("Dummy Text", "Test")]),
+            ],
+            Route(
+                1,
+                "AW",
+                directions=[RouteDirections("Dummy Text", "Test")],
+            ),
+            id="Directions: First value empty",
+        ),
+        pytest.param(
+            [
+                Route(1, "AW", directions=[RouteDirections("Dummy Text", "Test")]),
+                Route(1, "AW"),
+            ],
+            Route(
+                1,
+                "AW",
+                directions=[RouteDirections("Dummy Text", "Test")],
+            ),
+            id="Directions: Second value empty",
+        ),
+        pytest.param(
+            [
+                Route(1, "AW", directions=[RouteDirections("Dummy Text 1", "Source 1")]),
+                Route(1, "AW", directions=[RouteDirections("Dummy Text 2", "Source 2")]),
+            ],
+            Route(
+                1,
+                "AW",
+                directions=[
+                    RouteDirections("Dummy Text 1", "Source 1"),
+                    RouteDirections("Dummy Text 2", "Source 2"),
+                ],
+            ),
+            id="Directions: Merge multiple directions",
         ),
         pytest.param(
             [

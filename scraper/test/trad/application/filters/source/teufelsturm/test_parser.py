@@ -21,7 +21,7 @@ from trad.application.filters.source.teufelsturm.parser import (
 )
 from trad.application.grades.regex import RegexBasedParser
 from trad.kernel.entities.geotypes import GeoPosition
-from trad.kernel.entities.routedata import Post
+from trad.kernel.entities.routedata import Post, RouteDirections
 
 posts_test_dict: Final = {
     0: {
@@ -170,10 +170,13 @@ def test_parse_user(input_text: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "sample_route_page_file",
-    ["route_page_sample_simple.html", "route_page_sample_extended.html"],
+    ("sample_route_page_file", "expect_route_directions"),
+    [
+        pytest.param("route_page_sample_simple.html", False, id="Simple route info"),
+        pytest.param("route_page_sample_extended.html", True, id="Extended route info"),
+    ],
 )
-def test_parse_page(sample_route_page_file: str) -> None:
+def test_parse_page(sample_route_page_file: str, *, expect_route_directions: bool) -> None:
     """
     Tests that the HTML page parser returns the expected (hard coded) results from the example
     files. The difference between the "simple" and the "extended" route page file is, that the
@@ -185,6 +188,11 @@ def test_parse_page(sample_route_page_file: str) -> None:
     # Summit data (name and position) must be taken from the summit_details_page_sample.html file
     expected_summit_name: Final = "Beispielwand"
     expected_summit_position: Final = GeoPosition.from_decimal_degree(50.95105, 14.06769)
+    expected_route_directions = (
+        [RouteDirections("Mittlerer Riss linksh. auf Band, von dort Wand z.G.", "Teufelsturm")]
+        if expect_route_directions
+        else []
+    )
 
     def mocked_retrieve_summit_details_page(peak_id: int) -> str:
         assert peak_id == expected_summit_id
@@ -205,6 +213,7 @@ def test_parse_page(sample_route_page_file: str) -> None:
     assert page_data.peak.position.value.is_equal_to(expected_summit_position)
     assert page_data.route.route_name == "Loremweg"
     assert page_data.route.grade == "** II"
+    assert page_data.route.directions == expected_route_directions
     assert len(page_data.posts) == 1
     assert page_data.posts[0].user_name == "Max Mustermann"
     assert page_data.posts[0].comment.startswith("Lorem ipsum")
