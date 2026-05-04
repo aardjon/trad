@@ -220,6 +220,25 @@ class RoutesTable {
   static const String columnDanger = '$tableName.danger';
 }
 
+/// Table containing directions (textual description) for climbing a route.
+class RouteDirectionsTable {
+  /// Name of the table.
+  static const String tableName = 'route_directions';
+
+  /// The name of the 'route_id' INT column:
+  /// ID of the route that these directions describe. Foreign key to the routes table.
+  static const String columnRouteId = '$tableName.route_id';
+
+  /// The name of the 'source_id' INT column:
+  /// ID of the external source these directions orignate from. Foreign key to the
+  /// external_data_sources table.
+  static const String columnSourceId = '$tableName.source_id';
+
+  /// The name of the 'directions' TEXT column:
+  /// Textual description of this route.
+  static const String columnDirections = '$tableName.directions';
+}
+
 /// Table containing all posts that have been assigned to routes.
 class PostsTable {
   /// Name of the table.

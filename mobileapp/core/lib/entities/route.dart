@@ -24,6 +24,11 @@ class Route {
   /// stars marks a route as "more beautiful". 0 is the default for regular routes.
   int stars;
 
+  /// List of directions describing this route.
+  /// Several different sets of descriptions (e.g. from different sources) may contain different
+  /// useful pieces of information.
+  List<Directions> directions;
+
   /// A community rating of the route.
   double? routeRating;
 
@@ -35,6 +40,7 @@ class Route {
     this.dangerous = false,
     this.stars = 0,
     this.routeRating,
+    this.directions = const <Directions>[],
   });
 
   @override
@@ -96,4 +102,16 @@ class Difficulty {
     }
     return 'Difficulty(${parts.join(",")})';
   }
+}
+
+/// A single description of a certain route onto a summit.
+class Directions {
+  /// The actual description text.
+  String content;
+
+  /// Name of the data source these directions came from.
+  String source;
+
+  /// Constructor for directly initializing all members.
+  Directions(this.content, this.source);
 }

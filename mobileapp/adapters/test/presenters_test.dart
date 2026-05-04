@@ -56,7 +56,9 @@ void main() {
         canShowOnMap: false,
       ),
     );
-    registerFallbackValue(RouteDetailsModel(0xFFFFFF, '[NoPageTitle]', '[NoPageSubTitle]'));
+    registerFallbackValue(
+      RouteDetailsModel(0xFFFFFF, '[NoPageTitle]', '[NoPageSubTitle]', <ListViewItem>[]),
+    );
     registerFallbackValue(
       SettingsModel(
         pageTitle: '[NoPageTitle]',

@@ -178,6 +178,10 @@ class ApplicationWidePresenter implements PresentationBoundary {
       selectedRoute.id,
       selectedRoute.routeName,
       _labelCreator.createGradeLabel(selectedRoute),
+      <ListViewItem>[
+        for (final Directions directions in selectedRoute.directions)
+          ListViewItem(directions.content, bottomLine: '(Quelle: ${directions.source})'),
+      ],
     );
     ui.showRouteDetails(model);
   }
