@@ -1,10 +1,16 @@
 # Scraper & Route Database Changelog
 
+## Version 0.4.0 - 2026-05-04
+
+### New/Improved Features:
+ - Import route directions (#24)
+ - Update to DB schema version 1.3
+
 
 ## Version 0.3.2 - 2026-04-19
 
 ### Fixed Bugs:
- - Retry failed HTTP requests to make the OSM filter more robust [#35]
+ - Retry failed HTTP requests to make the OSM filter more robust (#35)
 
 ### New/Improved Features:
  - Improve performance of network requests
