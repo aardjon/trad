@@ -388,7 +388,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Route> retrieveRoute(int routeDataId) async {
-    Query query = Query.table(RoutesTable.tableName, <String>[
+    Query routeQuery = Query.table(RoutesTable.tableName, <String>[
       RoutesTable.columnId,
       RoutesTable.columnRouteName,
       RoutesTable.columnGradeJump,
@@ -398,21 +398,46 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnStars,
       RoutesTable.columnDanger,
     ]);
-    query.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
+    routeQuery.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
+    routeQuery.limit = 1;
+    List<ResultRow> routeResultSet = await _repository.executeQuery(routeQuery);
 
-    List<ResultRow> resultSet = await _repository.executeQuery(query);
+    Query directionsQuery = Query.join(
+      <String>[
+        RouteDirectionsTable.tableName,
+        ExternalDataSourcesTable.tableName,
+      ],
+      <String>[
+        '${RouteDirectionsTable.columnSourceId}=${ExternalDataSourcesTable.columnId}',
+      ],
+      <String>[
+        RouteDirectionsTable.columnDirections,
+        ExternalDataSourcesTable.columnLabel,
+      ],
+    );
+    directionsQuery.setWhereCondition('${RouteDirectionsTable.columnRouteId} = ?', <Object?>[
+      routeDataId,
+    ]);
+    List<ResultRow> directionsResultSet = await _repository.executeQuery(directionsQuery);
 
     return Route(
-      id: resultSet[0].getIntValue(RoutesTable.columnId),
-      routeName: resultSet[0].getStringValue(RoutesTable.columnRouteName),
+      id: routeResultSet[0].getIntValue(RoutesTable.columnId),
+      routeName: routeResultSet[0].getStringValue(RoutesTable.columnRouteName),
       grade: Difficulty(
-        af: resultSet[0].getIntValue(RoutesTable.columnGradeAf),
-        ou: resultSet[0].getIntValue(RoutesTable.columnGradeOu),
-        rp: resultSet[0].getIntValue(RoutesTable.columnGradeRp),
-        jump: resultSet[0].getIntValue(RoutesTable.columnGradeJump),
+        af: routeResultSet[0].getIntValue(RoutesTable.columnGradeAf),
+        ou: routeResultSet[0].getIntValue(RoutesTable.columnGradeOu),
+        rp: routeResultSet[0].getIntValue(RoutesTable.columnGradeRp),
+        jump: routeResultSet[0].getIntValue(RoutesTable.columnGradeJump),
       ),
-      dangerous: resultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
-      stars: resultSet[0].getIntValue(RoutesTable.columnStars),
+      dangerous: routeResultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
+      stars: routeResultSet[0].getIntValue(RoutesTable.columnStars),
+      directions: <Directions>[
+        for (final ResultRow dr in directionsResultSet)
+          Directions(
+            dr.getStringValue(RouteDirectionsTable.columnDirections),
+            dr.getStringValue(ExternalDataSourcesTable.columnLabel),
+          ),
+      ],
     );
   }
 
