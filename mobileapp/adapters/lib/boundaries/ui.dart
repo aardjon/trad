@@ -230,8 +230,11 @@ class RouteDetailsModel {
   /// Sub title of the route details page.
   final String pageSubTitle;
 
+  /// The directions to be displayed on the route details page.
+  final List<ListViewItem> directionsItems;
+
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle);
+  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle, this.directionsItems);
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.
