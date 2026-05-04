@@ -164,7 +164,7 @@ def parse_page(page_text: str, summit_cache: SummitCache, grade_parser: GradePar
     if ext_route_data_table is not None:
         try:
             directions = _parse_route_directions(ext_route_data_table)
-        except Exception as e:
+        except DataProcessingError as e:
             _logger.warning(
                 "Cannot parse directions from route '%s' due to: %s",
                 f"{peak.name} - {route}",
@@ -220,6 +220,8 @@ def _parse_route_directions(dataframe: DataFrame) -> str | None:
     for row_idx in range(len(dataframe)):
         row = dataframe.loc[row_idx]
         if row[0].strip() == "Wegbeschreibung:":
+            if not isinstance(row[1], str):
+                raise DataProcessingError("Route description is not a string value")
             return row[1].strip() or None
     return None
 
