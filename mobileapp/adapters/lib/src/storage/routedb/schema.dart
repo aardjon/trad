@@ -9,7 +9,7 @@ library;
 import '../version.dart';
 
 /// The schema version currently supported (and required) by this app.
-final Version supportedSchemaVersion = Version(1, 2);
+final Version supportedSchemaVersion = Version(1, 3);
 
 /// Table containing some static metadata about the database itself.
 ///
@@ -168,6 +168,13 @@ class SummitsTable {
 /// rating and without an upper bound. Each step in the corresponding scale system increases the
 /// value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
 /// 0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
+///
+/// To store geographical coordinate values as integer values, their decimal representation is
+/// multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+/// ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+/// stored as (509170936, 141992389).
+///
+/// See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
 class RoutesTable {
   /// Name of the table.
   static const String tableName = 'routes';
@@ -218,6 +225,14 @@ class RoutesTable {
   /// The name of the 'danger' BOOLEAN column:
   /// True if the route is officially marked as "dangerous", false if not.
   static const String columnDanger = '$tableName.danger';
+
+  /// The name of the 'entry_latitude' INTEGER column:
+  /// The latitude value of the route entry point.
+  static const String columnEntryLatitude = '$tableName.entry_latitude';
+
+  /// The name of the 'entry_longitude' INTEGER column:
+  /// The longitude value of the route entry point.
+  static const String columnEntryLongitude = '$tableName.entry_longitude';
 }
 
 /// Table containing directions (textual description) for climbing a route.
