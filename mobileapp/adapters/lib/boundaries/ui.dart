@@ -200,12 +200,20 @@ class SummitDetailsModel {
   /// Title of the summit details page.
   final String pageTitle;
 
+  /// Sub title of the summit details page.
+  final String pageSubTitle;
+
   /// Flag for displaying if the summit can be shown on a map (true) or not (false, e.g. because it
   /// lacks a geo position).
   final bool canShowOnMap;
 
   /// Constructor for directly initializing all members.
-  SummitDetailsModel(this.summitDataId, this.pageTitle, {required this.canShowOnMap});
+  SummitDetailsModel(
+    this.summitDataId,
+    this.pageTitle,
+    this.pageSubTitle, {
+    required this.canShowOnMap,
+  });
 }
 
 /// Model that provides all static data needed to display the route details page to the UI.
@@ -222,8 +230,11 @@ class RouteDetailsModel {
   /// Sub title of the route details page.
   final String pageSubTitle;
 
+  /// The directions to be displayed on the route details page.
+  final List<ListViewItem> directionsItems;
+
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle);
+  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle, this.directionsItems);
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.

@@ -4,6 +4,17 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Version 0.4.0 - 2026-05-04
+
+### New/Improved Features:
+
+ - Display the sector to which a selected summit is assigned (#20)
+ - Show route directions on the route details page (#24)
+
+### Fixed Bugs:
+ - Don't display empty posts (#50)
+
+
 ## Version 0.3.1 - 2026-03-29
 
 ### Fixed Bugs:

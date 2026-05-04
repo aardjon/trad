@@ -236,12 +236,16 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     const double coordinateValuePrecision = 10000000;
 
     Query query = Query.join(
-      <String>[SummitsTable.tableName, SummitNamesTable.tableName],
-      <String>['${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}'],
+      <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
+      <String>[
+        '${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}',
+        '${SummitsTable.columnAreaId}=${AreasTable.columnId}',
+      ],
       <String>[
         SummitNamesTable.columnName,
         SummitsTable.columnLatitude,
         SummitsTable.columnLongitude,
+        AreasTable.columnName,
       ],
     );
     query.setWhereCondition(
@@ -252,22 +256,32 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     String name = resultSet[0].getStringValue(SummitNamesTable.columnName);
+    String sector = resultSet[0].getStringValue(AreasTable.columnName);
     int lat = resultSet[0].getIntValue(SummitsTable.columnLatitude);
     int lon = resultSet[0].getIntValue(SummitsTable.columnLongitude);
     GeoPosition? position;
     if ((lat, lon) != undefinedCoordinates) {
       position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
     }
-    return Summit(summitDataId, name, position);
+    return Summit(summitDataId, name, sector, position);
   }
 
   @override
   Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
     // Configure the query
-    Query query = Query.table(SummitNamesTable.tableName, <String>[
-      SummitNamesTable.columnSummitId,
-      SummitNamesTable.columnName,
-    ]);
+    Query query = Query.join(
+      <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
+      <String>[
+        '${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}',
+        '${SummitsTable.columnAreaId}=${AreasTable.columnId}',
+      ],
+      <String>[
+        SummitNamesTable.columnSummitId,
+        SummitNamesTable.columnName,
+        AreasTable.columnName,
+      ],
+    );
+
     if (nameFilter != null) {
       _logger.debug('Retrieving filtered summit list for "$nameFilter"');
       query.setWhereCondition('${SummitNamesTable.columnName} LIKE ?', <String>['%$nameFilter%']);
@@ -284,7 +298,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     for (final ResultRow dataRow in resultSet) {
       int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
       String name = dataRow.getStringValue(SummitNamesTable.columnName);
-      summits.add(Summit(id, name));
+      String area = dataRow.getStringValue(AreasTable.columnName);
+      summits.add(Summit(id, name, area));
     }
     return summits;
   }
@@ -373,7 +388,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
 
   @override
   Future<Route> retrieveRoute(int routeDataId) async {
-    Query query = Query.table(RoutesTable.tableName, <String>[
+    Query routeQuery = Query.table(RoutesTable.tableName, <String>[
       RoutesTable.columnId,
       RoutesTable.columnRouteName,
       RoutesTable.columnGradeJump,
@@ -383,21 +398,46 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnStars,
       RoutesTable.columnDanger,
     ]);
-    query.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
+    routeQuery.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
+    routeQuery.limit = 1;
+    List<ResultRow> routeResultSet = await _repository.executeQuery(routeQuery);
 
-    List<ResultRow> resultSet = await _repository.executeQuery(query);
+    Query directionsQuery = Query.join(
+      <String>[
+        RouteDirectionsTable.tableName,
+        ExternalDataSourcesTable.tableName,
+      ],
+      <String>[
+        '${RouteDirectionsTable.columnSourceId}=${ExternalDataSourcesTable.columnId}',
+      ],
+      <String>[
+        RouteDirectionsTable.columnDirections,
+        ExternalDataSourcesTable.columnLabel,
+      ],
+    );
+    directionsQuery.setWhereCondition('${RouteDirectionsTable.columnRouteId} = ?', <Object?>[
+      routeDataId,
+    ]);
+    List<ResultRow> directionsResultSet = await _repository.executeQuery(directionsQuery);
 
     return Route(
-      id: resultSet[0].getIntValue(RoutesTable.columnId),
-      routeName: resultSet[0].getStringValue(RoutesTable.columnRouteName),
+      id: routeResultSet[0].getIntValue(RoutesTable.columnId),
+      routeName: routeResultSet[0].getStringValue(RoutesTable.columnRouteName),
       grade: Difficulty(
-        af: resultSet[0].getIntValue(RoutesTable.columnGradeAf),
-        ou: resultSet[0].getIntValue(RoutesTable.columnGradeOu),
-        rp: resultSet[0].getIntValue(RoutesTable.columnGradeRp),
-        jump: resultSet[0].getIntValue(RoutesTable.columnGradeJump),
+        af: routeResultSet[0].getIntValue(RoutesTable.columnGradeAf),
+        ou: routeResultSet[0].getIntValue(RoutesTable.columnGradeOu),
+        rp: routeResultSet[0].getIntValue(RoutesTable.columnGradeRp),
+        jump: routeResultSet[0].getIntValue(RoutesTable.columnGradeJump),
       ),
-      dangerous: resultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
-      stars: resultSet[0].getIntValue(RoutesTable.columnStars),
+      dangerous: routeResultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
+      stars: routeResultSet[0].getIntValue(RoutesTable.columnStars),
+      directions: <Directions>[
+        for (final ResultRow dr in directionsResultSet)
+          Directions(
+            dr.getStringValue(RouteDirectionsTable.columnDirections),
+            dr.getStringValue(ExternalDataSourcesTable.columnLabel),
+          ),
+      ],
     );
   }
 

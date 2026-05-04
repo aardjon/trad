@@ -478,9 +478,9 @@ void main() {
     });
 
     List<Summit> summitList = <Summit>[
-      Summit(1, 'Mount A'),
-      Summit(2, 'Mount B'),
-      Summit(3, 'Mount C'),
+      Summit(1, 'Mount A', 'Sector A'),
+      Summit(2, 'Mount B', 'Sector B'),
+      Summit(3, 'Mount C', 'Sector C'),
     ];
 
     /// Ensures the correct behaviour of the showSummitListPage() method:
@@ -530,8 +530,8 @@ void main() {
     ///  - If the summit has no GeoPosition, nothing happens
     group('showSummitOnMap() use case', () {
       final List<Summit> testedSummits = <Summit>[
-        Summit(42, 'Mount X'),
-        Summit(83, 'Mount Y', GeoPosition(51.852, 13.623)),
+        Summit(42, 'Mount X', 'Sector X'),
+        Summit(83, 'Mount Y', 'Sector Y', GeoPosition(51.852, 13.623)),
       ];
       for (final Summit summit in testedSummits) {
         test('$summit', () async {
@@ -569,7 +569,7 @@ void main() {
     });
 
     const RoutesFilterMode sortCriterion = RoutesFilterMode.grade;
-    final Summit summit = Summit(42, 'Teufelsturm');
+    final Summit summit = Summit(42, 'Teufelsturm', 'Sector');
     final List<Route> routeList = <Route>[
       Route(id: 1, routeName: 'Route A', grade: Difficulty(af: 3), routeRating: 1),
       Route(id: 2, routeName: 'Route B', grade: Difficulty(af: 2), routeRating: 2),

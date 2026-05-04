@@ -9,7 +9,7 @@ library;
 import '../version.dart';
 
 /// The schema version currently supported (and required) by this app.
-final Version supportedSchemaVersion = Version(1, 1);
+final Version supportedSchemaVersion = Version(1, 3);
 
 /// Table containing some static metadata about the database itself.
 ///
@@ -72,6 +72,23 @@ class ExternalDataSourcesTable {
   static const String columnLicense = '$tableName.license';
 }
 
+/// All climbing areas/sectors.
+///
+/// An area or sector is a geographic area containing several summits. Each summit is assigned to
+/// one.
+class AreasTable {
+  /// Name of the table.
+  static const String tableName = 'areas';
+
+  /// The name of the 'id' INTEGER column:
+  /// Unique ID of this area/sector.
+  static const String columnId = '$tableName.id';
+
+  /// The name of the 'name' TEXT column:
+  /// Name of this area/sector.
+  static const String columnName = '$tableName.name';
+}
+
 /// All names of all summits.
 ///
 /// As a single summit can have multiple names, this table assigns specific names strings to summits.
@@ -109,6 +126,10 @@ class SummitNamesTable {
 /// stored as (509170936, 141992389).
 ///
 /// See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
+///
+/// The special coordinates of 0/0 are used in case no position is available at all. This value is
+/// not *invalid* by itself, it is just a point somewhere in the Atlantic Ocean where we do not
+/// expect a climbing rock. It may be changed if a new island is discovered there, of course ;)
 class SummitsTable {
   /// Name of the table.
   static const String tableName = 'summits';
@@ -116,6 +137,10 @@ class SummitsTable {
   /// The name of the 'id' INTEGER column:
   /// Summit ID, unique within this database.
   static const String columnId = '$tableName.id';
+
+  /// The name of the 'area_id' INTEGER column:
+  /// ID of the area/sector this summit belongs to.
+  static const String columnAreaId = '$tableName.area_id';
 
   /// The name of the 'latitude' INTEGER column:
   /// The latitude value of the geographical position.
@@ -143,6 +168,13 @@ class SummitsTable {
 /// rating and without an upper bound. Each step in the corresponding scale system increases the
 /// value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
 /// 0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
+///
+/// To store geographical coordinate values as integer values, their decimal representation is
+/// multiplied by 10.000.000 to support the same precision as the OSM database (7 decimal places,
+/// ~1 cm). Positive values are N/E, negative ones are S/W. For example, (50,9170936, 14,1992389) is
+/// stored as (509170936, 141992389).
+///
+/// See also: https://wiki.openstreetmap.org/wiki/Precision_of_coordinates
 class RoutesTable {
   /// Name of the table.
   static const String tableName = 'routes';
@@ -193,6 +225,33 @@ class RoutesTable {
   /// The name of the 'danger' BOOLEAN column:
   /// True if the route is officially marked as "dangerous", false if not.
   static const String columnDanger = '$tableName.danger';
+
+  /// The name of the 'entry_latitude' INTEGER column:
+  /// The latitude value of the route entry point.
+  static const String columnEntryLatitude = '$tableName.entry_latitude';
+
+  /// The name of the 'entry_longitude' INTEGER column:
+  /// The longitude value of the route entry point.
+  static const String columnEntryLongitude = '$tableName.entry_longitude';
+}
+
+/// Table containing directions (textual description) for climbing a route.
+class RouteDirectionsTable {
+  /// Name of the table.
+  static const String tableName = 'route_directions';
+
+  /// The name of the 'route_id' INT column:
+  /// ID of the route that these directions describe. Foreign key to the routes table.
+  static const String columnRouteId = '$tableName.route_id';
+
+  /// The name of the 'source_id' INT column:
+  /// ID of the external source these directions orignate from. Foreign key to the
+  /// external_data_sources table.
+  static const String columnSourceId = '$tableName.source_id';
+
+  /// The name of the 'directions' TEXT column:
+  /// Textual description of this route.
+  static const String columnDirections = '$tableName.directions';
 }
 
 /// Table containing all posts that have been assigned to routes.

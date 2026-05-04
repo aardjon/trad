@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../icons.dart';
 import '../state.dart';
+import '../widgets/carousel.dart';
 
 /// Widget representing a single post with the post list.
 class _PostItem extends StatelessWidget {
@@ -56,6 +57,62 @@ class _PostItem extends StatelessWidget {
   }
 }
 
+/// Widget representing a single item in the directions carousel.
+class _DirectionsItem extends StatelessWidget {
+  /// The data item to display.
+  final ListViewItem _dataItem;
+
+  /// Constructor for directly initializing all members.
+  const _DirectionsItem(this._dataItem);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          _dataItem.mainTitle,
+        ),
+        const SizedBox(height: 5),
+        Text(
+          _dataItem.bottomLine!,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Widget for displaying "global" properties of the route itself, not of all the single posts.
+class _RoutePropertiesView extends StatelessWidget {
+  /// The model to retrieve route data from.
+  final RouteDetailsModel model;
+
+  /// Constructor for directly initializing all members.
+  const _RoutePropertiesView(this.model);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          WidgetCarousel(
+            <Widget>[
+              for (final ListViewItem item in model.directionsItems) _DirectionsItem(item),
+            ],
+          ),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+}
+
 /// Widget representing the *Route Details* page.
 class RouteDetailsView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
@@ -82,7 +139,7 @@ class RouteDetailsView extends StatelessWidget {
           if (state.postsLoaded()) {
             return Scaffold(
               appBar: _appBar(model, state, context),
-              body: _listView(state, context),
+              body: _listView(model, state, context),
               drawer: _appDrawer,
               drawerEnableOpenDragGesture: false,
             );
@@ -137,11 +194,15 @@ class RouteDetailsView extends StatelessWidget {
     return Column(mainAxisSize: MainAxisSize.min, children: menuItems);
   }
 
-  Widget _listView(PostListNotifier state, BuildContext context) {
+  Widget _listView(RouteDetailsModel model, PostListNotifier state, BuildContext context) {
+    final int listItemIndexOffset = model.directionsItems.isNotEmpty ? 1 : 0;
     return ListView.builder(
-      itemCount: state.getPostCount(),
+      itemCount: state.getPostCount() + listItemIndexOffset,
       itemBuilder: (BuildContext context, int index) {
-        final ListViewItem post = state.getPostItem(index);
+        if (model.directionsItems.isNotEmpty && index == 0) {
+          return _RoutePropertiesView(model);
+        }
+        final ListViewItem post = state.getPostItem(index - listItemIndexOffset);
         return _PostItem(post: post);
       },
     );
