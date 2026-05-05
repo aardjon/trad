@@ -322,6 +322,7 @@ Table routes {
 
   indexes {
     route_name [name: 'IdxRouteName']
+    summit_id [name: 'IdxRoutesSummitId']
   }
 }
 // Foreign key routes -> summits
@@ -403,6 +404,10 @@ Table posts {
     value in the range between -3 (extremely bad/dangerous) to 3 (extremely outstanding/great).
     '''
   ]
+  
+  indexes {
+    route_id [name: 'IdxPostsRouteId']
+  }
 }
 // Foreign key posts -> routes
 Ref: routes.id < posts.route_id [delete: cascade]

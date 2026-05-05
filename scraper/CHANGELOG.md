@@ -1,5 +1,12 @@
 # Scraper & Route Database Changelog
 
+
+## Version 0.4.1 - 2026-05-05
+
+### Fixed Bugs:
+ - Performance issue when showing summit details (#51)
+
+
 ## Version 0.4.0 - 2026-05-04
 
 ### New/Improved Features:

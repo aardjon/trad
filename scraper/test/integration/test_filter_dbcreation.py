@@ -31,9 +31,13 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     post_date: Final = datetime.datetime.now(tz=datetime.UTC)
     post_rating: Final = 2
     expected_index_count: Final = (
-        # 'summits', 'routes', 'route_directions' and 'areas' tables each have one user-defined
-        # index
-        4
+        # There should be user-defined indices on the following tables:
+        #  summits - 1
+        #  routes - 2
+        #  route_directions - 1
+        #  areas - 1
+        #  posts - 1
+        6
     )
     af_grade: Final = 2
 
