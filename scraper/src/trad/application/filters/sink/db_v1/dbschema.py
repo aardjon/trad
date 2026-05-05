@@ -453,6 +453,9 @@ class RoutesTable(TableSchema):
             SqlStatement(
                 'CREATE INDEX "IdxRouteName" ON "routes" (route_name);',
             ),
+            SqlStatement(
+                'CREATE INDEX "IdxRoutesSummitId" ON "routes" (summit_id);',
+            ),
         ]
 
 
@@ -582,7 +585,11 @@ class PostsTable(TableSchema):
 
     @override
     def index_ddl(self) -> list[SqlStatement]:
-        return []
+        return [
+            SqlStatement(
+                'CREATE INDEX "IdxPostsRouteId" ON "posts" (route_id);',
+            ),
+        ]
 
 
 class DatabaseSchema:
