@@ -17,11 +17,16 @@ class RouteDbMetadata {
     /** Minor schema version of this route database. */
     public int $schemaVersionMinor;
     
-    /** Creation date of this route database. */
-    public string $creationDate;
+    /** Creation time stamp of this route database. */
+    public DateTimeImmutable $creationDate;
     
     /** Constructor for directly initializing all members. */
-    public function __construct(string $downloadUrl, int $majorVersion, int $minorVersion, string $creationDate) {
+    public function __construct(
+            string $downloadUrl,
+            int $majorVersion,
+            int $minorVersion,
+            DateTimeImmutable $creationDate,
+    ) {
         $this->downloadUrl = $downloadUrl;
         $this->schemaVersionMajor = $majorVersion;
         $this->schemaVersionMinor = $minorVersion;

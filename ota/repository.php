@@ -36,7 +36,12 @@ class TradRouteDbFileReader implements DbMetadataRepository {
         $cursor = null;
         $db = null;
 
-        return new RouteDbMetadata("$routeDbFile", $metadataRow[0], $metadataRow[1], $metadataRow[2]);
+        return new RouteDbMetadata(
+            "$routeDbFile",
+            $metadataRow[0],
+            $metadataRow[1],
+            new DateTimeImmutable($metadataRow[2]),
+        );
     }
 }
 
