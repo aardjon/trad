@@ -8,7 +8,7 @@ class AppConfig {
      * This path must be relative to the 'apivX.php` file, e.g. '../dbfiles'. Do not give an
      * absolute path here!
      */
-    public string $CONFIG_DATABASE_FILES_DIRECTORY = 'rdbfiles';
+    public string $CONFIG_DATABASE_FILES_DIRECTORY = '../rdbfiles';
 }
 
 ?>
