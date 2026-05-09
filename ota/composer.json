@@ -4,6 +4,7 @@
     "description": "Server backend of the trad route database online updater",
     "type": "project",
     "license": "EUPL-1.2",
-    "require": {
+    "require-dev": {
+        "vimeo/psalm": "^6.16"
     }
 }
