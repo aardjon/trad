@@ -6,6 +6,7 @@ src/*.egg-info
 /.mypy_cache/
 **/.pytest_cache/
 .coverage
+.python-version
 
 # Output directories/files
 traffic/
