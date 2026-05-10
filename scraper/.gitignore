@@ -7,6 +7,12 @@ src/*.egg-info
 **/.pytest_cache/
 .coverage
 
-# Output directories
+# Output directories/files
 traffic/
 routedb/
+build/
+artifacts/
+scraper.log
+
+# Local notes
+notes/

@@ -19,3 +19,5 @@ doc/sql_schemes/*/generated/
 # Visual Studio Code
 .vscode/
 
+# trad website source
+website
