@@ -3,12 +3,13 @@
 require_once('core.php');
 
 
-class JsonPresenter implements PresentationBoundary {
+final class JsonPresenter implements PresentationBoundary {
     public function __construct() {
         header('Content-Type: application/json');
     }
     
-    public function sendDbMetadata(array $routeDbMetadata) {
+    #[\Override]
+    public function sendDbMetadata(array $routeDbMetadata) : void {
         $jsonData = [];
         foreach($routeDbMetadata as $routeDb) {
             $jsonData[] = [

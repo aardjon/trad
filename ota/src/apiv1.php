@@ -15,7 +15,7 @@ require_once('presentation.php');
 
 
 /** Entry point for handling HTTP GET requests. */
-function api_get() {
+function api_get() : void {
     $staticConfig = new AppConfig();
     $directoryReader = new DbDirectoryReader($staticConfig->CONFIG_DATABASE_FILES_DIRECTORY);
     $metadataReader = new TradRouteDbFileReader();

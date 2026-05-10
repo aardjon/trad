@@ -6,7 +6,7 @@
 // Entity types
 
 /** Metadata describing a single route database file. */
-class RouteDbMetadata {
+final class RouteDbMetadata {
     
     /** Full URL for downloading this route database. */
     public string $downloadUrl;
@@ -44,7 +44,7 @@ interface DbDirectoryRepository {
     
     /** Return the paths of all available route database files.
      * 
-     * The return value is an array of strings, representing the (local) file paths.
+     * @return array<string> The (local) route database file paths.
      */
     public function getRouteDbFiles() : array;
 }
@@ -63,9 +63,9 @@ interface PresentationBoundary {
     
     /** Send the given database metadata to the client, in the requested format.
      * 
-     * The $routeDbMetadata parameter is an array of [RouteDbMetadata] objects.
+     * @param array<RouteDbMetadata> $routeDbMetadata Route DB information to be sent.
      */
-    public function sendDbMetadata(array $routeDbMetadata);
+    public function sendDbMetadata(array $routeDbMetadata) : void;
 }
 
 
@@ -83,7 +83,7 @@ function provideAvailableRouteDatabases(
     DbDirectoryRepository $directoryRepository,
     DbMetadataRepository $metadataRepository,
     PresentationBoundary $ui,
-) {
+) : void {
     $collectedMetadata = [];
 
     foreach ($directoryRepository->getRouteDbFiles() as $routeDbFile) {

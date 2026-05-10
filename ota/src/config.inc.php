@@ -1,7 +1,7 @@
 <?php
 
 /** Static configuration of the trad.ota web service. */
-class AppConfig {
+final class AppConfig {
     
     /** Path to the directory containing all avilable route database files.
      * 
