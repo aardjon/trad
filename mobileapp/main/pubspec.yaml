@@ -18,7 +18,7 @@ publish_to: 'none'
 version: 0.0.1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.11.5
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

@@ -4,8 +4,8 @@ resolution: workspace
 publish_to: none
 
 environment:
-  sdk: ^3.9.2
-  flutter: ^3.35.3
+  sdk: ^3.11.5
+  flutter: ^3.41.9
 
 dependencies:
   adapters:
