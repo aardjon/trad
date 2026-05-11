@@ -171,7 +171,7 @@ class RouteDetailsView extends StatelessWidget {
               ),
             );
           },
-          icon: const Icon(Icons.filter_list),
+          icon: const Icon(Icons.menu_open),
         ),
       ],
     );
