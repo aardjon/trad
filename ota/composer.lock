@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "560b7995948ebcd844273d61aedc46cd",
+    "content-hash": "482aa18607ee1ac62c0775592f5f37f3",
     "packages": [],
     "packages-dev": [
         {
@@ -465,16 +465,16 @@
         },
         {
             "name": "amphp/pipeline",
-            "version": "v1.2.3",
+            "version": "v1.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/pipeline.git",
-                "reference": "7b52598c2e9105ebcddf247fc523161581930367"
+                "reference": "a044733e080940d1483f56caff0c412ad6982776"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/pipeline/zipball/7b52598c2e9105ebcddf247fc523161581930367",
-                "reference": "7b52598c2e9105ebcddf247fc523161581930367",
+                "url": "https://api.github.com/repos/amphp/pipeline/zipball/a044733e080940d1483f56caff0c412ad6982776",
+                "reference": "a044733e080940d1483f56caff0c412ad6982776",
                 "shasum": ""
             },
             "require": {
@@ -486,7 +486,7 @@
                 "amphp/php-cs-fixer-config": "^2",
                 "amphp/phpunit-util": "^3",
                 "phpunit/phpunit": "^9",
-                "psalm/phar": "^5.18"
+                "psalm/phar": "6.16.1"
             },
             "type": "library",
             "autoload": {
@@ -520,7 +520,7 @@
             ],
             "support": {
                 "issues": "https://github.com/amphp/pipeline/issues",
-                "source": "https://github.com/amphp/pipeline/tree/v1.2.3"
+                "source": "https://github.com/amphp/pipeline/tree/v1.2.4"
             },
             "funding": [
                 {
@@ -528,7 +528,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-03-16T16:33:53+00:00"
+            "time": "2026-05-06T05:37:57+00:00"
         },
         {
             "name": "amphp/process",
@@ -1585,6 +1585,126 @@
             "time": "2026-03-08T20:05:35+00:00"
         },
         {
+            "name": "lkrms/dice",
+            "version": "v4.1.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lkrms/Dice.git",
+                "reference": "feff8d3d1bec0e72275797fbbc8bf2bd65a9ba72"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lkrms/Dice/zipball/feff8d3d1bec0e72275797fbbc8bf2bd65a9ba72",
+                "reference": "feff8d3d1bec0e72275797fbbc8bf2bd65a9ba72",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dice\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "description": "A minimalist dependency injection container for PHP. Forked from level-2/dice.",
+            "homepage": "https://github.com/lkrms/Dice",
+            "keywords": [
+                "container",
+                "dependency injection",
+                "di",
+                "ioc"
+            ],
+            "support": {
+                "source": "https://github.com/lkrms/Dice/tree/v4.1.12"
+            },
+            "time": "2025-11-20T08:18:16+00:00"
+        },
+        {
+            "name": "lkrms/pretty-php",
+            "version": "v0.4.95",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lkrms/pretty-php.git",
+                "reference": "a9859dc60177852ad8bc27b069777d244dbd276d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lkrms/pretty-php/zipball/a9859dc60177852ad8bc27b069777d244dbd276d",
+                "reference": "a9859dc60177852ad8bc27b069777d244dbd276d",
+                "shasum": ""
+            },
+            "require": {
+                "composer-runtime-api": "^2.2",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-tokenizer": "*",
+                "php": ">=7.4",
+                "salient/cli": "0.99.81",
+                "salient/collections": "0.99.81",
+                "salient/console": "0.99.81",
+                "salient/contracts": "0.99.81",
+                "salient/core": "0.99.81",
+                "salient/phpdoc": "0.99.81",
+                "salient/polyfills": "0.99.81",
+                "salient/utils": "0.99.81",
+                "sebastian/diff": "^4 || ^5"
+            },
+            "require-dev": {
+                "ergebnis/composer-normalize": "^2",
+                "nikic/php-parser": "^5",
+                "phpstan/extension-installer": "^1",
+                "phpstan/phpstan": "^2",
+                "phpstan/phpstan-deprecation-rules": "^2",
+                "phpstan/phpstan-phpunit": "^2",
+                "phpunit/phpunit": "^9",
+                "salient/phpstan": "0.99.81",
+                "salient/sli": "0.99.81",
+                "salient/testing": "0.99.81"
+            },
+            "bin": [
+                "bin/pretty-php"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Lkrms\\PrettyPHP\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The opinionated PHP code formatter",
+            "support": {
+                "issues": "https://github.com/lkrms/pretty-php/issues",
+                "source": "https://github.com/lkrms/pretty-php"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/lkrms",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-12-04T08:48:47+00:00"
+        },
+        {
             "name": "netresearch/jsonmapper",
             "version": "v5.0.1",
             "source": {
@@ -2023,6 +2143,108 @@
             "time": "2021-11-05T16:47:00+00:00"
         },
         {
+            "name": "psr/event-dispatcher",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/event-dispatcher.git",
+                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/event-dispatcher/zipball/dbefd12671e8a14ec7f180cab83036ed26714bb0",
+                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\EventDispatcher\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Standard interfaces for event handling.",
+            "keywords": [
+                "events",
+                "psr",
+                "psr-14"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/event-dispatcher/issues",
+                "source": "https://github.com/php-fig/event-dispatcher/tree/1.0.0"
+            },
+            "time": "2019-01-08T18:20:26+00:00"
+        },
+        {
+            "name": "psr/http-client",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-client.git",
+                "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-client/zipball/bb5906edc1c324c9a05aa0873d40117941e5fa90",
+                "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0 || ^8.0",
+                "psr/http-message": "^1.0 || ^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP clients",
+            "homepage": "https://github.com/php-fig/http-client",
+            "keywords": [
+                "http",
+                "http-client",
+                "psr",
+                "psr-18"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/http-client"
+            },
+            "time": "2023-09-23T14:17:50+00:00"
+        },
+        {
             "name": "psr/http-factory",
             "version": "1.1.0",
             "source": {
@@ -2132,30 +2354,30 @@
         },
         {
             "name": "psr/log",
-            "version": "3.0.2",
+            "version": "1.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3"
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
-                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11",
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.0.0"
+                "php": ">=5.3.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Psr\\Log\\": "src"
+                    "Psr\\Log\\": "Psr/Log/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -2176,9 +2398,60 @@
                 "psr-3"
             ],
             "support": {
-                "source": "https://github.com/php-fig/log/tree/3.0.2"
+                "source": "https://github.com/php-fig/log/tree/1.1.4"
             },
-            "time": "2024-09-11T13:17:53+00:00"
+            "time": "2021-05-03T11:20:27+00:00"
+        },
+        {
+            "name": "psr/simple-cache",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/simple-cache.git",
+                "reference": "8707bf3cea6f710bf6ef05491234e3ab06f6432a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/simple-cache/zipball/8707bf3cea6f710bf6ef05491234e3ab06f6432a",
+                "reference": "8707bf3cea6f710bf6ef05491234e3ab06f6432a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\SimpleCache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interfaces for simple caching",
+            "keywords": [
+                "cache",
+                "caching",
+                "psr",
+                "psr-16",
+                "simple-cache"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/simple-cache/tree/2.0.0"
+            },
+            "time": "2021-10-29T13:22:09+00:00"
         },
         {
             "name": "revolt/event-loop",
@@ -2253,30 +2526,499 @@
             "time": "2025-08-27T21:33:23+00:00"
         },
         {
-            "name": "sebastian/diff",
-            "version": "8.1.0",
+            "name": "salient/cli",
+            "version": "v0.99.81",
             "source": {
                 "type": "git",
-                "url": "https://github.com/sebastianbergmann/diff.git",
-                "reference": "9c957d730257f49c873f3761674559bd90098a7d"
+                "url": "https://github.com/salient-labs/toolkit-cli.git",
+                "reference": "7a34d04e451ecfb8cd083a3b8bf44742312190e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/9c957d730257f49c873f3761674559bd90098a7d",
-                "reference": "9c957d730257f49c873f3761674559bd90098a7d",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-cli/zipball/7a34d04e451ecfb8cd083a3b8bf44742312190e5",
+                "reference": "7a34d04e451ecfb8cd083a3b8bf44742312190e5",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.4"
+                "php": ">=7.4",
+                "salient/console": "self.version",
+                "salient/container": "self.version",
+                "salient/contracts": "self.version",
+                "salient/core": "self.version",
+                "salient/utils": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Cli\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The CLI component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-11-20T07:03:45+00:00"
+        },
+        {
+            "name": "salient/collections",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-collections.git",
+                "reference": "aa48e9cd7ecb1e8c347010dfe312eb6daff51c42"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-collections/zipball/aa48e9cd7ecb1e8c347010dfe312eb6daff51c42",
+                "reference": "aa48e9cd7ecb1e8c347010dfe312eb6daff51c42",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4",
+                "salient/contracts": "self.version",
+                "salient/utils": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Collection\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The collections component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-05-07T05:03:43+00:00"
+        },
+        {
+            "name": "salient/console",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-console.git",
+                "reference": "554d0d54a8aea58177119962b01ff710849ad31f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-console/zipball/554d0d54a8aea58177119962b01ff710849ad31f",
+                "reference": "554d0d54a8aea58177119962b01ff710849ad31f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4",
+                "psr/log": "^1",
+                "salient/contracts": "self.version",
+                "salient/core": "self.version",
+                "salient/utils": "self.version"
+            },
+            "provide": {
+                "psr/log-implementation": "^1"
+            },
+            "suggest": {
+                "analog/analog": "Required by AnalogTarget"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Console\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The console component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-11-17T05:42:24+00:00"
+        },
+        {
+            "name": "salient/container",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-container.git",
+                "reference": "9ffb1221f0a4ee525935e1d31929362d9a7e62c1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-container/zipball/9ffb1221f0a4ee525935e1d31929362d9a7e62c1",
+                "reference": "9ffb1221f0a4ee525935e1d31929362d9a7e62c1",
+                "shasum": ""
+            },
+            "require": {
+                "lkrms/dice": "^4.1.11",
+                "php": ">=7.4",
+                "psr/container": "^2",
+                "salient/console": "self.version",
+                "salient/contracts": "self.version",
+                "salient/core": "self.version",
+                "salient/utils": "self.version"
+            },
+            "provide": {
+                "psr/container-implementation": "^2"
+            },
+            "suggest": {
+                "salient/cache": "Required by Application::startCache()",
+                "salient/curler": "Required by Application::exportHar()",
+                "salient/sync": "Required by Application::startSync()"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Container\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The container component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-04-04T00:26:57+00:00"
+        },
+        {
+            "name": "salient/contracts",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-contracts.git",
+                "reference": "2409477b6939d4bf5fadd7b1cc6cc7165d1254b0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-contracts/zipball/2409477b6939d4bf5fadd7b1cc6cc7165d1254b0",
+                "reference": "2409477b6939d4bf5fadd7b1cc6cc7165d1254b0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4",
+                "psr/container": "^2",
+                "psr/event-dispatcher": "^1",
+                "psr/http-client": "^1",
+                "psr/http-message": "^1.1 || ^2",
+                "psr/log": "^1",
+                "psr/simple-cache": "^1 || ^2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Contract\\": ""
+                },
+                "classmap": [
+                    "stubs/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The contracts component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-11-14T14:20:43+00:00"
+        },
+        {
+            "name": "salient/core",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-core.git",
+                "reference": "1edd39f56f5c3f0e3bb1656cadc20b9921be9557"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-core/zipball/1edd39f56f5c3f0e3bb1656cadc20b9921be9557",
+                "reference": "1edd39f56f5c3f0e3bb1656cadc20b9921be9557",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4",
+                "psr/event-dispatcher": "^1",
+                "salient/container": "self.version",
+                "salient/contracts": "self.version",
+                "salient/iterators": "self.version",
+                "salient/utils": "self.version"
+            },
+            "provide": {
+                "psr/event-dispatcher-implementation": "^1"
+            },
+            "suggest": {
+                "ext-sqlite3": "Required by Store"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Core\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The core component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-11-18T05:44:07+00:00"
+        },
+        {
+            "name": "salient/iterators",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-iterators.git",
+                "reference": "d2288b4e92668e7e71baa7b5994b6b047aab9997"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-iterators/zipball/d2288b4e92668e7e71baa7b5994b6b047aab9997",
+                "reference": "d2288b4e92668e7e71baa7b5994b6b047aab9997",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4",
+                "salient/contracts": "self.version",
+                "salient/utils": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Iterator\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The iterators component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-02-26T02:48:47+00:00"
+        },
+        {
+            "name": "salient/phpdoc",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-phpdoc.git",
+                "reference": "add77abca5fcf589f9f8af804c1826b3fdb04290"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-phpdoc/zipball/add77abca5fcf589f9f8af804c1826b3fdb04290",
+                "reference": "add77abca5fcf589f9f8af804c1826b3fdb04290",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4",
+                "salient/contracts": "self.version",
+                "salient/core": "self.version",
+                "salient/utils": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\PHPDoc\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The PHPDoc component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-11-17T05:42:24+00:00"
+        },
+        {
+            "name": "salient/polyfills",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-polyfills.git",
+                "reference": "78e1627687cea37f4e42a4f0c61780b46295d10c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-polyfills/zipball/78e1627687cea37f4e42a4f0c61780b46295d10c",
+                "reference": "78e1627687cea37f4e42a4f0c61780b46295d10c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Salient\\Polyfill\\": ""
+                },
+                "classmap": [
+                    "stubs/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The polyfills component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-03-04T02:19:09+00:00"
+        },
+        {
+            "name": "salient/utils",
+            "version": "v0.99.81",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/salient-labs/toolkit-utils.git",
+                "reference": "5e36085c28a61983740fad6d11d1ef4dd472c5ee"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/salient-labs/toolkit-utils/zipball/5e36085c28a61983740fad6d11d1ef4dd472c5ee",
+                "reference": "5e36085c28a61983740fad6d11d1ef4dd472c5ee",
+                "shasum": ""
+            },
+            "require": {
+                "composer-runtime-api": "^2.2",
+                "php": ">=7.4"
+            },
+            "suggest": {
+                "salient/iterators": "Required by File::find() and File::pruneDir()"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Salient\\Utility\\": ""
+                },
+                "classmap": [
+                    "stubs/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luke Arms",
+                    "email": "luke@linacreative.com"
+                }
+            ],
+            "description": "The utilities component of the Salient toolkit",
+            "support": {
+                "issues": "https://github.com/salient-labs/toolkit/issues",
+                "source": "https://github.com/salient-labs/toolkit"
+            },
+            "time": "2025-11-18T05:44:07+00:00"
+        },
+        {
+            "name": "sebastian/diff",
+            "version": "5.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/diff.git",
+                "reference": "c41e007b4b62af48218231d6c2275e4c9b975b2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/c41e007b4b62af48218231d6c2275e4c9b975b2e",
+                "reference": "c41e007b4b62af48218231d6c2275e4c9b975b2e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.0",
-                "symfony/process": "^7.2"
+                "phpunit/phpunit": "^10.0",
+                "symfony/process": "^6.4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "8.1-dev"
+                    "dev-main": "5.1-dev"
                 }
             },
             "autoload": {
@@ -2309,27 +3051,15 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/diff/issues",
                 "security": "https://github.com/sebastianbergmann/diff/security/policy",
-                "source": "https://github.com/sebastianbergmann/diff/tree/8.1.0"
+                "source": "https://github.com/sebastianbergmann/diff/tree/5.1.1"
             },
             "funding": [
                 {
                     "url": "https://github.com/sebastianbergmann",
                     "type": "github"
-                },
-                {
-                    "url": "https://liberapay.com/sebastianbergmann",
-                    "type": "liberapay"
-                },
-                {
-                    "url": "https://thanks.dev/u/gh/sebastianbergmann",
-                    "type": "thanks_dev"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/sebastian/diff",
-                    "type": "tidelift"
                 }
             ],
-            "time": "2026-04-05T12:02:33+00:00"
+            "time": "2024-03-02T07:15:17+00:00"
         },
         {
             "name": "spatie/array-to-xml",

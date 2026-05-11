@@ -5,6 +5,7 @@
     "type": "project",
     "license": "EUPL-1.2",
     "require-dev": {
+        "lkrms/pretty-php": "^0.4.95",
         "vimeo/psalm": "^6.16",
         "phpstan/phpstan": "^2.1"
     }

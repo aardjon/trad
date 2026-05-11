@@ -1,0 +1,4 @@
+{
+    "psr12": true,
+    "preset": "laravel"
+}
