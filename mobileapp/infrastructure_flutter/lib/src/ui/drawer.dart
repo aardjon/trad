@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 import 'icons.dart';
 import 'state.dart';
 
-/// Factory for creating the global application drawer.
-class TradDrawerFactory {
+/// The global application drawer.
+class TradDrawer extends StatelessWidget {
   /// Model for the application main menu data.
   final MainMenuModel _model;
 
@@ -18,13 +18,12 @@ class TradDrawerFactory {
   /// Controller instance to notify for any user interaction.
   final ApplicationWideController _controller;
 
-  final IconWidgetFactory _iconFactory = const IconWidgetFactory();
-
   /// Constructor for directly initializing all members.
-  TradDrawerFactory(this._model, this._settingsState, this._controller);
+  const TradDrawer(this._model, this._settingsState, this._controller, {super.key});
 
-  /// Creates and returns a new instance of the application drawer for the given build [context].
-  Widget create(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    const IconWidgetFactory iconFactory = IconWidgetFactory();
     ChangeNotifierProvider<SettingsNotifier> changeNotifier =
         ChangeNotifierProvider<SettingsNotifier>.value(
           value: _settingsState,
@@ -45,30 +44,30 @@ class TradDrawerFactory {
                   ),
                 ),
                 /*ListTile(
-                  leading: _iconFactory.getIconWidget(_model.journalItem.icon),
+                  leading: iconFactory.getIconWidget(_model.journalItem.icon),
                   title: Text(_model.journalItem.mainTitle),
                   onTap: _controller.requestSwitchToJournal,
                 ),*/
                 ListTile(
                   enabled: _settingsState.isRouteDbAavailable(),
-                  leading: _iconFactory.getIconWidget(_model.routedbItem.icon),
+                  leading: iconFactory.getIconWidget(_model.routedbItem.icon),
                   title: Text(_model.routedbItem.mainTitle),
                   onTap: _controller.requestSwitchToRouteDb,
                 ),
                 /*ListTile(
-                  leading: _iconFactory.getIconWidget(_model.knowledgebaseItem.icon),
+                  leading: iconFactory.getIconWidget(_model.knowledgebaseItem.icon),
                   title: Text(_model.knowledgebaseItem.mainTitle),
                   onTap: _controller.requestSwitchToKnowledgebase,
                 ),*/
                 const Divider(),
                 ListTile(
-                  leading: _iconFactory.getIconWidget(_model.settingsItem.icon),
+                  leading: iconFactory.getIconWidget(_model.settingsItem.icon),
                   title: Text(_model.settingsItem.mainTitle),
                   onTap: _controller.requestSwitchToSettings,
                 ),
                 const Divider(),
                 ListTile(
-                  leading: _iconFactory.getIconWidget(_model.aboutItem.icon),
+                  leading: iconFactory.getIconWidget(_model.aboutItem.icon),
                   title: Text(_model.aboutItem.mainTitle),
                   onTap: _controller.requestSwitchToAbout,
                 ),
