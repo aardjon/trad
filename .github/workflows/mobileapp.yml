@@ -128,6 +128,8 @@ jobs:
              flutter config --no-cli-animations
              echo "--- Install Melos"
              dart pub global activate melos
+             echo "--- Install requirements"
+             melos bootstrap
 
       - name: Check code style
         run: melos run format
