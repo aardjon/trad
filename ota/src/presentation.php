@@ -1,17 +1,19 @@
 <?php
 
-require_once('core.php');
+require_once ('core.php');
 
-
-final class JsonPresenter implements PresentationBoundary {
-    public function __construct() {
+final class JsonPresenter implements PresentationBoundary
+{
+    public function __construct()
+    {
         header('Content-Type: application/json');
     }
-    
+
     #[\Override]
-    public function sendDbMetadata(array $routeDbMetadata) : void {
+    public function sendDbMetadata(array $routeDbMetadata): void
+    {
         $jsonData = [];
-        foreach($routeDbMetadata as $routeDb) {
+        foreach ($routeDbMetadata as $routeDb) {
             $jsonData[] = [
                 'downloadUrl' => $routeDb->downloadUrl,
                 'schemaVersionMajor' => $routeDb->schemaVersionMajor,
@@ -22,6 +24,5 @@ final class JsonPresenter implements PresentationBoundary {
         echo json_encode($jsonData);
     }
 }
-
 
 ?>

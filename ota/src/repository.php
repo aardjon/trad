@@ -1,37 +1,38 @@
 <?php
 
-require_once('core.php');
+require_once ('core.php');
 
-
-final class DbDirectoryReader implements DbDirectoryRepository {
-    
+final class DbDirectoryReader implements DbDirectoryRepository
+{
     private string $dbFilesDirectory;
-    
-    public function __construct(string $dbFilesDir) {
+
+    public function __construct(string $dbFilesDir)
+    {
         $this->dbFilesDirectory = $dbFilesDir;
     }
-    
+
     #[\Override]
-    public function getRouteDbFiles() : array {
+    public function getRouteDbFiles(): array
+    {
         $dbFiles = [];
         foreach (new DirectoryIterator($this->dbFilesDirectory) as $fileInfo) {
-            if($fileInfo->isFile()) {
-                $dbFiles[] ="{$this->dbFilesDirectory}/{$fileInfo->getFilename()}";
+            if ($fileInfo->isFile()) {
+                $dbFiles[] = "{$this->dbFilesDirectory}/{$fileInfo->getFilename()}";
             }
         }
+
         return $dbFiles;
     }
 }
 
-
- 
-final class TradRouteDbFileReader implements DbMetadataRepository {
-
+final class TradRouteDbFileReader implements DbMetadataRepository
+{
     #[\Override]
-    public function getRouteDbMetadata(string $routeDbFile) : RouteDbMetadata {
+    public function getRouteDbMetadata(string $routeDbFile): RouteDbMetadata
+    {
         $db = new PDO('sqlite:'.$routeDbFile);
         $cursor = $db->query('SELECT schema_version_major, schema_version_minor, compile_time FROM database_metadata LIMIT 1');
-        if($cursor == false) {
+        if ($cursor == false) {
             throw new RuntimeException('SQL query failed; maybe this is not a valid trad route database?');
         }
         /** @var array<int, mixed> $resultSet */
@@ -39,7 +40,7 @@ final class TradRouteDbFileReader implements DbMetadataRepository {
 
         /** @var array<int, int | string> $metadataRow */
         $metadataRow = $resultSet[0];
-        
+
         $cursor->closeCursor();
         unset($cursor);
         unset($db);

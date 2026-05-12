@@ -1,10 +1,13 @@
 <?php
 
-/** Static configuration of the trad.ota web service. */
-final class AppConfig {
-    
-    /** Path to the directory containing all avilable route database files.
-     * 
+/**
+ * Static configuration of the trad.ota web service.
+ */
+final class AppConfig
+{
+    /**
+     * Path to the directory containing all avilable route database files.
+     *
      * This path must be relative to the 'apivX.php` file, e.g. '../dbfiles'. Do not give an
      * absolute path here!
      */
