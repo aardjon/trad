@@ -44,7 +44,7 @@ class Sqlite3Database implements RelationalDatabaseBoundary {
 
   @override
   void disconnect() {
-    _dbHandle?.dispose();
+    _dbHandle?.close();
     _dbHandle = null;
   }
 

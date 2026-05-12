@@ -89,9 +89,9 @@ void main() {
         expect(database.disconnect, returnsNormally);
 
         if (dbIsConnected) {
-          verify(dbMock.dispose).called(1);
+          verify(dbMock.close).called(1);
         } else {
-          verifyNever(dbMock.dispose);
+          verifyNever(dbMock.close);
         }
       });
     }
