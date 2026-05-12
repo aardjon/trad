@@ -8,5 +8,10 @@
         "lkrms/pretty-php": "^0.4.95",
         "vimeo/psalm": "^6.16",
         "phpstan/phpstan": "^2.1"
+    },
+    "scripts": {
+        "analyze": "vendor/bin/phpstan && vendor/bin/psalm --no-cache",
+        "format": "vendor/bin/pretty-php",
+        "upgrade": "composer update"
     }
 }
