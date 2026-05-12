@@ -18,7 +18,8 @@ enum AdjectivalGrade {
   e3('E3'),
 
   /// Cannot be properly secured.
-  e4('E4');
+  e4('E4')
+  ;
 
   const AdjectivalGrade(this.caption);
 
