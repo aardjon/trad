@@ -45,6 +45,8 @@ class MainWidget extends StatelessWidget {
 
   final RouteListNotifier _routeListState;
 
+  final SummitListNotifier _contextualSummitListState;
+
   final PostListNotifier _postListState;
 
   final ApplicationWideController _controller;
@@ -59,6 +61,7 @@ class MainWidget extends StatelessWidget {
     this._settingsState,
     this._summitListState,
     this._routeListState,
+    this._contextualSummitListState,
     this._postListState, {
     super.key,
   });
@@ -88,6 +91,7 @@ class MainWidget extends StatelessWidget {
           return SummitDetailsView(
             TradDrawer(_menuModel, _settingsState, _controller),
             _routeListState,
+            _contextualSummitListState,
           );
         },
         UiRoute.routedetails.toRouteString(): (BuildContext context) {

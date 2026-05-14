@@ -22,8 +22,16 @@ class SummitDetailsView extends StatefulWidget {
   /// Notifier providing the current route list state to be displayed.
   final RouteListNotifier routeListState;
 
+  /// Notifier providing the list of nearby summits to be displayed.
+  final SummitListNotifier nearbySummitListState;
+
   /// Constructor for directly initializing all members.
-  const SummitDetailsView(this.appDrawer, this.routeListState, {super.key});
+  const SummitDetailsView(
+    this.appDrawer,
+    this.routeListState,
+    this.nearbySummitListState, {
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -48,7 +56,7 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
     _TabFactory tabFactory = _TabFactory(widget, model);
 
     return Scaffold(
-      appBar: _buildAppBar(model, tabFactory.getTabs(), tabFactory.getContextMenus(), context),
+      appBar: _buildAppBar(model, tabFactory, context),
       body: TabBarView(
         controller: _tabController,
         children: tabFactory.getContentWidgets(),
@@ -60,8 +68,7 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
 
   AppBar _buildAppBar(
     SummitDetailsModel model,
-    List<Tab> tabs,
-    List<Widget> contextMenus,
+    _TabFactory tabFactory,
     BuildContext context,
   ) {
     return AppBar(
@@ -83,15 +90,20 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
           icon: const Icon(Icons.map),
         ),
         IconButton(
-          onPressed: () {
-            _showContextMenu(contextMenus[_tabController.index], context);
-          },
+          onPressed: tabFactory.hasContextMenu(_tabController.index)
+              ? () {
+                  _showContextMenu(tabFactory.getContextMenus()[_tabController.index], context);
+                }
+              : null,
           icon: const Icon(Icons.menu_open),
         ),
       ],
       bottom: TabBar(
         controller: _tabController,
-        tabs: tabs,
+        tabs: tabFactory.getTabs(),
+        onTap: (int value) {
+          setState(() {});
+        },
       ),
     );
   }
@@ -169,7 +181,7 @@ class _TabFactory {
 
   /// Return the number of available tabs.
   static int getTabCount() {
-    return 1;
+    return 2;
   }
 
   /// Return all the tab widgets (i.e. the icons to click on for selecting one) to use.
@@ -178,6 +190,7 @@ class _TabFactory {
       Tab(
         icon: Icon(Icons.hiking), // Better: Icons.elevation, but not available yet
       ),
+      Tab(icon: Icon(Icons.radar)),
     ];
   }
 
@@ -185,13 +198,22 @@ class _TabFactory {
   List<Widget> getContentWidgets() {
     return <Widget>[
       SummitRoutesView(_pageWidget.routeListState),
+      NearbySummitsView(_pageWidget.nearbySummitListState),
     ];
+  }
+
+  bool hasContextMenu(int tabIndex) {
+    if (tabIndex == 1) {
+      return _pageModel.canShowNearbySummits;
+    }
+    return true;
   }
 
   /// Return all the context menu widgets that are associated with the single tabs.
   List<Widget> getContextMenus() {
     return <Widget>[
       SummitRoutesContextMenu(_pageModel, _pageWidget.routeListState),
+      NearbySummitsContextMenu(_pageModel, _pageWidget.nearbySummitListState),
     ];
   }
 }
@@ -245,5 +267,84 @@ class SummitRoutesView extends StatelessWidget {
   void _onRouteTap(ItemDataId routeDataId) {
     RouteDbController controller = RouteDbController();
     controller.requestRouteDetails(routeDataId);
+  }
+}
+
+/// Context menu to be shown when the "nearby summits" tab is active
+class NearbySummitsContextMenu extends StatelessWidget {
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+
+  final SummitListNotifier _state;
+  final SummitDetailsModel _pageModel;
+
+  /// Constructor for directly initializing all members.
+  const NearbySummitsContextMenu(this._pageModel, this._state, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: _createContextMenuitems(context),
+    );
+  }
+
+  List<Widget> _createContextMenuitems(BuildContext context) {
+    List<ListTile> menuItems = <ListTile>[];
+    for (final ListViewItem item in _state.getContextActionItems()) {
+      menuItems.add(
+        ListTile(
+          title: Text(item.mainTitle),
+          trailing: _iconFactory.getIconWidget(item.endIcon),
+          onTap: () {
+            _onContextAction(_pageModel.summitDataId, item.itemId!);
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }
+    return menuItems;
+  }
+
+  void _onContextAction(ItemDataId summitDataId, ItemDataId actionItemId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestNearbySummitListSorting(summitDataId, actionItemId);
+  }
+}
+
+/// Widget to be shown when the "nearby summits" tab is active
+class NearbySummitsView extends StatelessWidget {
+  final SummitListNotifier _summitListState;
+
+  /// Constructor for directly initializing all members.
+  const NearbySummitsView(this._summitListState, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<SummitListNotifier>.value(
+      value: _summitListState,
+      child: Consumer<SummitListNotifier>(
+        builder: (BuildContext context, SummitListNotifier state, Widget? child) {
+          return ListView.builder(
+            itemCount: state.getSummitCount(),
+            itemBuilder: (BuildContext context, int index) {
+              final ListViewItem summit = state.getSummitItem(index);
+              return ListTile(
+                title: Text(summit.mainTitle),
+                trailing: Text(summit.subTitle ?? ''),
+                onTap: () {
+                  _onSummitTap(summit.itemId!);
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _onSummitTap(ItemDataId summitDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestSummitDetails(summitDataId);
   }
 }

@@ -48,6 +48,13 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// one and never create their own!
   static final RouteListNotifier _routeListState = RouteListNotifier();
 
+  /// The central UI state of the minor summit list assigned to a certain context (e.g. summit
+  /// details).
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  static final SummitListNotifier _contextualSummitListState = SummitListNotifier();
+
   /// The central post list state of the UI.
   ///
   /// This is the only real instance of this, all other clients (views) should only reference this
@@ -66,6 +73,7 @@ class ApplicationUI implements ApplicationUiBoundary {
         _settingsState,
         _summitListState,
         _routeListState,
+        _contextualSummitListState,
         _postListState,
       ),
     );
@@ -103,7 +111,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateSummitList(List<ListViewItem> summitItems) {
-    _summitListState.replaceSummits(summitItems);
+    _summitListState.replaceSummits(summitItems, <ListViewItem>[]);
   }
 
   @override
@@ -116,6 +124,15 @@ class ApplicationUI implements ApplicationUiBoundary {
   void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems) {
     _logger.debug('Updating route list data');
     _routeListState.replaceRoutes(routeItems, sortMenuItems);
+  }
+
+  @override
+  void updateContextualSummitList(
+    List<ListViewItem> summitItems,
+    List<ListViewItem> contextActionItems,
+  ) {
+    _logger.debug('Updating contextual summit list data');
+    _contextualSummitListState.replaceSummits(summitItems, contextActionItems);
   }
 
   @override

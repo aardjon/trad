@@ -123,6 +123,9 @@ class SummitListNotifier extends ChangeNotifier {
   /// The current list of summits.
   List<ListViewItem> _summits = <ListViewItem>[];
 
+  /// The currently available context action items.
+  List<ListViewItem> _contextActionItems = <ListViewItem>[];
+
   /// Returns the total number of summits that shall currently be displayed.
   int getSummitCount() {
     return _summits.length;
@@ -136,11 +139,20 @@ class SummitListNotifier extends ChangeNotifier {
     return _summits[index];
   }
 
+  /// Returns the action items for the current summit list.
+  List<ListViewItem> getContextActionItems() {
+    return _contextActionItems;
+  }
+
   /// Replaces the current summit list with the new one defined by [summits].
   ///
   /// All listeners are notified so that that e.g. views can be updated.
-  void replaceSummits(List<ListViewItem> summits) {
+  void replaceSummits(
+    List<ListViewItem> summits,
+    List<ListViewItem> contextActionItems,
+  ) {
     _summits = summits;
+    _contextActionItems = contextActionItems;
     notifyListeners();
   }
 }

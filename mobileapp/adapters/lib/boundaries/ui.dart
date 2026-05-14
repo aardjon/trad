@@ -207,12 +207,17 @@ class SummitDetailsModel {
   /// lacks a geo position).
   final bool canShowOnMap;
 
+  /// Flag for displaying if nearby summits may be found for this summit at all (true) or not
+  /// (false, e.g. because it lacks a geo position).
+  final bool canShowNearbySummits;
+
   /// Constructor for directly initializing all members.
   SummitDetailsModel(
     this.summitDataId,
     this.pageTitle,
     this.pageSubTitle, {
     required this.canShowOnMap,
+    required this.canShowNearbySummits,
   });
 }
 
@@ -382,6 +387,15 @@ abstract interface class ApplicationUiBoundary {
   /// This will update the display with the new [routeItems] and the new [sortMenuItems] (sort menu)
   /// as necessary.
   void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems);
+
+  /// Notify the UI about a new contextual summit list.
+  ///
+  /// This will update the display with the new [summitItems] and the new [contextActionItems] (e.g.
+  /// sort menu) as necessary.
+  void updateContextualSummitList(
+    List<ListViewItem> summitItems,
+    List<ListViewItem> contextActionItems,
+  );
 
   /// Request the UI to display the *Route Details* screen based on the provided [model].
   ///
