@@ -3,6 +3,8 @@
 ///
 library;
 
+import 'dart:math';
+
 /// A single geographical point in the WGS 84 geodetic system.
 ///
 /// The coordinates are represented in decimal degree, with the latitude value being within
@@ -31,6 +33,26 @@ class GeoPosition {
         longitude >= -180.0 && longitude <= 180.0,
         'Longitude value must be within [-180.0, 180.0]',
       );
+
+  /// Return the distance between this and the [other] position im meters.
+  ///
+  /// "Distance" means a direct, straight line - terrain and earth's curvature are ignored, so this
+  /// calculation becomes less accurate with increasing distances. Also, due to the involved
+  /// floating point operations, the distance calculation may not be too precise in some cases.
+  double calculateDistance(GeoPosition other) {
+    /*
+    This simple distance calculation uses the Pythagorean theorem but improves it by estimating the
+    distance between two latitudes. This is good enough for the smaller distances in the scale of
+    hundreds of meters we are working with in this application. For more information and a detailed
+    explanation, please have a look at https://en.kompf.de/gps/distcalc.html (we are using the
+    "Improved method" here).
+    */
+    double longitudeDistance = 111.3 * 1000; // We want the distance in meters
+    double averageLat = (latitude + other.latitude) / 2 * pi / 180.0;
+    double dlat = longitudeDistance * (latitude - other.latitude);
+    double dlon = longitudeDistance * cos(averageLat) * (longitude - other.longitude);
+    return sqrt(dlat * dlat + dlon * dlon);
+  }
 
   @override
   String toString() {
