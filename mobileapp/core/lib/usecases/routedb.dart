@@ -15,10 +15,12 @@ import '../boundaries/storage/routedb.dart';
 import '../boundaries/sysenv.dart';
 import '../entities/data_source.dart';
 import '../entities/errors.dart';
+import '../entities/geoposition.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
+import '../entities/sorting/summits_filter_mode.dart';
 import '../entities/summit.dart';
 
 /// Logger to be used in this library file.
@@ -41,6 +43,9 @@ class RouteDbUseCases {
 
   /// Interface to the operating system environment.
   final SystemEnvironmentBoundary _systemEnvBoundary;
+
+  /// Maximum distance in meters up to which an object is still considered "nearby" another one.
+  static const int _maxNearbyDistance = 500;
 
   /// Constructor for creating a new RouteDbUseCases instance.
   RouteDbUseCases(DependencyProvider di)
@@ -123,7 +128,7 @@ class RouteDbUseCases {
     _presentationBoundary.updateSummitList(summitList);
   }
 
-  /// Use Case: Show all routes for the selected summit.
+  /// Use Case: Show detailed information about the selected summit.
   Future<void> showRouteListPage(int summitId) async {
     _logger.info('Running use case showRouteListPage($summitId)');
     RoutesFilterMode sortCriterion = await _preferencesBoundary.getInitialRoutesSortCriterion();
@@ -131,6 +136,76 @@ class RouteDbUseCases {
     _presentationBoundary.showSummitDetails(selectedSummit);
     List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(summitId, sortCriterion);
     _presentationBoundary.updateRouteList(routeList, sortCriterion);
+    if (selectedSummit.position != null) {
+      _logger.debug('Retrieving nearby summits, sorting them by distance');
+      List<(Summit, double)> nearbySummitsList = await _querySortedSummitList(
+        selectedSummit.position!,
+        _maxNearbyDistance,
+        NearbySummitsSortMode.distance,
+      );
+      _presentationBoundary.updateNearbySummitList(
+        nearbySummitsList,
+        NearbySummitsSortMode.distance,
+      );
+    } else {
+      _logger.info('No position found for selected summit, nearby list will be missing.');
+    }
+  }
+
+  /// Use Case: Sort the nearby summits list by a certain criterion
+  Future<void> sortNearbySummitsList(int summitId, NearbySummitsSortMode sortCriterion) async {
+    _logger.info('Running use case sortRouteList($summitId, $sortCriterion)');
+    Summit selectedSummit = await _storageBoundary.retrieveSummit(summitId);
+    if (selectedSummit.position != null) {
+      List<(Summit, double)> nearbySummitsList = await _querySortedSummitList(
+        selectedSummit.position!,
+        _maxNearbyDistance,
+        sortCriterion,
+      );
+      _presentationBoundary.updateNearbySummitList(nearbySummitsList, sortCriterion);
+    } else {
+      _logger.info('No position found for selected summit, nearby list will be missing.');
+    }
+  }
+
+  Future<List<(Summit, double)>> _querySortedSummitList(
+    GeoPosition centerPoint,
+    int maxDistance,
+    NearbySummitsSortMode sortCriterion,
+  ) async {
+    (GeoPosition northWest, GeoPosition southEast) rect = centerPoint.calculateBoundingSquare(
+      maxDistance,
+    );
+    List<Summit> summitsInRect = await _storageBoundary.retrieveSummitsWithinRect(
+      rect.$1,
+      rect.$2,
+      sortAlphabetically: sortCriterion == NearbySummitsSortMode.name,
+    );
+
+    List<(Summit, double)> nearbySummitList = <(Summit, double)>[];
+    for (final Summit summit in summitsInRect) {
+      //if (summit.position == null) continue;
+      double distance = summit.position!.calculateDistance(centerPoint);
+      if (distance > 0.0 && distance <= maxDistance) {
+        nearbySummitList.add((summit, distance));
+      }
+    }
+
+    if (sortCriterion == NearbySummitsSortMode.distance) {
+      int orderByDistance((Summit, double) summit1, (Summit, double) summit2) {
+        double dist1 = summit1.$2;
+        double dist2 = summit2.$2;
+        if (dist1 > dist2) {
+          return 1;
+        } else if (dist1 < dist2) {
+          return -1;
+        }
+        return 0;
+      }
+
+      nearbySummitList.sort(orderByDistance);
+    }
+    return nearbySummitList;
   }
 
   /// Use Case: Sort the route list by a certain criterion

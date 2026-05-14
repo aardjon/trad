@@ -9,6 +9,7 @@ import '../entities/post.dart';
 import '../entities/route.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
+import '../entities/sorting/summits_filter_mode.dart';
 import '../entities/summit.dart';
 
 /// Interface providing user interactions to the core.
@@ -50,6 +51,14 @@ abstract interface class PresentationBoundary {
   /// The current display may be updated with the provided [routeList], if necessary.
   /// [usedSortCriterion] defines the sort criterion the [routeList] is ordered by.
   void updateRouteList(List<Route> routeList, RoutesFilterMode usedSortCriterion);
+
+  /// Notify the user interface about a new list of nearby summits.
+  ///
+  /// The current display may be updated with the provided [nearbySummits], if necessary.
+  void updateNearbySummitList(
+    List<(Summit, double)> nearbySummits,
+    NearbySummitsSortMode usedSortCriterion,
+  );
 
   /// Let the UI display details about the [selectedRoute] in the *route db* domain.
   ///
