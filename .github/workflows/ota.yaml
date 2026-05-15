@@ -1,0 +1,44 @@
+name: trad.ota
+
+on: [push, pull_request]
+
+jobs:
+  check-style:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./ota
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: 'composer'
+          
+      - name: Setup environment
+        run: composer install
+
+      - name: Check code style
+        run: composer run format
+
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./ota
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: 'composer'
+          
+      - name: Setup environment
+        run: composer install
+
+      - name: Check code style
+        run: composer run analyze
