@@ -296,6 +296,59 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     return summits;
   }
 
+  @override
+  Future<List<Summit>> retrieveSummitsWithinRect(
+    GeoPosition northWest,
+    GeoPosition southEast, {
+    bool sortAlphabetically = false,
+  }) async {
+    _logger.debug('Retrieving filtered summit list for rect [$northWest, $southEast]"');
+
+    // Configure the query
+    Query query = Query.join(
+      <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
+      <String>[
+        '${SummitNamesTable.columnSummitId}=${SummitsTable.columnId}',
+        '${SummitsTable.columnAreaId}=${AreasTable.columnId}',
+      ],
+      <String>[
+        SummitNamesTable.columnSummitId,
+        SummitNamesTable.columnName,
+        SummitsTable.columnLatitude,
+        SummitsTable.columnLongitude,
+        AreasTable.columnName,
+      ],
+    );
+
+    query.setWhereCondition(
+      '(${SummitsTable.columnLatitude} <= ? AND ${SummitsTable.columnLatitude} >= ?) '
+      'AND (${SummitsTable.columnLongitude} >= ? AND ${SummitsTable.columnLongitude} <= ?)',
+      <int>[
+        _convertCoordinateValue(northWest.latitude),
+        _convertCoordinateValue(southEast.latitude),
+        _convertCoordinateValue(northWest.longitude),
+        _convertCoordinateValue(southEast.longitude),
+      ],
+    );
+    if (sortAlphabetically) {
+      query.orderByColumns = <String>[SummitNamesTable.columnName];
+    }
+
+    // Run the database query
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
+    // Convert and return the result data
+    List<Summit> summits = <Summit>[];
+    for (final ResultRow dataRow in resultSet) {
+      int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
+      String name = dataRow.getStringValue(SummitNamesTable.columnName);
+      String area = dataRow.getStringValue(AreasTable.columnName);
+      GeoPosition? position = _extractPosition(dataRow);
+      summits.add(Summit(id, name, area, position));
+    }
+    return summits;
+  }
+
   GeoPosition? _extractPosition(ResultRow dataRow) {
     // Unknown/Missing position values are stored in the database with this special coordinates.
     const (int, int) undefinedCoordinates = (0, 0);
@@ -310,6 +363,13 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
     }
     return position;
+  }
+
+  int _convertCoordinateValue(double latOrLonValue) {
+    // The precision of geographic coordinates stored in the database. The read value must be
+    // divided by this factor to get regular (floating point) decimal degree.
+    const double coordinateValuePrecision = 10000000;
+    return (latOrLonValue * coordinateValuePrecision).toInt();
   }
 
   @override
