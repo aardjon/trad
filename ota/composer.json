@@ -1,6 +1,6 @@
 {
     "name": "aardjon/trad.ota",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "Server backend of the trad route database online updater",
     "type": "project",
     "license": "EUPL-1.2",
