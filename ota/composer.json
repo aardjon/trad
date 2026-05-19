@@ -4,6 +4,16 @@
     "description": "Server backend of the trad route database online updater",
     "type": "project",
     "license": "EUPL-1.2",
+    "authors": [
+        {
+            "name": "Thomas Wesenigk",
+            "role": "Developer"
+        },
+        {
+            "name": "Karsten Wesenigk",
+            "role": "Developer"
+        }
+    ],
     "require-dev": {
         "lkrms/pretty-php": "^0.4.95",
         "vimeo/psalm": "^6.16",
