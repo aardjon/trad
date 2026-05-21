@@ -11,9 +11,10 @@ error_reporting(E_ALL);
 
 require_once ('config.inc.php');
 
-require_once ('core.php');
-require_once ('repository.php');
-require_once ('presentation.php');
+require_once (__DIR__.'/core/usecases.php');
+require_once (__DIR__.'/adapters/repositories/filesystem.php');
+require_once (__DIR__.'/adapters/repositories/routedbv1.php');
+require_once (__DIR__.'/adapters/presentation.php');
 
 /**
  * Entry point for handling HTTP GET requests.

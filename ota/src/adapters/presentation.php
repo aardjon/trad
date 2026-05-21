@@ -1,6 +1,6 @@
 <?php
 
-require_once ('core.php');
+require_once (__DIR__.'/../core/boundaries.php');
 
 final class JsonPresenter implements PresentationBoundary
 {

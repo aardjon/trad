@@ -1,30 +1,12 @@
 <?php
 
-require_once ('core.php');
+/** Adapter implementation for the DbMetadataRepository. */
+require_once (__DIR__.'/../../core/boundaries.php');
+require_once (__DIR__.'/../../core/entities.php');
 
-final class DbDirectoryReader implements DbDirectoryRepository
-{
-    private string $dbFilesDirectory;
-
-    public function __construct(string $dbFilesDir)
-    {
-        $this->dbFilesDirectory = $dbFilesDir;
-    }
-
-    #[\Override]
-    public function getRouteDbFiles(): array
-    {
-        $dbFiles = [];
-        foreach (new DirectoryIterator($this->dbFilesDirectory) as $fileInfo) {
-            if ($fileInfo->isFile()) {
-                $dbFiles[] = "{$this->dbFilesDirectory}/{$fileInfo->getFilename()}";
-            }
-        }
-
-        return $dbFiles;
-    }
-}
-
+/**
+ * Implementation reading data from a trad routedb of schema version 1.
+ */
 final class TradRouteDbFileReader implements DbMetadataRepository
 {
     #[\Override]
