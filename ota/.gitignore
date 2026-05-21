@@ -1,2 +1,7 @@
+# Composer environment
 vendor
 
+
+# KDevelop project files
+.kdev4/
+*.kdev4
