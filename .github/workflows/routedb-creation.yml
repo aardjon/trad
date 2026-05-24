@@ -3,7 +3,7 @@ name: routedb-creation
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 22 * * 2'
+    - cron: '20 0 * * 3'
 
 jobs:
   routedb-creation:
