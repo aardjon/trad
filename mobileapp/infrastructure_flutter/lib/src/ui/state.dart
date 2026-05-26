@@ -45,6 +45,37 @@ class GuiState {
   GlobalKey<NavigatorState> getNavigatorKey() {
     return _navigatorKey;
   }
+
+  /// The central settings state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final SettingsNotifier settingsState = SettingsNotifier();
+
+  /// The central summit list state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final SummitListNotifier summitListState = SummitListNotifier();
+
+  /// The central route list/summit details state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final RouteListNotifier routeListState = RouteListNotifier();
+
+  /// The central UI state of the minor summit list assigned to a certain context (e.g. summit
+  /// details).
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final SummitListNotifier contextualSummitListState = SummitListNotifier();
+
+  /// The central post list state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final PostListNotifier postListState = PostListNotifier();
 }
 
 /// Represents the current state of the application settings and notifies about changes.

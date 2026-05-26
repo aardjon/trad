@@ -34,33 +34,6 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// this one and never create their own!
   static final GuiState _uiState = GuiState();
 
-  static final SettingsNotifier _settingsState = SettingsNotifier();
-
-  /// The central summit list state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final SummitListNotifier _summitListState = SummitListNotifier();
-
-  /// The central route list/summit details state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final RouteListNotifier _routeListState = RouteListNotifier();
-
-  /// The central UI state of the minor summit list assigned to a certain context (e.g. summit
-  /// details).
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final SummitListNotifier _contextualSummitListState = SummitListNotifier();
-
-  /// The central post list state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final PostListNotifier _postListState = PostListNotifier();
-
   @override
   void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel) {
     runApp(
@@ -70,11 +43,6 @@ class ApplicationUI implements ApplicationUiBoundary {
         menuModel,
         ApplicationWideController(),
         _uiState,
-        _settingsState,
-        _summitListState,
-        _routeListState,
-        _contextualSummitListState,
-        _postListState,
       ),
     );
     // Set the UI state to initialized after the first event frame is done.
@@ -90,7 +58,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     required List<ListViewItem> dataSourceAttributions,
     String? statusMessage,
   }) {
-    _settingsState.updateRouteDbStatus(
+    _uiState.settingsState.updateRouteDbStatus(
       routeDbActivationStatus: activated,
       dbIdentifier: label,
       dataSourceAttributions: dataSourceAttributions,
@@ -100,7 +68,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateRouteDbUpdateProgress({required bool inProgress}) {
-    _settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
+    _uiState.settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
   }
 
   @override
@@ -111,7 +79,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateSummitList(List<ListViewItem> summitItems) {
-    _summitListState.replaceSummits(summitItems, <ListViewItem>[]);
+    _uiState.summitListState.replaceSummits(summitItems, <ListViewItem>[]);
   }
 
   @override
@@ -123,7 +91,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems) {
     _logger.debug('Updating route list data');
-    _routeListState.replaceRoutes(routeItems, sortMenuItems);
+    _uiState.routeListState.replaceRoutes(routeItems, sortMenuItems);
   }
 
   @override
@@ -132,7 +100,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     List<ListViewItem> contextActionItems,
   ) {
     _logger.debug('Updating contextual summit list data');
-    _contextualSummitListState.replaceSummits(summitItems, contextActionItems);
+    _uiState.contextualSummitListState.replaceSummits(summitItems, contextActionItems);
   }
 
   @override
@@ -144,7 +112,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void updatePostList(List<ListViewItem> postItems, List<ListViewItem> sortMenuItems) {
     _logger.debug('Updating post list data');
-    _postListState.replacePosts(postItems, sortMenuItems);
+    _uiState.postListState.replacePosts(postItems, sortMenuItems);
   }
 
   @override
