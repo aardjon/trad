@@ -23,5 +23,8 @@
         "analyze": "vendor/bin/phpstan && vendor/bin/psalm --no-cache",
         "format": "vendor/bin/pretty-php",
         "upgrade": "composer update"
+    },
+    "require": {
+        "monolog/monolog": "^2.11"
     }
 }
