@@ -23,6 +23,12 @@ final class JsonPresenter implements PresentationBoundary
         }
         echo json_encode($jsonData);
     }
+
+    #[\Override]
+    public function sendMessage(string $message): void
+    {
+        // Don't write user messages into the JSON output!
+    }
 }
 
 ?>
