@@ -11,16 +11,20 @@ error_reporting(E_ALL);
 
 require_once ('config.inc.php');
 
+require_once (__DIR__.'/core/logging.php');
 require_once (__DIR__.'/core/usecases.php');
 require_once (__DIR__.'/adapters/repositories/filesystem.php');
 require_once (__DIR__.'/adapters/repositories/routedbv1.php');
 require_once (__DIR__.'/adapters/presentation.php');
+require_once (__DIR__.'/infrastructure/monolog.php');
 
 /**
  * Entry point for handling HTTP GET requests.
  */
 function api_get(): void
 {
+    setupLogging(new BlackHoleLoggingHandler());
+
     $staticConfig = new AppConfig();
     $directoryReader = new DbDirectoryReader($staticConfig->CONFIG_DATABASE_FILES_DIRECTORY);
     $metadataReader = new TradRouteDbFileReader();
