@@ -47,10 +47,61 @@ interface AbstractLogHandler extends HandlerInterface, FormattableHandlerInterfa
  * Can be used as default or to definitely disable all logging. However, to disable logging it is
  * usually better to set the log level to `LogLevel.off` because this will avoid some overhead like
  * message string creation and propagation and therefore improve performance.
+ *
+ * @psalm-api
  */
 final class BlackHoleLoggingHandler extends NullHandler implements AbstractLogHandler
 {
     use FormattableHandlerTrait;
+}
+
+/**
+ * A handler that sends all log messages to the UI.
+ *
+ * @phpstan-import-type Level from \Monolog\Logger
+ * @phpstan-import-type LevelName from \Monolog\Logger
+ * @psalm-api
+ */
+final class UiLoggingHandler extends AbstractProcessingHandler implements AbstractLogHandler
+{
+    /**
+     * The UI to all log messages shall be sent.
+     */
+    private PresentationBoundary $uiBoundary;
+
+    /**
+     * Create a new UiLoggingHandler instance sending log message to the given UI boundary.
+     *
+     * The $level and $bubble parameters are forwarded to the Monolog base class, see there for
+     * documentation.
+     *
+     * @param $ui The UI that shall be used for displaying log messages.
+     * @param Level|LevelName|LogLevel::* $level See base class for documentation.
+     */
+    public function __construct(
+        PresentationBoundary $ui,
+        $level = MonoLogger::DEBUG,
+        bool $bubble = true,
+    ) {
+        parent::__construct($level, $bubble);
+        $this->uiBoundary = $ui;
+    }
+
+    #[\Override]
+    protected function write(array $record): void
+    {
+        /** @var mixed $formattedRecord */
+        $formattedRecord = $record['formatted'];
+        if (is_string($formattedRecord)) {
+            $this->uiBoundary->sendMessage($formattedRecord);
+        } else {
+            // Raise to cause an error in the server logfile
+            $className = get_debug_type($formattedRecord);
+            throw new InvalidArgumentException(
+                "Formatted log message must be a string, got: {$className}"
+            );
+        }
+    }
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////
