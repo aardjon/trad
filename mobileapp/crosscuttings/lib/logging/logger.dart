@@ -32,7 +32,7 @@ class Logger {
   /// Creates a new [Logger] which sends its messages to the channel with the provided
   /// [channelName].
   ///
-  /// The [channelName] must start with `trad`  and reflect the source/architectural position of
+  /// The [channelName] must start with `trad` and reflect the source/architectural position of
   /// the module the `Logger` instance is created in, using single dots as delimeters (e.g.
   /// `trad.core.usecases.journal`). This makes it easy to filter for messages from a certain system
   /// part later on.
