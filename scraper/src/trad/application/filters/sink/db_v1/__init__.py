@@ -6,7 +6,7 @@ import datetime
 from collections.abc import Collection
 from logging import getLogger
 from pathlib import Path
-from typing import Final, override
+from typing import override
 
 from trad.application.boundaries.database import RelationalDatabaseBoundary, SqlStatement
 from trad.application.filters._base import SinkFilter
@@ -41,18 +41,19 @@ class DbSchemaV1Filter(SinkFilter):
     particular schema version.
     """
 
-    _DB_FILE_NAME: Final = (
-        f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}.sqlite"
-    )
-    """ File name to use for the destination database file. """
-
     def __init__(self, output_directory: Path, database_boundary: RelationalDatabaseBoundary):
         """
         Create a new filter that writes all data from the input pipe into a new route DB file within
         the given [output_directory], using the provided [database_boundary].
         """
         super().__init__()
-        self.__destination_file = output_directory.joinpath(self._DB_FILE_NAME)
+        self.__creation_time = datetime.datetime.now(tz=datetime.UTC)
+        """
+        Database creation time, to make sure the same is used in all places.
+        """
+        self.__destination_file = output_directory.joinpath(
+            f"routedb_v1-{self.__creation_time.strftime('%Y-%m-%d')}.sqlite"
+        )
         self.__database_boundary = database_boundary
         self._seen_sectors: list[str] = []
         """
@@ -126,7 +127,7 @@ class DbSchemaV1Filter(SinkFilter):
                 minor,
                 f"{APPLICATION_NAME} {APPLICATION_VERSION}",
                 f"{APPLICATION_NAME} {APPLICATION_VERSION}",
-                datetime.datetime.now(tz=datetime.UTC).isoformat(),
+                self.__creation_time.isoformat(),
             ],
         )
 
