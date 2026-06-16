@@ -10,16 +10,18 @@ annotated-types==0.7.0
     # via
     #   -c app-requirements.txt
     #   pydantic
+ast-serialize==0.5.0
+    # via mypy
 astroid==4.0.4
     # via
     #   pylint
     #   pylint-restricted-imports
-beautifulsoup4==4.14.3
+beautifulsoup4==4.15.0
     # via
     #   -c app-requirements.txt
     #   pandas
     #   trad_scraper (pyproject.toml)
-certifi==2026.2.25
+certifi==2026.5.20
     # via
     #   -c app-requirements.txt
     #   requests
@@ -27,7 +29,7 @@ charset-normalizer==3.4.7
     # via
     #   -c app-requirements.txt
     #   requests
-coverage==7.13.5
+coverage==7.14.1
     # via trad_scraper (pyproject.toml)
 dill==0.4.1
     # via pylint
@@ -37,7 +39,7 @@ html5lib==1.1
     # via
     #   -c app-requirements.txt
     #   pandas
-idna==3.11
+idna==3.18
     # via
     #   -c app-requirements.txt
     #   requests
@@ -49,13 +51,13 @@ isort==8.0.1
     # via pylint
 jinja2==3.1.6
     # via dinja-tool
-librt==0.9.0
+librt==0.11.0
     # via mypy
 lidipy==0.3.2
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-lxml==6.0.3
+lxml==6.1.1
     # via
     #   -c app-requirements.txt
     #   pandas
@@ -63,7 +65,7 @@ markupsafe==3.0.3
     # via jinja2
 mccabe==0.7.0
     # via pylint
-mypy==1.20.0
+mypy==2.1.0
     # via trad_scraper (pyproject.toml)
 mypy-extensions==1.1.0
     # via mypy
@@ -73,7 +75,7 @@ numpy==2.3.5
     #   pandas
     #   pandas-stubs
     #   trad_scraper (pyproject.toml)
-packaging==26.0
+packaging==26.2
     # via
     #   pyinstaller
     #   pyinstaller-hooks-contrib
@@ -82,29 +84,29 @@ pandas==2.3.3
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-pandas-stubs==3.0.0.260204
+pandas-stubs==3.0.3.260530
     # via trad_scraper (pyproject.toml)
-pathspec==1.0.4
+pathspec==1.1.1
     # via mypy
-platformdirs==4.9.6
+platformdirs==4.10.0
     # via pylint
 pluggy==1.6.0
     # via pytest
-pydantic==2.12.5
+pydantic==2.13.4
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-pydantic-core==2.41.5
+pydantic-core==2.46.4
     # via
     #   -c app-requirements.txt
     #   pydantic
 pydbml==1.2.1
     # via dinja-tool
-pyinstaller==6.19.0
+pyinstaller==6.21.0
     # via trad_scraper (pyproject.toml)
-pyinstaller-hooks-contrib==2026.4
+pyinstaller-hooks-contrib==2026.6
     # via pyinstaller
-pylint==4.0.5
+pylint==4.0.6
     # via
     #   pylint-pytest
     #   pylint-restricted-imports
@@ -123,32 +125,32 @@ python-dateutil==2.9.0.post0
     # via
     #   -c app-requirements.txt
     #   pandas
-pytz==2026.1.post1
+pytz==2026.2
     # via
     #   -c app-requirements.txt
     #   pandas
-requests==2.33.1
+requests==2.34.2
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-ruff==0.15.10
+ruff==0.15.17
     # via trad_scraper (pyproject.toml)
 six==1.17.0
     # via
     #   -c app-requirements.txt
     #   html5lib
     #   python-dateutil
-soupsieve==2.8.3
+soupsieve==2.8.4
     # via
     #   -c app-requirements.txt
     #   beautifulsoup4
-tomlkit==0.14.0
+tomlkit==0.15.0
     # via pylint
 types-beautifulsoup4==4.12.0.20250516
     # via trad_scraper (pyproject.toml)
-types-html5lib==1.1.11.20260408
+types-html5lib==1.1.11.20260518
     # via types-beautifulsoup4
-types-requests==2.33.0.20260408
+types-requests==2.33.0.20260518
     # via trad_scraper (pyproject.toml)
 types-webencodings==0.5.0.20260408
     # via types-html5lib
@@ -164,11 +166,11 @@ typing-inspection==0.4.2
     # via
     #   -c app-requirements.txt
     #   pydantic
-tzdata==2026.1
+tzdata==2026.2
     # via
     #   -c app-requirements.txt
     #   pandas
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   -c app-requirements.txt
     #   requests
