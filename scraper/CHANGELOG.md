@@ -1,6 +1,12 @@
 # Scraper & Route Database Changelog
 
 
+## Version 0.5.0 - 2026-06-16
+
+### New/Improved Features:
+ - Add current date to the name of created route database files (#48)
+
+
 ## Version 0.4.1 - 2026-05-05
 
 ### Fixed Bugs:
