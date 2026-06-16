@@ -21,7 +21,9 @@ from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Post, Route, RouteDirections, Summit
 
-DB_FILE_NAME: Final = f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).date().today().strftime('%Y-%m-%d')}.sqlite"
+DB_FILE_NAME: Final = (
+    f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}.sqlite"
+)
 
 
 def test_schema_v1_db_creation(tmp_path: Path) -> None:

@@ -41,7 +41,9 @@ class DbSchemaV1Filter(SinkFilter):
     particular schema version.
     """
 
-    _DB_FILE_NAME: Final = f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).date().today().strftime('%Y-%m-%d')}.sqlite"
+    _DB_FILE_NAME: Final = (
+        f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}.sqlite"
+    )
     """ File name to use for the destination database file. """
 
     def __init__(self, output_directory: Path, database_boundary: RelationalDatabaseBoundary):
