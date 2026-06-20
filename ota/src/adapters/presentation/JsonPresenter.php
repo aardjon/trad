@@ -1,7 +1,15 @@
 <?php
 
-require_once (__DIR__.'/../core/boundaries.php');
+namespace trad\adapters\presentation;
 
+use trad\core\boundaries\PresentationBoundary;
+use \DateTimeInterface;
+
+/**
+ * UI implementation that sends JSON data to the client.
+ *
+ * This UI is not able to display log messages.
+ */
 final class JsonPresenter implements PresentationBoundary
 {
     public function __construct()

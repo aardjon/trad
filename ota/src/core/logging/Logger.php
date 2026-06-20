@@ -3,18 +3,12 @@
 // Logging library that can be used by all parts of the trad application.
 // Usage:
 // - Create a Logger by calling [Logger::get()].
-// - Log a message by calling one of the channel functions (e.g. `warning()`) the Logger instance.
+// - Log a message by calling one of the channel functions (e.g. `warning()`) of the Logger
+//   instance.
+namespace trad\core\logging;
 
-/**
- * Interface of a factory for creating Logger instances. Not meant to be used by clients directly.
- */
-interface LoggerFactory
-{
-    /**
-     * Create and return a new Logger instance that sends all messages to the given [$channel].
-     */
-    public function getLogger(string $channel): Logger;
-}
+use trad\core\logging\LoggerFactory;
+use \RuntimeException;
 
 /**
  * Logger for writing messages to a certain channel.

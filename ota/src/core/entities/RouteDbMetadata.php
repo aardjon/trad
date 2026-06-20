@@ -1,7 +1,9 @@
 <?php
-// /
-// / Entity types of the OTA core component
-// /
+
+// Entity types of the OTA core component
+namespace trad\core\entities;
+
+use \DateTimeImmutable;
 
 /**
  * Metadata describing a single route database file.

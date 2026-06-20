@@ -1,13 +1,21 @@
 <?php
 
-/** Adapter implementation for the DbMetadataRepository. */
-require_once (__DIR__.'/../../core/boundaries.php');
-require_once (__DIR__.'/../../core/entities.php');
+/**
+ * Adapter implementation for the DbMetadataRepository.
+ */
+
+namespace trad\adapters\repositories;
+
+use trad\core\boundaries\DbMetadataRepository;
+use trad\core\entities\RouteDbMetadata;
+use \DateTimeImmutable;
+use \PDO;
+use \RuntimeException;
 
 /**
  * Implementation reading data from a trad routedb of schema version 1.
  */
-final class TradRouteDbFileReader implements DbMetadataRepository
+final class RouteDbFileReader implements DbMetadataRepository
 {
     #[\Override]
     public function getRouteDbMetadata(string $routeDbFile): RouteDbMetadata

@@ -1,5 +1,7 @@
 <?php
 
+namespace trad;
+
 /**
  * Static configuration of the trad.ota web service.
  */

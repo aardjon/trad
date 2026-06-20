@@ -1,13 +1,18 @@
 <?php
 
-/** Adapter implementation for the DbDirectoryRepository. */
-require_once (__DIR__.'/../../core/boundaries.php');
-require_once (__DIR__.'/../../core/entities.php');
+/**
+ * Adapter implementation for the DbDirectoryRepository.
+ */
+
+namespace trad\adapters\repositories;
+
+use trad\core\boundaries\DbDirectoryRepository;
+use \DirectoryIterator;
 
 /**
  * Adapter implementation that finds route databases within a single file system directory.
  */
-final class DbDirectoryReader implements DbDirectoryRepository
+final class FilesystemRepository implements DbDirectoryRepository
 {
     private string $dbFilesDirectory;
 
