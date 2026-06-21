@@ -19,6 +19,9 @@ final class FilesystemRepository implements DbDirectoryRepository
     public function __construct(string $dbFilesDir)
     {
         $this->dbFilesDirectory = $dbFilesDir;
+        if (! str_ends_with($this->dbFilesDirectory, DIRECTORY_SEPARATOR)) {
+            $this->dbFilesDirectory = $this->dbFilesDirectory.DIRECTORY_SEPARATOR;
+        }
     }
 
     #[\Override]
@@ -27,7 +30,7 @@ final class FilesystemRepository implements DbDirectoryRepository
         $dbFiles = [];
         foreach (new DirectoryIterator($this->dbFilesDirectory) as $fileInfo) {
             if ($fileInfo->isFile()) {
-                $dbFiles[] = "{$this->dbFilesDirectory}/{$fileInfo->getFilename()}";
+                $dbFiles[] = "{$this->dbFilesDirectory}{$fileInfo->getFilename()}";
             }
         }
 
