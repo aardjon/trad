@@ -17,12 +17,14 @@
     "require-dev": {
         "lkrms/pretty-php": "^0.4.95",
         "vimeo/psalm": "^6.16",
-        "phpstan/phpstan": "^2.1"
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5"
     },
     "scripts": {
         "analyze": "vendor/bin/phpstan && vendor/bin/psalm --no-cache",
         "format": "vendor/bin/pretty-php",
-        "upgrade": "composer update"
+        "upgrade": "composer update",
+        "test": "vendor/bin/phpunit --display-all-issues test"
     },
     "require": {
         "monolog/monolog": "^2.11"
