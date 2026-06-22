@@ -5,6 +5,8 @@ require_once (__DIR__.'/../../../vendor/autoload.php');
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use trad\adapters\repositories\FilesystemRepository;
+use trad\infrastructure\monolog\handlers\BlackHoleLoggingHandler;
+use trad\infrastructure\monolog\loggers\MonologLoggerFactory;
 
 /**
  * Unit tests for the FilesystemRepository class.
@@ -18,9 +20,8 @@ final class FilesystemRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Mock für den Logger erstellen
-        // $this->loggerMock = $this->createMock(LoggerInterface::class);
+        MonologLoggerFactory::setupLogging(new BlackHoleLoggingHandler());
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->testTempDir = $this->getTempDir();
         if (! mkdir($this->testTempDir, 0777, true)) {
@@ -42,10 +43,11 @@ final class FilesystemRepositoryTest extends TestCase
         if (is_dir($this->testTempDir)) {
             $this->deleteRecursively($this->testTempDir);
         }
+        MonologLoggerFactory::shutdownLogging();
     }
 
     /**
-     * Recursively deletes the given directory an all of its contents.
+     * Recursively deletes the given directory and all of its contents.
      */
     private function deleteRecursively(string $dir): void
     {
@@ -62,9 +64,10 @@ final class FilesystemRepositoryTest extends TestCase
     }
 
     /**
-     * Make sure that only files are returned from getRouteDbFiles. Directories must be ignored.
+     * Make sure that only sqlite database files are returned from getRouteDbFiles. Directories and
+     * other files are ignored.
      */
-    public function testGetRouteDbFilesReturnsOnlyFiles(): void
+    public function testGetRouteDbFilesReturnsOnlyRouteDbFiles(): void
     {
         // Create test data (files and directory)
         touch($this->testTempDir.'test1.sqlite');
@@ -75,11 +78,9 @@ final class FilesystemRepositoryTest extends TestCase
 
         $result = $this->repository->getRouteDbFiles();
 
-        $this->assertCount(4, $result);
+        $this->assertCount(2, $result);
         $this->assertContains($this->testTempDir.'test1.sqlite', $result);
         $this->assertContains($this->testTempDir.'test2.sqlite', $result);
-        $this->assertContains($this->testTempDir.'test3.txt', $result);
-        $this->assertContains($this->testTempDir.'test4.md', $result);
     }
 
     /**
@@ -96,7 +97,6 @@ final class FilesystemRepositoryTest extends TestCase
      */
     public function testGetRouteDbFilesHandlesDirectorySubDirectories(): void
     {
-        // Nur Unterverzeichnisse erstellen
         mkdir($this->testTempDir.'subdir1');
         mkdir($this->testTempDir.'subdir2');
         touch($this->testTempDir.'subdir2'.DIRECTORY_SEPARATOR.'test1.sqlite');
@@ -126,15 +126,15 @@ final class FilesystemRepositoryTest extends TestCase
     public function testGetRouteDbFilesHandlesFilesWithMultipleDots(): void
     {
         touch($this->testTempDir.'test.file.sqlite');
-        touch($this->testTempDir.'test.sqlite.backup');
+        touch($this->testTempDir.'.test.sqlite');
         touch($this->testTempDir.'test.sqlite');
 
         $result = $this->repository->getRouteDbFiles();
 
         $this->assertCount(3, $result);
         $this->assertContains($this->testTempDir.'test.file.sqlite', $result);
+        $this->assertContains($this->testTempDir.'.test.sqlite', $result);
         $this->assertContains($this->testTempDir.'test.sqlite', $result);
-        $this->assertContains($this->testTempDir.'test.sqlite.backup', $result);
     }
 
     /**
