@@ -36,7 +36,7 @@ abstract class Logger
     private static ?LoggerFactory $loggerFactory = null;
 
     /**
-     * /** Configures the logger factory to use for creating new Logger instances.
+     * Configures the logger factory to use for creating new Logger instances.
      *
      * Must be called exactly once before the very first Logger can be created. Calling it a second
      * time raises an error.
@@ -48,6 +48,15 @@ abstract class Logger
         } else {
             throw new RuntimeException('The Logger factory has already been configured!');
         }
+    }
+
+    /**
+     * Discards the logger factory (if any), allowing a new one being configured. This is mainly
+     * meant to be used by unit tests.
+     */
+    public static function discardLoggerFactory(): void
+    {
+        self::$loggerFactory = null;
     }
 
     /**

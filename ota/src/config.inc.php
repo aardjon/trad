@@ -14,6 +14,10 @@ final class AppConfig
      * absolute path here!
      */
     public string $CONFIG_DATABASE_FILES_DIRECTORY = '../rdbfiles';
+
+    public string $CONFIG_GITHUB_REPO_OWNER = 'aardjon';
+    public string $CONFIG_GITHUB_REPO_NAME = 'trad';
+    public string $CONFIG_GITHUB_API_TOKEN = '<GITHUB_API_TOKEN>';
 }
 
 ?>
