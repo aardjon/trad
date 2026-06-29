@@ -13,8 +13,19 @@ use trad\infrastructure\monolog\loggers\MonologLoggerFactory;
  */
 final class FilesystemRepositoryTest extends TestCase
 {
+    /**
+     * Path to the temporary route DB repository data directory.
+     * This corresponds to the $CONFIG_DATABASE_FILES_DIRECTORY settings variable.
+     */
     private string $testTempDir;
+
+    /**
+     * Path to a temporary directory that is not used as route DB repository.
+     */
+    private string $testTempDirOther;
+
     private LoggerInterface $loggerMock;
+
     private FilesystemRepository $repository;
 
     protected function setUp(): void
@@ -23,9 +34,14 @@ final class FilesystemRepositoryTest extends TestCase
         MonologLoggerFactory::setupLogging(new BlackHoleLoggingHandler());
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
-        $this->testTempDir = $this->getTempDir();
+        $tempDir = $this->getTempDir();
+        $this->testTempDir = $tempDir.'repository_files'.DIRECTORY_SEPARATOR;
+        $this->testTempDirOther = $tempDir.'other_files'.DIRECTORY_SEPARATOR;
         if (! mkdir($this->testTempDir, 0777, true)) {
             $this->fail("Unable to create temporary directory: {$this->testTempDir}");
+        }
+        if (! mkdir($this->testTempDirOther, 0777, true)) {
+            $this->fail("Unable to create temporary directory: {$this->testTempDirOther}");
         }
         $this->repository = new FilesystemRepository($this->testTempDir);
     }
@@ -35,13 +51,15 @@ final class FilesystemRepositoryTest extends TestCase
         $uniqueName = uniqid('db_reader_test_', true);
 
         return sys_get_temp_dir().DIRECTORY_SEPARATOR.$uniqueName.DIRECTORY_SEPARATOR;
+        // return '/home/thomas/tmp/trad.ota'.DIRECTORY_SEPARATOR.$uniqueName.DIRECTORY_SEPARATOR;
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        if (is_dir($this->testTempDir)) {
-            $this->deleteRecursively($this->testTempDir);
+        $tempBaseDir = dirname($this->testTempDir);
+        if (is_dir($tempBaseDir)) {
+            $this->deleteRecursively($tempBaseDir);
         }
         MonologLoggerFactory::shutdownLogging();
     }
@@ -150,6 +168,112 @@ final class FilesystemRepositoryTest extends TestCase
         rmdir($this->testTempDir);
         $this->repository = new FilesystemRepository($invalidDir);
         $this->repository->getRouteDbFiles();
+    }
+
+    /**
+     * Ensure that replacing an existing file with a new one works.
+     */
+    public function testReplaceRouteDbSuccessfullyReplacesFile(): void
+    {
+        $oldFilePath = "{$this->testTempDir}old_routedb.sqlite";
+        $newFilePath = "{$this->testTempDirOther}new_routedb.sqlite";
+        touch($oldFilePath);
+        touch($newFilePath);
+
+        $this->repository->replaceRouteDb($oldFilePath, $newFilePath);
+
+        // Make sure the new file is in the repository, the old one isn't.
+        $routeDbFiles = $this->repository->getRouteDbFiles();
+        $this->assertCount(1, $routeDbFiles);
+        $this->assertStringContainsString(basename($newFilePath), $routeDbFiles[0]);
+
+        $this->assertFileDoesNotExist($oldFilePath);
+        $this->assertFileDoesNotExist($newFilePath);
+        $this->assertFileExists($this->testTempDir.basename($newFilePath));
+    }
+
+    /**
+     * Ensure that replacing an existing file doesn't touch any other files.
+     */
+    public function testReplaceRouteDbDoesntChangeOtherFiles(): void
+    {
+        $oldFilePath1 = "{$this->testTempDir}old1.sqlite";
+        $oldFilePath2 = "{$this->testTempDir}old2.sqlite";
+        $newFilePath1 = "{$this->testTempDirOther}new1.sqlite";
+        $newFilePath2 = "{$this->testTempDirOther}new2.sqlite";
+
+        touch($oldFilePath1);
+        touch($oldFilePath2);
+        touch($newFilePath1);
+        touch($newFilePath2);
+
+        $this->repository->replaceRouteDb($oldFilePath1, $newFilePath1);
+
+        // Make sure that all the second files are still in place.
+        $routeDbFiles = $this->repository->getRouteDbFiles();
+        $this->assertCount(2, $routeDbFiles);
+        $this->assertContains($this->testTempDir.basename($newFilePath1), $routeDbFiles);
+        $this->assertContains($this->testTempDir.basename($oldFilePath2), $routeDbFiles);
+
+        $this->assertFileDoesNotExist($oldFilePath1);
+        $this->assertFileDoesNotExist($newFilePath1);
+        $this->assertFileExists($oldFilePath2);
+        $this->assertFileExists($newFilePath2);
+    }
+
+    /**
+     * Ensure that replaceRouteDb() throws if the file to replace doesn't exist.
+     */
+    public function testReplaceRouteDbThrowsIfFileToReplaceDoesNotExist(): void
+    {
+        $existingRepoFilePath = "{$this->testTempDir}old_routedb.sqlite";
+        $newFilePath = "{$this->testTempDirOther}new_routedb.sqlite";
+        $nonExistentOldFilePath = "{$this->testTempDir}non_existent.sqlite";
+
+        touch($existingRepoFilePath);
+        touch($newFilePath);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("File to replace doesn't exist: $nonExistentOldFilePath");
+
+        $this->repository->replaceRouteDb($nonExistentOldFilePath, $newFilePath);
+    }
+
+    /**
+     * Ensure that replaceRouteDb() throws if the given new file does not exist.
+     */
+    public function testReplaceRouteDbThrowsIfNewFileDoesNotExist(): void
+    {
+        $oldFilePath = "{$this->testTempDir}old_routedb.sqlite";
+        $nonExistentNewFile = "{$this->testTempDirOther}new_routedb.sqlite";
+        touch($oldFilePath);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            "New file to replace with doesn't exist: {$nonExistentNewFile}"
+        );
+
+        $this->repository->replaceRouteDb($oldFilePath, $nonExistentNewFile);
+    }
+
+    /**
+     * Ensure that replaceRouteDb() throws if the destination file already exists.
+     */
+    public function testReplaceRouteDbThrowsIfDestinationAlreadyExists(): void
+    {
+        $oldFilePath1 = "{$this->testTempDir}old_routedb.sqlite";
+        $oldFilePath2 = "{$this->testTempDir}dest_routedb.sqlite";
+        $newFilePath = "{$this->testTempDirOther}dest_routedb.sqlite";
+        touch($oldFilePath1);
+        touch($oldFilePath2);
+        touch($newFilePath);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            "New file already exists in the repository: {$oldFilePath2}"
+        );
+
+        $this->repository->replaceRouteDb($oldFilePath1, $newFilePath);
     }
 }
 
