@@ -29,6 +29,7 @@
         "clean": "cd src && rm -rf .vendor && rm -f version.txt"
     },
     "require": {
+        "php": "^8.5",
         "monolog/monolog": "^2.11"
     },
     "autoload": {
