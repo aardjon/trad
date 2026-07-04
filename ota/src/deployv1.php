@@ -14,7 +14,7 @@ namespace trad;
 
 error_reporting(E_ALL);
 
-require_once (__DIR__.'/../vendor/autoload.php');
+require_once ('autoload.php');
 require_once ('config.inc.php');
 
 use trad\adapters\presentation\TextPresenter;
