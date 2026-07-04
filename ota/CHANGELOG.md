@@ -1,7 +1,7 @@
 # OTA Update Web Application Changelog
 
 
-## Next Version
+## Version 0.2.0 - 2026-07-04
 
 ### New/Improved Features:
  - New API endpoint for publishing newly created route databases (#47)
