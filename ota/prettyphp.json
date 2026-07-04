@@ -1,4 +1,8 @@
 {
+    "src": [
+        "src",
+        "test"
+    ],
     "psr12": true,
     "preset": "laravel"
 }
