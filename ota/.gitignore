@@ -1,0 +1,12 @@
+# Composer environment
+vendor
+
+# Build artifacts
+artifacts/
+
+# Route DB files directory
+rdbfiles/
+
+# KDevelop project files
+.kdev4/
+*.kdev4

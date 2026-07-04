@@ -1,0 +1,23 @@
+<?php
+
+namespace trad;
+
+/**
+ * Static configuration of the trad.ota web service.
+ */
+final class AppConfig
+{
+    /**
+     * Path to the directory containing all avilable route database files.
+     *
+     * This path must be relative to the 'apivX.php` file, e.g. '../dbfiles'. Do not give an
+     * absolute path here!
+     */
+    public string $CONFIG_DATABASE_FILES_DIRECTORY = '../rdbfiles';
+
+    public string $CONFIG_GITHUB_REPO_OWNER = 'aardjon';
+    public string $CONFIG_GITHUB_REPO_NAME = 'trad';
+    public string $CONFIG_GITHUB_API_TOKEN = '<GITHUB_API_TOKEN>';
+}
+
+?>

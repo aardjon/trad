@@ -1,13 +1,14 @@
 Development tools and CI
 ========================
 
-Because the `trad` system is split into two applications witten in different languages, we also have
+Because the `trad` system is split into three applications witten in different languages, we also have
 to use different sets of development tools for them. We try to keep their usages as similar as
 possible, e.g. by using the same names for scripts/tasks that are essentially doing the same but in
 different environments.
 
 - For developing the mobile application (Dart), we use [Melos](https://melos.invertase.dev/).
 - For developing the scraper application (Python), we use [Invoke](https://www.pyinvoke.org/).
+- For developing the ota application (PHP), we use [Composer](https://getcomposer.org/).
 
 We use those tools to provides several scripts for common tasks that can be used in local
 development as well as from CI workflows. This helps to use the same configuration in both
@@ -111,11 +112,47 @@ Runs the requested script as provided by the Invoke configuration. `invoke -l` s
 scripts. See section [Provided Scripts](#provided-scripts) for a list of available Invoke scripts.
 
 
+# Composer (OTA Development)
+
+We use [Composer](https://getcomposer.org/) for managing dependencies and for providing scripts to
+simplify and unify common tasks.
+
+## Using Composer
+
+All Composer commands have to be executed from the `ota` directory (which is the ota application
+project root). The following sections shortly describe how to work with Invoke. For very
+detailled usage information, please refer to the [Composer documentation](https://getcomposer.org/doc/).
+
+The configuration (e.g. available scripts) is stored in the [composer.json.py](../ota/cpomposer.json)
+file.
+
+## Setup a working copy
+
+```
+composer install
+```
+
+Installs all necessary packages for the ota application, resulting in the environment being used
+developing and running it. Needs to be done once after initial checkout and again after changes to
+the dependencies.
+
+## Run a Composer script
+
+```
+composer run [script]
+```
+
+Runs the requested script as provided by the Composer configuration. `composer run -l` shows all
+available scripts. See section [Provided Scripts](#provided-scripts) for a list of available
+Composer scripts.
+
+
+
 # Provided Scripts
 
 This section describes the most importand development scripts. If not mentioned otherwise, these
 scripts are available for both Melos (mobile app) and Invoke (scraper). Run them with `melos run
-[script]` and `invoke [script]`, respectively.
+[script]`, `invoke [script]` and `composer run [script], respectively.
 
 ## analyze: Run the linter
 
@@ -151,8 +188,7 @@ successfully before!
 
 ## format: Auto format all sources
 
-The `format` script auto-formats the sources according to our coding style guidelines (by running
-`dart format` or `ruff format`).
+The `format` script auto-formats the sources according to our coding style guidelines.
 
 ## generate-schema: Generate DB schema sources
 
@@ -188,7 +224,7 @@ this is a MAJOR.MINOR.BUGFIX version number which must follow the
 
 # CI workflows
 
-Several [Github actions](https://github.com/Headbucket/trad/actions) ("CI") are defined to
+Several [Github actions](https://github.com/aardjon/trad/actions) ("CI") are defined to
 automatically check the following quality properties after each push:
 - Is it possible to build the application for all platforms?
 - Do all unit tests pass?
