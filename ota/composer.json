@@ -25,7 +25,7 @@
         "format": "vendor/bin/pretty-php",
         "upgrade": "composer update",
         "test": "vendor/bin/phpunit --display-all-issues test",
-        "build": "cd src && cp ../composer.lock composer.lock && jq '\"Version \" + .version' ../composer.json > version.txt && jq '.autoload.\"psr-4\".\"trad\\\\\"=\".\" | . + {config: {\"vendor-dir\": \".vendor\"}}' ../composer.json > composer.json && composer install --no-dev && rm composer.* && mkdir -p ../artifacts && cp -r . ../artifacts/ota",
+        "build": "cd src && cp ../composer.lock composer.lock && jq '\"Version \" + .version' ../composer.json > version.txt && jq '.autoload.\"psr-4\".\"trad\\\\\"=\".\" | . + {config: {\"vendor-dir\": \".vendor\"}}' ../composer.json > composer.json && composer install --no-dev -o -a && rm composer.* && mkdir -p ../artifacts && cp -r . ../artifacts/ota",
         "clean": "cd src && rm -rf .vendor && rm -f version.txt"
     },
     "require": {
