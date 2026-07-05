@@ -10,7 +10,7 @@ library;
 import 'package:logging/logging.dart' as loglib;
 
 import '../../logging/config.dart';
-import './handlers.dart';
+import 'handlers.dart';
 
 /// Adapter connecting the package interface (Logger) to the actual implementation (the `logging`
 /// library).

@@ -736,7 +736,7 @@ class _FakeStorageBoundary extends Fake implements RouteDbStorageBoundary {
 
   /// Constructor for creating a fake storage which pretends to have been created at
   /// [_dbCreationDate] and has the initial state of [_isStarted].
-  _FakeStorageBoundary(this._dbCreationDate, {required bool isStarted}) : _isStarted = isStarted;
+  _FakeStorageBoundary(this._dbCreationDate, {required this._isStarted});
 
   @override
   Future<void> startStorage() async {
