@@ -32,8 +32,7 @@ enum UiRoute {
   settings,
 
   /// Route to the *About* screen.
-  appinfo
-  ;
+  appinfo;
 
   /// Returns the concrete Flutter route/path string that corresponds to this item.
   ///
