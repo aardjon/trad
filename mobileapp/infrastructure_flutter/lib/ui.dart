@@ -161,10 +161,10 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// stack as usual (and thus the user can go back to the previous one). If it is true, the whole
   /// previous page stack is cleared (so that the user cannot go back).
   void _switchToRoute(String routeString, {required bool isRoot, Object? routeArguments}) {
-    NavigatorState state = _uiState.getNavigatorKey().currentState!;
     // Directly switch to the requested route if the UI is already initialized (=normal case),
     // but delay it if it is not (i.e. before the initial page is shown).
     if (!_uiState.isInitializing()) {
+      NavigatorState state = _uiState.getNavigatorKey().currentState!;
       if (isRoot) {
         unawaited(
           state.pushNamedAndRemoveUntil(
@@ -183,6 +183,7 @@ class ApplicationUI implements ApplicationUiBoundary {
       }
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        NavigatorState state = _uiState.getNavigatorKey().currentState!;
         unawaited(
           state.pushReplacementNamed(
             routeString,
