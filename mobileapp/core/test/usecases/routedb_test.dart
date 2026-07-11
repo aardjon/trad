@@ -607,7 +607,9 @@ void main() {
       // summit ID and sort criterion
       verify(() => storageBoundaryMock.retrieveRoutesOfSummit(summit.id, sortCriterion)).called(1);
       // Make sure the retrieved route list and the correct sort criterion are sent to the UI
-      verify(() => presentationBoundaryMock.updateRouteList(routeList, sortCriterion)).called(1);
+      verify(
+        () => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion),
+      ).called(1);
     });
 
     /// Ensures the correct behaviour of the sortRouteList() method:
@@ -635,7 +637,9 @@ void main() {
       // summit ID and sort criterion
       verify(() => storageBoundaryMock.retrieveRoutesOfSummit(summit.id, sortCriterion)).called(1);
       // Make sure the retrieved route list and the correct sort criterion are sent to the UI
-      verify(() => presentationBoundaryMock.updateRouteList(routeList, sortCriterion)).called(1);
+      verify(
+        () => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion),
+      ).called(1);
     });
   });
 

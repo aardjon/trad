@@ -129,7 +129,11 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteList(List<Route> routeList, RoutesFilterMode usedSortCriterion) {
+  void updateRouteList(
+    int contextKey,
+    List<Route> routeList,
+    RoutesFilterMode usedSortCriterion,
+  ) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     List<ListViewItem> routeItems = <ListViewItem>[];
     for (final Route route in routeList) {
@@ -149,6 +153,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
   @override
   void updateNearbySummitList(
+    int contextKey,
     List<(Summit, double)> nearbySummits,
     NearbySummitsSortMode usedSortCriterion,
   ) {

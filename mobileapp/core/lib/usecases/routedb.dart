@@ -135,7 +135,7 @@ class RouteDbUseCases {
     Summit selectedSummit = await _storageBoundary.retrieveSummit(summitId);
     _presentationBoundary.showSummitDetails(selectedSummit);
     List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(summitId, sortCriterion);
-    _presentationBoundary.updateRouteList(routeList, sortCriterion);
+    _presentationBoundary.updateRouteList(summitId, routeList, sortCriterion);
     if (selectedSummit.position != null) {
       _logger.debug('Retrieving nearby summits, sorting them by distance');
       List<(Summit, double)> nearbySummitsList = await _querySortedSummitList(
@@ -144,6 +144,7 @@ class RouteDbUseCases {
         NearbySummitsSortMode.distance,
       );
       _presentationBoundary.updateNearbySummitList(
+        summitId,
         nearbySummitsList,
         NearbySummitsSortMode.distance,
       );
@@ -162,7 +163,7 @@ class RouteDbUseCases {
         _maxNearbyDistance,
         sortCriterion,
       );
-      _presentationBoundary.updateNearbySummitList(nearbySummitsList, sortCriterion);
+      _presentationBoundary.updateNearbySummitList(summitId, nearbySummitsList, sortCriterion);
     } else {
       _logger.info('No position found for selected summit, nearby list will be missing.');
     }
@@ -213,7 +214,7 @@ class RouteDbUseCases {
     _logger.info('Running use case sortRouteList($summitId, $sortCriterion)');
     unawaited(_preferencesBoundary.setInitialRoutesSortCriterion(sortCriterion));
     List<Route> routeList = await _storageBoundary.retrieveRoutesOfSummit(summitId, sortCriterion);
-    _presentationBoundary.updateRouteList(routeList, sortCriterion);
+    _presentationBoundary.updateRouteList(summitId, routeList, sortCriterion);
   }
 
   /// Use Case: Show/Open a certain Summit on a map
