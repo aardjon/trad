@@ -12,6 +12,7 @@ import 'dart:async';
 
 import 'package:core/entities/sorting/posts_filter_mode.dart';
 import 'package:core/entities/sorting/routes_filter_mode.dart';
+import 'package:core/entities/sorting/summits_filter_mode.dart';
 import 'package:core/usecases/appwide.dart';
 import 'package:core/usecases/knowledgebase.dart';
 import 'package:core/usecases/routedb.dart';
@@ -112,6 +113,18 @@ class RouteDbController {
   void requestSummitDetails(ItemDataId summitDataId) {
     _logger.debug('UI request: Show details for summit with ID $summitDataId');
     unawaited(_routeDbUseCases.showRouteListPage(summitDataId));
+  }
+
+  /// The user requested to sort all nearby summits of the summit identified by [summitDataId] by
+  /// the criterion identified by [sortMenuItemId].
+  void requestNearbySummitListSorting(ItemDataId summitDataId, ItemDataId sortMenuItemId) {
+    _logger.debug('UI request: Sort nearby summit list of $summitDataId by $sortMenuItemId');
+    unawaited(
+      _routeDbUseCases.sortNearbySummitsList(
+        summitDataId,
+        NearbySummitsSortMode.values[sortMenuItemId],
+      ),
+    );
   }
 
   /// The user requested to sort all routes of the summit identified by [summitDataId] by the

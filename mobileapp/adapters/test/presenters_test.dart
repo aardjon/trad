@@ -54,6 +54,7 @@ void main() {
         '[NoPageTitle]',
         '[NoPageSubTitle]',
         canShowOnMap: false,
+        canShowNearbySummits: false,
       ),
     );
     registerFallbackValue(

@@ -207,13 +207,27 @@ class SummitDetailsModel {
   /// lacks a geo position).
   final bool canShowOnMap;
 
+  /// Flag for displaying if nearby summits may be found for this summit at all (true) or not
+  /// (false, e.g. because it lacks a geo position).
+  final bool canShowNearbySummits;
+
+  /// Message to show if there are now nearby summits, i.e. if [canShowNearbySummits] is false.
+  /// This mesag eis shown to the user, explaining why there is no data.
+  /// Set to an emptry String if [canShowNearbySummits] is true.
+  final String noNearbySummitsMessage;
+
   /// Constructor for directly initializing all members.
   SummitDetailsModel(
     this.summitDataId,
     this.pageTitle,
     this.pageSubTitle, {
     required this.canShowOnMap,
-  });
+    required this.canShowNearbySummits,
+    this.noNearbySummitsMessage = '',
+  }) : assert(
+         canShowNearbySummits || (!canShowNearbySummits && noNearbySummitsMessage.isNotEmpty),
+         'Set a [noNearbySummitsMessage] if canShowNearbySummits is false.',
+       );
 }
 
 /// Model that provides all static data needed to display the route details page to the UI.
@@ -377,11 +391,25 @@ abstract interface class ApplicationUiBoundary {
   /// afterwards.
   void showSummitDetails(SummitDetailsModel model);
 
-  /// Notify the UI about a new route list.
+  /// Notify the UI about a new route list for the context identified by [contextItemId].
   ///
   /// This will update the display with the new [routeItems] and the new [sortMenuItems] (sort menu)
   /// as necessary.
-  void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems);
+  void updateRouteList(
+    ItemDataId contextItemId,
+    List<ListViewItem> routeItems,
+    List<ListViewItem> sortMenuItems,
+  );
+
+  /// Notify the UI about a new summit list for the context identified by [contextItemId].
+  ///
+  /// This will update the display with the new [summitItems] and the new [contextActionItems] (e.g.
+  /// sort menu) as necessary.
+  void updateContextualSummitList(
+    ItemDataId contextItemId,
+    List<ListViewItem> summitItems,
+    List<ListViewItem> contextActionItems,
+  );
 
   /// Request the UI to display the *Route Details* screen based on the provided [model].
   ///

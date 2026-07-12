@@ -37,16 +37,6 @@ class MainWidget extends StatelessWidget {
   /// Reference to the central state of the GUI.
   final GuiState _guiState;
 
-  /// Reference to the central settings state notifier.
-  final SettingsNotifier _settingsState;
-
-  /// Reference to the central summit list state notifier.
-  final SummitListNotifier _summitListState;
-
-  final RouteListNotifier _routeListState;
-
-  final PostListNotifier _postListState;
-
   final ApplicationWideController _controller;
 
   /// Constructor for directly initializing all members.
@@ -55,11 +45,7 @@ class MainWidget extends StatelessWidget {
     this._splashMessage,
     this._menuModel,
     this._controller,
-    this._guiState,
-    this._settingsState,
-    this._summitListState,
-    this._routeListState,
-    this._postListState, {
+    this._guiState, {
     super.key,
   });
 
@@ -74,42 +60,45 @@ class MainWidget extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         UiRoute.journal.toRouteString(): (BuildContext context) {
           return JournalPage(
-            TradDrawer(_menuModel, _settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
             _menuModel.journalItem.mainTitle,
           );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
           return SummitListView(
-            TradDrawer(_menuModel, _settingsState, _controller),
-            _summitListState,
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState.summitListState,
           );
         },
         UiRoute.summitdetails.toRouteString(): (BuildContext context) {
           return SummitDetailsView(
-            TradDrawer(_menuModel, _settingsState, _controller),
-            _routeListState,
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState,
           );
         },
         UiRoute.routedetails.toRouteString(): (BuildContext context) {
           return RouteDetailsView(
-            TradDrawer(_menuModel, _settingsState, _controller),
-            _postListState,
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState.postListState,
           );
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
           return KnowledgebaseView(
-            TradDrawer(_menuModel, _settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
           );
         },
         UiRoute.settings.toRouteString(): (BuildContext context) {
           return SettingsPage(
-            TradDrawer(_menuModel, _settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
             _menuModel.settingsItem.mainTitle,
-            _settingsState,
+            _guiState.settingsState,
           );
         },
         UiRoute.appinfo.toRouteString(): (BuildContext context) {
-          return AppInfoPage(TradDrawer(_menuModel, _settingsState, _controller), _settingsState);
+          return AppInfoPage(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState.settingsState,
+          );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {
           return _SplashPage(_splashMessage);

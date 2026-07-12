@@ -15,43 +15,58 @@ import '../icons.dart';
 import '../state.dart';
 
 /// Widget representing the *Summit Details* page.
-class SummitDetailsView extends StatelessWidget {
+class SummitDetailsView extends StatefulWidget {
   /// The app drawer (navigation menu) to use.
-  final Widget _appDrawer;
+  final Widget appDrawer;
 
-  /// Notifier providing the current route list state to be displayed.
-  final RouteListNotifier _routeListState;
-
-  /// Factory for creating icon widgets.
-  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+  /// Central collection of all Notifiers that can provide the data to display.
+  final GuiState guiState;
 
   /// Constructor for directly initializing all members.
-  const SummitDetailsView(this._appDrawer, this._routeListState, {super.key});
+  const SummitDetailsView(
+    this.appDrawer,
+    this.guiState, {
+    super.key,
+  });
+
+  @override
+  State<StatefulWidget> createState() {
+    return _SummitDetailsViewState();
+  }
+}
+
+class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: _TabFactory.getTabCount());
+  }
 
   @override
   Widget build(BuildContext context) {
     final SummitDetailsModel model =
         ModalRoute.of(context)!.settings.arguments! as SummitDetailsModel;
-    return ChangeNotifierProvider<RouteListNotifier>.value(
-      value: _routeListState,
-      child: Consumer<RouteListNotifier>(
-        builder: (BuildContext context, RouteListNotifier state, Widget? child) {
-          if (state.routesLoaded()) {
-            return Scaffold(
-              appBar: _appBar(model, state, context),
-              body: _listView(state, context),
-              drawer: _appDrawer,
-              drawerEnableOpenDragGesture: false,
-            );
-          } else {
-            return _showLoadingIndicator();
-          }
-        },
+
+    _TabFactory tabFactory = _TabFactory(widget, model);
+
+    return Scaffold(
+      appBar: _buildAppBar(model, tabFactory, context),
+      body: TabBarView(
+        controller: _tabController,
+        children: tabFactory.getContentWidgets(),
       ),
+      drawer: widget.appDrawer,
+      drawerEnableOpenDragGesture: false,
     );
   }
 
-  AppBar _appBar(SummitDetailsModel model, RouteListNotifier state, BuildContext context) {
+  AppBar _buildAppBar(
+    SummitDetailsModel model,
+    _TabFactory tabFactory,
+    BuildContext context,
+  ) {
     return AppBar(
       title: Column(
         children: <Widget>[
@@ -71,77 +86,290 @@ class SummitDetailsView extends StatelessWidget {
           icon: const Icon(Icons.map),
         ),
         IconButton(
-          onPressed: () {
-            unawaited(
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) => _createFilterMenu(model, state, context),
-              ),
-            );
-          },
+          onPressed: tabFactory.hasContextMenu(_tabController.index)
+              ? () {
+                  _showContextMenu(tabFactory.getContextMenus()[_tabController.index], context);
+                }
+              : null,
           icon: const Icon(Icons.menu_open),
         ),
       ],
+      bottom: TabBar(
+        controller: _tabController,
+        tabs: tabFactory.getTabs(),
+        onTap: (int value) {
+          setState(() {});
+        },
+      ),
     );
   }
 
-  Widget _createFilterMenu(
-    SummitDetailsModel model,
-    RouteListNotifier state,
-    BuildContext context,
-  ) {
-    List<ListTile> menuItems = <ListTile>[];
-    for (final ListViewItem item in state.getSortMenuItems()) {
-      menuItems.add(
-        ListTile(
-          title: Text(item.mainTitle),
-          trailing: _iconFactory.getIconWidget(item.endIcon),
-          onTap: () {
-            _onOrderingChanged(model.summitDataId, item.itemId!);
-            Navigator.pop(context);
-          },
-        ),
-      );
-    }
-    return Column(mainAxisSize: MainAxisSize.min, children: menuItems);
-  }
-
-  Widget _listView(RouteListNotifier state, BuildContext context) {
-    return ListView.builder(
-      itemCount: state.getRouteCount(),
-      itemBuilder: (BuildContext context, int index) {
-        final ListViewItem route = state.getRouteItem(index);
-        return ListTile(
-          title: Text(route.mainTitle),
-          subtitle: Text(route.subTitle ?? ''),
-          trailing: _iconFactory.getIconWidget(route.endIcon),
-          onTap: () {
-            _onRouteTap(route.itemId!);
-          },
-        );
-      },
+  void _showContextMenu(Widget contextMenu, BuildContext context) {
+    unawaited(
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) => contextMenu,
+      ),
     );
-  }
-
-  void _onOrderingChanged(ItemDataId summitDataId, ItemDataId sortMenuItemId) {
-    RouteDbController controller = RouteDbController();
-    controller.requestRouteListSorting(summitDataId, sortMenuItemId);
-  }
-
-  void _onRouteTap(ItemDataId routeDataId) {
-    RouteDbController controller = RouteDbController();
-    controller.requestRouteDetails(routeDataId);
   }
 
   void _onShowOnMap(ItemDataId summitDataId) {
     RouteDbController controller = RouteDbController();
     controller.requestShowSummitOnMap(summitDataId);
   }
+}
+
+/// Context menu to be shown when the "routes" tab is active.
+class SummitRoutesContextMenu extends StatelessWidget {
+  final SummitDetailsModel _model;
+  final RouteListNotifier _state;
+
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+
+  /// Constructor for directly initializing all members.
+  const SummitRoutesContextMenu(this._model, this._state, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: _createContextMenuitems(context),
+    );
+  }
+
+  List<Widget> _createContextMenuitems(BuildContext context) {
+    List<ListTile> menuItems = <ListTile>[];
+    for (final ListViewItem item in _state.getSortMenuItems()) {
+      menuItems.add(
+        ListTile(
+          title: Text(item.mainTitle),
+          trailing: _iconFactory.getIconWidget(item.endIcon),
+          onTap: () {
+            _onOrderingChanged(_model.summitDataId, item.itemId!);
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }
+    return menuItems;
+  }
+
+  void _onOrderingChanged(ItemDataId summitDataId, ItemDataId sortMenuItemId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestRouteListSorting(summitDataId, sortMenuItemId);
+  }
+}
+
+/// A factory that creates all the tabs and associated widgets.
+///
+/// Most methods return a list of objects, their indices are synchronized, meaning: Index 1 of the
+/// [getTabs()] return value correspond to index 1 of the [getContentWidgets()] return value and so
+/// on.
+///
+/// This factory doesn't actually build or define tab contents, but is responsible to decide which
+/// concrete classes are used and in which order.
+class _TabFactory {
+  final SummitDetailsView _pageWidget;
+  final SummitDetailsModel _pageModel;
+
+  _TabFactory(this._pageWidget, this._pageModel);
+
+  /// Return the number of available tabs.
+  static int getTabCount() {
+    return 2;
+  }
+
+  /// Return all the tab widgets (i.e. the icons to click on for selecting one) to use.
+  List<Tab> getTabs() {
+    return const <Tab>[
+      Tab(
+        icon: Icon(Icons.hiking), // Better: Icons.elevation, but not available yet
+      ),
+      Tab(icon: Icon(Icons.radar)),
+    ];
+  }
+
+  /// Return all the content widgets that should be shown.
+  List<Widget> getContentWidgets() {
+    return <Widget>[
+      SummitRoutesView(_pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId)),
+      if (_pageModel.canShowNearbySummits)
+        NearbySummitsView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId))
+      else
+        NoDataMessageView(_pageModel.noNearbySummitsMessage),
+    ];
+  }
+
+  bool hasContextMenu(int tabIndex) {
+    if (tabIndex == 1) {
+      return _pageModel.canShowNearbySummits;
+    }
+    return true;
+  }
+
+  /// Return all the context menu widgets that are associated with the single tabs.
+  List<Widget> getContextMenus() {
+    return <Widget>[
+      SummitRoutesContextMenu(
+        _pageModel,
+        _pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId),
+      ),
+      NearbySummitsContextMenu(
+        _pageModel,
+        _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
+      ),
+    ];
+  }
+}
+
+/// The widget being shown when the "routes" tab is active.
+class SummitRoutesView extends StatelessWidget {
+  final RouteListNotifier _state;
+
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+
+  /// Constructor for directly initializing all members.
+  const SummitRoutesView(this._state, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<RouteListNotifier>.value(
+      value: _state,
+      child: Consumer<RouteListNotifier>(
+        builder: (BuildContext context, RouteListNotifier state, Widget? child) {
+          if (state.routesLoaded()) {
+            return ListView.builder(
+              itemCount: _state.getRouteCount(),
+              itemBuilder: (BuildContext context, int index) {
+                final ListViewItem route = _state.getRouteItem(index);
+                return ListTile(
+                  title: Text(route.mainTitle),
+                  subtitle: Text(route.subTitle ?? ''),
+                  trailing: _iconFactory.getIconWidget(route.endIcon),
+                  onTap: () {
+                    _onRouteTap(route.itemId!);
+                  },
+                );
+              },
+            );
+          } else {
+            return _showLoadingIndicator();
+          }
+        },
+      ),
+    );
+  }
 
   Widget _showLoadingIndicator() {
     return const LoadingIndicator(
       indicatorType: Indicator.ballClipRotateMultiple,
       colors: <Color>[Colors.lightGreen],
+    );
+  }
+
+  void _onRouteTap(ItemDataId routeDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestRouteDetails(routeDataId);
+  }
+}
+
+/// Context menu to be shown when the "nearby summits" tab is active
+class NearbySummitsContextMenu extends StatelessWidget {
+  /// Factory for creating icon widgets.
+  static const IconWidgetFactory _iconFactory = IconWidgetFactory();
+
+  final SummitListNotifier _state;
+  final SummitDetailsModel _pageModel;
+
+  /// Constructor for directly initializing all members.
+  const NearbySummitsContextMenu(this._pageModel, this._state, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: _createContextMenuitems(context),
+    );
+  }
+
+  List<Widget> _createContextMenuitems(BuildContext context) {
+    List<ListTile> menuItems = <ListTile>[];
+    for (final ListViewItem item in _state.getContextActionItems()) {
+      menuItems.add(
+        ListTile(
+          title: Text(item.mainTitle),
+          trailing: _iconFactory.getIconWidget(item.endIcon),
+          onTap: () {
+            _onContextAction(_pageModel.summitDataId, item.itemId!);
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }
+    return menuItems;
+  }
+
+  void _onContextAction(ItemDataId summitDataId, ItemDataId actionItemId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestNearbySummitListSorting(summitDataId, actionItemId);
+  }
+}
+
+/// Widget to be shown when the "nearby summits" tab is active
+class NearbySummitsView extends StatelessWidget {
+  final SummitListNotifier _summitListState;
+
+  /// Constructor for directly initializing all members.
+  const NearbySummitsView(this._summitListState, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<SummitListNotifier>.value(
+      value: _summitListState,
+      child: Consumer<SummitListNotifier>(
+        builder: (BuildContext context, SummitListNotifier state, Widget? child) {
+          return ListView.builder(
+            itemCount: state.getSummitCount(),
+            itemBuilder: (BuildContext context, int index) {
+              final ListViewItem summit = state.getSummitItem(index);
+              return ListTile(
+                title: Text(summit.mainTitle),
+                trailing: Text(summit.subTitle ?? ''),
+                onTap: () {
+                  _onSummitTap(summit.itemId!);
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _onSummitTap(ItemDataId summitDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestSummitDetails(summitDataId);
+  }
+}
+
+/// The widget being shown when there is no data at all. It simply displays the given message.
+class NoDataMessageView extends StatelessWidget {
+  final String _message;
+
+  /// Constructor for directly initializing all members.
+  const NoDataMessageView(this._message, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Center(
+          child: Padding(padding: const EdgeInsets.all(20), child: Text(_message)),
+        ),
+      ],
     );
   }
 }

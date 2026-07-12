@@ -9,6 +9,7 @@ import '../entities/post.dart';
 import '../entities/route.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
+import '../entities/sorting/summits_filter_mode.dart';
 import '../entities/summit.dart';
 
 /// Interface providing user interactions to the core.
@@ -34,7 +35,7 @@ abstract interface class PresentationBoundary {
   /// The actual summit list data must be set separately by calling [updateSummitList()].
   void showSummitList();
 
-  /// Notify the user interface about a new (e.g. filtered) summit list.
+  /// Notify the user interface about a new (e.g. filtered or sorted) global summit list.
   ///
   /// The current display may be updated with the provided [summitList], if necessary.
   void updateSummitList(List<Summit> summitList);
@@ -45,11 +46,22 @@ abstract interface class PresentationBoundary {
   /// by calling [updateRouteList].
   void showSummitDetails(Summit selectedSummit);
 
-  /// Notify the user interface about a new (e.g. filtered) route list.
+  /// Notify the user interface about a new (e.g. filtered or sorted) route list of the summit
+  /// identified by [summitId].
   ///
   /// The current display may be updated with the provided [routeList], if necessary.
   /// [usedSortCriterion] defines the sort criterion the [routeList] is ordered by.
-  void updateRouteList(List<Route> routeList, RoutesFilterMode usedSortCriterion);
+  void updateRouteList(int summitId, List<Route> routeList, RoutesFilterMode usedSortCriterion);
+
+  /// Notify the user interface about a new (e.g. filtered or sorted) list of summits nearby the
+  /// one identified by [summitId].
+  ///
+  /// The current display may be updated with the provided [nearbySummits], if necessary.
+  void updateNearbySummitList(
+    int summitId,
+    List<(Summit, double)> nearbySummits,
+    NearbySummitsSortMode usedSortCriterion,
+  );
 
   /// Let the UI display details about the [selectedRoute] in the *route db* domain.
   ///
