@@ -148,7 +148,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ),
       );
     }
-    ui.updateRouteList(routeItems, _createRoutesSortCriterionItems(usedSortCriterion));
+    ui.updateRouteList(contextKey, routeItems, _createRoutesSortCriterionItems(usedSortCriterion));
   }
 
   @override
@@ -159,6 +159,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
   ) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateContextualSummitList(
+      contextKey,
       <ListViewItem>[
         for (final (Summit, double) summitData in nearbySummits)
           ListViewItem(

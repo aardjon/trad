@@ -52,24 +52,62 @@ class GuiState {
   /// one and never create their own!
   final SettingsNotifier settingsState = SettingsNotifier();
 
+  /// All summit list notifiers for all alive summit list widgets assigned to a certain context.
+  ///
+  /// The Notifier instances can be retrieved with [getSummitListNotifier()] and deleted with
+  /// [resetNotifiers()].
+  ///
+  /// Map key is a string containing the "parent" summit ID.
+  final Map<String, SummitListNotifier> _summitLists = <String, SummitListNotifier>{};
+
+  /// All summit list notifiers for all alive route list widgets assigned to a certain context.
+  ///
+  /// The Notifier instances can be retrieved with [getSummitListNotifier()] and deleted with
+  /// [resetNotifiers()].
+  ///
+  /// Map key is a string containing the "parent" summit ID.
+  final Map<String, RouteListNotifier> _routeLists = <String, RouteListNotifier>{};
+
+  /// Returns the Notifier providing nearby summits for the given [contextItemId].
+  ///
+  /// If there is none for this context yet, a new one will be created.
+  SummitListNotifier getSummitListNotifier(ItemDataId? contextItemId) {
+    String idStr = contextItemId == null ? '' : '$contextItemId';
+    String mapKey = '/$idStr';
+    SummitListNotifier? state = _summitLists[mapKey];
+    if (state == null) {
+      state = SummitListNotifier();
+      _summitLists[mapKey] = state;
+    }
+    return state;
+  }
+
+  /// Returns the Notifier providing route or the given [contextItemId].
+  ///
+  /// If there is none for this context yet, a new one will be created.
+  RouteListNotifier getRouteListNotifier(ItemDataId? contextItemId) {
+    String idStr = contextItemId == null ? '' : '$contextItemId';
+    String mapKey = '/$idStr';
+    RouteListNotifier? state = _routeLists[mapKey];
+    if (state == null) {
+      state = RouteListNotifier();
+      _routeLists[mapKey] = state;
+    }
+    return state;
+  }
+
+  /// Removes all context sensitive notifiers.
+  /// Must be called when discarding previous widgets to avoid memory leaks.
+  void resetNotifiers() {
+    _summitLists.clear();
+    _routeLists.clear();
+  }
+
   /// The central summit list state of the UI.
   ///
   /// This is the only real instance of this, all other clients (views) should only reference this
   /// one and never create their own!
   final SummitListNotifier summitListState = SummitListNotifier();
-
-  /// The central route list/summit details state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  final RouteListNotifier routeListState = RouteListNotifier();
-
-  /// The central UI state of the minor summit list assigned to a certain context (e.g. summit
-  /// details).
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  final SummitListNotifier contextualSummitListState = SummitListNotifier();
 
   /// The central post list state of the UI.
   ///

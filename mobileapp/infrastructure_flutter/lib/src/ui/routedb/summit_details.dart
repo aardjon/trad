@@ -19,17 +19,13 @@ class SummitDetailsView extends StatefulWidget {
   /// The app drawer (navigation menu) to use.
   final Widget appDrawer;
 
-  /// Notifier providing the current route list state to be displayed.
-  final RouteListNotifier routeListState;
-
-  /// Notifier providing the list of nearby summits to be displayed.
-  final SummitListNotifier nearbySummitListState;
+  /// Central collection of all Notifiers that can provide the data to display.
+  final GuiState guiState;
 
   /// Constructor for directly initializing all members.
   const SummitDetailsView(
     this.appDrawer,
-    this.routeListState,
-    this.nearbySummitListState, {
+    this.guiState, {
     super.key,
   });
 
@@ -197,8 +193,8 @@ class _TabFactory {
   /// Return all the content widgets that should be shown.
   List<Widget> getContentWidgets() {
     return <Widget>[
-      SummitRoutesView(_pageWidget.routeListState),
-      NearbySummitsView(_pageWidget.nearbySummitListState),
+      SummitRoutesView(_pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId)),
+      NearbySummitsView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId)),
     ];
   }
 
@@ -212,8 +208,14 @@ class _TabFactory {
   /// Return all the context menu widgets that are associated with the single tabs.
   List<Widget> getContextMenus() {
     return <Widget>[
-      SummitRoutesContextMenu(_pageModel, _pageWidget.routeListState),
-      NearbySummitsContextMenu(_pageModel, _pageWidget.nearbySummitListState),
+      SummitRoutesContextMenu(
+        _pageModel,
+        _pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId),
+      ),
+      NearbySummitsContextMenu(
+        _pageModel,
+        _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
+      ),
     ];
   }
 }

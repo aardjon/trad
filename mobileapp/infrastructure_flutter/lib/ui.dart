@@ -74,6 +74,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void showSummitList(SummitListModel model) {
     _logger.debug('Displaying summit list page');
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.summitlist.toRouteString(), isRoot: true, routeArguments: model);
   }
 
@@ -84,23 +85,28 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void showSummitDetails(SummitDetailsModel model) {
-    _logger.debug('Displaying route list page');
+    _logger.debug('Displaying summit details page');
     _switchToRoute(UiRoute.summitdetails.toRouteString(), isRoot: false, routeArguments: model);
   }
 
   @override
-  void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems) {
+  void updateRouteList(
+    ItemDataId contextItemId,
+    List<ListViewItem> routeItems,
+    List<ListViewItem> sortMenuItems,
+  ) {
     _logger.debug('Updating route list data');
-    _uiState.routeListState.replaceRoutes(routeItems, sortMenuItems);
+    _uiState.getRouteListNotifier(contextItemId).replaceRoutes(routeItems, sortMenuItems);
   }
 
   @override
   void updateContextualSummitList(
+    ItemDataId contextItemId,
     List<ListViewItem> summitItems,
     List<ListViewItem> contextActionItems,
   ) {
     _logger.debug('Updating contextual summit list data');
-    _uiState.contextualSummitListState.replaceSummits(summitItems, contextActionItems);
+    _uiState.getSummitListNotifier(contextItemId).replaceSummits(summitItems, contextActionItems);
   }
 
   @override
@@ -117,6 +123,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void switchToJournal() {
+    _uiState.resetNotifiers();
     _switchToRoute(
       UiRoute.journal.toRouteString(),
       isRoot: true,
@@ -126,18 +133,21 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void showKnowledgebase(KnowledgebaseModel document) {
     _logger.debug("Displaying knowledgebase page with title '${document.documentTitle}'");
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.knowledgebase.toRouteString(), isRoot: true, routeArguments: document);
   }
 
   @override
   void showSettings(SettingsModel model) {
     _logger.debug('Displaying settings page');
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.settings.toRouteString(), isRoot: true, routeArguments: model);
   }
 
   @override
   void showAppInfo(AppInfoModel model) {
     _logger.debug('Displaying app info page');
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.appinfo.toRouteString(), isRoot: true, routeArguments: model);
   }
 
