@@ -55,6 +55,7 @@ void main() {
         '[NoPageSubTitle]',
         canShowOnMap: false,
         canShowNearbySummits: false,
+        noNearbySummitsMessage: '[NoMissingDataMessage]',
       ),
     );
     registerFallbackValue(
