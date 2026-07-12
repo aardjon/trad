@@ -194,7 +194,10 @@ class _TabFactory {
   List<Widget> getContentWidgets() {
     return <Widget>[
       SummitRoutesView(_pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId)),
-      NearbySummitsView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId)),
+      if (_pageModel.canShowNearbySummits)
+        NearbySummitsView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId))
+      else
+        NoDataMessageView(_pageModel.noNearbySummitsMessage),
     ];
   }
 
@@ -348,5 +351,25 @@ class NearbySummitsView extends StatelessWidget {
   void _onSummitTap(ItemDataId summitDataId) {
     RouteDbController controller = RouteDbController();
     controller.requestSummitDetails(summitDataId);
+  }
+}
+
+/// The widget being shown when there is no data at all. It simply displays the given message.
+class NoDataMessageView extends StatelessWidget {
+  final String _message;
+
+  /// Constructor for directly initializing all members.
+  const NoDataMessageView(this._message, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Center(
+          child: Padding(padding: const EdgeInsets.all(20), child: Text(_message)),
+        ),
+      ],
+    );
   }
 }

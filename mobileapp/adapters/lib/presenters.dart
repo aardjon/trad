@@ -124,6 +124,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
       selectedSummit.sector,
       canShowOnMap: selectedSummit.position != null,
       canShowNearbySummits: selectedSummit.position != null,
+      noNearbySummitsMessage:
+          "Für '${selectedSummit.name}' liegen leider keine Positionsdaten "
+          'vor, weshalb nicht nach nahegelegenen Gipfeln gesucht werden kann.',
     );
     ui.showSummitDetails(model);
   }
