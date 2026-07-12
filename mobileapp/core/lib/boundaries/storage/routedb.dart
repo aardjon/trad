@@ -6,6 +6,7 @@ library;
 import 'dart:async';
 
 import '../../entities/data_source.dart';
+import '../../entities/geoposition.dart';
 import '../../entities/post.dart';
 import '../../entities/route.dart';
 import '../../entities/sorting/posts_filter_mode.dart';
@@ -83,6 +84,17 @@ abstract interface class RouteDbStorageBoundary {
   ///
   /// This must only be called on a STARTED storage.
   Future<List<Summit>> retrieveSummits([String? nameFilter]);
+
+  /// Retrieve all summits within the geographical rectangle defined by [northWest] and [southEast]
+  /// from the storage. If [sortAlphabetically] is set to true, the summits are ordered
+  /// alphabetically by their names (in ascending order). Summits without a position are ignored.
+  ///
+  /// This must only be called on a STARTED storage.
+  Future<List<Summit>> retrieveSummitsWithinRect(
+    GeoPosition northWest,
+    GeoPosition southEast, {
+    bool sortAlphabetically = false,
+  });
 
   /// Retrieve all [Route]s to the requested summit (identified by [summitId]).
   ///

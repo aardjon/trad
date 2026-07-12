@@ -18,6 +18,7 @@ import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
 import 'package:core/entities/sorting/posts_filter_mode.dart';
 import 'package:core/entities/sorting/routes_filter_mode.dart';
+import 'package:core/entities/sorting/summits_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 
@@ -122,12 +123,20 @@ class ApplicationWidePresenter implements PresentationBoundary {
       selectedSummit.name,
       selectedSummit.sector,
       canShowOnMap: selectedSummit.position != null,
+      canShowNearbySummits: selectedSummit.position != null,
+      noNearbySummitsMessage:
+          "Für '${selectedSummit.name}' liegen leider keine Positionsdaten "
+          'vor, weshalb nicht nach nahegelegenen Gipfeln gesucht werden kann.',
     );
     ui.showSummitDetails(model);
   }
 
   @override
-  void updateRouteList(List<Route> routeList, RoutesFilterMode usedSortCriterion) {
+  void updateRouteList(
+    int contextKey,
+    List<Route> routeList,
+    RoutesFilterMode usedSortCriterion,
+  ) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     List<ListViewItem> routeItems = <ListViewItem>[];
     for (final Route route in routeList) {
@@ -142,7 +151,47 @@ class ApplicationWidePresenter implements PresentationBoundary {
         ),
       );
     }
-    ui.updateRouteList(routeItems, _createRoutesSortCriterionItems(usedSortCriterion));
+    ui.updateRouteList(contextKey, routeItems, _createRoutesSortCriterionItems(usedSortCriterion));
+  }
+
+  @override
+  void updateNearbySummitList(
+    int contextKey,
+    List<(Summit, double)> nearbySummits,
+    NearbySummitsSortMode usedSortCriterion,
+  ) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateContextualSummitList(
+      contextKey,
+      <ListViewItem>[
+        for (final (Summit, double) summitData in nearbySummits)
+          ListViewItem(
+            summitData.$1.name,
+            subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
+            itemId: summitData.$1.id,
+          ),
+      ],
+      _createSummitListSortCriterionItems(usedSortCriterion),
+    );
+  }
+
+  List<ListViewItem> _createSummitListSortCriterionItems(NearbySummitsSortMode usedSortCriterion) {
+    return <ListViewItem>[
+      ListViewItem(
+        'Entfernung',
+        endIcon: usedSortCriterion == NearbySummitsSortMode.distance
+            ? const IconDefinition(Glyph.checked)
+            : null,
+        itemId: NearbySummitsSortMode.distance.index,
+      ),
+      ListViewItem(
+        'Name',
+        endIcon: usedSortCriterion == NearbySummitsSortMode.name
+            ? const IconDefinition(Glyph.checked)
+            : null,
+        itemId: NearbySummitsSortMode.name.index,
+      ),
+    ];
   }
 
   List<ListViewItem> _createRoutesSortCriterionItems(RoutesFilterMode usedSortCriterion) {

@@ -4,17 +4,17 @@ resolution: workspace
 publish_to: none
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.12.2
 
 # Add regular dependencies here.
 dependencies:
   crosscuttings:
     path: ../crosscuttings
-  meta: ^1.16.0
+  meta: ^1.17.0
 
 dev_dependencies:
   coverage: ^1.9.2
   dlcov: ^4.2.1
   mocktail: ^1.0.0
-  test: ^1.26.0
+  test: ^1.30.0
   very_good_analysis: ^10.0.0

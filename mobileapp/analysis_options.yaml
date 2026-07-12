@@ -27,6 +27,7 @@ linter:
     avoid_classes_with_only_static_members: true
     avoid_implementing_value_types: true
     avoid_redundant_argument_values: false
+    avoid_types_on_closure_parameters: false
     cascade_invocations: false
     deprecated_member_use_from_same_package: true
     diagnostic_describe_all_properties: false

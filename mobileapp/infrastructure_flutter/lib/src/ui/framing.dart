@@ -34,43 +34,20 @@ class MainWidget extends StatelessWidget {
   /// Model for the app's main menu (drawer).
   final MainMenuModel _menuModel;
 
-  /// Factory for creating drawer (=navigation menu) instances as needed.
-  final TradDrawerFactory _appDrawerFactory;
-
   /// Reference to the central state of the GUI.
   final GuiState _guiState;
 
-  /// Reference to the central settings state notifier.
-  final SettingsNotifier _settingsState;
-
-  /// Reference to the central summit list state notifier.
-  final SummitListNotifier _summitListState;
-
-  final RouteListNotifier _routeListState;
-
-  final PostListNotifier _postListState;
+  final ApplicationWideController _controller;
 
   /// Constructor for directly initializing all members.
-  MainWidget(
-    String appName,
-    String splashMessage,
-    MainMenuModel menuModel,
-    ApplicationWideController controller,
-    GuiState guiState,
-    SettingsNotifier settingsState,
-    SummitListNotifier summitListState,
-    RouteListNotifier routeListState,
-    PostListNotifier postListState, {
+  const MainWidget(
+    this._appName,
+    this._splashMessage,
+    this._menuModel,
+    this._controller,
+    this._guiState, {
     super.key,
-  }) : _appName = appName,
-       _splashMessage = splashMessage,
-       _menuModel = menuModel,
-       _appDrawerFactory = TradDrawerFactory(menuModel, settingsState, controller),
-       _guiState = guiState,
-       _settingsState = settingsState,
-       _summitListState = summitListState,
-       _routeListState = routeListState,
-       _postListState = postListState;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,29 +59,46 @@ class MainWidget extends StatelessWidget {
       ),
       routes: <String, WidgetBuilder>{
         UiRoute.journal.toRouteString(): (BuildContext context) {
-          return JournalPage(_appDrawerFactory.create(context), _menuModel.journalItem.mainTitle);
+          return JournalPage(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _menuModel.journalItem.mainTitle,
+          );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
-          return SummitListView(_appDrawerFactory.create(context), _summitListState);
+          return SummitListView(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState.summitListState,
+          );
         },
         UiRoute.summitdetails.toRouteString(): (BuildContext context) {
-          return SummitDetailsView(_appDrawerFactory.create(context), _routeListState);
+          return SummitDetailsView(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState,
+          );
         },
         UiRoute.routedetails.toRouteString(): (BuildContext context) {
-          return RouteDetailsView(_appDrawerFactory.create(context), _postListState);
+          return RouteDetailsView(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState.postListState,
+          );
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
-          return KnowledgebaseView(_appDrawerFactory.create(context));
+          return KnowledgebaseView(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+          );
         },
         UiRoute.settings.toRouteString(): (BuildContext context) {
           return SettingsPage(
-            _appDrawerFactory.create(context),
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
             _menuModel.settingsItem.mainTitle,
-            _settingsState,
+            _guiState.settingsState,
           );
         },
         UiRoute.appinfo.toRouteString(): (BuildContext context) {
-          return AppInfoPage(_appDrawerFactory.create(context), _settingsState);
+          return AppInfoPage(
+            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            _guiState.settingsState,
+          );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {
           return _SplashPage(_splashMessage);

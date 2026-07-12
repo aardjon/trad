@@ -45,6 +45,75 @@ class GuiState {
   GlobalKey<NavigatorState> getNavigatorKey() {
     return _navigatorKey;
   }
+
+  /// The central settings state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final SettingsNotifier settingsState = SettingsNotifier();
+
+  /// All summit list notifiers for all alive summit list widgets assigned to a certain context.
+  ///
+  /// The Notifier instances can be retrieved with [getSummitListNotifier()] and deleted with
+  /// [resetNotifiers()].
+  ///
+  /// Map key is a string containing the "parent" summit ID.
+  final Map<String, SummitListNotifier> _summitLists = <String, SummitListNotifier>{};
+
+  /// All summit list notifiers for all alive route list widgets assigned to a certain context.
+  ///
+  /// The Notifier instances can be retrieved with [getSummitListNotifier()] and deleted with
+  /// [resetNotifiers()].
+  ///
+  /// Map key is a string containing the "parent" summit ID.
+  final Map<String, RouteListNotifier> _routeLists = <String, RouteListNotifier>{};
+
+  /// Returns the Notifier providing nearby summits for the given [contextItemId].
+  ///
+  /// If there is none for this context yet, a new one will be created.
+  SummitListNotifier getSummitListNotifier(ItemDataId? contextItemId) {
+    String idStr = contextItemId == null ? '' : '$contextItemId';
+    String mapKey = '/$idStr';
+    SummitListNotifier? state = _summitLists[mapKey];
+    if (state == null) {
+      state = SummitListNotifier();
+      _summitLists[mapKey] = state;
+    }
+    return state;
+  }
+
+  /// Returns the Notifier providing route or the given [contextItemId].
+  ///
+  /// If there is none for this context yet, a new one will be created.
+  RouteListNotifier getRouteListNotifier(ItemDataId? contextItemId) {
+    String idStr = contextItemId == null ? '' : '$contextItemId';
+    String mapKey = '/$idStr';
+    RouteListNotifier? state = _routeLists[mapKey];
+    if (state == null) {
+      state = RouteListNotifier();
+      _routeLists[mapKey] = state;
+    }
+    return state;
+  }
+
+  /// Removes all context sensitive notifiers.
+  /// Must be called when discarding previous widgets to avoid memory leaks.
+  void resetNotifiers() {
+    _summitLists.clear();
+    _routeLists.clear();
+  }
+
+  /// The central summit list state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final SummitListNotifier summitListState = SummitListNotifier();
+
+  /// The central post list state of the UI.
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final PostListNotifier postListState = PostListNotifier();
 }
 
 /// Represents the current state of the application settings and notifies about changes.
@@ -123,6 +192,9 @@ class SummitListNotifier extends ChangeNotifier {
   /// The current list of summits.
   List<ListViewItem> _summits = <ListViewItem>[];
 
+  /// The currently available context action items.
+  List<ListViewItem> _contextActionItems = <ListViewItem>[];
+
   /// Returns the total number of summits that shall currently be displayed.
   int getSummitCount() {
     return _summits.length;
@@ -136,11 +208,20 @@ class SummitListNotifier extends ChangeNotifier {
     return _summits[index];
   }
 
+  /// Returns the action items for the current summit list.
+  List<ListViewItem> getContextActionItems() {
+    return _contextActionItems;
+  }
+
   /// Replaces the current summit list with the new one defined by [summits].
   ///
   /// All listeners are notified so that that e.g. views can be updated.
-  void replaceSummits(List<ListViewItem> summits) {
+  void replaceSummits(
+    List<ListViewItem> summits,
+    List<ListViewItem> contextActionItems,
+  ) {
     _summits = summits;
+    _contextActionItems = contextActionItems;
     notifyListeners();
   }
 }

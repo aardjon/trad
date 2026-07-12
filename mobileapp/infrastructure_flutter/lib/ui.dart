@@ -34,26 +34,6 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// this one and never create their own!
   static final GuiState _uiState = GuiState();
 
-  static final SettingsNotifier _settingsState = SettingsNotifier();
-
-  /// The central summit list state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final SummitListNotifier _summitListState = SummitListNotifier();
-
-  /// The central route list/summit details state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final RouteListNotifier _routeListState = RouteListNotifier();
-
-  /// The central post list state of the UI.
-  ///
-  /// This is the only real instance of this, all other clients (views) should only reference this
-  /// one and never create their own!
-  static final PostListNotifier _postListState = PostListNotifier();
-
   @override
   void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel) {
     runApp(
@@ -63,10 +43,6 @@ class ApplicationUI implements ApplicationUiBoundary {
         menuModel,
         ApplicationWideController(),
         _uiState,
-        _settingsState,
-        _summitListState,
-        _routeListState,
-        _postListState,
       ),
     );
     // Set the UI state to initialized after the first event frame is done.
@@ -82,7 +58,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     required List<ListViewItem> dataSourceAttributions,
     String? statusMessage,
   }) {
-    _settingsState.updateRouteDbStatus(
+    _uiState.settingsState.updateRouteDbStatus(
       routeDbActivationStatus: activated,
       dbIdentifier: label,
       dataSourceAttributions: dataSourceAttributions,
@@ -92,30 +68,45 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateRouteDbUpdateProgress({required bool inProgress}) {
-    _settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
+    _uiState.settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
   }
 
   @override
   void showSummitList(SummitListModel model) {
     _logger.debug('Displaying summit list page');
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.summitlist.toRouteString(), isRoot: true, routeArguments: model);
   }
 
   @override
   void updateSummitList(List<ListViewItem> summitItems) {
-    _summitListState.replaceSummits(summitItems);
+    _uiState.summitListState.replaceSummits(summitItems, <ListViewItem>[]);
   }
 
   @override
   void showSummitDetails(SummitDetailsModel model) {
-    _logger.debug('Displaying route list page');
+    _logger.debug('Displaying summit details page');
     _switchToRoute(UiRoute.summitdetails.toRouteString(), isRoot: false, routeArguments: model);
   }
 
   @override
-  void updateRouteList(List<ListViewItem> routeItems, List<ListViewItem> sortMenuItems) {
+  void updateRouteList(
+    ItemDataId contextItemId,
+    List<ListViewItem> routeItems,
+    List<ListViewItem> sortMenuItems,
+  ) {
     _logger.debug('Updating route list data');
-    _routeListState.replaceRoutes(routeItems, sortMenuItems);
+    _uiState.getRouteListNotifier(contextItemId).replaceRoutes(routeItems, sortMenuItems);
+  }
+
+  @override
+  void updateContextualSummitList(
+    ItemDataId contextItemId,
+    List<ListViewItem> summitItems,
+    List<ListViewItem> contextActionItems,
+  ) {
+    _logger.debug('Updating contextual summit list data');
+    _uiState.getSummitListNotifier(contextItemId).replaceSummits(summitItems, contextActionItems);
   }
 
   @override
@@ -127,11 +118,12 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void updatePostList(List<ListViewItem> postItems, List<ListViewItem> sortMenuItems) {
     _logger.debug('Updating post list data');
-    _postListState.replacePosts(postItems, sortMenuItems);
+    _uiState.postListState.replacePosts(postItems, sortMenuItems);
   }
 
   @override
   void switchToJournal() {
+    _uiState.resetNotifiers();
     _switchToRoute(
       UiRoute.journal.toRouteString(),
       isRoot: true,
@@ -141,18 +133,21 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void showKnowledgebase(KnowledgebaseModel document) {
     _logger.debug("Displaying knowledgebase page with title '${document.documentTitle}'");
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.knowledgebase.toRouteString(), isRoot: true, routeArguments: document);
   }
 
   @override
   void showSettings(SettingsModel model) {
     _logger.debug('Displaying settings page');
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.settings.toRouteString(), isRoot: true, routeArguments: model);
   }
 
   @override
   void showAppInfo(AppInfoModel model) {
     _logger.debug('Displaying app info page');
+    _uiState.resetNotifiers();
     _switchToRoute(UiRoute.appinfo.toRouteString(), isRoot: true, routeArguments: model);
   }
 
@@ -161,10 +156,10 @@ class ApplicationUI implements ApplicationUiBoundary {
   /// stack as usual (and thus the user can go back to the previous one). If it is true, the whole
   /// previous page stack is cleared (so that the user cannot go back).
   void _switchToRoute(String routeString, {required bool isRoot, Object? routeArguments}) {
-    NavigatorState state = _uiState.getNavigatorKey().currentState!;
     // Directly switch to the requested route if the UI is already initialized (=normal case),
     // but delay it if it is not (i.e. before the initial page is shown).
     if (!_uiState.isInitializing()) {
+      NavigatorState state = _uiState.getNavigatorKey().currentState!;
       if (isRoot) {
         unawaited(
           state.pushNamedAndRemoveUntil(
@@ -183,6 +178,7 @@ class ApplicationUI implements ApplicationUiBoundary {
       }
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        NavigatorState state = _uiState.getNavigatorKey().currentState!;
         unawaited(
           state.pushReplacementNamed(
             routeString,

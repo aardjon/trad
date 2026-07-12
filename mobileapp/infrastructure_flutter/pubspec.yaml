@@ -4,15 +4,15 @@ resolution: workspace
 publish_to: none
 
 environment:
-  sdk: ^3.9.2
-  flutter: ^3.35.3
+  sdk: ^3.12.2
+  flutter: ^3.44.4
 
 dependencies:
   adapters:
     path: ../adapters
   crosscuttings:
     path: ../crosscuttings
-  file_picker: ^10.1.0
+  file_picker: ^11.0.2
   flutter:
     sdk: flutter
   flutter_markdown: ^0.7.1
@@ -30,7 +30,7 @@ dev_dependencies:
   mocktail: ^1.0.0
   path_provider_platform_interface:  # Use the version defined by path_provider
   plugin_platform_interface:  # Use the version defined by path_provider
-  test: ^1.26.0
+  test: ^1.30.0
   very_good_analysis: ^10.0.0
 
 # For information on the generic Dart part of this file, see the

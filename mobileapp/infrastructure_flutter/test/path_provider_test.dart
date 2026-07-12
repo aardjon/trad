@@ -12,8 +12,8 @@ import 'package:infrastructure_flutter/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-const String _fakeTempDir = '/fake/dir/temp';
-const String _fakeAppDataDir = '/fake/dir/appdata';
+final String _fakeTempDir = Platform.isWindows ? r'D:\fake\dir\temp' : '/fake/dir/temp';
+final String _fakeAppDataDir = Platform.isWindows ? r'D:\fake\dir\appdata' : '/fake/dir/appdata';
 
 /// Unit tests for the SystemPathProvider component class.
 void main() {

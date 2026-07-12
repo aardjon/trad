@@ -15,7 +15,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
 
       - name: Setup environment
         run: |
@@ -51,7 +51,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
 
       - name: Setup environment
         run: |
@@ -85,7 +85,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
 
       - name: Setup environment
         run: |
@@ -119,7 +119,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
           
       - name: Setup environment
         run: |
@@ -128,6 +128,8 @@ jobs:
              flutter config --no-cli-animations
              echo "--- Install Melos"
              dart pub global activate melos
+             echo "--- Install requirements"
+             melos bootstrap
 
       - name: Check code style
         run: melos run format
@@ -144,7 +146,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
 
       - name: Setup environment
         run: |
@@ -171,7 +173,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
 
       - name: Setup environment
         run: |
@@ -211,7 +213,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.x
+          flutter-version: 3.44.x
 
       - name: Setup environment
         run: |

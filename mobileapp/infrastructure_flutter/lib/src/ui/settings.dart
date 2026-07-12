@@ -117,7 +117,7 @@ class SettingsPage extends StatelessWidget {
       ElevatedButton(
         child: Text(model.routeDbFileSelectionActionLabel),
         onPressed: () async {
-          FilePickerResult? result = await FilePicker.platform.pickFiles(
+          FilePickerResult? result = await FilePicker.pickFiles(
             dialogTitle: model.routeDbFileSelectionFieldLabel,
             allowMultiple: false,
           );
