@@ -10,6 +10,7 @@ import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
+import 'package:core/entities/sector.dart';
 import 'package:core/entities/sorting/posts_filter_mode.dart';
 import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
@@ -225,6 +226,29 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       attribution: row.getStringValue(ExternalDataSourcesTable.columnAttribution),
       license: row.getOptStringValue(ExternalDataSourcesTable.columnLicense),
     );
+  }
+
+  @override
+  Future<List<Sector>> retrieveAllSectors() async {
+    // Configure the query
+    Query query = Query.table(
+      AreasTable.tableName,
+      <String>[AreasTable.columnId, AreasTable.columnName],
+    );
+
+    query.orderByColumns = <String>[AreasTable.columnName];
+
+    // Run the database query
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
+    // Convert and return the result data
+    List<Sector> sectors = <Sector>[];
+    for (final ResultRow dataRow in resultSet) {
+      int id = dataRow.getIntValue(AreasTable.columnId);
+      String name = dataRow.getStringValue(AreasTable.columnName);
+      sectors.add(Sector(id, name));
+    }
+    return sectors;
   }
 
   @override

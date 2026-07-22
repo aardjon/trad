@@ -9,6 +9,7 @@ import '../../entities/data_source.dart';
 import '../../entities/geoposition.dart';
 import '../../entities/post.dart';
 import '../../entities/route.dart';
+import '../../entities/sector.dart';
 import '../../entities/sorting/posts_filter_mode.dart';
 import '../../entities/sorting/routes_filter_mode.dart';
 import '../../entities/summit.dart';
@@ -66,6 +67,11 @@ abstract interface class RouteDbStorageBoundary {
   ///
   /// This method must only be called on a STARTED storage.
   Future<DataSourceAttribution> getExternalDataSource(int sourceId);
+
+  /// Retrieve all available sector data, sorted alphabetically by their names.
+  ///
+  /// This method must only be called on a STARTED storage.
+  Future<List<Sector>> retrieveAllSectors();
 
   /// Retrieve all data of the single summit identified by [summitDataId].
   ///
