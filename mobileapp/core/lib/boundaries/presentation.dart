@@ -7,6 +7,7 @@ import '../entities/data_source.dart';
 import '../entities/knowledgebase.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
+import '../entities/sector.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
 import '../entities/sorting/summits_filter_mode.dart';
@@ -32,8 +33,9 @@ abstract interface class PresentationBoundary {
 
   /// Let the UI display the list of summits in the *route db* domain.
   ///
-  /// The actual summit list data must be set separately by calling [updateSummitList()].
-  void showSummitList();
+  /// [sectors] is the List of sectors than may be selected for summit filtering. The actual summit
+  /// list data must be set separately by calling [updateSummitList()].
+  void showSummitList(List<Sector> sectors);
 
   /// Notify the user interface about a new (e.g. filtered or sorted) global summit list.
   ///

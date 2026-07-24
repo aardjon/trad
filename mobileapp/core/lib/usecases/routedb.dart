@@ -18,6 +18,7 @@ import '../entities/errors.dart';
 import '../entities/geoposition.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
+import '../entities/sector.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
 import '../entities/sorting/summits_filter_mode.dart';
@@ -115,16 +116,17 @@ class RouteDbUseCases {
   /// Use Case: Switch to the summit list, resetting any previous filter
   Future<void> showSummitListPage() async {
     _logger.info('Running use case showSummitListPage()');
+    List<Sector> sectorList = await _storageBoundary.retrieveAllSectors();
     _presentationBoundary.updateSummitList(<Summit>[]);
-    _presentationBoundary.showSummitList();
+    _presentationBoundary.showSummitList(sectorList);
     List<Summit> summitList = await _storageBoundary.retrieveSummits();
     _presentationBoundary.updateSummitList(summitList);
   }
 
-  /// Use Case: Update the summit list to show only the entries matching the given filter text.
-  Future<void> filterSummitList(String filterText) async {
-    _logger.info('Running use case filterSummitList($filterText)');
-    List<Summit> summitList = await _storageBoundary.retrieveSummits(filterText);
+  /// Use Case: Update the summit list to show only the entries matching the given filter text and/or area.
+  Future<void> filterSummitList(String filterBySummitName, int? filterByAreaId) async {
+    _logger.info('Running use case filterSummitList("$filterBySummitName", $filterByAreaId)');
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(filterBySummitName);
     _presentationBoundary.updateSummitList(summitList);
   }
 

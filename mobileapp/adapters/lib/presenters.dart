@@ -8,6 +8,7 @@
 ///
 library;
 
+import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
 import 'package:intl/intl.dart';
 
@@ -99,9 +100,16 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void showSummitList() {
+  void showSummitList(List<Sector> sectors) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    SummitListModel model = SummitListModel('Gipfel', 'Gipfel suchen');
+    SummitListModel model = SummitListModel(
+      'Gipfel',
+      'Gipfel suchen',
+      searchBarSectors: <ListViewItem>[
+        ListViewItem('Alle Teilgebiete'),
+        for (final Sector sector in sectors) ListViewItem(sector.name, itemId: sector.id),
+      ],
+    );
     ui.showSummitList(model);
   }
 
