@@ -135,8 +135,15 @@ class SummitListModel {
   /// Help message/Hint to be displayed in the search bar.
   final String searchBarHint;
 
+  /// Sectors that can be selected for filtering/searching summits
+  final List<ListViewItem> searchBarSectors;
+
   /// Constructor for directly initializing all members.
-  SummitListModel(this.pageTitle, this.searchBarHint);
+  SummitListModel(
+    this.pageTitle,
+    this.searchBarHint, {
+    this.searchBarSectors = const <ListViewItem>[],
+  });
 }
 
 /// Internal ID to uniquely identify a single data item.

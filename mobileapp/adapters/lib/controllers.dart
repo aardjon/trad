@@ -104,9 +104,9 @@ class RouteDbController {
   }
 
   /// The user requested to filter the summit list by [filterText].
-  void requestFilterSummitList(String filterText) {
-    _logger.debug('UI request: Filter summit list for "$filterText"');
-    unawaited(_routeDbUseCases.filterSummitList(filterText));
+  void requestFilterSummitList(String filterText, ItemDataId? filterArea) {
+    _logger.debug('UI request: Filter summit list for "$filterText" in area: $filterArea');
+    unawaited(_routeDbUseCases.filterSummitList(filterText, filterArea));
   }
 
   /// The user requested to see all details of the single summit identified by [summitDataId].
