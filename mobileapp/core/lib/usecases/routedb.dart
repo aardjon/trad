@@ -126,7 +126,10 @@ class RouteDbUseCases {
   /// Use Case: Update the summit list to show only the entries matching the given filter text and/or area.
   Future<void> filterSummitList(String filterBySummitName, int? filterByAreaId) async {
     _logger.info('Running use case filterSummitList("$filterBySummitName", $filterByAreaId)');
-    List<Summit> summitList = await _storageBoundary.retrieveSummits(filterBySummitName);
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(
+      filterBySummitName,
+      filterByAreaId,
+    );
     _presentationBoundary.updateSummitList(summitList);
   }
 
