@@ -280,7 +280,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   }
 
   @override
-  Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
+  Future<List<Summit>> retrieveSummits([String? nameFilter, int? sectorIdFilter]) async {
     // Configure the query
     Query query = Query.join(
       <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
@@ -297,12 +297,25 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       ],
     );
 
-    if (nameFilter != null) {
-      _logger.debug('Retrieving filtered summit list for "$nameFilter"');
-      query.setWhereCondition('${SummitNamesTable.columnName} LIKE ?', <String>['%$nameFilter%']);
+    List<String> whereClauses = <String>[];
+    List<Object> whereArgs = <Object>[];
+
+    if (nameFilter != null || sectorIdFilter != null) {
+      if (nameFilter != null) {
+        _logger.debug('Filtering summit list summit list for "$nameFilter"');
+        whereClauses.add('${SummitNamesTable.columnName} LIKE ?');
+        whereArgs.add('%$nameFilter%');
+      }
+      if (sectorIdFilter != null) {
+        _logger.debug('Filtering summit list for sector $sectorIdFilter');
+        whereClauses.add('${AreasTable.columnId} = ?');
+        whereArgs.add(sectorIdFilter);
+      }
+      query.setWhereCondition(whereClauses.join(' AND '), whereArgs);
     } else {
       _logger.debug('Retrieving complete summit list');
     }
+
     query.orderByColumns = <String>[SummitNamesTable.columnName];
 
     // Run the database query
