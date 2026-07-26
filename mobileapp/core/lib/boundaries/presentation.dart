@@ -33,7 +33,7 @@ abstract interface class PresentationBoundary {
 
   /// Let the UI display the list of summits in the *route db* domain.
   ///
-  /// [sectors] is the List of sectors than may be selected for summit filtering. The actual summit
+  /// [sectors] is the list of sectors that may be selected for summit filtering. The actual summit
   /// list data must be set separately by calling [updateSummitList()].
   void showSummitList(List<Sector> sectors);
 

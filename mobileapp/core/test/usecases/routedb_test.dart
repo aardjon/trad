@@ -10,6 +10,7 @@ import 'package:core/boundaries/sysenv.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/geoposition.dart';
+import 'package:core/entities/sector.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -491,6 +492,9 @@ void main() {
       when(() => storageBoundaryMock.retrieveSummits(any())).thenAnswer((_) async {
         return summitList;
       });
+      when(storageBoundaryMock.retrieveAllSectors).thenAnswer((_) async {
+        return <Sector>[];
+      });
 
       // Run the actual test case
       RouteDbUseCases usecases = RouteDbUseCases(di);
@@ -516,7 +520,7 @@ void main() {
 
       // Run the actual test case
       RouteDbUseCases usecases = RouteDbUseCases(di);
-      await usecases.filterSummitList(filterText);
+      await usecases.filterSummitList(filterText, null);
 
       // Make sure the filter string is provided to the storage for loading the summit
       verify(() => storageBoundaryMock.retrieveSummits(filterText)).called(1);
