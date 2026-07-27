@@ -5,7 +5,6 @@ library;
 
 import 'dart:async';
 
-import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/ota.dart';
@@ -49,12 +48,13 @@ class RouteDbUseCases {
   static const int _maxNearbyDistance = 500;
 
   /// Constructor for creating a new RouteDbUseCases instance.
-  RouteDbUseCases(DependencyProvider di)
-    : _presentationBoundary = di.provide<PresentationBoundary>(),
-      _storageBoundary = di.provide<RouteDbStorageBoundary>(),
-      _downloadBoundary = di.provide<RouteDbDownloadBoundary>(),
-      _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
-      _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>();
+  RouteDbUseCases({
+    required this._presentationBoundary,
+    required this._storageBoundary,
+    required this._downloadBoundary,
+    required this._preferencesBoundary,
+    required this._systemEnvBoundary,
+  });
 
   /// Use case: Download the most current route database via OTA and install (import) it.
   Future<void> updateRouteDatabase() async {

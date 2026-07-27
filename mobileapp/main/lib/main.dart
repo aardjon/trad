@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:adapters/boundaries/external_apps.dart';
 import 'package:adapters/boundaries/network.dart';
 import 'package:core/boundaries/ota.dart';
+import 'package:core/usecases/routedb.dart';
 import 'package:crosscuttings/appmeta.dart';
 import 'package:flutter/foundation.dart';
 
@@ -122,5 +123,16 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<FileSystemBoundary>(DartIoFileSystem.new);
     _dependencyProvider.registerFactory<ExternalAppsBoundary>(UrlLauncher.new);
     _dependencyProvider.registerFactory<HttpNetworkingBoundary>(HttpNetworkRequests.new);
+
+    // core components
+    _dependencyProvider.registerSingleton<RouteDbUseCases>(() {
+      return RouteDbUseCases(
+        presentationBoundary: _dependencyProvider.provide<PresentationBoundary>(),
+        storageBoundary: _dependencyProvider.provide<RouteDbStorageBoundary>(),
+        downloadBoundary: _dependencyProvider.provide<RouteDbDownloadBoundary>(),
+        preferencesBoundary: _dependencyProvider.provide<AppPreferencesBoundary>(),
+        systemEnvBoundary: _dependencyProvider.provide<SystemEnvironmentBoundary>(),
+      );
+    });
   }
 }

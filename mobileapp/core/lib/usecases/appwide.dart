@@ -80,8 +80,7 @@ class ApplicationWideUseCases {
   /// Change the active domain to the "route db" domain.
   Future<void> switchToRouteDb() async {
     _logger.info('Running use case switchToRouteDb()');
-    RouteDbUseCases rdbUseCases = RouteDbUseCases(_di);
-    await rdbUseCases.showSummitListPage();
+    await _di.provide<RouteDbUseCases>().showSummitListPage();
   }
 
   /// Change the active domain to the "Settings" domain.
