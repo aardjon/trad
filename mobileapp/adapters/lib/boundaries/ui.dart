@@ -135,15 +135,19 @@ class SummitListModel {
   /// Help message/Hint to be displayed in the search bar.
   final String searchBarHint;
 
-  /// Sectors that can be selected for filtering/searching summits
+  /// Sectors that can be selected for filtering/searching summits. Must not be empty.
   final List<ListViewItem> searchBarSectors;
+
+  /// Index of the [searchBarSectors] item that is initially selected/shown by the search bar.
+  final int searchBarInitialSectorIndex;
 
   /// Constructor for directly initializing all members.
   SummitListModel(
     this.pageTitle,
-    this.searchBarHint, {
+    this.searchBarHint,
+    this.searchBarInitialSectorIndex, {
     this.searchBarSectors = const <ListViewItem>[],
-  });
+  }) : assert(searchBarSectors.isNotEmpty, 'searchBarSectors must not be empty');
 }
 
 /// Internal ID to uniquely identify a single data item.

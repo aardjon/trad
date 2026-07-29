@@ -490,9 +490,10 @@ void main() {
     ];
 
     /// Ensures the correct behaviour of the showSummitListPage() method:
+    ///  - The full sector list is retrieved from the storage (retrieveAllSectors())
     ///  - The full summit list must be loaded from the storage (retrieveSummits())
     ///  - The retrieved list must be forwarded to the UI (updateSummitList())
-    test('showSummitListPage() use case', () async {
+    test('showSummitListPage() initial call', () async {
       // Setup the storage mock
       when(() => storageBoundaryMock.retrieveSummits(any())).thenAnswer((_) async {
         return summitList;
@@ -511,6 +512,8 @@ void main() {
       );
       await usecases.showSummitListPage();
 
+      // Make sure that all sectors are loaded from the storage
+      verify(storageBoundaryMock.retrieveAllSectors).called(1);
       // Make sure the full summit list (i.e. no filter string) is loaded from the storage
       verify(storageBoundaryMock.retrieveSummits).called(1);
       // Make sure the retrieved list is sent to the UI
@@ -543,6 +546,41 @@ void main() {
       verify(() => storageBoundaryMock.retrieveSummits(filterText)).called(1);
       // Make sure the retrieved list is sent to the UI
       verify(() => presentationBoundaryMock.updateSummitList(summitList)).called(1);
+    });
+
+    /// Ensures that the sector filter is kept when loading the full summit list after applying a
+    /// filter, while the name filter is discarded.
+    test('keep sector filter', () async {
+      const String nameFilter = 'name';
+      const int sectorId = 1;
+      const List<Sector> sectorList = <Sector>[Sector(sectorId, 'Example Sector')];
+
+      // Setup the storage mock
+      when(storageBoundaryMock.retrieveAllSectors).thenAnswer((_) async {
+        return sectorList;
+      });
+      when(() => storageBoundaryMock.retrieveSummits(any(), any())).thenAnswer((_) async {
+        return summitList;
+      });
+
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
+
+      // Filter the summit list by name and sector
+      await usecases.filterSummitList(nameFilter, sectorId);
+      // Show the full summit list
+      await usecases.showSummitListPage();
+
+      // Make sure the summit list has been loaded from the storage, without any name filter but
+      // with a sector constraint
+      verify(() => storageBoundaryMock.retrieveSummits(null, sectorId)).called(1);
+      // Make sure the selected sector is sent to the UI
+      verify(() => presentationBoundaryMock.showSummitList(sectorList, sectorId)).called(1);
     });
 
     /// Ensures the correct behaviour of the showSummitOnMap() method:

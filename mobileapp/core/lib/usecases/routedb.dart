@@ -47,6 +47,10 @@ class RouteDbUseCases {
   /// Maximum distance in meters up to which an object is still considered "nearby" another one.
   static const int _maxNearbyDistance = 500;
 
+  /// The ID of the sector that was previously selected for filtering the summit list. Null if no
+  /// sector filter was set.
+  int? _lastSelectedSector;
+
   /// Constructor for creating a new RouteDbUseCases instance.
   RouteDbUseCases({
     required this._presentationBoundary,
@@ -113,19 +117,21 @@ class RouteDbUseCases {
     }
   }
 
-  /// Use Case: Switch to the summit list, resetting any previous filter
+  /// Use Case: Switch to the main sector list, resetting any previous name filter. The previous
+  /// sector filter stays active, though.
   Future<void> showSummitListPage() async {
     _logger.info('Running use case showSummitListPage()');
     List<Sector> sectorList = await _storageBoundary.retrieveAllSectors();
     _presentationBoundary.updateSummitList(<Summit>[]);
-    _presentationBoundary.showSummitList(sectorList);
-    List<Summit> summitList = await _storageBoundary.retrieveSummits();
+    _presentationBoundary.showSummitList(sectorList, _lastSelectedSector);
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(null, _lastSelectedSector);
     _presentationBoundary.updateSummitList(summitList);
   }
 
   /// Use Case: Update the summit list to show only the entries matching the given filter text and/or area.
   Future<void> filterSummitList(String filterBySummitName, int? filterByAreaId) async {
     _logger.info('Running use case filterSummitList("$filterBySummitName", $filterByAreaId)');
+    _lastSelectedSector = filterByAreaId;
     List<Summit> summitList = await _storageBoundary.retrieveSummits(
       filterBySummitName,
       filterByAreaId,

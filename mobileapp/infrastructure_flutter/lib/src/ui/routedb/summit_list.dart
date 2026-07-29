@@ -47,6 +47,7 @@ class SummitListView extends StatelessWidget {
     return SummitFilterBar(
       nameFilterHint: model.searchBarHint,
       sectorFilterItems: model.searchBarSectors,
+      initialSelectedIndex: model.searchBarInitialSectorIndex,
       onFilterChanged: _filterSummits,
     );
   }
@@ -98,6 +99,9 @@ class SummitFilterBar extends StatefulWidget {
   /// The sector items to be available for selection.
   final List<ListViewItem> sectorFilterItems;
 
+  /// The index of the [sectorFilterItems] item to be selected initially.
+  final int initialSelectedIndex;
+
   /// Function to call after the user changed the filter condition.
   /// Note that it is not called when the user set the same conition again.
   final void Function(String nameFilter, ItemDataId? sectorFilter) onFilterChanged;
@@ -106,6 +110,7 @@ class SummitFilterBar extends StatefulWidget {
   const SummitFilterBar({
     required this.nameFilterHint,
     required this.sectorFilterItems,
+    required this.initialSelectedIndex,
     required this.onFilterChanged,
     super.key,
   });
@@ -199,7 +204,7 @@ class _SummitFilterBarState extends State<SummitFilterBar> {
         padding: EdgeInsets.all(12),
         child: Icon(Icons.filter_alt_outlined),
       ),
-      initialSelection: entries[0].value,
+      initialSelection: entries[widget.initialSelectedIndex].value,
       requestFocusOnTap: false,
       expandedInsets: EdgeInsets.zero,
       onSelected: (ItemDataId? areaId) {

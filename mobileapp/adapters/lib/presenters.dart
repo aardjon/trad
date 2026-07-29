@@ -10,6 +10,7 @@ library;
 
 import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
+import 'package:crosscuttings/logging/logger.dart';
 import 'package:intl/intl.dart';
 
 import 'package:core/boundaries/presentation.dart';
@@ -25,6 +26,9 @@ import 'package:crosscuttings/di.dart';
 
 import 'boundaries/ui.dart';
 import 'src/ui/rating.dart';
+
+/// Logger to be used in this library file.
+final Logger _logger = Logger('trad.adapters.presenters');
 
 /// Implementation of the application-wide presenter used by the core to interact with the user.
 class ApplicationWidePresenter implements PresentationBoundary {
@@ -100,11 +104,28 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void showSummitList(List<Sector> sectors) {
+  void showSummitList(List<Sector> sectors, int? selectedSectorId) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    List<ListViewItem> selectableSectors = <ListViewItem>[
+      ListViewItem('Alle Teilgebiete'),
+      for (final Sector sector in sectors) ListViewItem(sector.name, itemId: sector.id),
+    ];
+
+    int selectedIndex = -1;
+    for (int i = 0; i < selectableSectors.length; i++) {
+      if (selectableSectors[i].itemId == selectedSectorId) {
+        selectedIndex = i;
+        break;
+      }
+    }
+    if (selectedIndex == -1) {
+      _logger.warning('Sector item ID $selectedSectorId not found, ignoring sector filter');
+      selectedIndex = 0;
+    }
     SummitListModel model = SummitListModel(
       'Gipfel',
       'Gipfel suchen',
+      selectedIndex,
       searchBarSectors: <ListViewItem>[
         ListViewItem('Alle Teilgebiete'),
         for (final Sector sector in sectors) ListViewItem(sector.name, itemId: sector.id),

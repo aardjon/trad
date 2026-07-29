@@ -35,7 +35,7 @@ abstract interface class PresentationBoundary {
   ///
   /// [sectors] is the list of sectors that may be selected for summit filtering. The actual summit
   /// list data must be set separately by calling [updateSummitList()].
-  void showSummitList(List<Sector> sectors);
+  void showSummitList(List<Sector> sectors, int? selectedSectorId);
 
   /// Notify the user interface about a new (e.g. filtered or sorted) global summit list.
   ///

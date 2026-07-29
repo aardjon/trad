@@ -9,11 +9,11 @@ library;
 /// area. The
 class Sector {
   /// Internal ID which globally identifies this sector. Not meant to be shown to users.
-  int id;
+  final int id;
 
   /// The name of the sector.
-  String name;
+  final String name;
 
   /// Constructor for directly initializing all members.
-  Sector(this.id, this.name);
+  const Sector(this.id, this.name);
 }
