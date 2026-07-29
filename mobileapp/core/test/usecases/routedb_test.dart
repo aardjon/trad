@@ -10,6 +10,7 @@ import 'package:core/boundaries/sysenv.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/geoposition.dart';
+import 'package:core/entities/sector.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -22,7 +23,6 @@ import 'package:core/entities/sorting/posts_filter_mode.dart';
 import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:core/usecases/routedb.dart';
-import 'package:crosscuttings/di.dart';
 
 class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary {}
 
@@ -43,19 +43,11 @@ void main() {
     registerFallbackValue(GeoPosition(0, 0));
   });
 
-  final DependencyProvider di = DependencyProvider();
   final RouteDbStorageBoundaryMock storageBoundaryMock = RouteDbStorageBoundaryMock();
   final RouteDbDownloadBoundaryMock downloadBoundaryMock = RouteDbDownloadBoundaryMock();
   final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
   final AppPreferencesBoundaryMock preferencesBoundaryMock = AppPreferencesBoundaryMock();
   final SystemEnvironmentBoundaryMock systemEnvBoundaryMock = SystemEnvironmentBoundaryMock();
-
-  setUp(() {
-    // Configure DI to provide the boundary mocks
-    di.registerFactory<PresentationBoundary>(() => presentationBoundaryMock);
-    di.registerFactory<AppPreferencesBoundary>(() => preferencesBoundaryMock);
-    di.registerFactory<SystemEnvironmentBoundary>(() => systemEnvBoundaryMock);
-  });
 
   tearDown(() async {
     // Reset the mocks after each test case
@@ -64,7 +56,6 @@ void main() {
     reset(presentationBoundaryMock);
     reset(preferencesBoundaryMock);
     reset(systemEnvBoundaryMock);
-    await di.shutdown();
   });
 
   // Tests for the route storage management (e.g. importing a new DB file)
@@ -80,9 +71,6 @@ void main() {
         DataSourceAttribution(id: 1, label: 'Test', url: '[some url]', attribution: '[some name]'),
       ];
 
-      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
-
       // Setup the storage mock as if everything went well
       when(storageBoundaryMock.isStarted).thenReturn(false);
       when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {});
@@ -94,7 +82,13 @@ void main() {
         return fakeAttributions;
       });
 
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.importRouteDbFile(fakeFilePath);
 
       // Make sure the correct file name is sent with the storage import request
@@ -110,9 +104,6 @@ void main() {
     /// Simple happy-path test of the whole updateRouteDatabase() use case: A new database file must
     /// be downloaded and installed successfully.
     test('updateRouteDatabase() use case', () async {
-      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
-
       when(storageBoundaryMock.isStarted).thenReturn(false);
       when(() => storageBoundaryMock.importRouteDbFile(any())).thenAnswer((_) async {});
       when(storageBoundaryMock.startStorage).thenAnswer((_) async {});
@@ -143,7 +134,13 @@ void main() {
       });
       when(downloadBoundaryMock.cleanupResources).thenAnswer((_) async {});
 
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.updateRouteDatabase();
 
       // Make sure the file name of the downloaded file was sent with the storage import request
@@ -257,14 +254,13 @@ void main() {
             isStarted: storageInitiallyStarted,
           );
 
-          di.registerFactory<RouteDbStorageBoundary>(() => fakeStorage);
-          di.registerFactory<RouteDbDownloadBoundary>(
-            () => _FakeRouteDbDownloadBoundary(
-              candidates,
-            ),
+          RouteDbUseCases usecases = RouteDbUseCases(
+            downloadBoundary: _FakeRouteDbDownloadBoundary(candidates),
+            preferencesBoundary: preferencesBoundaryMock,
+            presentationBoundary: presentationBoundaryMock,
+            storageBoundary: fakeStorage,
+            systemEnvBoundary: systemEnvBoundaryMock,
           );
-
-          RouteDbUseCases usecases = RouteDbUseCases(di);
           await usecases.updateRouteDatabase();
 
           String expectedDbFile = '${candidates[params.$3].identifier}.sqlite';
@@ -322,10 +318,14 @@ void main() {
             dbCreationDate,
             isStarted: storageInitiallyStarted,
           );
-          di.registerFactory<RouteDbStorageBoundary>(() => fakeStorage);
-          di.registerFactory<RouteDbDownloadBoundary>(() => fakeDownloader);
 
-          RouteDbUseCases usecases = RouteDbUseCases(di);
+          RouteDbUseCases usecases = RouteDbUseCases(
+            downloadBoundary: fakeDownloader,
+            preferencesBoundary: preferencesBoundaryMock,
+            presentationBoundary: presentationBoundaryMock,
+            storageBoundary: fakeStorage,
+            systemEnvBoundary: systemEnvBoundaryMock,
+          );
           await usecases.updateRouteDatabase();
 
           expect(fakeStorage.importedRouteDbFile, null);
@@ -335,12 +335,6 @@ void main() {
 
     // Tests for actually installing/importing a route db file.
     group('install given file', () {
-      setUp(() {
-        // Configure DI to provide the boundary mocks
-        di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-        di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
-      });
-
       /// Checks the regular, normal route DB import behaviour:
       ///  - The given file name is forwarded to the storage
       ///  - After successful import, the new storage creation date is sent to the UI
@@ -368,7 +362,13 @@ void main() {
             return fakeAttributions;
           });
 
-          RouteDbUseCases usecases = RouteDbUseCases(di);
+          RouteDbUseCases usecases = RouteDbUseCases(
+            downloadBoundary: downloadBoundaryMock,
+            preferencesBoundary: preferencesBoundaryMock,
+            presentationBoundary: presentationBoundaryMock,
+            storageBoundary: storageBoundaryMock,
+            systemEnvBoundary: systemEnvBoundaryMock,
+          );
           await usecases.importRouteDbFile(fakeFilePath);
 
           if (stopStorageFirst) {
@@ -421,7 +421,13 @@ void main() {
           return dummyAttributions;
         });
 
-        RouteDbUseCases usecases = RouteDbUseCases(di);
+        RouteDbUseCases usecases = RouteDbUseCases(
+          downloadBoundary: downloadBoundaryMock,
+          preferencesBoundary: preferencesBoundaryMock,
+          presentationBoundary: presentationBoundaryMock,
+          storageBoundary: storageBoundaryMock,
+          systemEnvBoundary: systemEnvBoundaryMock,
+        );
         await usecases.importRouteDbFile(fakeFilePath);
 
         // Make sure the correct file name is sent with the storage import request
@@ -454,7 +460,13 @@ void main() {
             throw error;
           });
 
-          RouteDbUseCases usecases = RouteDbUseCases(di);
+          RouteDbUseCases usecases = RouteDbUseCases(
+            downloadBoundary: downloadBoundaryMock,
+            preferencesBoundary: preferencesBoundaryMock,
+            presentationBoundary: presentationBoundaryMock,
+            storageBoundary: storageBoundaryMock,
+            systemEnvBoundary: systemEnvBoundaryMock,
+          );
           await usecases.importRouteDbFile(fakeFilePath);
 
           // Make sure the correct file name is sent with the storage import request
@@ -471,12 +483,6 @@ void main() {
   });
 
   group('core.usecases.routedb.summits', () {
-    setUp(() {
-      // Configure DI to provide the boundary mocks
-      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
-    });
-
     List<Summit> summitList = <Summit>[
       Summit(1, 'Mount A', 'Sector A'),
       Summit(2, 'Mount B', 'Sector B'),
@@ -484,18 +490,30 @@ void main() {
     ];
 
     /// Ensures the correct behaviour of the showSummitListPage() method:
+    ///  - The full sector list is retrieved from the storage (retrieveAllSectors())
     ///  - The full summit list must be loaded from the storage (retrieveSummits())
     ///  - The retrieved list must be forwarded to the UI (updateSummitList())
-    test('showSummitListPage() use case', () async {
+    test('showSummitListPage() initial call', () async {
       // Setup the storage mock
       when(() => storageBoundaryMock.retrieveSummits(any())).thenAnswer((_) async {
         return summitList;
       });
+      when(storageBoundaryMock.retrieveAllSectors).thenAnswer((_) async {
+        return <Sector>[];
+      });
 
       // Run the actual test case
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.showSummitListPage();
 
+      // Make sure that all sectors are loaded from the storage
+      verify(storageBoundaryMock.retrieveAllSectors).called(1);
       // Make sure the full summit list (i.e. no filter string) is loaded from the storage
       verify(storageBoundaryMock.retrieveSummits).called(1);
       // Make sure the retrieved list is sent to the UI
@@ -515,13 +533,54 @@ void main() {
       });
 
       // Run the actual test case
-      RouteDbUseCases usecases = RouteDbUseCases(di);
-      await usecases.filterSummitList(filterText);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
+      await usecases.filterSummitList(filterText, null);
 
       // Make sure the filter string is provided to the storage for loading the summit
       verify(() => storageBoundaryMock.retrieveSummits(filterText)).called(1);
       // Make sure the retrieved list is sent to the UI
       verify(() => presentationBoundaryMock.updateSummitList(summitList)).called(1);
+    });
+
+    /// Ensures that the sector filter is kept when loading the full summit list after applying a
+    /// filter, while the name filter is discarded.
+    test('keep sector filter', () async {
+      const String nameFilter = 'name';
+      const int sectorId = 1;
+      const List<Sector> sectorList = <Sector>[Sector(sectorId, 'Example Sector')];
+
+      // Setup the storage mock
+      when(storageBoundaryMock.retrieveAllSectors).thenAnswer((_) async {
+        return sectorList;
+      });
+      when(() => storageBoundaryMock.retrieveSummits(any(), any())).thenAnswer((_) async {
+        return summitList;
+      });
+
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
+
+      // Filter the summit list by name and sector
+      await usecases.filterSummitList(nameFilter, sectorId);
+      // Show the full summit list
+      await usecases.showSummitListPage();
+
+      // Make sure the summit list has been loaded from the storage, without any name filter but
+      // with a sector constraint
+      verify(() => storageBoundaryMock.retrieveSummits(null, sectorId)).called(1);
+      // Make sure the selected sector is sent to the UI
+      verify(() => presentationBoundaryMock.showSummitList(sectorList, sectorId)).called(1);
     });
 
     /// Ensures the correct behaviour of the showSummitOnMap() method:
@@ -543,7 +602,13 @@ void main() {
           when(() => systemEnvBoundaryMock.openExternalMapsApp(any())).thenAnswer((_) async {});
 
           // Run the actual test case
-          RouteDbUseCases usecases = RouteDbUseCases(di);
+          RouteDbUseCases usecases = RouteDbUseCases(
+            downloadBoundary: downloadBoundaryMock,
+            preferencesBoundary: preferencesBoundaryMock,
+            presentationBoundary: presentationBoundaryMock,
+            storageBoundary: storageBoundaryMock,
+            systemEnvBoundary: systemEnvBoundaryMock,
+          );
           await usecases.showSummitOnMap(summit.id);
 
           // Make sure the filter string is provided to the storage for loading the summit
@@ -562,12 +627,6 @@ void main() {
   });
 
   group('core.usecases.routedb.routes', () {
-    setUp(() {
-      // Configure DI to provide the boundary mocks
-      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
-    });
-
     const RoutesFilterMode sortCriterion = RoutesFilterMode.grade;
     final Summit summit = Summit(42, 'Teufelsturm', 'Sector');
     final List<Route> routeList = <Route>[
@@ -596,7 +655,13 @@ void main() {
       });
 
       // Run the actual test case
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.showRouteListPage(summit.id);
 
       // Make sure the summit data is retrieved from the routedb storage by providing the given ID
@@ -628,7 +693,13 @@ void main() {
       });
 
       // Run the actual test case
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.sortRouteList(summit.id, sortCriterion);
 
       // Make sure the sort criterion is stored in the preferences
@@ -644,12 +715,6 @@ void main() {
   });
 
   group('core.usecases.routedb.posts', () {
-    setUp(() {
-      // Configure DI to provide the boundary mocks
-      di.registerFactory<RouteDbStorageBoundary>(() => storageBoundaryMock);
-      di.registerFactory<RouteDbDownloadBoundary>(() => downloadBoundaryMock);
-    });
-
     const PostsFilterMode sortCriterion = PostsFilterMode.oldestFirst;
     final Route route = Route(
       id: 1337,
@@ -683,7 +748,13 @@ void main() {
       });
 
       // Run the actual test case
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.showPostsPage(route.id);
 
       // Make sure the route data is retrieved from the routedb storage by providing the given ID
@@ -713,7 +784,13 @@ void main() {
       });
 
       // Run the actual test case
-      RouteDbUseCases usecases = RouteDbUseCases(di);
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+      );
       await usecases.sortPostList(route.id, sortCriterion);
 
       // Make sure the sort criterion is stored in the preferences

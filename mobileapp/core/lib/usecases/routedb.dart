@@ -5,7 +5,6 @@ library;
 
 import 'dart:async';
 
-import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/ota.dart';
@@ -18,6 +17,7 @@ import '../entities/errors.dart';
 import '../entities/geoposition.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
+import '../entities/sector.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
 import '../entities/sorting/summits_filter_mode.dart';
@@ -47,13 +47,18 @@ class RouteDbUseCases {
   /// Maximum distance in meters up to which an object is still considered "nearby" another one.
   static const int _maxNearbyDistance = 500;
 
+  /// The ID of the sector that was previously selected for filtering the summit list. Null if no
+  /// sector filter was set.
+  int? _lastSelectedSector;
+
   /// Constructor for creating a new RouteDbUseCases instance.
-  RouteDbUseCases(DependencyProvider di)
-    : _presentationBoundary = di.provide<PresentationBoundary>(),
-      _storageBoundary = di.provide<RouteDbStorageBoundary>(),
-      _downloadBoundary = di.provide<RouteDbDownloadBoundary>(),
-      _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
-      _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>();
+  RouteDbUseCases({
+    required this._presentationBoundary,
+    required this._storageBoundary,
+    required this._downloadBoundary,
+    required this._preferencesBoundary,
+    required this._systemEnvBoundary,
+  });
 
   /// Use case: Download the most current route database via OTA and install (import) it.
   Future<void> updateRouteDatabase() async {
@@ -112,19 +117,25 @@ class RouteDbUseCases {
     }
   }
 
-  /// Use Case: Switch to the summit list, resetting any previous filter
+  /// Use Case: Switch to the main sector list, resetting any previous name filter. The previous
+  /// sector filter stays active, though.
   Future<void> showSummitListPage() async {
     _logger.info('Running use case showSummitListPage()');
+    List<Sector> sectorList = await _storageBoundary.retrieveAllSectors();
     _presentationBoundary.updateSummitList(<Summit>[]);
-    _presentationBoundary.showSummitList();
-    List<Summit> summitList = await _storageBoundary.retrieveSummits();
+    _presentationBoundary.showSummitList(sectorList, _lastSelectedSector);
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(null, _lastSelectedSector);
     _presentationBoundary.updateSummitList(summitList);
   }
 
-  /// Use Case: Update the summit list to show only the entries matching the given filter text.
-  Future<void> filterSummitList(String filterText) async {
-    _logger.info('Running use case filterSummitList($filterText)');
-    List<Summit> summitList = await _storageBoundary.retrieveSummits(filterText);
+  /// Use Case: Update the summit list to show only the entries matching the given filter text and/or area.
+  Future<void> filterSummitList(String filterBySummitName, int? filterByAreaId) async {
+    _logger.info('Running use case filterSummitList("$filterBySummitName", $filterByAreaId)');
+    _lastSelectedSector = filterByAreaId;
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(
+      filterBySummitName,
+      filterByAreaId,
+    );
     _presentationBoundary.updateSummitList(summitList);
   }
 

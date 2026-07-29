@@ -4,6 +4,13 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Next Version
+
+### New/Improved Features:
+
+ - Filter summit list by sector (#34)
+
+
 ## Version 0.5.0 - 2026-07-12
 
 ### New/Improved Features:

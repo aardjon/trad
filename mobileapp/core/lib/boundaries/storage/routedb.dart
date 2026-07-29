@@ -9,6 +9,7 @@ import '../../entities/data_source.dart';
 import '../../entities/geoposition.dart';
 import '../../entities/post.dart';
 import '../../entities/route.dart';
+import '../../entities/sector.dart';
 import '../../entities/sorting/posts_filter_mode.dart';
 import '../../entities/sorting/routes_filter_mode.dart';
 import '../../entities/summit.dart';
@@ -67,6 +68,11 @@ abstract interface class RouteDbStorageBoundary {
   /// This method must only be called on a STARTED storage.
   Future<DataSourceAttribution> getExternalDataSource(int sourceId);
 
+  /// Retrieve all available sector data, sorted alphabetically by their names.
+  ///
+  /// This method must only be called on a STARTED storage.
+  Future<List<Sector>> retrieveAllSectors();
+
   /// Retrieve all data of the single summit identified by [summitDataId].
   ///
   /// This must only be called on a STARTED storage.
@@ -77,13 +83,15 @@ abstract interface class RouteDbStorageBoundary {
   /// This must only be called on a STARTED storage.
   Future<Route> retrieveRoute(int routeDataId);
 
-  /// Retrieve all summit data matching the given [nameFilter] from the storage.
+  /// Retrieve all summit data of the requested sector matching the given [nameFilter] from the
+  /// storage.
   ///
-  /// If a filter string is given, only the summits whose name contains it are returned. If no
-  /// filter is given, all summits are returned.
+  /// If a filter string is given, only the summits whose name contains it are returned. If a
+  /// sector ID is given, only summits from this sector are returned. Both filters are
+  /// AND-combined. If no filter is given, all summits are returned.
   ///
-  /// This must only be called on a STARTED storage.
-  Future<List<Summit>> retrieveSummits([String? nameFilter]);
+  /// This method must only be called on a STARTED storage.
+  Future<List<Summit>> retrieveSummits([String? nameFilter, int? sectorIdFilter]);
 
   /// Retrieve all summits within the geographical rectangle defined by [northWest] and [southEast]
   /// from the storage. If [sortAlphabetically] is set to true, the summits are ordered

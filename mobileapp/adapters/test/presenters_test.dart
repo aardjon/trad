@@ -8,6 +8,7 @@ import 'package:adapters/presenters.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/route.dart';
+import 'package:core/entities/sector.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:mocktail/mocktail.dart';
@@ -47,7 +48,14 @@ void main() {
         'Application version 0.0.0',
       ),
     );
-    registerFallbackValue(SummitListModel('[NoPageTitle]', '[NoSearchBarHint]'));
+    registerFallbackValue(
+      SummitListModel(
+        '[NoPageTitle]',
+        '[NoSearchBarHint]',
+        0,
+        searchBarSectors: <ListViewItem>[ListViewItem('NoItem')],
+      ),
+    );
     registerFallbackValue(
       SummitDetailsModel(
         0xFFFFFF,
@@ -274,7 +282,7 @@ void main() {
     /// data to the actual UI implementation: Page title and search box label must not be empty.
     test('showSummitList()', () {
       ApplicationWidePresenter presenter = ApplicationWidePresenter();
-      presenter.showSummitList();
+      presenter.showSummitList(<Sector>[], null);
 
       Matcher summitModelMatcher = isA<SummitListModel>()
           .having((SummitListModel m) => m.pageTitle, 'pageTitle', isNotEmpty)
