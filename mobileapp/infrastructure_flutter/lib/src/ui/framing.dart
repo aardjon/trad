@@ -65,7 +65,7 @@ class MainWidget extends StatelessWidget {
           );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
-          return SummitListView(
+          return SummitListPage(
             TradDrawer(_menuModel, _guiState.settingsState, _controller),
             _guiState.summitListState,
           );

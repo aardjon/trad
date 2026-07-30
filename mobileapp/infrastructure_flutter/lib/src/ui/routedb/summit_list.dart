@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../state.dart';
 
 /// Widget representing the *Summit List* page.
-class SummitListView extends StatelessWidget {
+class SummitListPage extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final Widget _appDrawer;
 
@@ -19,7 +19,7 @@ class SummitListView extends StatelessWidget {
   final SummitListNotifier _summitListState;
 
   /// Constructor for directly initializing all members.
-  const SummitListView(this._appDrawer, this._summitListState, {super.key});
+  const SummitListPage(this._appDrawer, this._summitListState, {super.key});
 
   @override
   Widget build(BuildContext context) {
