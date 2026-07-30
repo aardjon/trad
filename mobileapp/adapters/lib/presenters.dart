@@ -53,7 +53,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
       MainMenuModel(
         appName,
         ListViewItem('Fahrtenbuch', icon: const IconDefinition(Glyph.logoJournal)),
-        ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Gipfelliste', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Nahegelegene Gipfel', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
         ListViewItem('Über trad', icon: const IconDefinition(Glyph.logoAppInfo)),
@@ -173,6 +174,16 @@ class ApplicationWidePresenter implements PresentationBoundary {
     }
     ui.updateSummitList(summitItems);
   }
+
+  @override
+  void showNearbySummits() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    NearbySummitsPageLabels model = NearbySummitsPageLabels('Gipfel in der Nähe');
+    ui.showNearbySummits(model);
+  }
+
+  @override
+  void updateNearbySummits(List<(Summit, double)> nearbySummits) {}
 
   @override
   void showSummitDetails(Summit selectedSummit) {

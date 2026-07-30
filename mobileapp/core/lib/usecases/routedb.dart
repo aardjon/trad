@@ -146,6 +146,12 @@ class RouteDbUseCases {
     _presentationBoundary.updateSummitList(summitList);
   }
 
+  /// Use Case: Switch to the main nearby summits list.
+  Future<void> showNearbySummitsPage() async {
+    _logger.info('Running use case showNearbySummitsPage()');
+    _presentationBoundary.showNearbySummits();
+  }
+
   /// Use Case: Show detailed information about the selected summit.
   Future<void> showRouteListPage(int summitId) async {
     _logger.info('Running use case showRouteListPage($summitId)');

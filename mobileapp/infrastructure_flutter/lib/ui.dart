@@ -90,6 +90,18 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
+  void showNearbySummits(NearbySummitsPageLabels model) {
+    _logger.debug('Displaying nearby summits page');
+    _uiState.resetNotifiers();
+    _switchToRoute(UiRoute.nearbysummits.toRouteString(), isRoot: true, routeArguments: model);
+  }
+
+  @override
+  void updateNearbySummits(List<ListViewItem> summitItems) {
+    _uiState.nearbySummitListNotifier.replaceData(summitItems, <ListViewItem>[]);
+  }
+
+  @override
   void showSummitDetails(SummitDetailsModel model) {
     _logger.debug('Displaying summit details page');
     _switchToRoute(UiRoute.summitdetails.toRouteString(), isRoot: false, routeArguments: model);

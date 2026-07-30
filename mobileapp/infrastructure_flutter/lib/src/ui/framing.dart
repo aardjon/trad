@@ -13,6 +13,7 @@ import 'appinfo.dart';
 import 'drawer.dart';
 import 'journal.dart';
 import 'knowledgebase.dart';
+import 'routedb/nearby_summits_page.dart';
 import 'routedb/route_details.dart';
 import 'routedb/summit_details.dart';
 import 'routedb/summit_list.dart';
@@ -68,6 +69,12 @@ class MainWidget extends StatelessWidget {
           return SummitListPage(
             TradDrawer(_menuModel, _guiState.routeDBState, _controller),
             _guiState.summitListState,
+          );
+        },
+        UiRoute.nearbysummits.toRouteString(): (BuildContext context) {
+          return NearbySummitsPage(
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
+            _guiState.nearbySummitListNotifier,
           );
         },
         UiRoute.summitdetails.toRouteString(): (BuildContext context) {

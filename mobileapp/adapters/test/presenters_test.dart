@@ -39,7 +39,8 @@ void main() {
       MainMenuModel(
         '[NoTitle]',
         ListViewItem('[NoJournal]'),
-        ListViewItem('[NoRouteDB]'),
+        ListViewItem('[NoRouteDB1]'),
+        ListViewItem('[NoRouteDB2]'),
         ListViewItem('[NoKnowledgebase]'),
         ListViewItem('[NoSettings]'),
         ListViewItem('[NoAbout]'),
@@ -120,8 +121,10 @@ void main() {
           isNotEmpty,
         )
         .having((MainMenuModel m) => m.knowledgebaseItem.icon, 'knowledgebase.icon', isNotNull)
-        .having((MainMenuModel m) => m.routedbItem.mainTitle, 'routedb.title', isNotEmpty)
-        .having((MainMenuModel m) => m.routedbItem.icon, 'routedb.icon', isNotNull)
+        .having((MainMenuModel m) => m.summitListItem.mainTitle, 'routedb.title', isNotEmpty)
+        .having((MainMenuModel m) => m.summitListItem.icon, 'routedb.icon', isNotNull)
+        .having((MainMenuModel m) => m.nearbyListItem.mainTitle, 'routedb.title', isNotEmpty)
+        .having((MainMenuModel m) => m.nearbyListItem.icon, 'routedb.icon', isNotNull)
         .having((MainMenuModel m) => m.settingsItem.mainTitle, 'settings.title', isNotEmpty)
         .having((MainMenuModel m) => m.settingsItem.icon, 'settings.icon', isNotNull);
 

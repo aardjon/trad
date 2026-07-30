@@ -12,8 +12,11 @@ class MainMenuModel {
   /// List item for the journal domain.
   final ListViewItem journalItem;
 
-  /// List item for the route db domain.
-  final ListViewItem routedbItem;
+  /// List item for the (filtered) summit list
+  final ListViewItem summitListItem;
+
+  /// List item for the list of nearby summits
+  final ListViewItem nearbyListItem;
 
   /// List item for the knowledge base domain.
   final ListViewItem knowledgebaseItem;
@@ -31,7 +34,8 @@ class MainMenuModel {
   const MainMenuModel(
     this.menuHeader,
     this.journalItem,
-    this.routedbItem,
+    this.summitListItem,
+    this.nearbyListItem,
     this.knowledgebaseItem,
     this.settingsItem,
     this.aboutItem,
@@ -152,6 +156,18 @@ class SummitListModel {
     this.searchBarInitialSectorIndex, {
     this.searchBarSectors = const <ListViewItem>[],
   }) : assert(searchBarSectors.isNotEmpty, 'searchBarSectors must not be empty');
+}
+
+/// Model that provides all static data needed to display the empty nearby summits page to the UI.
+///
+/// "Static" means, that this data does not change while the page is shown, so it can be provided
+/// once during the initial page display.
+class NearbySummitsPageLabels {
+  /// Title of the nearby summits page.
+  final String pageTitle;
+
+  /// Constructor for directly initializing all members.
+  NearbySummitsPageLabels(this.pageTitle);
 }
 
 /// Internal ID to uniquely identify a single data item.
@@ -421,6 +437,16 @@ abstract interface class ApplicationUiBoundary {
   ///
   /// This will update the display with the new [summitItems] as necessary.
   void updateSummitList(List<ListViewItem> summitItems);
+
+  /// Request the UI to display the *Nearby Summits* screen based on the provided [model].
+  ///
+  /// The list data must be sent separately by calling [updateNearbySummits] afterwards.
+  void showNearbySummits(NearbySummitsPageLabels model);
+
+  /// Notify the UI about a new list of nearby summits.
+  ///
+  /// This will update the display with the new [summitItems] as necessary.
+  void updateNearbySummits(List<ListViewItem> summitItems);
 
   /// Request the UI to display the *Summit Details* screen based on the provided [model].
   ///
