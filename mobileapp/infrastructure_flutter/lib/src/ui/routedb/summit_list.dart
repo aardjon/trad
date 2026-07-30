@@ -6,9 +6,9 @@ library;
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../state.dart';
+import '../widgets/summit_list_view.dart';
 
 /// Widget representing the *Summit List* page.
 class SummitListPage extends StatelessWidget {
@@ -53,37 +53,12 @@ class SummitListPage extends StatelessWidget {
   }
 
   Widget _listView() {
-    return ChangeNotifierProvider<SummitListNotifier>.value(
-      value: _summitListState,
-      child: Consumer<SummitListNotifier>(
-        builder: (BuildContext context, SummitListNotifier state, Widget? child) {
-          return Expanded(
-            child: ListView.builder(
-              itemCount: state.getSummitCount(),
-              itemBuilder: (BuildContext context, int index) {
-                final ListViewItem summit = state.getSummitItem(index);
-                return ListTile(
-                  title: Text(summit.mainTitle),
-                  onTap: () {
-                    _onSummitTap(summit.itemId!);
-                  },
-                );
-              },
-            ),
-          );
-        },
-      ),
-    );
+    return Expanded(child: SummitListView(_summitListState));
   }
 
   void _filterSummits(String nameFilter, int? areaFilter) {
     RouteDbController controller = RouteDbController();
     controller.requestFilterSummitList(nameFilter, areaFilter);
-  }
-
-  void _onSummitTap(ItemDataId summitDataId) {
-    RouteDbController controller = RouteDbController();
-    controller.requestSummitDetails(summitDataId);
   }
 }
 

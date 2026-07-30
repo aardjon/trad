@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../icons.dart';
 import '../state.dart';
+import '../widgets/summit_list_view.dart';
 
 /// Widget representing the *Summit Details* page.
 class SummitDetailsView extends StatefulWidget {
@@ -195,7 +196,7 @@ class _TabFactory {
     return <Widget>[
       SummitRoutesView(_pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId)),
       if (_pageModel.canShowNearbySummits)
-        NearbySummitsView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId))
+        SummitListView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId))
       else
         NoDataMessageView(_pageModel.noNearbySummitsMessage),
     ];
@@ -314,43 +315,6 @@ class NearbySummitsContextMenu extends StatelessWidget {
   void _onContextAction(ItemDataId summitDataId, ItemDataId actionItemId) {
     RouteDbController controller = RouteDbController();
     controller.requestNearbySummitListSorting(summitDataId, actionItemId);
-  }
-}
-
-/// Widget to be shown when the "nearby summits" tab is active
-class NearbySummitsView extends StatelessWidget {
-  final SummitListNotifier _summitListState;
-
-  /// Constructor for directly initializing all members.
-  const NearbySummitsView(this._summitListState, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SummitListNotifier>.value(
-      value: _summitListState,
-      child: Consumer<SummitListNotifier>(
-        builder: (BuildContext context, SummitListNotifier state, Widget? child) {
-          return ListView.builder(
-            itemCount: state.getSummitCount(),
-            itemBuilder: (BuildContext context, int index) {
-              final ListViewItem summit = state.getSummitItem(index);
-              return ListTile(
-                title: Text(summit.mainTitle),
-                trailing: Text(summit.subTitle ?? ''),
-                onTap: () {
-                  _onSummitTap(summit.itemId!);
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  void _onSummitTap(ItemDataId summitDataId) {
-    RouteDbController controller = RouteDbController();
-    controller.requestSummitDetails(summitDataId);
   }
 }
 
