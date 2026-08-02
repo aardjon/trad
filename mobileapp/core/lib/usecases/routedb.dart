@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/ota.dart';
+import '../boundaries/positioning.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
@@ -37,6 +38,9 @@ class RouteDbUseCases {
   /// Interface to the download boundary, used for fetching database updates.
   final RouteDbDownloadBoundary _downloadBoundary;
 
+  // interface to the positioning component, used for getting the current location.
+  final PositioningBoundary _positioningBoundary;
+
   /// Interface to the storage boundary component, used for reading and writing application config
   /// settings.
   final AppPreferencesBoundary _preferencesBoundary;
@@ -58,6 +62,7 @@ class RouteDbUseCases {
     required this._downloadBoundary,
     required this._preferencesBoundary,
     required this._systemEnvBoundary,
+    required this._positioningBoundary,
   });
 
   /// Use case: Download the most current route database via OTA and install (import) it.
@@ -149,7 +154,36 @@ class RouteDbUseCases {
   /// Use Case: Switch to the main nearby summits list.
   Future<void> showNearbySummitsPage() async {
     _logger.info('Running use case showNearbySummitsPage()');
+    // Display the nearby summits page first
     _presentationBoundary.showNearbySummits();
+
+    // Try to get the current position
+    GeoPosition currentPosition;
+    try {
+      try {
+        currentPosition = await _positioningBoundary.getCurrentPosition();
+      } on MissingPermission {
+        _logger.debug('Location permission is missing but may be requested');
+        // TODO: Display explanation to the user
+        await _positioningBoundary.requestPermissions();
+        currentPosition = await _positioningBoundary.getCurrentPosition();
+      }
+    } on PermissionDenied {
+      _logger.error('Location permission denied permanently');
+      // TODO: Send error to the UI
+      return;
+    } on ResourceUnavailable {
+      _logger.error('Location service is not available');
+      return;
+    }
+
+    // Got a position, now find and display all summits in the vicinity
+    List<(Summit, double)> nearbySummits = await _querySortedSummitList(
+      currentPosition,
+      _maxNearbyDistance,
+      NearbySummitsSortMode.distance,
+    );
+    _presentationBoundary.updateNearbySummits(nearbySummits);
   }
 
   /// Use Case: Show detailed information about the selected summit.
