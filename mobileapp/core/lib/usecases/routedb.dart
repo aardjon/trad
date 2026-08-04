@@ -164,14 +164,14 @@ class RouteDbUseCases {
       try {
         currentPosition = await _positioningBoundary.getCurrentPosition();
       } on MissingPermission {
-        _logger.debug('Location permission is missing but may be requested');
-        // TODO: Display explanation to the user
+        _logger.debug('Location permission is missing but will be requested');
+        // TODO(aardjon): Display explanation to the user
         await _positioningBoundary.requestPermissions();
         currentPosition = await _positioningBoundary.getCurrentPosition();
       }
     } on PermissionDenied {
       _logger.error('Location permission denied permanently');
-      // TODO: Send error to the UI
+      // TODO(aardjon): Send error to the UI
       return;
     } on ResourceUnavailable {
       _logger.error('Location service is not available');
