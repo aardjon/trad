@@ -183,7 +183,19 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateNearbySummits(List<(Summit, double)> nearbySummits) {}
+  void updateNearbySummits(List<(Summit, double)> nearbySummits) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateNearbySummits(
+      <ListViewItem>[
+        for (final (Summit, double) summitData in nearbySummits)
+          ListViewItem(
+            summitData.$1.name,
+            subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
+            itemId: summitData.$1.id,
+          ),
+      ],
+    );
+  }
 
   @override
   void showSummitDetails(Summit selectedSummit) {
