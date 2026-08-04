@@ -5,6 +5,7 @@ library;
 
 import 'dart:async';
 
+import 'package:crosscuttings/errors.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/ota.dart';

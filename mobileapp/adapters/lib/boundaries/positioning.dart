@@ -4,10 +4,9 @@
 library;
 
 import 'package:crosscuttings/errors.dart';
-import '../entities/geoposition.dart';
 
 /// Interface providing the current location (as in geographical position).
-abstract interface class PositioningBoundary {
+abstract interface class LocationBoundary {
   /// Request all required permissions to get a position from the operating system. This may be
   /// successful when another method raised [MissingPermission], but should be avoided after a
   /// [PermissionDenied] to not bother the user unnecessarily.
@@ -16,7 +15,7 @@ abstract interface class PositioningBoundary {
   /// user disabled it or the platform doesn't provide the necessary GPS device).
   Future<void> requestPermissions();
 
-  /// Return the current geographical position, as reported by the operating system.
+  /// Return the current geographical position as pair of (latitude, longitude) in degree.
   ///
   /// Throws an exception in case of errors:
   ///  - PermissionError: The application is not allowed to access the location, either because the
@@ -26,5 +25,5 @@ abstract interface class PositioningBoundary {
   ///    the platform doesn't provide the necessary GPS device at all.
   ///
   /// Note that retrieving the position may take a while.
-  Future<GeoPosition> getCurrentPosition();
+  Future<(double, double)> getCurrentPosition();
 }

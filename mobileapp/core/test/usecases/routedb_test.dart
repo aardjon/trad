@@ -6,6 +6,7 @@ library;
 import 'dart:io';
 
 import 'package:core/boundaries/ota.dart';
+import 'package:core/boundaries/positioning.dart';
 import 'package:core/boundaries/sysenv.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
@@ -34,6 +35,8 @@ class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary 
 
 class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
 
+class PositioningBoundaryMock extends Mock implements PositioningBoundary {}
+
 /// Unit tests for the core.usecases.routedb.RouteDbUseCases component.
 void main() {
   setUpAll(() {
@@ -48,6 +51,7 @@ void main() {
   final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
   final AppPreferencesBoundaryMock preferencesBoundaryMock = AppPreferencesBoundaryMock();
   final SystemEnvironmentBoundaryMock systemEnvBoundaryMock = SystemEnvironmentBoundaryMock();
+  final PositioningBoundaryMock positioningBoundaryMock = PositioningBoundaryMock();
 
   tearDown(() async {
     // Reset the mocks after each test case
@@ -56,6 +60,7 @@ void main() {
     reset(presentationBoundaryMock);
     reset(preferencesBoundaryMock);
     reset(systemEnvBoundaryMock);
+    reset(positioningBoundaryMock);
   });
 
   // Tests for the route storage management (e.g. importing a new DB file)
@@ -88,6 +93,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.importRouteDbFile(fakeFilePath);
 
@@ -146,6 +152,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.updateRouteDatabase();
 
@@ -268,6 +275,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: fakeStorage,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.updateRouteDatabase();
 
@@ -333,6 +341,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: fakeStorage,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.updateRouteDatabase();
 
@@ -376,6 +385,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: storageBoundaryMock,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.importRouteDbFile(fakeFilePath);
 
@@ -434,6 +444,7 @@ void main() {
           presentationBoundary: presentationBoundaryMock,
           storageBoundary: storageBoundaryMock,
           systemEnvBoundary: systemEnvBoundaryMock,
+          positioningBoundary: positioningBoundaryMock,
         );
         await usecases.importRouteDbFile(fakeFilePath);
 
@@ -473,6 +484,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: storageBoundaryMock,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.importRouteDbFile(fakeFilePath);
 
@@ -514,6 +526,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.showSummitListPage();
 
@@ -544,6 +557,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.filterSummitList(filterText, null);
 
@@ -574,6 +588,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
 
       // Filter the summit list by name and sector
@@ -613,6 +628,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: storageBoundaryMock,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.showSummitOnMap(summit.id);
 
@@ -661,6 +677,7 @@ void main() {
           presentationBoundary: presentationBoundaryMock,
           storageBoundary: storageBoundaryMock,
           systemEnvBoundary: systemEnvBoundaryMock,
+          positioningBoundary: positioningBoundaryMock,
         );
         await usecases.showRouteOnMap(route.id);
 
@@ -713,6 +730,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.showRouteListPage(summit.id);
 
@@ -751,6 +769,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.sortRouteList(summit.id, sortCriterion);
 
@@ -806,6 +825,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.showPostsPage(route.id);
 
@@ -842,6 +862,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.sortPostList(route.id, sortCriterion);
 

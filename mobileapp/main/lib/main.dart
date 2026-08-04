@@ -8,7 +8,10 @@ import 'dart:async';
 
 import 'package:adapters/boundaries/external_apps.dart';
 import 'package:adapters/boundaries/network.dart';
+import 'package:adapters/boundaries/positioning.dart';
+import 'package:adapters/location.dart';
 import 'package:core/boundaries/ota.dart';
+import 'package:core/boundaries/positioning.dart';
 import 'package:core/usecases/routedb.dart';
 import 'package:crosscuttings/appmeta.dart';
 import 'package:flutter/foundation.dart';
@@ -33,6 +36,7 @@ import 'package:core/boundaries/sysenv.dart';
 import 'package:core/usecases/appwide.dart';
 import 'package:crosscuttings/di.dart';
 import 'package:crosscuttings/logging/logger.dart';
+import 'package:infrastructure_flutter/geolocation.dart';
 import 'package:infrastructure_flutter/path_provider.dart';
 import 'package:infrastructure_flutter/url_launcher.dart';
 import 'package:infrastructure_flutter/repository/root_bundle_assets.dart';
@@ -113,6 +117,9 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<AppPreferencesBoundary>(
       () => PreferencesStorage(_dependencyProvider),
     );
+    _dependencyProvider.registerFactory<PositioningBoundary>(
+      () => LocationAdapter(_dependencyProvider.provide<LocationBoundary>()),
+    );
 
     // infrastructure components
     _dependencyProvider.registerFactory<ApplicationUiBoundary>(ApplicationUI.new);
@@ -123,6 +130,7 @@ class ApplicationBootstrap {
     _dependencyProvider.registerFactory<FileSystemBoundary>(DartIoFileSystem.new);
     _dependencyProvider.registerFactory<ExternalAppsBoundary>(UrlLauncher.new);
     _dependencyProvider.registerFactory<HttpNetworkingBoundary>(HttpNetworkRequests.new);
+    _dependencyProvider.registerSingleton<LocationBoundary>(LocationComponent.new);
 
     // core components
     _dependencyProvider.registerSingleton<RouteDbUseCases>(() {
@@ -132,6 +140,7 @@ class ApplicationBootstrap {
         downloadBoundary: _dependencyProvider.provide<RouteDbDownloadBoundary>(),
         preferencesBoundary: _dependencyProvider.provide<AppPreferencesBoundary>(),
         systemEnvBoundary: _dependencyProvider.provide<SystemEnvironmentBoundary>(),
+        positioningBoundary: _dependencyProvider.provide<PositioningBoundary>(),
       );
     });
   }
