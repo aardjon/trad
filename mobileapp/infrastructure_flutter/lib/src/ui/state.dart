@@ -187,8 +187,37 @@ class SettingsNotifier extends ChangeNotifier {
   }
 }
 
+/// Notifier that knows whether the data is available at all (or not), no matter of what the actual
+/// data is like. Data may be missing e.g. due to an error or some unmet precondition, or there may
+/// just be no data to display at all.
+mixin AlternateStatusMessageNotifier on ChangeNotifier {
+  ///
+  String? _message;
+
+  /// Return true if the regular data is available for display, or false if not.
+  bool canDisplayData() {
+    return _message == null;
+  }
+
+  /// Return an explanatory message that can be shown to the user. The message shall provide
+  /// details about the problem together with information about its consequences and what the user
+  /// can do about.
+  ///
+  /// Must only be called when [canDisplayData] returnes false!
+  String getAlternateMessage() {
+    return _message!;
+  }
+
+  /// Define the message text to be displayed to the user instead of the actual data widget.
+  /// All listeners are notified so that that e.g. views can be updated.
+  void setAlternateMessage(String message) {
+    _message = message;
+    notifyListeners();
+  }
+}
+
 /// Represents the current state of the summit list and notifies about changes.
-class SummitListNotifier extends ChangeNotifier {
+class SummitListNotifier extends ChangeNotifier with AlternateStatusMessageNotifier {
   /// The current list of summits.
   List<ListViewItem> _summits = <ListViewItem>[];
 
