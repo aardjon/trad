@@ -21,8 +21,8 @@ class SettingsPage extends StatelessWidget {
   /// The page title
   final String _title;
 
-  /// Notifier providing the current settings state to be displayed.
-  final SettingsNotifier _settingsState;
+  /// Notifier providing the current routeDB state to be displayed.
+  final RouteDbStatusNotifier _settingsState;
 
   /// Controller to notify about user actions regarding the route db.
   final RouteDbController _routeDbController;
@@ -40,11 +40,11 @@ class SettingsPage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(_title),
       ),
-      body: ChangeNotifierProvider<SettingsNotifier>.value(
+      body: ChangeNotifierProvider<RouteDbStatusNotifier>.value(
         value: _settingsState,
         child: Center(
-          child: Consumer<SettingsNotifier>(
-            builder: (BuildContext context, SettingsNotifier state, Widget? child) {
+          child: Consumer<RouteDbStatusNotifier>(
+            builder: (BuildContext context, RouteDbStatusNotifier state, Widget? child) {
               List<Widget> widgetList = <Widget>[
                 Text(
                   model.routeDbSectionTitle,
@@ -72,7 +72,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildRouteDbUpdateTaskWidgets(SettingsModel model, SettingsNotifier state) {
+  List<Widget> _buildRouteDbUpdateTaskWidgets(SettingsModel model, RouteDbStatusNotifier state) {
     return <Widget>[
       const SizedBox(
         height: 100,
@@ -85,7 +85,7 @@ class SettingsPage extends StatelessWidget {
     ];
   }
 
-  List<Widget> _buildManageRouteDbWidgets(SettingsModel model, SettingsNotifier state) {
+  List<Widget> _buildManageRouteDbWidgets(SettingsModel model, RouteDbStatusNotifier state) {
     List<Widget> widgetList = <Widget>[
       Text('${model.routeDbIdLabel} ${state.getRouteDbIdentifier()}'),
     ];

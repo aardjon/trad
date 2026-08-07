@@ -46,11 +46,11 @@ class GuiState {
     return _navigatorKey;
   }
 
-  /// The central settings state of the UI.
+  /// The central route db state of the UI.
   ///
   /// This is the only real instance of this, all other clients (views) should only reference this
   /// one and never create their own!
-  final SettingsNotifier settingsState = SettingsNotifier();
+  final RouteDbStatusNotifier settingsState = RouteDbStatusNotifier();
 
   /// All summit list notifiers for all alive summit list widgets assigned to a certain context.
   ///
@@ -116,8 +116,8 @@ class GuiState {
   final PostListNotifier postListState = PostListNotifier();
 }
 
-/// Represents the current state of the application settings and notifies about changes.
-class SettingsNotifier extends ChangeNotifier {
+/// Represents the current state of the route database and notifies about changes.
+class RouteDbStatusNotifier extends ChangeNotifier {
   /// The activation status of the route database: true (available) or false (unavailable).
   bool _routeDbActivationStatus = true;
 

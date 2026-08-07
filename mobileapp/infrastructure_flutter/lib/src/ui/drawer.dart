@@ -12,8 +12,8 @@ class TradDrawer extends StatelessWidget {
   /// Model for the application main menu data.
   final MainMenuModel _model;
 
-  /// Notifier providing the current settings state to be displayed.
-  final SettingsNotifier _settingsState;
+  /// Notifier providing the current route db state to be displayed.
+  final RouteDbStatusNotifier _settingsState;
 
   /// Controller instance to notify for any user interaction.
   final ApplicationWideController _controller;
@@ -24,11 +24,11 @@ class TradDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const IconWidgetFactory iconFactory = IconWidgetFactory();
-    ChangeNotifierProvider<SettingsNotifier> changeNotifier =
-        ChangeNotifierProvider<SettingsNotifier>.value(
+    ChangeNotifierProvider<RouteDbStatusNotifier> changeNotifier =
+        ChangeNotifierProvider<RouteDbStatusNotifier>.value(
           value: _settingsState,
-          child: Consumer<SettingsNotifier>(
-            builder: (BuildContext context, SettingsNotifier state, Widget? child) {
+          child: Consumer<RouteDbStatusNotifier>(
+            builder: (BuildContext context, RouteDbStatusNotifier state, Widget? child) {
               List<Widget> itemList = <Widget>[
                 DrawerHeader(
                   decoration: const BoxDecoration(color: Colors.lightGreen),
