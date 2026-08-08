@@ -28,9 +28,14 @@ abstract interface class HttpNetworkingBoundary {
   Future<Uint8List> retrieveBinaryResource(Uri url);
 }
 
+/// Raised in case of an error during a (HTTP) network request. This usually means that the
+/// connection failed, timed out or the remote side did something unexpected - it may work when
+/// trying again later.
+class NetworkException implements Exception {}
+
 /// Raised when an HTTP(S) request fails. This can be caused by e.g. network problems, address
 /// resolution failures or HTTP errors.
-class HttpRequestException implements Exception {
+class HttpRequestException extends NetworkException {
   /// The HTTP response status code
   final int statusCode;
 
@@ -48,7 +53,7 @@ class HttpRequestException implements Exception {
 
 /// Raised when a successful HTTP(S) request returned a response of an unexpected content type, like
 /// e.g. plain text or binary instead of JSON.
-class UnexpectedContentTypeException implements Exception {
+class UnexpectedContentTypeException extends NetworkException {
   /// The expected content MIME type.
   final String expectedContentType;
 
