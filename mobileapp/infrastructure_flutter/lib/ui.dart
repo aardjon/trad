@@ -72,6 +72,11 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
+  void showRouteDbUpdateErrorMessage(String message) {
+    _uiState.settingsState.setLastUpdateErrorMessage(message);
+  }
+
+  @override
   void showSummitList(SummitListModel model) {
     _logger.debug('Displaying summit list page');
     _uiState.resetNotifiers();

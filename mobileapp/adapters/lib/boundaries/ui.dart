@@ -386,6 +386,10 @@ abstract interface class ApplicationUiBoundary {
   /// Set [inProgress] to true when the update task has been started, and to false when it is done.
   void updateRouteDbUpdateProgress({required bool inProgress});
 
+  /// Notify the UI about an error message from a running routedb update task, that shall be
+  /// displayed to the user.
+  void showRouteDbUpdateErrorMessage(String message);
+
   /// Request the UI to display the *Summit List* screen based on the provided [model].
   ///
   /// The list data must be sent separately by calling [updateSummitList] afterwards.

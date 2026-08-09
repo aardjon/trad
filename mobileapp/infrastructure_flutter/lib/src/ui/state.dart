@@ -116,28 +116,42 @@ class GuiState {
   final PostListNotifier postListState = PostListNotifier();
 }
 
+enum _RouteDbStatus {
+  /// No route database is available.
+  missing,
+
+  /// The route database is currently being updated in the background (and therefore not available).
+  updating,
+
+  /// A route database if available and loaded and thus can be used normally.
+  activated,
+}
+
 /// Represents the current state of the route database and notifies about changes.
 class RouteDbStatusNotifier extends ChangeNotifier {
-  /// The activation status of the route database: true (available) or false (unavailable).
-  bool _routeDbActivationStatus = true;
+  /// The current status of the route database.
+  _RouteDbStatus _routeDbStatus = _RouteDbStatus.missing;
 
   /// A message informing the user about the current state of the route database domain, e.g. when
   /// it's not available because of missing data. Set to `null` if no such message should be shown
   /// at all.
-  String? _routeDbAvailabilityMessage;
+  String? _routeDbStatusMessage;
 
-  /// The identifier of the currently used route database
+  /// A message informaing the user about the last error that occured during a DB update. Set to
+  /// `null` if no such message shall be displayed.
+  String? _lastUpdateErrorMessage;
+
+  /// The identifier of the currently used route database. Only set if [_routeDbStatus] is
+  /// [_RouteDbStatus.activated].
   String _routeDbIdentifier = '';
 
+  /// The attribution data of the currently loaded route database. Only set if [_routeDbStatus] is
+  /// [_RouteDbStatus.activated].
   List<ListViewItem> _dataSourceAttributions = <ListViewItem>[];
-
-  /// Displays whether the route db is currently being updated in the background (true) or not
-  /// (false).
-  bool _routeDbUpdateInProgress = false;
 
   /// Returns true if the route database is currently available, false if not.
   bool isRouteDbAavailable() {
-    return _routeDbActivationStatus;
+    return _routeDbStatus == _RouteDbStatus.activated;
   }
 
   /// Returns the identifying label of the current route database.
@@ -145,7 +159,8 @@ class RouteDbStatusNotifier extends ChangeNotifier {
     return _routeDbIdentifier;
   }
 
-  /// Returns the data source attribution information for the current route database.
+  /// Returns the data source attribution information for the current route database. Returns an
+  /// empty list if no route database is available.
   List<ListViewItem> getDataSourceAttributions() {
     return _dataSourceAttributions;
   }
@@ -154,12 +169,32 @@ class RouteDbStatusNotifier extends ChangeNotifier {
   ///
   /// If there is no such additional message, `null` is returned.
   String? getRouteDbAvailabilityMessage() {
-    return _routeDbAvailabilityMessage;
+    return _routeDbStatusMessage;
   }
 
   /// Returns true if the route database is currently being updated, or false if not.
   bool isRouteDbUpdateInProgress() {
-    return _routeDbUpdateInProgress;
+    return _routeDbStatus == _RouteDbStatus.updating;
+  }
+
+  /// Returns the last DB update error message that should be displayed to the user. If there is no
+  /// such additional message, `null` is returned.
+  ///
+  /// Note: The message is discarded afterwards, meaning that it can be obtained from the Notifier
+  /// only once.
+  String? popLastUpdateErrorMessage() {
+    String? message = _lastUpdateErrorMessage;
+    _lastUpdateErrorMessage = null;
+    return message;
+  }
+
+  /// Stores the given [message] to be displayed as DB update error with the next view update.
+  ///
+  /// This is not a simple 'setter' to avoid the impression that the get/set operations on this
+  /// member work as usual. That's also why the linter warning is ignored here.
+  // ignore: use_setters_to_change_properties
+  void setLastUpdateErrorMessage(String message) {
+    _lastUpdateErrorMessage = message;
   }
 
   /// Replaces the status information of the route database with the given [dbIdentifier] and
@@ -172,8 +207,8 @@ class RouteDbStatusNotifier extends ChangeNotifier {
     required List<ListViewItem> dataSourceAttributions,
     String? availabilityMessage,
   }) {
-    _routeDbActivationStatus = routeDbActivationStatus;
-    _routeDbAvailabilityMessage = availabilityMessage;
+    _routeDbStatus = routeDbActivationStatus ? _RouteDbStatus.activated : _RouteDbStatus.missing;
+    _routeDbStatusMessage = availabilityMessage;
     _routeDbIdentifier = dbIdentifier;
     _dataSourceAttributions = dataSourceAttributions;
     notifyListeners();
@@ -182,7 +217,7 @@ class RouteDbStatusNotifier extends ChangeNotifier {
   /// Updates the progress status of a currently running route DB update task to [inProgress]:
   /// true if the task is running, false if not.
   void updateRouteDbUpdateProgress({required bool inProgress}) {
-    _routeDbUpdateInProgress = inProgress;
+    _routeDbStatus = inProgress ? _RouteDbStatus.updating : _RouteDbStatus.missing;
     notifyListeners();
   }
 }

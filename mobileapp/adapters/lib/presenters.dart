@@ -8,6 +8,7 @@
 ///
 library;
 
+import 'package:core/entities/errors.dart';
 import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
 import 'package:crosscuttings/logging/logger.dart';
@@ -24,6 +25,7 @@ import 'package:core/entities/sorting/summits_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 
+import 'boundaries/network.dart';
 import 'boundaries/ui.dart';
 import 'src/ui/rating.dart';
 
@@ -95,6 +97,32 @@ class ApplicationWidePresenter implements PresentationBoundary {
   void routeDbUpdateTaskStarted() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbUpdateProgress(inProgress: true);
+  }
+
+  @override
+  void routeDbUpdateError(Exception error) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    if (error is NetworkException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die Abfrage der Daten vom Updateserver schlug fehl. Bitte überprüfe deine Internetverbindung '
+        'und versuche es später noch einmal.',
+      );
+    } else if (error is InvalidStorageFormatException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die ausgewählte Datei enthält keine gültige Wegedatenbank. Verwende die Online-Funktion '
+        'um eine gültige Datenbank herunterzuladen.',
+      );
+    } else if (error is IncompatibleStorageException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die ausgewählte Wegedatenbank kann mit deiner trad-Version nicht verwendet werden. Verwende am besten '
+        'immer die neueste Version von trad, und verwende die Online-Funktion um automatisch eine passende '
+        'Datenbank zu beziehen.',
+      );
+    } else {
+      ui.showRouteDbUpdateErrorMessage(
+        'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
+      );
+    }
   }
 
   @override
