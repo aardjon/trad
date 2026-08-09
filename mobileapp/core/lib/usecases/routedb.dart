@@ -63,7 +63,6 @@ class RouteDbUseCases {
   /// Use case: Download the most current route database via OTA and install (import) it.
   Future<void> updateRouteDatabase() async {
     _logger.debug('Running use case updateRouteDatabase()');
-    _presentationBoundary.routeDbUpdateTaskStarted();
     DateTime? dbCreationDate;
 
     if (_storageBoundary.isStarted()) {
@@ -72,7 +71,6 @@ class RouteDbUseCases {
     await _fetchAndInstallRouteDb(
       dbFileProvider: OnlineDbFileProvider(_downloadBoundary, dbCreationDate),
     );
-    _presentationBoundary.routeDbUpdateTaskDone();
     await _downloadBoundary.cleanupResources();
   }
 
@@ -89,20 +87,29 @@ class RouteDbUseCases {
   Future<void> _fetchAndInstallRouteDb({
     required DbFileProvider dbFileProvider,
   }) async {
+    _presentationBoundary.routeDbUpdateTaskStarted();
+
     if (_storageBoundary.isStarted()) {
       _storageBoundary.stopStorage();
-      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
     }
 
-    String? filePath = await dbFileProvider.determineLocalFileToInstall();
+    String? filePath;
+    try {
+      filePath = await dbFileProvider.determineLocalFileToInstall();
+    } on Exception catch (error, stackTrace) {
+      _logger.error('Unable to retrieve database file due to', error, stackTrace);
+      _presentationBoundary.routeDbUpdateError(error);
+    }
+
     if (filePath != null) {
       try {
         await _storageBoundary.importRouteDbFile(filePath);
       } on Exception catch (error, stackTrace) {
         _logger.warning('Unable to import database file due to', error, stackTrace);
-        // TODO(aardjon): Request the UI to show an error
+        _presentationBoundary.routeDbUpdateError(error);
       }
     }
+    // else means: No newer or no compatible file available
 
     // TODO(aardjon): This is a code duplication with the startApplication() use case, eliminate!
     try {

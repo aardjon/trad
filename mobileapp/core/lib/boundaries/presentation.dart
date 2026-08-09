@@ -28,6 +28,9 @@ abstract interface class PresentationBoundary {
   /// Notify the UI about a running route database update.
   void routeDbUpdateTaskStarted();
 
+  /// Notify the UI about an error that happened while updating.
+  void routeDbUpdateError(Exception error);
+
   /// Notify the UI that the route database update is done.
   void routeDbUpdateTaskDone();
 
