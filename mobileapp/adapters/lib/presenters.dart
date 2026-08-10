@@ -8,6 +8,7 @@
 ///
 library;
 
+import 'package:core/entities/errors.dart';
 import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
 import 'package:crosscuttings/logging/logger.dart';
@@ -24,6 +25,7 @@ import 'package:core/entities/sorting/summits_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 
+import 'boundaries/network.dart';
 import 'boundaries/ui.dart';
 import 'src/ui/rating.dart';
 
@@ -61,11 +63,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources) {
-    const String noDbMessage =
-        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
-        'indem du Wegedaten herunterlädst bzw. importierst.';
-
+  void routeDbAvailable(DateTime routeDatabaseDate, List<DataSourceAttribution> dataSources) {
     final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
     final List<ListViewItem> dataSourceAttributions = <ListViewItem>[];
@@ -83,24 +81,55 @@ class ApplicationWidePresenter implements PresentationBoundary {
     }
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbStatus(
-      activated: routeDatabaseDate != null,
-      label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
-      dataSourceAttributions: routeDatabaseDate != null ? dataSourceAttributions : <ListViewItem>[],
-      statusMessage: routeDatabaseDate != null ? null : noDbMessage,
+    ui.setStatusActivated(
+      label: dateFormatter.format(routeDatabaseDate),
+      dataSourceAttributions: dataSourceAttributions,
     );
   }
 
   @override
-  void routeDbUpdateTaskStarted() {
+  void routeDbUnavailable() {
+    const String noDbMessage =
+        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
+        'indem du Wegedaten herunterlädst bzw. importierst.';
+
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbUpdateProgress(inProgress: true);
+    ui.setStatusMissing(
+      label: 'Keine',
+      userHint: noDbMessage,
+    );
   }
 
   @override
-  void routeDbUpdateTaskDone() {
+  void routeDbUpdating() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbUpdateProgress(inProgress: false);
+    ui.setStatusUpdating();
+  }
+
+  @override
+  void routeDbUpdateError(Exception error) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    if (error is NetworkException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die Abfrage der Daten vom Updateserver schlug fehl. Bitte überprüfe deine Internetverbindung '
+        'und versuche es später noch einmal.',
+      );
+    } else if (error is InvalidStorageFormatException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die ausgewählte Datei enthält keine gültige Wegedatenbank. Verwende die Online-Funktion '
+        'um eine gültige Datenbank herunterzuladen.',
+      );
+    } else if (error is IncompatibleStorageException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die ausgewählte Wegedatenbank kann mit deiner trad-Version nicht verwendet werden. Verwende am besten '
+        'immer die neueste Version von trad, und verwende die Online-Funktion um automatisch eine passende '
+        'Datenbank zu beziehen.',
+      );
+    } else {
+      ui.showRouteDbUpdateErrorMessage(
+        'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
+      );
+    }
   }
 
   @override

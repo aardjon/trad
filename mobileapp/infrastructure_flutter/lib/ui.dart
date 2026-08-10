@@ -52,23 +52,29 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void updateRouteDbStatus({
-    required bool activated,
+  void setStatusActivated({
     required String label,
     required List<ListViewItem> dataSourceAttributions,
-    String? statusMessage,
   }) {
-    _uiState.settingsState.updateRouteDbStatus(
-      routeDbActivationStatus: activated,
+    _uiState.routeDBState.setStatusActivated(
       dbIdentifier: label,
       dataSourceAttributions: dataSourceAttributions,
-      availabilityMessage: statusMessage,
     );
   }
 
   @override
-  void updateRouteDbUpdateProgress({required bool inProgress}) {
-    _uiState.settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
+  void setStatusMissing({required String label, required String userHint}) {
+    _uiState.routeDBState.setStatusMissing(label, userHint);
+  }
+
+  @override
+  void setStatusUpdating() {
+    _uiState.routeDBState.setStatusUpdating();
+  }
+
+  @override
+  void showRouteDbUpdateErrorMessage(String message) {
+    _uiState.routeDBState.setLastUpdateErrorMessage(message);
   }
 
   @override

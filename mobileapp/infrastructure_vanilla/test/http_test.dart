@@ -13,7 +13,6 @@ import 'package:test/test.dart';
 import 'package:infrastructure_vanilla/http.dart';
 
 /// Unit tests for the HttpNetworkRequests component.
-// TODO(aardjon): Please add tests that simulate a connection/network failure
 void main() {
   /// Ensure that the retrieveJsonResource() method requests the given URL exactly once, and
   /// returns the expected binary data.
@@ -128,6 +127,40 @@ void main() {
     expect(() async {
       await httpRequests.retrieveBinaryResource(binaryUri);
     }, throwsA(isA<HttpRequestException>()));
+  });
+
+  /// Ensure that the retrieveBinaryResource() throws a ConnectionException in case of a network
+  /// problem.
+  test('retrieveJsonResource() connection error', () async {
+    final Uri jsonUri = Uri.https('localhost', 'path/to/binary');
+
+    _HttpClientMock mockedHttpClient = _HttpClientMock();
+    when(() => mockedHttpClient.get(jsonUri)).thenAnswer((_) async {
+      throw http.ClientException('Fake connection error', jsonUri);
+    });
+
+    // Make sure the requests raises
+    HttpNetworkRequests httpRequests = HttpNetworkRequests(client: mockedHttpClient);
+    expect(() async {
+      await httpRequests.retrieveJsonResource(jsonUri);
+    }, throwsA(isA<ConnectionException>()));
+  });
+
+  /// Ensure that the retrieveBinaryResource() throws a ConnectionException in case of a network
+  /// problem.
+  test('retrieveBinaryResource() connection error', () async {
+    final Uri binaryUri = Uri.https('localhost', 'path/to/binary');
+
+    _HttpClientMock mockedHttpClient = _HttpClientMock();
+    when(() => mockedHttpClient.get(binaryUri)).thenAnswer((_) async {
+      throw http.ClientException('Fake connection error', binaryUri);
+    });
+
+    // Make sure the requests raises
+    HttpNetworkRequests httpRequests = HttpNetworkRequests(client: mockedHttpClient);
+    expect(() async {
+      await httpRequests.retrieveBinaryResource(binaryUri);
+    }, throwsA(isA<ConnectionException>()));
   });
 }
 

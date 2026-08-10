@@ -364,27 +364,30 @@ abstract interface class ApplicationUiBoundary {
   /// [menuModel] are used e.g. for the main navigation menu.
   void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel);
 
-  /// Notify the UI about changed route database status.
+  /// Notify the UI that the route database is now activated.
   ///
   /// This will update the display with the given status information:
-  /// - [activated]: The activation status of the route database (true: enabled, false: disabled)
-  /// - [label]: A label for identifying the current route database (may of course be something like
-  ///   'None' if the route database is disabled)
+  /// - [label]: A label for identifying the current route database.
   /// - [dataSourceAttributions]: Information about all external data sources (and their
   ///   attributions) the current route database was built from.
-  /// - [statusMessage]: A message with more detailed information about the route database status.
-  ///   Set to `null` to not display any additional hint at all.
-  void updateRouteDbStatus({
-    required bool activated,
+  void setStatusActivated({
     required String label,
     required List<ListViewItem> dataSourceAttributions,
-    String? statusMessage,
   });
 
-  /// Notify the UI about some progress change of a running route DB update task.
+  /// Notify the UI that the route database is now missing.
   ///
-  /// Set [inProgress] to true when the update task has been started, and to false when it is done.
-  void updateRouteDbUpdateProgress({required bool inProgress});
+  /// This will update the display with the given status information:
+  /// - [label]: Text to be displayed instead of the database label (i.e. something like "None").
+  /// - [userHint]: A message with more detailed information about the route database status.
+  void setStatusMissing({required String label, required String userHint});
+
+  /// Notify the UI that the route DB is currently being updated.
+  void setStatusUpdating();
+
+  /// Notify the UI about an error message from a running routedb update task, that shall be
+  /// displayed to the user.
+  void showRouteDbUpdateErrorMessage(String message);
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].
   ///

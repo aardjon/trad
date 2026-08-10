@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../icons.dart';
 import '../state.dart';
+import '../widgets/optional_data_view.dart';
 import '../widgets/summit_list_view.dart';
 
 /// Widget representing the *Summit Details* page.
@@ -193,12 +194,23 @@ class _TabFactory {
 
   /// Return all the content widgets that should be shown.
   List<Widget> getContentWidgets() {
+    SummitListNotifier summitListNotifier = _pageWidget.guiState.getSummitListNotifier(
+      _pageModel.summitDataId,
+    );
+    if (!_pageModel.canShowNearbySummits) {
+      summitListNotifier.setAlternateMessage(_pageModel.noNearbySummitsMessage);
+    }
+
     return <Widget>[
       SummitRoutesView(_pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId)),
-      if (_pageModel.canShowNearbySummits)
-        SummitListView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId))
-      else
-        NoDataMessageView(_pageModel.noNearbySummitsMessage),
+      OptionalDataView(
+        summitListNotifier,
+        childBuilder: (BuildContext context) {
+          return SummitListView(
+            _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
+          );
+        },
+      ),
     ];
   }
 
@@ -315,25 +327,5 @@ class NearbySummitsContextMenu extends StatelessWidget {
   void _onContextAction(ItemDataId summitDataId, ItemDataId actionItemId) {
     RouteDbController controller = RouteDbController();
     controller.requestNearbySummitListSorting(summitDataId, actionItemId);
-  }
-}
-
-/// The widget being shown when there is no data at all. It simply displays the given message.
-class NoDataMessageView extends StatelessWidget {
-  final String _message;
-
-  /// Constructor for directly initializing all members.
-  const NoDataMessageView(this._message, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Center(
-          child: Padding(padding: const EdgeInsets.all(20), child: Text(_message)),
-        ),
-      ],
-    );
   }
 }

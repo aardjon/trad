@@ -15,8 +15,8 @@ class AppInfoPage extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final Widget _appDrawer;
 
-  /// Notifier providing the current settings state to be displayed.
-  final SettingsNotifier _settingsState;
+  /// Notifier providing the current route db state to be displayed.
+  final RouteDbStatusNotifier _settingsState;
 
   /// Constructor for directly initializing all members.
   const AppInfoPage(this._appDrawer, this._settingsState, {super.key});
@@ -47,7 +47,7 @@ class AppInfoPage extends StatelessWidget {
     return widgets;
   }
 
-  List<Widget> _buildRouteDbSourcesList(BuildContext context, SettingsNotifier state) {
+  List<Widget> _buildRouteDbSourcesList(BuildContext context, RouteDbStatusNotifier state) {
     List<Widget> listWidgets = <Widget>[];
     for (final ListViewItem source in state.getDataSourceAttributions()) {
       listWidgets.add(
@@ -84,10 +84,10 @@ class AppInfoPage extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
-      ChangeNotifierProvider<SettingsNotifier>.value(
+      ChangeNotifierProvider<RouteDbStatusNotifier>.value(
         value: _settingsState,
-        child: Consumer<SettingsNotifier>(
-          builder: (BuildContext context, SettingsNotifier state, Widget? child) {
+        child: Consumer<RouteDbStatusNotifier>(
+          builder: (BuildContext context, RouteDbStatusNotifier state, Widget? child) {
             if (state.getDataSourceAttributions().isNotEmpty) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
