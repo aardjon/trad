@@ -22,17 +22,17 @@ abstract interface class PresentationBoundary {
   /// This may display some kind of "loading" or "splash" screen if appropriate.
   void initUserInterface();
 
-  /// Let the UI display/update the [routeDatabaseDate] and [dataSources] as given.
-  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources);
+  /// Notify the UI that a created at [routeDatabaseDate] from [dataSources] is now available.
+  void routeDbAvailable(DateTime routeDatabaseDate, List<DataSourceAttribution> dataSources);
+
+  /// Notify the UI that no route database is available (anymore).
+  void routeDbUnavailable();
 
   /// Notify the UI about a running route database update.
-  void routeDbUpdateTaskStarted();
+  void routeDbUpdating();
 
   /// Notify the UI about an error that happened while updating.
   void routeDbUpdateError(Exception error);
-
-  /// Notify the UI that the route database update is done.
-  void routeDbUpdateTaskDone();
 
   /// Let the UI display the list of summits in the *route db* domain.
   ///

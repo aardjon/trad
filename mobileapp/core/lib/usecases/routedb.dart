@@ -87,7 +87,7 @@ class RouteDbUseCases {
   Future<void> _fetchAndInstallRouteDb({
     required DbFileProvider dbFileProvider,
   }) async {
-    _presentationBoundary.routeDbUpdateTaskStarted();
+    _presentationBoundary.routeDbUpdating();
 
     if (_storageBoundary.isStarted()) {
       _storageBoundary.stopStorage();
@@ -117,10 +117,10 @@ class RouteDbUseCases {
       await _storageBoundary.startStorage();
       DateTime routeDbDate = await _storageBoundary.getCreationDate();
       List<DataSourceAttribution> dataSources = await _storageBoundary.getExternalDataSources();
-      _presentationBoundary.updateRouteDbStatus(routeDbDate, dataSources);
+      _presentationBoundary.routeDbAvailable(routeDbDate, dataSources);
     } on StorageStartingException {
       // No or an invalid DB may have been there before already
-      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
+      _presentationBoundary.routeDbUnavailable();
     }
   }
 

@@ -98,9 +98,9 @@ void main() {
       verifyNever(downloadBoundaryMock.getAvailableUpdateCandidates);
 
       // Make sure the UI has been notified about a DB update
-      verify(presentationBoundaryMock.routeDbUpdateTaskStarted);
+      verify(presentationBoundaryMock.routeDbUpdating);
       verify(
-        () => presentationBoundaryMock.updateRouteDbStatus(fakeCreationDate, fakeAttributions),
+        () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
       ).called(1);
     });
 
@@ -156,9 +156,9 @@ void main() {
       verify(downloadBoundaryMock.cleanupResources).called(1);
 
       // Make sure the UI has been notified about the DB update process
-      verify(presentationBoundaryMock.routeDbUpdateTaskStarted).called(1);
+      verify(presentationBoundaryMock.routeDbUpdating).called(1);
       verify(
-        () => presentationBoundaryMock.updateRouteDbStatus(fakeCreationDate, fakeAttributions),
+        () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
       ).called(1);
     });
 
@@ -391,10 +391,10 @@ void main() {
           // Make sure the storage is started (again)
           verify(storageBoundaryMock.startStorage).called(1);
           // Make sure the UI is notified about the ongoing update
-          verify(presentationBoundaryMock.routeDbUpdateTaskStarted).called(1);
+          verify(presentationBoundaryMock.routeDbUpdating).called(1);
           // Make sure the UI gets the storage state update and the new creation date
           verify(
-            () => presentationBoundaryMock.updateRouteDbStatus(fakeCreationDate, fakeAttributions),
+            () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
           ).called(1);
         });
       }
@@ -443,7 +443,7 @@ void main() {
         verify(storageBoundaryMock.startStorage).called(1);
         // Make sure the UI gets the storage state update and the creation date
         verify(
-          () => presentationBoundaryMock.updateRouteDbStatus(
+          () => presentationBoundaryMock.routeDbAvailable(
             dummyCreationDate,
             dummyAttributions,
           ),
@@ -481,9 +481,7 @@ void main() {
           // Make sure the storage is started (again)
           verify(storageBoundaryMock.startStorage).called(1);
           // Make sure the UI gets the storage state update
-          verify(
-            () => presentationBoundaryMock.updateRouteDbStatus(null, <DataSourceAttribution>[]),
-          ).called(1);
+          verify(presentationBoundaryMock.routeDbUnavailable).called(1);
         });
       }
     });

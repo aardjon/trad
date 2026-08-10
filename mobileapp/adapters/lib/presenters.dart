@@ -63,11 +63,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources) {
-    const String noDbMessage =
-        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
-        'indem du Wegedaten herunterlädst bzw. importierst.';
-
+  void routeDbAvailable(DateTime routeDatabaseDate, List<DataSourceAttribution> dataSources) {
     final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
     final List<ListViewItem> dataSourceAttributions = <ListViewItem>[];
@@ -86,15 +82,30 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbStatus(
-      activated: routeDatabaseDate != null,
-      label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
-      dataSourceAttributions: routeDatabaseDate != null ? dataSourceAttributions : <ListViewItem>[],
-      statusMessage: routeDatabaseDate != null ? null : noDbMessage,
+      activated: true,
+      label: dateFormatter.format(routeDatabaseDate),
+      dataSourceAttributions: dataSourceAttributions,
+      statusMessage: null,
     );
   }
 
   @override
-  void routeDbUpdateTaskStarted() {
+  void routeDbUnavailable() {
+    const String noDbMessage =
+        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
+        'indem du Wegedaten herunterlädst bzw. importierst.';
+
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateRouteDbStatus(
+      activated: false,
+      label: 'Keine',
+      dataSourceAttributions: <ListViewItem>[],
+      statusMessage: noDbMessage,
+    );
+  }
+
+  @override
+  void routeDbUpdating() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.updateRouteDbUpdateProgress(inProgress: true);
   }
@@ -123,12 +134,6 @@ class ApplicationWidePresenter implements PresentationBoundary {
         'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
       );
     }
-  }
-
-  @override
-  void routeDbUpdateTaskDone() {
-    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbUpdateProgress(inProgress: false);
   }
 
   @override

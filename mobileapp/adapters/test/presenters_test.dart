@@ -135,37 +135,35 @@ void main() {
     ///  - If it gets null, deactivate the routeDB domain in the UI, send a special "No DB
     ///    available" label and send a status message.
     ///  - Provided data attributions must be forwarded correctly (if there is a DB at all)
-    group('updateRouteDbStatus(): creation date', () {
-      /// Make sure the correct values are sent to the UI when the route DB status is changed. If
-      /// there is a route DB date, the creation timestamp must be formatted correctly.
-      final List<(DateTime?, String)> testParams = <(DateTime?, String)>[
+    group('routeDbAvailable(): creation date', () {
+      /// Make sure the correct values are sent to the UI when the route DB is activated. The creation
+      /// timestamp must be formatted correctly.
+      final List<(DateTime, String)> testParams = <(DateTime, String)>[
         (DateTime(2023, 1, 2, 3, 4), '02.01.2023 03:04'), // minimal digit value
         (DateTime(2023, 12, 31, 23, 59), '31.12.2023 23:59'), // full digit values
         (DateTime(2024, 4, 16, 13, 9), '16.04.2024 13:09'), // mixed
-        (null, 'Keine'), // no timestamp given
       ];
 
-      for (final (DateTime?, String) args in testParams) {
-        DateTime? inputDate = args.$1;
+      for (final (DateTime, String) args in testParams) {
+        DateTime inputDate = args.$1;
         String expectedLabel = args.$2;
         test('db date = $inputDate', () {
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          presenter.updateRouteDbStatus(inputDate, <DataSourceAttribution>[]);
+          presenter.routeDbAvailable(inputDate, <DataSourceAttribution>[]);
 
-          final Matcher availabilityMessageMatcher = inputDate != null ? isNull : isNotEmpty;
           verify(
             () => fakeUi.updateRouteDbStatus(
-              activated: inputDate != null,
+              activated: true,
               label: expectedLabel,
               dataSourceAttributions: <ListViewItem>[],
-              statusMessage: any(named: 'statusMessage', that: availabilityMessageMatcher),
+              statusMessage: any(named: 'statusMessage', that: isNull),
             ),
           ).called(1);
         });
       }
     });
 
-    group('updateRouteDbStatus(): data attribution', () {
+    group('routeDbAvailable(): data attribution', () {
       tearDown(() async {
         // Reset the mocks after each test case
         await di.shutdown();
@@ -263,7 +261,7 @@ void main() {
           di.registerSingleton<ApplicationUiBoundary>(() => ui);
 
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          presenter.updateRouteDbStatus(fakeCreationDate, inputAttribution);
+          presenter.routeDbAvailable(fakeCreationDate, inputAttribution);
 
           expect(ui.dataSourceItems.length, equals(expectedListItems.length));
           for (int i = 0; i < ui.dataSourceItems.length; i++) {
@@ -276,6 +274,21 @@ void main() {
           }
         });
       }
+    });
+
+    /// Make sure the UI is notified values are sent to the UI when the route DB is disabled.
+    test('routeDbUnavailable()', () {
+      ApplicationWidePresenter presenter = ApplicationWidePresenter();
+      presenter.routeDbUnavailable();
+
+      verify(
+        () => fakeUi.updateRouteDbStatus(
+          activated: false,
+          label: 'Keine',
+          dataSourceAttributions: <ListViewItem>[],
+          statusMessage: any(named: 'statusMessage', that: isNotEmpty),
+        ),
+      ).called(1);
     });
 
     /// Ensure the expected behaviour of the showSummitList() method, i.e. send the expected static
