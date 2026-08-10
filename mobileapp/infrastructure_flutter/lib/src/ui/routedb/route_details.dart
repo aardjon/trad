@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../icons.dart';
 import '../state.dart';
 import '../widgets/carousel.dart';
+import '../widgets/optional_data.dart';
 
 /// Widget representing a single post with the post list.
 class _PostItem extends StatelessWidget {
@@ -139,7 +140,7 @@ class RouteDetailsView extends StatelessWidget {
           if (state.postsLoaded()) {
             return Scaffold(
               appBar: _appBar(model, state, context),
-              body: _listView(model, state, context),
+              body: _buildDataView(model, state, context),
               drawer: _appDrawer,
               drawerEnableOpenDragGesture: false,
             );
@@ -192,6 +193,13 @@ class RouteDetailsView extends StatelessWidget {
       );
     }
     return Column(mainAxisSize: MainAxisSize.min, children: menuItems);
+  }
+
+  Widget _buildDataView(RouteDetailsModel model, PostListNotifier state, BuildContext context) {
+    if (model.directionsItems.isEmpty && state.getPostCount() == 0) {
+      return CenteredText(model.noDataMessage);
+    }
+    return _listView(model, state, context);
   }
 
   Widget _listView(RouteDetailsModel model, PostListNotifier state, BuildContext context) {

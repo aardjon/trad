@@ -297,7 +297,7 @@ class SummitListNotifier extends ChangeNotifier with AlternateStatusMessageNotif
 }
 
 /// Represents the current state of the route list and notifies about changes.
-class RouteListNotifier extends ChangeNotifier {
+class RouteListNotifier extends ChangeNotifier with AlternateStatusMessageNotifier {
   /// The current list of routes.
   List<ListViewItem>? _routes;
 

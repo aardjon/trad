@@ -185,6 +185,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
       noNearbySummitsMessage:
           "Für '${selectedSummit.name}' liegen leider keine Positionsdaten "
           'vor, weshalb nicht nach nahegelegenen Gipfeln gesucht werden kann.',
+      noRoutesMessage: "Für '${selectedSummit.name}' liegen leider keine Wegeinformationen vor.",
     );
     ui.showSummitDetails(model);
   }
@@ -289,6 +290,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         for (final Directions directions in selectedRoute.directions)
           ListViewItem(directions.content, bottomLine: '(Quelle: ${directions.source})'),
       ],
+      'Zu diesem Weg gibt es bisher weder Kommentare noch eine Wegbeschreibung.',
     );
     ui.showRouteDetails(model);
   }

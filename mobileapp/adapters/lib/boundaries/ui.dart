@@ -223,9 +223,13 @@ class SummitDetailsModel {
   final bool canShowNearbySummits;
 
   /// Message to show if there are now nearby summits, i.e. if [canShowNearbySummits] is false.
-  /// This mesag eis shown to the user, explaining why there is no data.
+  /// This message is shown to the user, explaining why there is no data.
   /// Set to an emptry String if [canShowNearbySummits] is true.
   final String noNearbySummitsMessage;
+
+  /// Message to show if there are now routes onto this summit. This message is shown to the user,
+  /// explaining why there is no data.
+  final String noRoutesMessage;
 
   /// Constructor for directly initializing all members.
   SummitDetailsModel(
@@ -235,6 +239,7 @@ class SummitDetailsModel {
     required this.canShowOnMap,
     required this.canShowNearbySummits,
     this.noNearbySummitsMessage = '',
+    this.noRoutesMessage = '',
   }) : assert(
          canShowNearbySummits || (!canShowNearbySummits && noNearbySummitsMessage.isNotEmpty),
          'Set a [noNearbySummitsMessage] if canShowNearbySummits is false.',
@@ -258,8 +263,17 @@ class RouteDetailsModel {
   /// The directions to be displayed on the route details page.
   final List<ListViewItem> directionsItems;
 
+  /// The message to display in case there is no data to display at all.
+  final String noDataMessage;
+
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle, this.directionsItems);
+  RouteDetailsModel(
+    this.routeDataId,
+    this.pageTitle,
+    this.pageSubTitle,
+    this.directionsItems,
+    this.noDataMessage,
+  );
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.
