@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../icons.dart';
 import '../state.dart';
-import '../widgets/optional_data_view.dart';
+import '../widgets/optional_data.dart';
 import '../widgets/summit_list_view.dart';
 
 /// Widget representing the *Summit Details* page.

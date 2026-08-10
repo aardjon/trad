@@ -1,5 +1,5 @@
 ///
-/// Provides a widget for showing an alternate message in case the requested data cannot be
+/// Provides widgets for showing an alternate message in case the requested data cannot be
 /// displayed.
 ///
 library;
