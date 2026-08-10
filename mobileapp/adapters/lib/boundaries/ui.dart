@@ -258,8 +258,17 @@ class RouteDetailsModel {
   /// The directions to be displayed on the route details page.
   final List<ListViewItem> directionsItems;
 
+  /// The message to display in case there is no data to display at all.
+  final String noDataMessage;
+
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle, this.directionsItems);
+  RouteDetailsModel(
+    this.routeDataId,
+    this.pageTitle,
+    this.pageSubTitle,
+    this.directionsItems,
+    this.noDataMessage,
+  );
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.

@@ -65,7 +65,13 @@ void main() {
       ),
     );
     registerFallbackValue(
-      RouteDetailsModel(0xFFFFFF, '[NoPageTitle]', '[NoPageSubTitle]', <ListViewItem>[]),
+      RouteDetailsModel(
+        0xFFFFFF,
+        '[NoPageTitle]',
+        '[NoPageSubTitle]',
+        <ListViewItem>[],
+        '[NoEmptyMessage]',
+      ),
     );
     registerFallbackValue(
       SettingsModel(

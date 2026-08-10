@@ -289,6 +289,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         for (final Directions directions in selectedRoute.directions)
           ListViewItem(directions.content, bottomLine: '(Quelle: ${directions.source})'),
       ],
+      'Zu diesem Weg gibt es bisher weder Kommentare noch eine Wegbeschreibung.',
     );
     ui.showRouteDetails(model);
   }
