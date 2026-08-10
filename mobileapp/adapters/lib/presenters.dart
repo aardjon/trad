@@ -185,6 +185,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
       noNearbySummitsMessage:
           "Für '${selectedSummit.name}' liegen leider keine Positionsdaten "
           'vor, weshalb nicht nach nahegelegenen Gipfeln gesucht werden kann.',
+      noRoutesMessage: "Für '${selectedSummit.name}' liegen leider keine Wegeinformationen vor.",
     );
     ui.showSummitDetails(model);
   }

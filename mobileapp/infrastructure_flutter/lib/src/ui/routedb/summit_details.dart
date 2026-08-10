@@ -201,8 +201,13 @@ class _TabFactory {
       summitListNotifier.setAlternateMessage(_pageModel.noNearbySummitsMessage);
     }
 
+    RouteListNotifier routeListNotifier = _pageWidget.guiState.getRouteListNotifier(
+      _pageModel.summitDataId,
+    );
+    routeListNotifier.setAlternateMessage(_pageModel.noRoutesMessage);
+
     return <Widget>[
-      SummitRoutesView(_pageWidget.guiState.getRouteListNotifier(_pageModel.summitDataId)),
+      SummitRoutesView(routeListNotifier),
       OptionalDataView(
         summitListNotifier,
         childBuilder: (BuildContext context) {
@@ -253,20 +258,24 @@ class SummitRoutesView extends StatelessWidget {
       child: Consumer<RouteListNotifier>(
         builder: (BuildContext context, RouteListNotifier state, Widget? child) {
           if (state.routesLoaded()) {
-            return ListView.builder(
-              itemCount: _state.getRouteCount(),
-              itemBuilder: (BuildContext context, int index) {
-                final ListViewItem route = _state.getRouteItem(index);
-                return ListTile(
-                  title: Text(route.mainTitle),
-                  subtitle: Text(route.subTitle ?? ''),
-                  trailing: _iconFactory.getIconWidget(route.endIcon),
-                  onTap: () {
-                    _onRouteTap(route.itemId!);
-                  },
-                );
-              },
-            );
+            if (state.getRouteCount() > 0) {
+              return ListView.builder(
+                itemCount: _state.getRouteCount(),
+                itemBuilder: (BuildContext context, int index) {
+                  final ListViewItem route = _state.getRouteItem(index);
+                  return ListTile(
+                    title: Text(route.mainTitle),
+                    subtitle: Text(route.subTitle ?? ''),
+                    trailing: _iconFactory.getIconWidget(route.endIcon),
+                    onTap: () {
+                      _onRouteTap(route.itemId!);
+                    },
+                  );
+                },
+              );
+            } else {
+              return CenteredText(state.getAlternateMessage());
+            }
           } else {
             return _showLoadingIndicator();
           }

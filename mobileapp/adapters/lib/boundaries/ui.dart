@@ -223,9 +223,13 @@ class SummitDetailsModel {
   final bool canShowNearbySummits;
 
   /// Message to show if there are now nearby summits, i.e. if [canShowNearbySummits] is false.
-  /// This mesag eis shown to the user, explaining why there is no data.
+  /// This message is shown to the user, explaining why there is no data.
   /// Set to an emptry String if [canShowNearbySummits] is true.
   final String noNearbySummitsMessage;
+
+  /// Message to show if there are now routes onto this summit. This message is shown to the user,
+  /// explaining why there is no data.
+  final String noRoutesMessage;
 
   /// Constructor for directly initializing all members.
   SummitDetailsModel(
@@ -235,6 +239,7 @@ class SummitDetailsModel {
     required this.canShowOnMap,
     required this.canShowNearbySummits,
     this.noNearbySummitsMessage = '',
+    this.noRoutesMessage = '',
   }) : assert(
          canShowNearbySummits || (!canShowNearbySummits && noNearbySummitsMessage.isNotEmpty),
          'Set a [noNearbySummitsMessage] if canShowNearbySummits is false.',
