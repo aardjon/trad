@@ -9,6 +9,7 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
 ### New/Improved Features:
 
  - Filter summit list by sector (#34)
+ - Show error message if updating the route database fails (#29)
 
 ### Fixed Bugs
 
