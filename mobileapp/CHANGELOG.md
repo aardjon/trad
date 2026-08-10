@@ -10,6 +10,10 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
 
  - Filter summit list by sector (#34)
 
+### Fixed Bugs
+
+ - Fixed the wrong (i.e. default) AppID still used in some places
+
 
 ## Version 0.5.0 - 2026-07-12
 

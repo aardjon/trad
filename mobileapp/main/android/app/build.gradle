@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.main"
+    namespace "de.wesenigk.trad"
     compileSdk flutter.compileSdkVersion
     // Originally, the ndkVersion was taken from Flutter (i.e. use the Flutter default one):
     // ndkVersion flutter.ndkVersion
