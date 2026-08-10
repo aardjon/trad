@@ -81,11 +81,9 @@ class ApplicationWidePresenter implements PresentationBoundary {
     }
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbStatus(
-      activated: true,
+    ui.setStatusActivated(
       label: dateFormatter.format(routeDatabaseDate),
       dataSourceAttributions: dataSourceAttributions,
-      statusMessage: null,
     );
   }
 
@@ -96,18 +94,16 @@ class ApplicationWidePresenter implements PresentationBoundary {
         'indem du Wegedaten herunterlädst bzw. importierst.';
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbStatus(
-      activated: false,
+    ui.setStatusMissing(
       label: 'Keine',
-      dataSourceAttributions: <ListViewItem>[],
-      statusMessage: noDbMessage,
+      userHint: noDbMessage,
     );
   }
 
   @override
   void routeDbUpdating() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbUpdateProgress(inProgress: true);
+    ui.setStatusUpdating();
   }
 
   @override

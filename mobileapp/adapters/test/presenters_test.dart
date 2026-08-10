@@ -21,11 +21,9 @@ class FakeUi extends Fake implements ApplicationUiBoundary {
   List<ListViewItem> dataSourceItems = <ListViewItem>[];
 
   @override
-  void updateRouteDbStatus({
-    required bool activated,
+  void setStatusActivated({
     required String label,
     required List<ListViewItem> dataSourceAttributions,
-    String? statusMessage,
   }) {
     dbLabel = label;
     dataSourceItems = dataSourceAttributions;
@@ -152,11 +150,9 @@ void main() {
           presenter.routeDbAvailable(inputDate, <DataSourceAttribution>[]);
 
           verify(
-            () => fakeUi.updateRouteDbStatus(
-              activated: true,
+            () => fakeUi.setStatusActivated(
               label: expectedLabel,
               dataSourceAttributions: <ListViewItem>[],
-              statusMessage: any(named: 'statusMessage', that: isNull),
             ),
           ).called(1);
         });
@@ -282,11 +278,9 @@ void main() {
       presenter.routeDbUnavailable();
 
       verify(
-        () => fakeUi.updateRouteDbStatus(
-          activated: false,
+        () => fakeUi.setStatusMissing(
           label: 'Keine',
-          dataSourceAttributions: <ListViewItem>[],
-          statusMessage: any(named: 'statusMessage', that: isNotEmpty),
+          userHint: any(named: 'userHint', that: isNotEmpty),
         ),
       ).called(1);
     });

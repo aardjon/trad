@@ -197,27 +197,33 @@ class RouteDbStatusNotifier extends ChangeNotifier {
     _lastUpdateErrorMessage = message;
   }
 
-  /// Replaces the status information of the route database with the given [dbIdentifier] and
-  /// [availabilityMessage].
-  ///
-  /// All listeners are notified so that that e.g. views can be updated.
-  void updateRouteDbStatus({
-    required bool routeDbActivationStatus,
+  /// Changes the displayed database status to `activated`, using the given [dbIdentifier] and
+  /// [dataSourceAttributions]. All listeners are notified so that that e.g. views can be updated.
+  void setStatusActivated({
     required String dbIdentifier,
     required List<ListViewItem> dataSourceAttributions,
-    String? availabilityMessage,
   }) {
-    _routeDbStatus = routeDbActivationStatus ? _RouteDbStatus.activated : _RouteDbStatus.missing;
-    _routeDbStatusMessage = availabilityMessage;
+    _routeDbStatus = _RouteDbStatus.activated;
+    _routeDbStatusMessage = null;
     _routeDbIdentifier = dbIdentifier;
     _dataSourceAttributions = dataSourceAttributions;
     notifyListeners();
   }
 
-  /// Updates the progress status of a currently running route DB update task to [inProgress]:
-  /// true if the task is running, false if not.
-  void updateRouteDbUpdateProgress({required bool inProgress}) {
-    _routeDbStatus = inProgress ? _RouteDbStatus.updating : _RouteDbStatus.missing;
+  /// Changes the displayed database status to `missing` and displays the given [label] and
+  /// [userHint]. All listeners are notified so that that e.g. views can be updated.
+  void setStatusMissing(String label, String userHint) {
+    _routeDbStatus = _RouteDbStatus.missing;
+    _routeDbStatusMessage = userHint;
+    _routeDbIdentifier = label;
+    _dataSourceAttributions = <ListViewItem>[];
+    notifyListeners();
+  }
+
+  /// Changes the displayed database status to `updating`. All listeners are notified so that that
+  /// e.g. views can be updated.
+  void setStatusUpdating() {
+    _routeDbStatus = _RouteDbStatus.updating;
     notifyListeners();
   }
 }
