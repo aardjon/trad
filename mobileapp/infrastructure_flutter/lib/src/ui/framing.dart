@@ -60,44 +60,44 @@ class MainWidget extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         UiRoute.journal.toRouteString(): (BuildContext context) {
           return JournalPage(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
             _menuModel.journalItem.mainTitle,
           );
         },
         UiRoute.summitlist.toRouteString(): (BuildContext context) {
           return SummitListPage(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
             _guiState.summitListState,
           );
         },
         UiRoute.summitdetails.toRouteString(): (BuildContext context) {
           return SummitDetailsView(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
             _guiState,
           );
         },
         UiRoute.routedetails.toRouteString(): (BuildContext context) {
           return RouteDetailsView(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
             _guiState.postListState,
           );
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
           return KnowledgebaseView(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
           );
         },
         UiRoute.settings.toRouteString(): (BuildContext context) {
           return SettingsPage(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
             _menuModel.settingsItem.mainTitle,
-            _guiState.settingsState,
+            _guiState.routeDBState,
           );
         },
         UiRoute.appinfo.toRouteString(): (BuildContext context) {
           return AppInfoPage(
-            TradDrawer(_menuModel, _guiState.settingsState, _controller),
-            _guiState.settingsState,
+            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
+            _guiState.routeDBState,
           );
         },
         UiRoute.splash.toRouteString(): (BuildContext context) {

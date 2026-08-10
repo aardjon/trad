@@ -56,7 +56,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     required String label,
     required List<ListViewItem> dataSourceAttributions,
   }) {
-    _uiState.settingsState.setStatusActivated(
+    _uiState.routeDBState.setStatusActivated(
       dbIdentifier: label,
       dataSourceAttributions: dataSourceAttributions,
     );
@@ -64,17 +64,17 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void setStatusMissing({required String label, required String userHint}) {
-    _uiState.settingsState.setStatusMissing(label, userHint);
+    _uiState.routeDBState.setStatusMissing(label, userHint);
   }
 
   @override
   void setStatusUpdating() {
-    _uiState.settingsState.setStatusUpdating();
+    _uiState.routeDBState.setStatusUpdating();
   }
 
   @override
   void showRouteDbUpdateErrorMessage(String message) {
-    _uiState.settingsState.setLastUpdateErrorMessage(message);
+    _uiState.routeDBState.setLastUpdateErrorMessage(message);
   }
 
   @override

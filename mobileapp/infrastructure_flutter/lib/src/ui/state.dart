@@ -50,7 +50,7 @@ class GuiState {
   ///
   /// This is the only real instance of this, all other clients (views) should only reference this
   /// one and never create their own!
-  final RouteDbStatusNotifier settingsState = RouteDbStatusNotifier();
+  final RouteDbStatusNotifier routeDBState = RouteDbStatusNotifier();
 
   /// All summit list notifiers for all alive summit list widgets assigned to a certain context.
   ///
