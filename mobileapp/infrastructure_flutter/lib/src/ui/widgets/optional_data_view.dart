@@ -30,22 +30,32 @@ class OptionalDataView extends StatelessWidget {
           if (state.canDisplayData()) {
             return _childBuilder(context);
           } else {
-            return _buildNoDataMessageWidget();
+            return CenteredText(_notifier.getAlternateMessage());
           }
         },
       ),
     );
   }
+}
 
-  /// Build the alternative Widget displaying the given message.
-  Widget _buildNoDataMessageWidget() {
+/// Simple text widget that displays the given text centered and padded. Used to maintain a unified
+/// look.
+class CenteredText extends StatelessWidget {
+  /// The text to display.
+  final String _message;
+
+  /// Constructor for directly initializing all members.
+  const CenteredText(this._message, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Center(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Text(_notifier.getAlternateMessage()),
+            child: Text(_message),
           ),
         ),
       ],
