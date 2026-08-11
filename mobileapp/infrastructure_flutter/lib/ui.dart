@@ -97,6 +97,12 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
+  void showNearbySummitsError(String message) {
+    _uiState.nearbySummitListNotifier.fallbackMessage = message;
+    _uiState.nearbySummitListNotifier.replaceData(<ListViewItem>[], <ListViewItem>[]);
+  }
+
+  @override
   void updateNearbySummits(List<ListViewItem> summitItems) {
     _uiState.nearbySummitListNotifier.replaceData(summitItems, <ListViewItem>[]);
   }

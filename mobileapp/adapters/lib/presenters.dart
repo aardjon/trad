@@ -11,6 +11,7 @@ library;
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
+import 'package:crosscuttings/errors.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:intl/intl.dart';
 
@@ -195,6 +196,27 @@ class ApplicationWidePresenter implements PresentationBoundary {
           ),
       ],
     );
+  }
+
+  @override
+  void nearbySummitsLocationError(Exception error) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    if (error is PermissionDenied) {
+      ui.showNearbySummitsError(
+        'Diese App darf nicht auf deinen aktuellen Standort zugreifen, weshalb die Suche nach '
+        'nahegelegenen Gipfeln nicht möglich ist. Bitte erteile trad die Berechtigung zum '
+        'Standortzugriff, um diese Funktion zu nutzen.',
+      );
+    } else if (error is ResourceUnavailable) {
+      ui.showNearbySummitsError(
+        'Die Standortdienste sind deaktiviert, weshalb die Suche nach nahegelegenen Gipfeln nicht '
+        'möglich ist. Bitte aktivere die Standortfunktion deines Gerätes und versuche es erneut.',
+      );
+    } else {
+      ui.showNearbySummitsError(
+        'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
+      );
+    }
   }
 
   @override

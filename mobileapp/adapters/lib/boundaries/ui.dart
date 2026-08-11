@@ -443,6 +443,10 @@ abstract interface class ApplicationUiBoundary {
   /// The list data must be sent separately by calling [updateNearbySummits] afterwards.
   void showNearbySummits(NearbySummitsPageLabels model);
 
+  /// Request the UI to display the given location-related error message within the *Nearby
+  /// Summits* context.
+  void showNearbySummitsError(String message);
+
   /// Notify the UI about a new list of nearby summits.
   ///
   /// This will update the display with the new [summitItems] as necessary.
