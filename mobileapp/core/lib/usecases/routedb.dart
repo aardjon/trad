@@ -244,11 +244,29 @@ class RouteDbUseCases {
     } else {
       // Normally this shouldn't happen because the UI is not supposed to allow this use case for
       // summits without a geo position. So if it does, there is another error somewhere else. For
-      // the same reason it's not necessary to show an explicit "error" use feedback - they
+      // the same reason it's not necessary to show an explicit "error" user feedback - they
       // shouldn't be able to end up here at all.
       _logger.warning(
         "Summit '${selectedSummit.name}' (${selectedSummit.id}) doesn't have a position to display "
         'on a map, ignoring.',
+      );
+    }
+  }
+
+  /// Use Case: Show/Open a certain Route on a map
+  Future<void> showRouteOnMap(int routeId) async {
+    _logger.info('Running use case showRouteOnMap($routeId)');
+    Route selectedRoute = await _storageBoundary.retrieveRoute(routeId);
+    if (selectedRoute.entryLocation != null) {
+      await _systemEnvBoundary.openExternalMapsApp(selectedRoute.entryLocation!);
+    } else {
+      // Normally this shouldn't happen because the UI is not supposed to allow this use case for
+      // routes without an entry point. So if it does, there is another error somewhere else. For
+      // the same reason it's not necessary to show an explicit "error" user feedback - they
+      // shouldn't be able to end up here at all.
+      _logger.warning(
+        "Route '${selectedRoute.routeName}' (${selectedRoute.id}) doesn't have an entry position "
+        'to display on a map, ignoring.',
       );
     }
   }

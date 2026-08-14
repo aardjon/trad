@@ -631,6 +631,53 @@ void main() {
     });
   });
 
+  /// Ensures the correct behaviour of the showRouteOnMap() method:
+  ///  - The requested route must be loaded from the storage (retrieveRoute())
+  ///  - If the route has an entry GeoPosition, this position is send to openExternalMapsApp()
+  ///  - If the route has no entry position, nothing happens
+  group('showRouteOnMap() use case', () {
+    final List<Route> testedRoutes = <Route>[
+      Route(id: 42, routeName: 'Problem No 5', grade: Difficulty(af: 3)),
+      Route(
+        id: 43,
+        routeName: 'Problem No 7',
+        grade: Difficulty(af: 3),
+        entryLocation: GeoPosition(51.852, 13.623),
+      ),
+    ];
+    for (final Route route in testedRoutes) {
+      test('$route', () async {
+        // Setup the storage mock
+        when(() => storageBoundaryMock.retrieveRoute(any())).thenAnswer((_) async {
+          return route;
+        });
+        // Setup the sysenv mock
+        when(() => systemEnvBoundaryMock.openExternalMapsApp(any())).thenAnswer((_) async {});
+
+        // Run the actual test case
+        RouteDbUseCases usecases = RouteDbUseCases(
+          downloadBoundary: downloadBoundaryMock,
+          preferencesBoundary: preferencesBoundaryMock,
+          presentationBoundary: presentationBoundaryMock,
+          storageBoundary: storageBoundaryMock,
+          systemEnvBoundary: systemEnvBoundaryMock,
+        );
+        await usecases.showRouteOnMap(route.id);
+
+        // Make sure the filter string is provided to the storage for loading the route
+        verify(() => storageBoundaryMock.retrieveRoute(route.id)).called(1);
+
+        // Make sure the routes's entry position is provided to the SysEnv boundary (or not if
+        // missing).
+        if (route.entryLocation != null) {
+          verify(() => systemEnvBoundaryMock.openExternalMapsApp(route.entryLocation!)).called(1);
+        } else {
+          verifyNever(() => systemEnvBoundaryMock.openExternalMapsApp(any()));
+        }
+      });
+    }
+  });
+
   group('core.usecases.routedb.routes', () {
     const RoutesFilterMode sortCriterion = RoutesFilterMode.grade;
     final Summit summit = Summit(42, 'Teufelsturm', 'Sector');

@@ -149,6 +149,12 @@ class RouteDbController {
     unawaited(_routeDbUseCases.showSummitOnMap(summitDataId));
   }
 
+  /// The user requested to show the route [routeDataId] on a map.
+  void requestShowRouteOnMap(ItemDataId routeDataId) {
+    _logger.debug('UI request: Show route $routeDataId on map');
+    unawaited(_routeDbUseCases.showRouteOnMap(routeDataId));
+  }
+
   /// The user requested to see all details of the single route identified by [routeDataId].
   void requestRouteDetails(ItemDataId routeDataId) {
     _logger.debug('UI request: Show details for route with ID $routeDataId');

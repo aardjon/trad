@@ -229,7 +229,10 @@ class RouteDetailsView extends StatelessWidget {
     controller.requestPostListSorting(routeDataId, sortMenuItemId);
   }
 
-  void _onShowOnMap(ItemDataId routeDataId) {}
+  void _onShowOnMap(ItemDataId routeDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestShowRouteOnMap(routeDataId);
+  }
 
   Widget _showLoadingIndicator() {
     return const LoadingIndicator(
