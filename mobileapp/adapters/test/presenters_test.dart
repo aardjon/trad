@@ -71,6 +71,7 @@ void main() {
         '[NoPageSubTitle]',
         <ListViewItem>[],
         '[NoEmptyMessage]',
+        canShowEntryOnMap: false,
       ),
     );
     registerFallbackValue(

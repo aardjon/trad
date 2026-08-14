@@ -164,6 +164,14 @@ class RouteDetailsView extends StatelessWidget {
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[
         IconButton(
+          onPressed: model.canShowEntryOnMap
+              ? () {
+                  _onShowOnMap(model.routeDataId);
+                }
+              : null,
+          icon: const Icon(Icons.map),
+        ),
+        IconButton(
           onPressed: () {
             unawaited(
               showModalBottomSheet(
@@ -220,6 +228,8 @@ class RouteDetailsView extends StatelessWidget {
     RouteDbController controller = RouteDbController();
     controller.requestPostListSorting(routeDataId, sortMenuItemId);
   }
+
+  void _onShowOnMap(ItemDataId routeDataId) {}
 
   Widget _showLoadingIndicator() {
     return const LoadingIndicator(

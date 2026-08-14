@@ -260,6 +260,10 @@ class RouteDetailsModel {
   /// Sub title of the route details page.
   final String pageSubTitle;
 
+  /// Flag for displaying if the routeEntry point can be shown on a map (true) or not (false, e.g.
+  /// because it lacks a geo position).
+  final bool canShowEntryOnMap;
+
   /// The directions to be displayed on the route details page.
   final List<ListViewItem> directionsItems;
 
@@ -272,8 +276,9 @@ class RouteDetailsModel {
     this.pageTitle,
     this.pageSubTitle,
     this.directionsItems,
-    this.noDataMessage,
-  );
+    this.noDataMessage, {
+    required this.canShowEntryOnMap,
+  });
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.
