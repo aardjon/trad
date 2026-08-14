@@ -11,8 +11,9 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
  - Filter summit list by sector (#34)
  - Show error message if updating the route database fails (#29)
  - Show a message if there is no data to display for the selected summit or route (#29)
+ - Display route entry point in maps app (#58)
 
-### Fixed Bugs
+### Fixed Bugs:
 
  - Fixed the wrong (i.e. default) AppID still used in some places
 

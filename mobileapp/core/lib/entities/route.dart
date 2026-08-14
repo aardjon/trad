@@ -3,6 +3,8 @@
 ///
 library;
 
+import 'geoposition.dart';
+
 /// A single climbing route.
 ///
 /// A route is the path by which a climber reaches the top of a mountain, so it is always attached
@@ -24,6 +26,10 @@ class Route {
   /// stars marks a route as "more beautiful". 0 is the default for regular routes.
   int stars;
 
+  /// Location of where this route starts, i.e. a point at the bottom of the summit. If missing,
+  /// the exact point is unknown.
+  GeoPosition? entryLocation;
+
   /// List of directions describing this route.
   /// Several different sets of descriptions (e.g. from different sources) may contain different
   /// useful pieces of information.
@@ -40,6 +46,7 @@ class Route {
     this.dangerous = false,
     this.stars = 0,
     this.routeRating,
+    this.entryLocation,
     this.directions = const <Directions>[],
   });
 

@@ -291,6 +291,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
           ListViewItem(directions.content, bottomLine: '(Quelle: ${directions.source})'),
       ],
       'Zu diesem Weg gibt es bisher weder Kommentare noch eine Wegbeschreibung.',
+      canShowEntryOnMap: selectedRoute.entryLocation != null,
     );
     ui.showRouteDetails(model);
   }

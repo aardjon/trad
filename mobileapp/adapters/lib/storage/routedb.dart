@@ -275,7 +275,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     String name = resultSet[0].getStringValue(SummitNamesTable.columnName);
     String sector = resultSet[0].getStringValue(AreasTable.columnName);
-    GeoPosition? position = _extractPosition(resultSet[0]);
+    GeoPosition? position = _extractPosition(
+      resultSet[0],
+      latColumnName: SummitsTable.columnLatitude,
+      lonColumnName: SummitsTable.columnLongitude,
+    );
     return Summit(summitDataId, name, sector, position);
   }
 
@@ -327,7 +331,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
       String name = dataRow.getStringValue(SummitNamesTable.columnName);
       String area = dataRow.getStringValue(AreasTable.columnName);
-      GeoPosition? position = _extractPosition(dataRow);
+      GeoPosition? position = _extractPosition(
+        dataRow,
+        latColumnName: SummitsTable.columnLatitude,
+        lonColumnName: SummitsTable.columnLongitude,
+      );
       summits.add(Summit(id, name, area, position));
     }
     return summits;
@@ -380,23 +388,31 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
       String name = dataRow.getStringValue(SummitNamesTable.columnName);
       String area = dataRow.getStringValue(AreasTable.columnName);
-      GeoPosition? position = _extractPosition(dataRow);
+      GeoPosition? position = _extractPosition(
+        dataRow,
+        latColumnName: SummitsTable.columnLatitude,
+        lonColumnName: SummitsTable.columnLongitude,
+      );
       summits.add(Summit(id, name, area, position));
     }
     return summits;
   }
 
-  GeoPosition? _extractPosition(ResultRow dataRow) {
+  GeoPosition? _extractPosition(
+    ResultRow dataRow, {
+    required String latColumnName,
+    required String lonColumnName,
+  }) {
     // Unknown/Missing position values are stored in the database with this special coordinates.
     const (int, int) undefinedCoordinates = (0, 0);
     // The precision of geographic coordinates stored in the database. The read value must be
     // divided by this factor to get regular (floating point) decimal degree.
     const double coordinateValuePrecision = 10000000;
 
-    int lat = dataRow.getIntValue(SummitsTable.columnLatitude);
-    int lon = dataRow.getIntValue(SummitsTable.columnLongitude);
+    int? lat = dataRow.getOptIntValue(latColumnName);
+    int? lon = dataRow.getOptIntValue(lonColumnName);
     GeoPosition? position;
-    if ((lat, lon) != undefinedCoordinates) {
+    if (lat != null && lon != null && (lat, lon) != undefinedCoordinates) {
       position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
     }
     return position;
@@ -437,6 +453,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnGradeJump,
       RoutesTable.columnDanger,
       RoutesTable.columnStars,
+      RoutesTable.columnEntryLatitude,
+      RoutesTable.columnEntryLongitude,
       "AVG(${PostsTable.columnRating}) AS '$averageRatingColumnName'",
     ];
 
@@ -485,6 +503,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
           stars: dataRow.getIntValue(RoutesTable.columnStars),
           dangerous: dataRow.getIntValue(RoutesTable.columnDanger) != 0,
           routeRating: rating,
+          entryLocation: _extractPosition(
+            dataRow,
+            latColumnName: RoutesTable.columnEntryLatitude,
+            lonColumnName: RoutesTable.columnEntryLongitude,
+          ),
         ),
       );
     }
@@ -502,6 +525,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnGradeRp,
       RoutesTable.columnStars,
       RoutesTable.columnDanger,
+      RoutesTable.columnEntryLatitude,
+      RoutesTable.columnEntryLongitude,
     ]);
     routeQuery.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
     routeQuery.limit = 1;
@@ -536,6 +561,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       ),
       dangerous: routeResultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
       stars: routeResultSet[0].getIntValue(RoutesTable.columnStars),
+      entryLocation: _extractPosition(
+        routeResultSet[0],
+        latColumnName: RoutesTable.columnEntryLatitude,
+        lonColumnName: RoutesTable.columnEntryLongitude,
+      ),
       directions: <Directions>[
         for (final ResultRow dr in directionsResultSet)
           Directions(
