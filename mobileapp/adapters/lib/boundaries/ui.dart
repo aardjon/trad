@@ -166,8 +166,11 @@ class NearbySummitsPageLabels {
   /// Title of the nearby summits page.
   final String pageTitle;
 
+  /// Message to display when no summits are found in the vicinity.
+  final String noDataMessage;
+
   /// Constructor for directly initializing all members.
-  NearbySummitsPageLabels(this.pageTitle);
+  NearbySummitsPageLabels(this.pageTitle, this.noDataMessage);
 }
 
 /// Internal ID to uniquely identify a single data item.

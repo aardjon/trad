@@ -93,6 +93,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   void showNearbySummits(NearbySummitsPageLabels model) {
     _logger.debug('Displaying nearby summits page');
     _uiState.resetNotifiers();
+    _uiState.nearbySummitListNotifier.fallbackMessage = model.noDataMessage;
     _switchToRoute(UiRoute.nearbysummits.toRouteString(), isRoot: true, routeArguments: model);
   }
 

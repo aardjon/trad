@@ -179,7 +179,10 @@ class ApplicationWidePresenter implements PresentationBoundary {
   @override
   void showNearbySummits() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    NearbySummitsPageLabels model = NearbySummitsPageLabels('Gipfel in der Nähe');
+    NearbySummitsPageLabels model = NearbySummitsPageLabels(
+      'Gipfel in deiner Nähe',
+      'In deiner Nähe wurden leider keine Gipfel gefunden.',
+    );
     ui.showNearbySummits(model);
   }
 
