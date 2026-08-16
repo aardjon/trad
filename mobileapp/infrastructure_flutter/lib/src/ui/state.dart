@@ -58,7 +58,8 @@ class GuiState {
   /// [resetNotifiers()].
   ///
   /// Map key is a string containing the "parent" summit ID.
-  final Map<String, SummitListNotifier> _summitLists = <String, SummitListNotifier>{};
+  final Map<String, DeferableOptionalDataListNotifier> _summitLists =
+      <String, DeferableOptionalDataListNotifier>{};
 
   /// All summit list notifiers for all alive route list widgets assigned to a certain context.
   ///
@@ -66,17 +67,18 @@ class GuiState {
   /// [resetNotifiers()].
   ///
   /// Map key is a string containing the "parent" summit ID.
-  final Map<String, RouteListNotifier> _routeLists = <String, RouteListNotifier>{};
+  final Map<String, DeferableOptionalDataListNotifier> _routeLists =
+      <String, DeferableOptionalDataListNotifier>{};
 
   /// Returns the Notifier providing nearby summits for the given [contextItemId].
   ///
   /// If there is none for this context yet, a new one will be created.
-  SummitListNotifier getSummitListNotifier(ItemDataId? contextItemId) {
+  DeferableOptionalDataListNotifier getSummitListNotifier(ItemDataId? contextItemId) {
     String idStr = contextItemId == null ? '' : '$contextItemId';
     String mapKey = '/$idStr';
-    SummitListNotifier? state = _summitLists[mapKey];
+    DeferableOptionalDataListNotifier? state = _summitLists[mapKey];
     if (state == null) {
-      state = SummitListNotifier();
+      state = DeferableOptionalDataListNotifier();
       _summitLists[mapKey] = state;
     }
     return state;
@@ -85,12 +87,12 @@ class GuiState {
   /// Returns the Notifier providing route or the given [contextItemId].
   ///
   /// If there is none for this context yet, a new one will be created.
-  RouteListNotifier getRouteListNotifier(ItemDataId? contextItemId) {
+  DeferableOptionalDataListNotifier getRouteListNotifier(ItemDataId? contextItemId) {
     String idStr = contextItemId == null ? '' : '$contextItemId';
     String mapKey = '/$idStr';
-    RouteListNotifier? state = _routeLists[mapKey];
+    DeferableOptionalDataListNotifier? state = _routeLists[mapKey];
     if (state == null) {
-      state = RouteListNotifier();
+      state = DeferableOptionalDataListNotifier();
       _routeLists[mapKey] = state;
     }
     return state;
@@ -107,7 +109,7 @@ class GuiState {
   ///
   /// This is the only real instance of this, all other clients (views) should only reference this
   /// one and never create their own!
-  final SummitListNotifier summitListState = SummitListNotifier();
+  final DeferableOptionalDataListNotifier summitListState = DeferableOptionalDataListNotifier();
 
   /// The central post list state of the UI.
   ///
@@ -228,121 +230,93 @@ class RouteDbStatusNotifier extends ChangeNotifier {
   }
 }
 
-/// Notifier that knows whether the data is available at all (or not), no matter of what the actual
-/// data is like. Data may be missing e.g. due to an error or some unmet precondition, or there may
-/// just be no data to display at all.
-mixin AlternateStatusMessageNotifier on ChangeNotifier {
+/// Notifier mixin that knows whether any data is available at all (or not), no matter of what the
+/// actual data is like. Data may be missing e.g. due to an error or some unmet precondition, or
+/// there may just be no data to display at all.
+mixin FallbackMessageNotifier on ChangeNotifier {
   ///
-  String? _message;
+  late String? _message;
 
-  /// Return true if the regular data is available for display, or false if not.
-  bool canDisplayData() {
-    return _message == null;
-  }
+  /// Return true if the regular data is available for display, or false if not. Must be
+  /// implemented by the using model classes. If [canDisplayData] returns false, a
+  /// [fallbackMessage] MUST have been set!
+  bool canDisplayData();
 
   /// Return an explanatory message that can be shown to the user. The message shall provide
   /// details about the problem together with information about its consequences and what the user
   /// can do about.
-  ///
-  /// Must only be called when [canDisplayData] returnes false!
-  String getAlternateMessage() {
-    return _message!;
-  }
+  String get fallbackMessage => _message!;
 
-  /// Define the message text to be displayed to the user instead of the actual data widget.
-  /// All listeners are notified so that that e.g. views can be updated.
-  void setAlternateMessage(String message) {
-    _message = message;
-    notifyListeners();
-  }
+  /// Define the message text to be displayed to the user instead of the actual data.
+  set fallbackMessage(String message) => _message = message;
 }
 
-/// Represents the current state of the summit list and notifies about changes.
-class SummitListNotifier extends ChangeNotifier with AlternateStatusMessageNotifier {
-  /// The current list of summits.
-  List<ListViewItem> _summits = <ListViewItem>[];
+/// Notifier mixin that knows whether the data is still being loaded or already available.
+mixin DeferableDataNotifier on ChangeNotifier {
+  /// True while the data is still loading, false if it is available.
+  bool _isLoading = true;
+
+  /// Return true while data is already loaded and should be available, otherweise false.
+  bool get dataLoaded => !_isLoading;
+
+  /// Set to true after the data has been loaded and can be displayed.
+  set dataLoaded(bool loadingComplete) => _isLoading = !loadingComplete;
+}
+
+/// Notifier providing data structured as a list.
+class DataListNotifier extends ChangeNotifier {
+  /// The current data.
+  List<ListViewItem> _data = <ListViewItem>[];
 
   /// The currently available context action items.
-  List<ListViewItem> _contextActionItems = <ListViewItem>[];
+  List<ListViewItem> _actionItems = <ListViewItem>[];
 
-  /// Returns the total number of summits that shall currently be displayed.
-  int getSummitCount() {
-    return _summits.length;
+  /// Returns the total number of data items that shall currently be displayed.
+  int getDataItemCount() {
+    return _data.length;
   }
 
-  /// Returns the summit with the requested list [index].
+  /// Returns the data item with the requested list [index].
   ///
-  /// The [index] is zero based and must be smaller than the value returned by [getSummitCount].
+  /// The [index] is zero based and must be smaller than the value returned by [getDataItemCount].
   /// For invalid indexes, an Exception is raised.
-  ListViewItem getSummitItem(int index) {
-    return _summits[index];
+  ListViewItem getDataItem(int index) {
+    return _data[index];
   }
 
-  /// Returns the action items for the current summit list.
-  List<ListViewItem> getContextActionItems() {
-    return _contextActionItems;
+  /// Returns the action items for the current dats.
+  List<ListViewItem> getActionItems() {
+    return _actionItems;
   }
 
-  /// Replaces the current summit list with the new one defined by [summits].
+  /// Replaces the current data and action items with the new ones defined by [data] and [actions].
   ///
-  /// All listeners are notified so that that e.g. views can be updated.
-  void replaceSummits(
-    List<ListViewItem> summits,
-    List<ListViewItem> contextActionItems,
+  /// All listeners are notified so that e.g. views can be updated.
+  void replaceData(
+    List<ListViewItem> data,
+    List<ListViewItem> actions,
   ) {
-    _summits = summits;
-    _contextActionItems = contextActionItems;
+    _data = data;
+    _actionItems = actions;
     notifyListeners();
   }
 }
 
-/// Represents the current state of the route list and notifies about changes.
-class RouteListNotifier extends ChangeNotifier with AlternateStatusMessageNotifier {
-  /// The current list of routes.
-  List<ListViewItem>? _routes;
-
-  /// The items of the sort menu to be displayed for the current route list (may e.g. emphasize the
-  /// used sort criterion).
-  List<ListViewItem>? _sortMenuItems;
-
-  /// Returns true if some route data is available for display.
-  ///
-  /// Route data must be provided via [replaceRoutes]. Without route data, most of the other methods
-  /// will fail.
-  bool routesLoaded() {
-    return _routes != null && _sortMenuItems != null;
+/// Represents the current data state of a list that may be empty.
+class OptionalDataListNotifier extends DataListNotifier with FallbackMessageNotifier {
+  @override
+  bool canDisplayData() {
+    return _data.isNotEmpty;
   }
+}
 
-  /// Returns the total number of routes that shall currently be displayed.
-  ///
-  /// Throws an exception if there is no route data (i.e. if [routesLoaded] returns false).
-  int getRouteCount() {
-    return _routes!.length;
-  }
-
-  /// Returns the route list item with the requested list index.
-  ///
-  /// The [index] is zero based and must be smaller than the value returned by [getRouteCount].
-  /// For invalid indexes, an Exception is raised. If there is no route data (i.e. if [routesLoaded]
-  /// returns false), an Exception is raised.
-  ListViewItem getRouteItem(int index) {
-    return _routes![index];
-  }
-
-  /// Returns the sort menu items for the current route list.
-  ///
-  /// Throws an exception if there is no route data (i.e. if [routesLoaded] returns false).
-  List<ListViewItem> getSortMenuItems() {
-    return _sortMenuItems!;
-  }
-
-  /// Replaces the current route list with the new one defined by [routes].
-  ///
-  /// All listeners are notified so that that e.g. views can be updated.
-  void replaceRoutes(List<ListViewItem> routes, List<ListViewItem> sortMenuItems) {
-    _routes = routes;
-    _sortMenuItems = sortMenuItems;
-    notifyListeners();
+/// Represents the current data state of a list that may be empty, and may need some time to load.
+class DeferableOptionalDataListNotifier extends OptionalDataListNotifier
+    with DeferableDataNotifier {
+  @override
+  void replaceData(List<ListViewItem> data, List<ListViewItem> actions) {
+    super.dataLoaded = true;
+    super.replaceData(data, actions);
   }
 }
 

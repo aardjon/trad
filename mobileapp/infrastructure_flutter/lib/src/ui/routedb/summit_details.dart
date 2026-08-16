@@ -8,13 +8,10 @@ import 'dart:async';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
-import 'package:provider/provider.dart';
 
 import '../icons.dart';
 import '../state.dart';
-import '../widgets/optional_data.dart';
-import '../widgets/summit_list_view.dart';
+import '../widgets/listviews.dart';
 
 /// Widget representing the *Summit Details* page.
 class SummitDetailsView extends StatefulWidget {
@@ -124,7 +121,7 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
 /// Context menu to be shown when the "routes" tab is active.
 class SummitRoutesContextMenu extends StatelessWidget {
   final SummitDetailsModel _model;
-  final RouteListNotifier _state;
+  final DeferableOptionalDataListNotifier _state;
 
   /// Factory for creating icon widgets.
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
@@ -142,7 +139,7 @@ class SummitRoutesContextMenu extends StatelessWidget {
 
   List<Widget> _createContextMenuitems(BuildContext context) {
     List<ListTile> menuItems = <ListTile>[];
-    for (final ListViewItem item in _state.getSortMenuItems()) {
+    for (final ListViewItem item in _state.getActionItems()) {
       menuItems.add(
         ListTile(
           title: Text(item.mainTitle),
@@ -194,27 +191,23 @@ class _TabFactory {
 
   /// Return all the content widgets that should be shown.
   List<Widget> getContentWidgets() {
-    SummitListNotifier summitListNotifier = _pageWidget.guiState.getSummitListNotifier(
-      _pageModel.summitDataId,
-    );
+    DeferableOptionalDataListNotifier summitListNotifier = _pageWidget.guiState
+        .getSummitListNotifier(_pageModel.summitDataId);
     if (!_pageModel.canShowNearbySummits) {
-      summitListNotifier.setAlternateMessage(_pageModel.noNearbySummitsMessage);
+      summitListNotifier.fallbackMessage = _pageModel.noNearbySummitsMessage;
+      // If this flag is set, we know that no data will ever arrive, so don't wait for it
+      summitListNotifier.replaceData(<ListViewItem>[], <ListViewItem>[]);
     }
 
-    RouteListNotifier routeListNotifier = _pageWidget.guiState.getRouteListNotifier(
+    DeferableOptionalDataListNotifier routeListNotifier = _pageWidget.guiState.getRouteListNotifier(
       _pageModel.summitDataId,
     );
-    routeListNotifier.setAlternateMessage(_pageModel.noRoutesMessage);
+    routeListNotifier.fallbackMessage = _pageModel.noRoutesMessage;
 
     return <Widget>[
-      SummitRoutesView(routeListNotifier),
-      OptionalDataView(
-        summitListNotifier,
-        childBuilder: (BuildContext context) {
-          return SummitListView(
-            _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
-          );
-        },
+      RoutesListView(routeListNotifier),
+      SummitListView(
+        _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
       ),
     ];
   }
@@ -242,55 +235,35 @@ class _TabFactory {
 }
 
 /// The widget being shown when the "routes" tab is active.
-class SummitRoutesView extends StatelessWidget {
-  final RouteListNotifier _state;
+class RoutesListView extends StatelessWidget {
+  final DeferableOptionalDataListNotifier _state;
 
   /// Factory for creating icon widgets.
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
   /// Constructor for directly initializing all members.
-  const SummitRoutesView(this._state, {super.key});
+  const RoutesListView(this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RouteListNotifier>.value(
-      value: _state,
-      child: Consumer<RouteListNotifier>(
-        builder: (BuildContext context, RouteListNotifier state, Widget? child) {
-          if (state.routesLoaded()) {
-            if (state.getRouteCount() > 0) {
-              return ListView.builder(
-                itemCount: _state.getRouteCount(),
-                itemBuilder: (BuildContext context, int index) {
-                  final ListViewItem route = _state.getRouteItem(index);
-                  return ListTile(
-                    title: Text(route.mainTitle),
-                    subtitle: Text(route.subTitle ?? ''),
-                    trailing: _iconFactory.getIconWidget(route.endIcon),
-                    onTap: () {
-                      _onRouteTap(route.itemId!);
-                    },
-                  );
-                },
-              );
-            } else {
-              return CenteredText(state.getAlternateMessage());
-            }
-          } else {
-            return _showLoadingIndicator();
-          }
-        },
-      ),
+    return DeferableOptionalDataListView(_state, _buildRouteTile);
+  }
+
+  /// Build the (single) data row widget of view index [index] for the data from the given
+  /// [notifier].
+  ListTile _buildRouteTile(DeferableOptionalDataListNotifier notifier, int index) {
+    final ListViewItem route = _state.getDataItem(index);
+    return ListTile(
+      title: Text(route.mainTitle),
+      subtitle: Text(route.subTitle ?? ''),
+      trailing: _iconFactory.getIconWidget(route.endIcon),
+      onTap: () {
+        _onRouteTap(route.itemId!);
+      },
     );
   }
 
-  Widget _showLoadingIndicator() {
-    return const LoadingIndicator(
-      indicatorType: Indicator.ballClipRotateMultiple,
-      colors: <Color>[Colors.lightGreen],
-    );
-  }
-
+  /// Executed when the user taps on a single route item.
   void _onRouteTap(ItemDataId routeDataId) {
     RouteDbController controller = RouteDbController();
     controller.requestRouteDetails(routeDataId);
@@ -302,7 +275,7 @@ class NearbySummitsContextMenu extends StatelessWidget {
   /// Factory for creating icon widgets.
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
-  final SummitListNotifier _state;
+  final DeferableOptionalDataListNotifier _state;
   final SummitDetailsModel _pageModel;
 
   /// Constructor for directly initializing all members.
@@ -318,7 +291,7 @@ class NearbySummitsContextMenu extends StatelessWidget {
 
   List<Widget> _createContextMenuitems(BuildContext context) {
     List<ListTile> menuItems = <ListTile>[];
-    for (final ListViewItem item in _state.getContextActionItems()) {
+    for (final ListViewItem item in _state.getActionItems()) {
       menuItems.add(
         ListTile(
           title: Text(item.mainTitle),

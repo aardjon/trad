@@ -8,7 +8,7 @@ import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
 
 import '../state.dart';
-import '../widgets/summit_list_view.dart';
+import '../widgets/listviews.dart';
 
 /// Widget representing the *Summit List* page.
 class SummitListPage extends StatelessWidget {
@@ -16,7 +16,7 @@ class SummitListPage extends StatelessWidget {
   final Widget _appDrawer;
 
   /// Notifier providing the current summit list state to be displayed.
-  final SummitListNotifier _summitListState;
+  final DeferableOptionalDataListNotifier _summitListState;
 
   /// Constructor for directly initializing all members.
   const SummitListPage(this._appDrawer, this._summitListState, {super.key});

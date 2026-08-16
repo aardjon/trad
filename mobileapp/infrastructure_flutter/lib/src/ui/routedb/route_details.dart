@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import '../icons.dart';
 import '../state.dart';
 import '../widgets/carousel.dart';
-import '../widgets/optional_data.dart';
+import '../widgets/centered_text.dart';
 
 /// Widget representing a single post with the post list.
 class _PostItem extends StatelessWidget {
@@ -115,6 +115,7 @@ class _RoutePropertiesView extends StatelessWidget {
 }
 
 /// Widget representing the *Route Details* page.
+// TODO(aardjon): Refactor this to the generic approach of using DeferableOptionalDataListView.
 class RouteDetailsView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final Widget _appDrawer;

@@ -86,7 +86,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateSummitList(List<ListViewItem> summitItems) {
-    _uiState.summitListState.replaceSummits(summitItems, <ListViewItem>[]);
+    _uiState.summitListState.replaceData(summitItems, <ListViewItem>[]);
   }
 
   @override
@@ -102,7 +102,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     List<ListViewItem> sortMenuItems,
   ) {
     _logger.debug('Updating route list data');
-    _uiState.getRouteListNotifier(contextItemId).replaceRoutes(routeItems, sortMenuItems);
+    _uiState.getRouteListNotifier(contextItemId).replaceData(routeItems, sortMenuItems);
   }
 
   @override
@@ -112,7 +112,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     List<ListViewItem> contextActionItems,
   ) {
     _logger.debug('Updating contextual summit list data');
-    _uiState.getSummitListNotifier(contextItemId).replaceSummits(summitItems, contextActionItems);
+    _uiState.getSummitListNotifier(contextItemId).replaceData(summitItems, contextActionItems);
   }
 
   @override
