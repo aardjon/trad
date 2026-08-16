@@ -135,6 +135,9 @@ class SummitListModel {
   /// Help message/Hint to be displayed in the search bar.
   final String searchBarHint;
 
+  /// Message to display in case there are no matching summits.
+  final String noDataMessage;
+
   /// Sectors that can be selected for filtering/searching summits. Must not be empty.
   final List<ListViewItem> searchBarSectors;
 
@@ -145,6 +148,7 @@ class SummitListModel {
   SummitListModel(
     this.pageTitle,
     this.searchBarHint,
+    this.noDataMessage,
     this.searchBarInitialSectorIndex, {
     this.searchBarSectors = const <ListViewItem>[],
   }) : assert(searchBarSectors.isNotEmpty, 'searchBarSectors must not be empty');

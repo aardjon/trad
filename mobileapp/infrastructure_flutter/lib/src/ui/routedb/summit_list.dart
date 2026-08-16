@@ -28,7 +28,7 @@ class SummitListPage extends StatelessWidget {
       appBar: _appBar(model),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[_filterWidget(model, context), _listView()],
+        children: <Widget>[_filterWidget(model, context), _listView(model)],
       ),
       drawer: _appDrawer,
       drawerEnableOpenDragGesture: false,
@@ -52,7 +52,8 @@ class SummitListPage extends StatelessWidget {
     );
   }
 
-  Widget _listView() {
+  Widget _listView(SummitListModel model) {
+    _summitListState.fallbackMessage = model.noDataMessage;
     return Expanded(child: SummitListView(_summitListState));
   }
 

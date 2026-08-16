@@ -50,6 +50,7 @@ void main() {
       SummitListModel(
         '[NoPageTitle]',
         '[NoSearchBarHint]',
+        '[NoFallbackMessage]',
         0,
         searchBarSectors: <ListViewItem>[ListViewItem('NoItem')],
       ),

@@ -154,6 +154,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
     SummitListModel model = SummitListModel(
       'Gipfel',
       'Gipfel suchen',
+      'Es wurden keine zu deinem aktuellen Filter passenden Gipfel gefunden.',
       selectedIndex,
       searchBarSectors: <ListViewItem>[
         ListViewItem('Alle Teilgebiete'),
