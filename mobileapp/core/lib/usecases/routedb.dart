@@ -104,8 +104,8 @@ class RouteDbUseCases {
     if (filePath != null) {
       try {
         await _storageBoundary.importRouteDbFile(filePath);
-      } on Exception catch (error, stackTrace) {
-        _logger.warning('Unable to import database file due to', error, stackTrace);
+      } on Exception catch (error) {
+        _logger.error('Unable to import database file due to', error);
         _presentationBoundary.routeDbUpdateError(error);
       }
     }
