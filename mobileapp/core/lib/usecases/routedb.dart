@@ -173,6 +173,7 @@ class RouteDbUseCases {
       _presentationBoundary.nearbySummitsLocationError(error);
       return;
     }
+    _logger.debug('Got location: ', currentPosition);
 
     // Got a position, now find and display all summits in the vicinity
     List<(Summit, double)> nearbySummits = await _querySortedSummitList(
