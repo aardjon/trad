@@ -6,8 +6,13 @@
 library;
 
 import 'package:adapters/boundaries/positioning.dart';
+import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:crosscuttings/errors.dart';
+import 'package:crosscuttings/logging/logger.dart';
+
+/// Logger to be used in this library file.
+final Logger _logger = Logger('trad.infrastructure_flutter.geolocation');
 
 /// Implements the Positioning component based on the Flutter *location* plugin.
 ///
@@ -43,7 +48,17 @@ class LocationComponent implements LocationBoundary {
   /// they are not.
   Future<void> _ensureLocationServiceEnabled() async {
     if (!await _location.serviceEnabled()) {
-      if (!await _location.requestService()) {
+      // Package example suggests that requestService() returns false if teh service is not
+      // available. But at least on Android, it raises a PlatformException. Documentation doesn't
+      // say anything about this case, so better handle both possibilities.
+      bool success = false;
+      try {
+        success = await _location.requestService();
+      } on PlatformException catch (error) {
+        _logger.error('Location Service Request failed with: ', error);
+        success = false;
+      }
+      if (!success) {
         // Location services are disabled
         throw ResourceUnavailable('LOCATION SERVICE');
       }
