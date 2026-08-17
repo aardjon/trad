@@ -30,7 +30,7 @@ android {
     // However, this used to be an old, incompatible version and I didn't find out how to change
     // the default NDK version in Flutter. So I just override it for this app instead.
     // Improvements are welcome!
-    ndkVersion "28.1.13356709"
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
