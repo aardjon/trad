@@ -161,12 +161,11 @@ class _RouteDbActionsWidget extends StatelessWidget {
 
   /// Called when the user chooses to import a local route DB file
   Future<void> _onImportLocalFile() async {
-    FilePickerResult? result = await FilePicker.pickFiles(
+    PlatformFile? result = await FilePicker.pickFile(
       dialogTitle: _settingsModel.routeDbFileSelectionFieldLabel,
-      allowMultiple: false,
     );
     if (result != null) {
-      String filePath = result.files.single.path!;
+      String filePath = result.path!;
       _routeDbController.requestRouteDbFileImport(filePath);
     } // else: User cancelled the picker
   }
