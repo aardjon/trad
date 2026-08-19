@@ -21,6 +21,9 @@ At the time of writing, we were using Dart 3.4.0 and Flutter 3.22.0, please chec
 
 If everything is set up correctly, the `dart` and `flutter` commands shall be available in your PATH. `flutter doctor -v` shouldn't report any critical issues.
 
+To be able to build for Android, you need OpenJDK 25. On Ubuntu, you can install it e.g. via `sudo apt install openjdk-25-jdk-headless`
+(and [restart your computer](https://github.com/gradle/gradle/issues/30499)!).
+
 #### 2. Install [Melos](https://melos.invertase.dev):
 
 ```
