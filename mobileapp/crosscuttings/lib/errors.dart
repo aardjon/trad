@@ -4,13 +4,13 @@
 library;
 
 /// Generic base type for all exception thrown when an operation fails due to missing permissions.
-class PermissionError implements Exception {
+class PermissionException implements Exception {
   /// Identifying name of the permission that caused problems, e.g. the missing one. This name is
   /// mainly meant for debugging.
   final String permissionName;
 
   /// Constructor for directly initializing all members.
-  PermissionError(this.permissionName);
+  PermissionException(this.permissionName);
 
   @override
   String toString() {
@@ -22,7 +22,7 @@ class PermissionError implements Exception {
 /// This can happen e.g. when this permission is needed for the very first time, and the user did
 /// not yet decide whether to grant it or not. So if this exception is thrown, it's usually a good
 /// idea display a short explanation to the user, ask for granting the permission and try again.
-class MissingPermission extends PermissionError {
+class MissingPermission extends PermissionException {
   /// Constructor for directly initializing all members.
   MissingPermission(super.permissionName);
 
@@ -36,7 +36,7 @@ class MissingPermission extends PermissionError {
 /// Unlike MissingPermission, the permission has been explicitly denied, so don't ask the user to
 /// grant it over and over again. It might be a good idea so display a short explanation of why
 /// something is not possible, though.
-class PermissionDenied extends PermissionError {
+class PermissionDenied extends PermissionException {
   /// Constructor for directly initializing all members.
   PermissionDenied(super.permissionName);
 
