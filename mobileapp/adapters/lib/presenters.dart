@@ -204,7 +204,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
   @override
   void nearbySummitsLocationError(Exception error) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    if (error is PermissionDenied || error is MissingPermission) {
+    if (error is PermissionError) {
       ui.showNearbySummitsError(
         'Diese App darf nicht auf deinen aktuellen Standort zugreifen, weshalb die Suche nach '
         'nahegelegenen Gipfeln nicht möglich ist. Bitte erteile trad die Berechtigung zum '
@@ -214,7 +214,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
       ui.showNearbySummitsError(
         'Die Standortdienste sind deaktiviert, weshalb die Suche nach nahegelegenen Gipfeln nicht '
         'möglich ist. Bitte aktivere die Standortfunktion deines Gerätes und versuche es erneut.',
-      ); 
+      );
     } else {
       ui.showNearbySummitsError(
         'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',

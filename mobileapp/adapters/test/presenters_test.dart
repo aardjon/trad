@@ -11,6 +11,7 @@ import 'package:core/entities/route.dart';
 import 'package:core/entities/sector.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
+import 'package:crosscuttings/errors.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -364,6 +365,29 @@ void main() {
           );
       verify(() => fakeUi.showRouteDetails(any(that: routeModelMatcher))).called(1);
     });
+  });
+
+  /// Ensure that nearbySummitsLocationError() sends the correct error message to the UI
+  group('nearbySummitsLocationError', () {
+    List<(Exception, String)> testCaseParams = <(Exception, String)>[
+      (MissingPermission('TEST'), 'Diese App darf nicht auf deinen aktuellen Standort zugreifen'),
+      (PermissionDenied('TEST'), 'Diese App darf nicht auf deinen aktuellen Standort zugreifen'),
+      (ResourceUnavailable('TEST'), 'Die Standortdienste sind deaktiviert'),
+      (const FormatException(), 'Es trat ein unerwarteter Fehler auf'),
+    ];
+
+    for (final (Exception, String) params in testCaseParams) {
+      Exception exception = params.$1;
+      String expectedSubString = params.$2;
+
+      test('${exception.runtimeType}', () {
+        ApplicationWidePresenter presenter = ApplicationWidePresenter();
+        presenter.nearbySummitsLocationError(exception);
+        verify(
+          () => fakeUi.showNearbySummitsError(any(that: contains(expectedSubString))),
+        ).called(1);
+      });
+    }
   });
 
   /// Ensure the correct grade labels are created for given input data.
