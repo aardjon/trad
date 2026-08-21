@@ -6,11 +6,13 @@ library;
 import 'dart:io';
 
 import 'package:core/boundaries/ota.dart';
+import 'package:core/boundaries/positioning.dart';
 import 'package:core/boundaries/sysenv.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/sector.dart';
+import 'package:crosscuttings/errors.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -34,6 +36,8 @@ class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary 
 
 class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
 
+class PositioningBoundaryMock extends Mock implements PositioningBoundary {}
+
 /// Unit tests for the core.usecases.routedb.RouteDbUseCases component.
 void main() {
   setUpAll(() {
@@ -48,6 +52,7 @@ void main() {
   final PresentationBoundaryMock presentationBoundaryMock = PresentationBoundaryMock();
   final AppPreferencesBoundaryMock preferencesBoundaryMock = AppPreferencesBoundaryMock();
   final SystemEnvironmentBoundaryMock systemEnvBoundaryMock = SystemEnvironmentBoundaryMock();
+  final PositioningBoundaryMock positioningBoundaryMock = PositioningBoundaryMock();
 
   tearDown(() async {
     // Reset the mocks after each test case
@@ -56,6 +61,7 @@ void main() {
     reset(presentationBoundaryMock);
     reset(preferencesBoundaryMock);
     reset(systemEnvBoundaryMock);
+    reset(positioningBoundaryMock);
   });
 
   // Tests for the route storage management (e.g. importing a new DB file)
@@ -88,6 +94,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.importRouteDbFile(fakeFilePath);
 
@@ -146,6 +153,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.updateRouteDatabase();
 
@@ -268,6 +276,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: fakeStorage,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.updateRouteDatabase();
 
@@ -333,6 +342,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: fakeStorage,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.updateRouteDatabase();
 
@@ -376,6 +386,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: storageBoundaryMock,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.importRouteDbFile(fakeFilePath);
 
@@ -434,6 +445,7 @@ void main() {
           presentationBoundary: presentationBoundaryMock,
           storageBoundary: storageBoundaryMock,
           systemEnvBoundary: systemEnvBoundaryMock,
+          positioningBoundary: positioningBoundaryMock,
         );
         await usecases.importRouteDbFile(fakeFilePath);
 
@@ -473,6 +485,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: storageBoundaryMock,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.importRouteDbFile(fakeFilePath);
 
@@ -489,9 +502,9 @@ void main() {
 
   group('core.usecases.routedb.summits', () {
     List<Summit> summitList = <Summit>[
-      Summit(1, 'Mount A', 'Sector A'),
-      Summit(2, 'Mount B', 'Sector B'),
-      Summit(3, 'Mount C', 'Sector C'),
+      Summit(1, 'Mount A', 'Sector A', GeoPosition(51.361, 13.371)),
+      Summit(2, 'Mount B', 'Sector B', GeoPosition(51.3611, 13.3711)),
+      Summit(3, 'Mount C', 'Sector C', GeoPosition(51.3599999, 13.3699999)),
     ];
 
     /// Ensures the correct behaviour of the showSummitListPage() method:
@@ -514,6 +527,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.showSummitListPage();
 
@@ -544,6 +558,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.filterSummitList(filterText, null);
 
@@ -574,6 +589,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
 
       // Filter the summit list by name and sector
@@ -586,6 +602,95 @@ void main() {
       verify(() => storageBoundaryMock.retrieveSummits(null, sectorId)).called(1);
       // Make sure the selected sector is sent to the UI
       verify(() => presentationBoundaryMock.showSummitList(sectorList, sectorId)).called(1);
+    });
+
+    /// Ensures the correct behaviour of the showNearbySummitsPage() method:
+    ///  - The current location is retrieved
+    ///  - The summit list within a radius of 500m is retrieved from the storage
+    ///  - The retrieved list is forwarded to the UI
+    test('showNearbySummitsPage() happy path', () async {
+      int expectedSummitSearchRadius = 500;
+      GeoPosition examplePosition = GeoPosition(51.36, 13.37);
+
+      // Setup the mocks
+      when(
+        () => storageBoundaryMock.retrieveSummitsWithinRect(
+          any(),
+          any(),
+          sortAlphabetically: any(named: 'sortAlphabetically'),
+        ),
+      ).thenAnswer((_) async {
+        return summitList;
+      });
+      when(positioningBoundaryMock.getCurrentPosition).thenAnswer((_) async {
+        return examplePosition;
+      });
+
+      // Run the actual test case
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
+      );
+      await usecases.showNearbySummitsPage();
+
+      // Make sure the current location was retrieved
+      verify(positioningBoundaryMock.getCurrentPosition).called(1);
+      // Make sure the summit list was loaded from the storage using the correct filter
+      (GeoPosition, GeoPosition) searchSquare = examplePosition.calculateBoundingSquare(
+        expectedSummitSearchRadius,
+      );
+      verify(
+        () => storageBoundaryMock.retrieveSummitsWithinRect(
+          any(that: isCloseTo(searchSquare.$1)),
+          any(that: isCloseTo(searchSquare.$2)),
+          sortAlphabetically: any(named: 'sortAlphabetically', that: equals(false)),
+        ),
+      ).called(1);
+
+      // Make sure the retrieved list is sent to the UI
+      verify(presentationBoundaryMock.showNearbySummits).called(1);
+      verify(
+        () => presentationBoundaryMock.updateNearbySummits(any(that: hasLength(summitList.length))),
+      ).called(1);
+    });
+
+    /// Ensures the correct behaviour in case of a location retrieval error:
+    ///  - The error object is sent to the UI
+    ///  - No summit list is retrieved
+    test('showNearbySummitsPage() location error', () async {
+      Exception expectedError = PermissionDenied('FAKE');
+
+      when(positioningBoundaryMock.getCurrentPosition).thenAnswer((_) async {
+        throw expectedError;
+      });
+
+      // Run the actual test case
+      RouteDbUseCases usecases = RouteDbUseCases(
+        downloadBoundary: downloadBoundaryMock,
+        preferencesBoundary: preferencesBoundaryMock,
+        presentationBoundary: presentationBoundaryMock,
+        storageBoundary: storageBoundaryMock,
+        systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
+      );
+      await usecases.showNearbySummitsPage();
+
+      // Make sure that no summit list is retrieved at all
+      verifyNever(
+        () => storageBoundaryMock.retrieveSummitsWithinRect(
+          any(),
+          any(),
+          sortAlphabetically: any(named: 'sortAlphabetically'),
+        ),
+      );
+
+      // Make sure the error object is sent to the UI
+      verify(presentationBoundaryMock.showNearbySummits).called(1);
+      verify(() => presentationBoundaryMock.nearbySummitsLocationError(expectedError)).called(1);
     });
 
     /// Ensures the correct behaviour of the showSummitOnMap() method:
@@ -613,6 +718,7 @@ void main() {
             presentationBoundary: presentationBoundaryMock,
             storageBoundary: storageBoundaryMock,
             systemEnvBoundary: systemEnvBoundaryMock,
+            positioningBoundary: positioningBoundaryMock,
           );
           await usecases.showSummitOnMap(summit.id);
 
@@ -661,6 +767,7 @@ void main() {
           presentationBoundary: presentationBoundaryMock,
           storageBoundary: storageBoundaryMock,
           systemEnvBoundary: systemEnvBoundaryMock,
+          positioningBoundary: positioningBoundaryMock,
         );
         await usecases.showRouteOnMap(route.id);
 
@@ -713,6 +820,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.showRouteListPage(summit.id);
 
@@ -751,6 +859,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.sortRouteList(summit.id, sortCriterion);
 
@@ -806,6 +915,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.showPostsPage(route.id);
 
@@ -842,6 +952,7 @@ void main() {
         presentationBoundary: presentationBoundaryMock,
         storageBoundary: storageBoundaryMock,
         systemEnvBoundary: systemEnvBoundaryMock,
+        positioningBoundary: positioningBoundaryMock,
       );
       await usecases.sortPostList(route.id, sortCriterion);
 
@@ -937,4 +1048,28 @@ class _FakeRouteDbDownloadBoundary extends Fake implements RouteDbDownloadBounda
 
   @override
   Future<void> cleanupResources() async {}
+}
+
+class _GeoPositionMatcher extends Matcher {
+  final GeoPosition expectedPosition;
+
+  _GeoPositionMatcher(this.expectedPosition);
+
+  @override
+  Description describe(Description description) {
+    return description.add(' must be very close to $expectedPosition');
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is! GeoPosition) {
+      return false;
+    }
+    return item.toString() == expectedPosition.toString();
+  }
+}
+
+/// Create a Matcher that verifies that a given GeoPosition equals the expected one.
+Matcher isCloseTo(GeoPosition expectedPos) {
+  return _GeoPositionMatcher(expectedPos);
 }

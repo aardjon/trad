@@ -50,9 +50,15 @@ class TradDrawer extends StatelessWidget {
                 ),*/
                 ListTile(
                   enabled: _settingsState.isRouteDbAavailable(),
-                  leading: iconFactory.getIconWidget(_model.routedbItem.icon),
-                  title: Text(_model.routedbItem.mainTitle),
+                  leading: iconFactory.getIconWidget(_model.summitListItem.icon),
+                  title: Text(_model.summitListItem.mainTitle),
                   onTap: _controller.requestSwitchToRouteDb,
+                ),
+                ListTile(
+                  enabled: _settingsState.isRouteDbAavailable(),
+                  leading: iconFactory.getIconWidget(_model.summitListItem.icon),
+                  title: Text(_model.nearbyListItem.mainTitle),
+                  onTap: _controller.requestSwitchToNearbySummits,
                 ),
                 /*ListTile(
                   leading: iconFactory.getIconWidget(_model.knowledgebaseItem.icon),

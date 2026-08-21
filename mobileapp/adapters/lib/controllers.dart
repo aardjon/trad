@@ -51,9 +51,14 @@ class ApplicationWideController {
     unawaited(_knowledgebaseUsecases.showHomePage());
   }
 
-  /// The user requested a switch to the Route DB domain.
+  /// The user requested a switch to the filterable summit list of the Route DB domain.
   void requestSwitchToRouteDb() {
     unawaited(_routeDbUseCases.showSummitListPage());
+  }
+
+  /// The user requested a switch to the nearby summits list of the Route DB domain.
+  void requestSwitchToNearbySummits() {
+    unawaited(_routeDbUseCases.showNearbySummitsPage());
   }
 
   /// The user requested a switch to the Settings domain.

@@ -45,6 +45,20 @@ abstract interface class PresentationBoundary {
   /// The current display may be updated with the provided [summitList], if necessary.
   void updateSummitList(List<Summit> summitList);
 
+  /// Let the UI display the list of nearby summits in the *route db* domain.
+  ///
+  /// The actual summit list data must be set separately by calling [updateNearbySummits()].
+  void showNearbySummits();
+
+  /// Notify the user interface about a new list of summits nearby the current position.
+  ///
+  /// The current display may be updated with the provided [nearbySummits], if necessary.
+  void updateNearbySummits(List<(Summit, double)> nearbySummits);
+
+  /// Notify the UI about an error that occured while geting the current location needed to
+  /// determine the nearby summits.
+  void nearbySummitsLocationError(Exception error);
+
   /// Let the UI display details about the [selectedSummit] in the *route db* domain.
   ///
   /// The list of routes onto this summit must be set separately and can also be changed afterwards

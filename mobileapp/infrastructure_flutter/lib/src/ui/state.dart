@@ -111,6 +111,15 @@ class GuiState {
   /// one and never create their own!
   final DeferableOptionalDataListNotifier summitListState = DeferableOptionalDataListNotifier();
 
+  /// The central nearby summit list state of the UI. This is the data notifier for the 'global'
+  /// nearby page, and *not* the one of the summit details (which are accessed via
+  /// [getSummitListNotifier()]).
+  ///
+  /// This is the only real instance of this, all other clients (views) should only reference this
+  /// one and never create their own!
+  final DeferableOptionalDataListNotifier nearbySummitListNotifier =
+      DeferableOptionalDataListNotifier();
+
   /// The central post list state of the UI.
   ///
   /// This is the only real instance of this, all other clients (views) should only reference this

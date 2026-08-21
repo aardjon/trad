@@ -13,6 +13,7 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
  - Show a message if there is no data to display for the selected summit or route (#29)
  - Show a message if no summit matches the given filter criteria (#29)
  - Display route entry point in maps app (#58)
+ - List summits around my current location (#27)
 
 ### Fixed Bugs:
 

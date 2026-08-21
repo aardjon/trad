@@ -11,6 +11,7 @@ library;
 import 'package:core/entities/errors.dart';
 import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
+import 'package:crosscuttings/errors.dart';
 import 'package:crosscuttings/logging/logger.dart';
 import 'package:intl/intl.dart';
 
@@ -53,7 +54,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
       MainMenuModel(
         appName,
         ListViewItem('Fahrtenbuch', icon: const IconDefinition(Glyph.logoJournal)),
-        ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Gipfelliste', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Nahegelegene Gipfel', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
         ListViewItem('Über trad', icon: const IconDefinition(Glyph.logoAppInfo)),
@@ -172,6 +174,52 @@ class ApplicationWidePresenter implements PresentationBoundary {
       summitItems.add(ListViewItem(summit.name, itemId: summit.id));
     }
     ui.updateSummitList(summitItems);
+  }
+
+  @override
+  void showNearbySummits() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    NearbySummitsPageLabels model = NearbySummitsPageLabels(
+      'Gipfel in deiner Nähe',
+      'In deiner Nähe wurden leider keine Gipfel gefunden.',
+    );
+    ui.showNearbySummits(model);
+  }
+
+  @override
+  void updateNearbySummits(List<(Summit, double)> nearbySummits) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateNearbySummits(
+      <ListViewItem>[
+        for (final (Summit, double) summitData in nearbySummits)
+          ListViewItem(
+            summitData.$1.name,
+            subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
+            itemId: summitData.$1.id,
+          ),
+      ],
+    );
+  }
+
+  @override
+  void nearbySummitsLocationError(Exception error) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    if (error is PermissionException) {
+      ui.showNearbySummitsError(
+        'Diese App darf nicht auf deinen aktuellen Standort zugreifen, weshalb die Suche nach '
+        'nahegelegenen Gipfeln nicht möglich ist. Bitte erteile trad die Berechtigung zum '
+        'Standortzugriff, um diese Funktion zu nutzen.',
+      );
+    } else if (error is ResourceUnavailable) {
+      ui.showNearbySummitsError(
+        'Die Standortdienste sind deaktiviert, weshalb die Suche nach nahegelegenen Gipfeln nicht '
+        'möglich ist. Bitte aktivere die Standortfunktion deines Gerätes und versuche es erneut.',
+      );
+    } else {
+      ui.showNearbySummitsError(
+        'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
+      );
+    }
   }
 
   @override
