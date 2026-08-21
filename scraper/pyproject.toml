@@ -521,6 +521,9 @@ ignore = [
   # Disable all flake8-annotations rules because they are checked by MyPy later on (aren't they?)
   "ANN",
 
+  # Disabled because we don't want to add a copyright notice to every single source file.
+  "CPY001",
+
   # Disable most of the pydocstyle (D) rules because we don't want to enforce too much docstring
   # content and style. We mainly want to ensure that there are docstrings at all.
   "D105",  # Missing docstring in magic method
