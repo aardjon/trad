@@ -31,10 +31,7 @@ class HttpNetworkRequests implements HttpNetworkingBoundary {
   Future<String> retrieveJsonResource(Uri url) async {
     const String jsonMimeMype = 'application/json';
 
-    http.Response response = await _httpClient.get(url);
-    if (response.statusCode != _httpStatusOk) {
-      throw HttpRequestException(response.statusCode, response.reasonPhrase ?? '');
-    }
+    http.Response response = await _request(url);
 
     String contentTypeHeader = '';
     for (final MapEntry<String, String> item in response.headers.entries) {
@@ -55,10 +52,22 @@ class HttpNetworkRequests implements HttpNetworkingBoundary {
 
   @override
   Future<Uint8List> retrieveBinaryResource(Uri url) async {
-    http.Response response = await _httpClient.get(url);
+    http.Response response = await _request(url);
+    return response.bodyBytes;
+  }
+
+  /// Does the actual HTTP request and returns the response in case of success. Raises if the
+  /// request fails or the server responds with a different status than OK.
+  Future<http.Response> _request(Uri url) async {
+    http.Response response;
+    try {
+      response = await _httpClient.get(url);
+    } on http.ClientException catch (error) {
+      throw ConnectionException(error.toString());
+    }
     if (response.statusCode != _httpStatusOk) {
       throw HttpRequestException(response.statusCode, response.reasonPhrase ?? '');
     }
-    return response.bodyBytes;
+    return response;
   }
 }

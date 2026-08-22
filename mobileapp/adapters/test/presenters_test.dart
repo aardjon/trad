@@ -8,8 +8,10 @@ import 'package:adapters/presenters.dart';
 import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/route.dart';
+import 'package:core/entities/sector.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
+import 'package:crosscuttings/errors.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -20,11 +22,9 @@ class FakeUi extends Fake implements ApplicationUiBoundary {
   List<ListViewItem> dataSourceItems = <ListViewItem>[];
 
   @override
-  void updateRouteDbStatus({
-    required bool activated,
+  void setStatusActivated({
     required String label,
     required List<ListViewItem> dataSourceAttributions,
-    String? statusMessage,
   }) {
     dbLabel = label;
     dataSourceItems = dataSourceAttributions;
@@ -40,14 +40,23 @@ void main() {
       MainMenuModel(
         '[NoTitle]',
         ListViewItem('[NoJournal]'),
-        ListViewItem('[NoRouteDB]'),
+        ListViewItem('[NoRouteDB1]'),
+        ListViewItem('[NoRouteDB2]'),
         ListViewItem('[NoKnowledgebase]'),
         ListViewItem('[NoSettings]'),
         ListViewItem('[NoAbout]'),
         'Application version 0.0.0',
       ),
     );
-    registerFallbackValue(SummitListModel('[NoPageTitle]', '[NoSearchBarHint]'));
+    registerFallbackValue(
+      SummitListModel(
+        '[NoPageTitle]',
+        '[NoSearchBarHint]',
+        '[NoFallbackMessage]',
+        0,
+        searchBarSectors: <ListViewItem>[ListViewItem('NoItem')],
+      ),
+    );
     registerFallbackValue(
       SummitDetailsModel(
         0xFFFFFF,
@@ -59,7 +68,14 @@ void main() {
       ),
     );
     registerFallbackValue(
-      RouteDetailsModel(0xFFFFFF, '[NoPageTitle]', '[NoPageSubTitle]', <ListViewItem>[]),
+      RouteDetailsModel(
+        0xFFFFFF,
+        '[NoPageTitle]',
+        '[NoPageSubTitle]',
+        <ListViewItem>[],
+        '[NoEmptyMessage]',
+        canShowEntryOnMap: false,
+      ),
     );
     registerFallbackValue(
       SettingsModel(
@@ -106,8 +122,10 @@ void main() {
           isNotEmpty,
         )
         .having((MainMenuModel m) => m.knowledgebaseItem.icon, 'knowledgebase.icon', isNotNull)
-        .having((MainMenuModel m) => m.routedbItem.mainTitle, 'routedb.title', isNotEmpty)
-        .having((MainMenuModel m) => m.routedbItem.icon, 'routedb.icon', isNotNull)
+        .having((MainMenuModel m) => m.summitListItem.mainTitle, 'routedb.title', isNotEmpty)
+        .having((MainMenuModel m) => m.summitListItem.icon, 'routedb.icon', isNotNull)
+        .having((MainMenuModel m) => m.nearbyListItem.mainTitle, 'routedb.title', isNotEmpty)
+        .having((MainMenuModel m) => m.nearbyListItem.icon, 'routedb.icon', isNotNull)
         .having((MainMenuModel m) => m.settingsItem.mainTitle, 'settings.title', isNotEmpty)
         .having((MainMenuModel m) => m.settingsItem.icon, 'settings.icon', isNotNull);
 
@@ -127,37 +145,33 @@ void main() {
     ///  - If it gets null, deactivate the routeDB domain in the UI, send a special "No DB
     ///    available" label and send a status message.
     ///  - Provided data attributions must be forwarded correctly (if there is a DB at all)
-    group('updateRouteDbStatus(): creation date', () {
-      /// Make sure the correct values are sent to the UI when the route DB status is changed. If
-      /// there is a route DB date, the creation timestamp must be formatted correctly.
-      final List<(DateTime?, String)> testParams = <(DateTime?, String)>[
+    group('routeDbAvailable(): creation date', () {
+      /// Make sure the correct values are sent to the UI when the route DB is activated. The creation
+      /// timestamp must be formatted correctly.
+      final List<(DateTime, String)> testParams = <(DateTime, String)>[
         (DateTime(2023, 1, 2, 3, 4), '02.01.2023 03:04'), // minimal digit value
         (DateTime(2023, 12, 31, 23, 59), '31.12.2023 23:59'), // full digit values
         (DateTime(2024, 4, 16, 13, 9), '16.04.2024 13:09'), // mixed
-        (null, 'Keine'), // no timestamp given
       ];
 
-      for (final (DateTime?, String) args in testParams) {
-        DateTime? inputDate = args.$1;
+      for (final (DateTime, String) args in testParams) {
+        DateTime inputDate = args.$1;
         String expectedLabel = args.$2;
         test('db date = $inputDate', () {
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          presenter.updateRouteDbStatus(inputDate, <DataSourceAttribution>[]);
+          presenter.routeDbAvailable(inputDate, <DataSourceAttribution>[]);
 
-          final Matcher availabilityMessageMatcher = inputDate != null ? isNull : isNotEmpty;
           verify(
-            () => fakeUi.updateRouteDbStatus(
-              activated: inputDate != null,
+            () => fakeUi.setStatusActivated(
               label: expectedLabel,
               dataSourceAttributions: <ListViewItem>[],
-              statusMessage: any(named: 'statusMessage', that: availabilityMessageMatcher),
             ),
           ).called(1);
         });
       }
     });
 
-    group('updateRouteDbStatus(): data attribution', () {
+    group('routeDbAvailable(): data attribution', () {
       tearDown(() async {
         // Reset the mocks after each test case
         await di.shutdown();
@@ -255,7 +269,7 @@ void main() {
           di.registerSingleton<ApplicationUiBoundary>(() => ui);
 
           ApplicationWidePresenter presenter = ApplicationWidePresenter();
-          presenter.updateRouteDbStatus(fakeCreationDate, inputAttribution);
+          presenter.routeDbAvailable(fakeCreationDate, inputAttribution);
 
           expect(ui.dataSourceItems.length, equals(expectedListItems.length));
           for (int i = 0; i < ui.dataSourceItems.length; i++) {
@@ -270,11 +284,24 @@ void main() {
       }
     });
 
+    /// Make sure the UI is notified values are sent to the UI when the route DB is disabled.
+    test('routeDbUnavailable()', () {
+      ApplicationWidePresenter presenter = ApplicationWidePresenter();
+      presenter.routeDbUnavailable();
+
+      verify(
+        () => fakeUi.setStatusMissing(
+          label: 'Keine',
+          userHint: any(named: 'userHint', that: isNotEmpty),
+        ),
+      ).called(1);
+    });
+
     /// Ensure the expected behaviour of the showSummitList() method, i.e. send the expected static
     /// data to the actual UI implementation: Page title and search box label must not be empty.
     test('showSummitList()', () {
       ApplicationWidePresenter presenter = ApplicationWidePresenter();
-      presenter.showSummitList();
+      presenter.showSummitList(<Sector>[], null);
 
       Matcher summitModelMatcher = isA<SummitListModel>()
           .having((SummitListModel m) => m.pageTitle, 'pageTitle', isNotEmpty)
@@ -338,6 +365,29 @@ void main() {
           );
       verify(() => fakeUi.showRouteDetails(any(that: routeModelMatcher))).called(1);
     });
+  });
+
+  /// Ensure that nearbySummitsLocationError() sends the correct error message to the UI
+  group('nearbySummitsLocationError', () {
+    List<(Exception, String)> testCaseParams = <(Exception, String)>[
+      (MissingPermission('TEST'), 'Diese App darf nicht auf deinen aktuellen Standort zugreifen'),
+      (PermissionDenied('TEST'), 'Diese App darf nicht auf deinen aktuellen Standort zugreifen'),
+      (ResourceUnavailable('TEST'), 'Die Standortdienste sind deaktiviert'),
+      (const FormatException(), 'Es trat ein unerwarteter Fehler auf'),
+    ];
+
+    for (final (Exception, String) params in testCaseParams) {
+      Exception exception = params.$1;
+      String expectedSubString = params.$2;
+
+      test('${exception.runtimeType}', () {
+        ApplicationWidePresenter presenter = ApplicationWidePresenter();
+        presenter.nearbySummitsLocationError(exception);
+        verify(
+          () => fakeUi.showNearbySummitsError(any(that: contains(expectedSubString))),
+        ).called(1);
+      });
+    }
   });
 
   /// Ensure the correct grade labels are created for given input data.

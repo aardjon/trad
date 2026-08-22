@@ -61,10 +61,10 @@ class ApplicationWideUseCases {
       await _routeDbBoundary.startStorage();
       DateTime routeDbDate = await _routeDbBoundary.getCreationDate();
       List<DataSourceAttribution> dataSources = await _routeDbBoundary.getExternalDataSources();
-      _presentationBoundary.updateRouteDbStatus(routeDbDate, dataSources);
+      _presentationBoundary.routeDbAvailable(routeDbDate, dataSources);
     } on Exception {
       // No (usable) route database, notify the GUI and start with the settings page
-      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
+      _presentationBoundary.routeDbUnavailable();
       switchToInitialDomain = switchToSettings;
     }
     // Finally, switch to the starting domain
@@ -80,8 +80,7 @@ class ApplicationWideUseCases {
   /// Change the active domain to the "route db" domain.
   Future<void> switchToRouteDb() async {
     _logger.info('Running use case switchToRouteDb()');
-    RouteDbUseCases rdbUseCases = RouteDbUseCases(_di);
-    await rdbUseCases.showSummitListPage();
+    await _di.provide<RouteDbUseCases>().showSummitListPage();
   }
 
   /// Change the active domain to the "Settings" domain.

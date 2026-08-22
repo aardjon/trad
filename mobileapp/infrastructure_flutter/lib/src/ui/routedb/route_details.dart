@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../icons.dart';
 import '../state.dart';
 import '../widgets/carousel.dart';
+import '../widgets/centered_text.dart';
 
 /// Widget representing a single post with the post list.
 class _PostItem extends StatelessWidget {
@@ -114,6 +115,7 @@ class _RoutePropertiesView extends StatelessWidget {
 }
 
 /// Widget representing the *Route Details* page.
+// TODO(aardjon): Refactor this to the generic approach of using DeferableOptionalDataListView.
 class RouteDetailsView extends StatelessWidget {
   /// The app drawer (navigation menu) to use.
   final Widget _appDrawer;
@@ -139,7 +141,7 @@ class RouteDetailsView extends StatelessWidget {
           if (state.postsLoaded()) {
             return Scaffold(
               appBar: _appBar(model, state, context),
-              body: _listView(model, state, context),
+              body: _buildDataView(model, state, context),
               drawer: _appDrawer,
               drawerEnableOpenDragGesture: false,
             );
@@ -162,6 +164,14 @@ class RouteDetailsView extends StatelessWidget {
       centerTitle: true,
       backgroundColor: Colors.lightGreen,
       actions: <Widget>[
+        IconButton(
+          onPressed: model.canShowEntryOnMap
+              ? () {
+                  _onShowOnMap(model.routeDataId);
+                }
+              : null,
+          icon: const Icon(Icons.map),
+        ),
         IconButton(
           onPressed: () {
             unawaited(
@@ -194,6 +204,13 @@ class RouteDetailsView extends StatelessWidget {
     return Column(mainAxisSize: MainAxisSize.min, children: menuItems);
   }
 
+  Widget _buildDataView(RouteDetailsModel model, PostListNotifier state, BuildContext context) {
+    if (model.directionsItems.isEmpty && state.getPostCount() == 0) {
+      return CenteredText(model.noDataMessage);
+    }
+    return _listView(model, state, context);
+  }
+
   Widget _listView(RouteDetailsModel model, PostListNotifier state, BuildContext context) {
     final int listItemIndexOffset = model.directionsItems.isNotEmpty ? 1 : 0;
     return ListView.builder(
@@ -211,6 +228,11 @@ class RouteDetailsView extends StatelessWidget {
   void _onOrderingChanged(ItemDataId routeDataId, ItemDataId sortMenuItemId) {
     RouteDbController controller = RouteDbController();
     controller.requestPostListSorting(routeDataId, sortMenuItemId);
+  }
+
+  void _onShowOnMap(ItemDataId routeDataId) {
+    RouteDbController controller = RouteDbController();
+    controller.requestShowRouteOnMap(routeDataId);
   }
 
   Widget _showLoadingIndicator() {

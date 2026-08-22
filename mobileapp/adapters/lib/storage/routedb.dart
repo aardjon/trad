@@ -10,6 +10,7 @@ import 'package:core/entities/data_source.dart';
 import 'package:core/entities/geoposition.dart';
 import 'package:core/entities/post.dart';
 import 'package:core/entities/route.dart';
+import 'package:core/entities/sector.dart';
 import 'package:core/entities/sorting/posts_filter_mode.dart';
 import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
@@ -228,6 +229,29 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   }
 
   @override
+  Future<List<Sector>> retrieveAllSectors() async {
+    // Configure the query
+    Query query = Query.table(
+      AreasTable.tableName,
+      <String>[AreasTable.columnId, AreasTable.columnName],
+    );
+
+    query.orderByColumns = <String>[AreasTable.columnName];
+
+    // Run the database query
+    List<ResultRow> resultSet = await _repository.executeQuery(query);
+
+    // Convert and return the result data
+    List<Sector> sectors = <Sector>[];
+    for (final ResultRow dataRow in resultSet) {
+      int id = dataRow.getIntValue(AreasTable.columnId);
+      String name = dataRow.getStringValue(AreasTable.columnName);
+      sectors.add(Sector(id, name));
+    }
+    return sectors;
+  }
+
+  @override
   Future<Summit> retrieveSummit(int summitDataId) async {
     Query query = Query.join(
       <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
@@ -251,12 +275,16 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     List<ResultRow> resultSet = await _repository.executeQuery(query);
     String name = resultSet[0].getStringValue(SummitNamesTable.columnName);
     String sector = resultSet[0].getStringValue(AreasTable.columnName);
-    GeoPosition? position = _extractPosition(resultSet[0]);
+    GeoPosition? position = _extractPosition(
+      resultSet[0],
+      latColumnName: SummitsTable.columnLatitude,
+      lonColumnName: SummitsTable.columnLongitude,
+    );
     return Summit(summitDataId, name, sector, position);
   }
 
   @override
-  Future<List<Summit>> retrieveSummits([String? nameFilter]) async {
+  Future<List<Summit>> retrieveSummits([String? nameFilter, int? sectorIdFilter]) async {
     // Configure the query
     Query query = Query.join(
       <String>[SummitsTable.tableName, SummitNamesTable.tableName, AreasTable.tableName],
@@ -273,12 +301,25 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       ],
     );
 
-    if (nameFilter != null) {
-      _logger.debug('Retrieving filtered summit list for "$nameFilter"');
-      query.setWhereCondition('${SummitNamesTable.columnName} LIKE ?', <String>['%$nameFilter%']);
+    List<String> whereClauses = <String>[];
+    List<Object> whereArgs = <Object>[];
+
+    if (nameFilter != null || sectorIdFilter != null) {
+      if (nameFilter != null) {
+        _logger.debug('Filtering summit list summit list for "$nameFilter"');
+        whereClauses.add('${SummitNamesTable.columnName} LIKE ?');
+        whereArgs.add('%$nameFilter%');
+      }
+      if (sectorIdFilter != null) {
+        _logger.debug('Filtering summit list for sector $sectorIdFilter');
+        whereClauses.add('${AreasTable.columnId} = ?');
+        whereArgs.add(sectorIdFilter);
+      }
+      query.setWhereCondition(whereClauses.join(' AND '), whereArgs);
     } else {
       _logger.debug('Retrieving complete summit list');
     }
+
     query.orderByColumns = <String>[SummitNamesTable.columnName];
 
     // Run the database query
@@ -290,7 +331,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
       String name = dataRow.getStringValue(SummitNamesTable.columnName);
       String area = dataRow.getStringValue(AreasTable.columnName);
-      GeoPosition? position = _extractPosition(dataRow);
+      GeoPosition? position = _extractPosition(
+        dataRow,
+        latColumnName: SummitsTable.columnLatitude,
+        lonColumnName: SummitsTable.columnLongitude,
+      );
       summits.add(Summit(id, name, area, position));
     }
     return summits;
@@ -343,23 +388,31 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       int id = dataRow.getIntValue(SummitNamesTable.columnSummitId);
       String name = dataRow.getStringValue(SummitNamesTable.columnName);
       String area = dataRow.getStringValue(AreasTable.columnName);
-      GeoPosition? position = _extractPosition(dataRow);
+      GeoPosition? position = _extractPosition(
+        dataRow,
+        latColumnName: SummitsTable.columnLatitude,
+        lonColumnName: SummitsTable.columnLongitude,
+      );
       summits.add(Summit(id, name, area, position));
     }
     return summits;
   }
 
-  GeoPosition? _extractPosition(ResultRow dataRow) {
+  GeoPosition? _extractPosition(
+    ResultRow dataRow, {
+    required String latColumnName,
+    required String lonColumnName,
+  }) {
     // Unknown/Missing position values are stored in the database with this special coordinates.
     const (int, int) undefinedCoordinates = (0, 0);
     // The precision of geographic coordinates stored in the database. The read value must be
     // divided by this factor to get regular (floating point) decimal degree.
     const double coordinateValuePrecision = 10000000;
 
-    int lat = dataRow.getIntValue(SummitsTable.columnLatitude);
-    int lon = dataRow.getIntValue(SummitsTable.columnLongitude);
+    int? lat = dataRow.getOptIntValue(latColumnName);
+    int? lon = dataRow.getOptIntValue(lonColumnName);
     GeoPosition? position;
-    if ((lat, lon) != undefinedCoordinates) {
+    if (lat != null && lon != null && (lat, lon) != undefinedCoordinates) {
       position = GeoPosition(lat / coordinateValuePrecision, lon / coordinateValuePrecision);
     }
     return position;
@@ -400,6 +453,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnGradeJump,
       RoutesTable.columnDanger,
       RoutesTable.columnStars,
+      RoutesTable.columnEntryLatitude,
+      RoutesTable.columnEntryLongitude,
       "AVG(${PostsTable.columnRating}) AS '$averageRatingColumnName'",
     ];
 
@@ -448,6 +503,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
           stars: dataRow.getIntValue(RoutesTable.columnStars),
           dangerous: dataRow.getIntValue(RoutesTable.columnDanger) != 0,
           routeRating: rating,
+          entryLocation: _extractPosition(
+            dataRow,
+            latColumnName: RoutesTable.columnEntryLatitude,
+            lonColumnName: RoutesTable.columnEntryLongitude,
+          ),
         ),
       );
     }
@@ -465,6 +525,8 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       RoutesTable.columnGradeRp,
       RoutesTable.columnStars,
       RoutesTable.columnDanger,
+      RoutesTable.columnEntryLatitude,
+      RoutesTable.columnEntryLongitude,
     ]);
     routeQuery.setWhereCondition('${RoutesTable.columnId} = ?', <int>[routeDataId]);
     routeQuery.limit = 1;
@@ -499,6 +561,11 @@ class RouteDbStorage implements RouteDbStorageBoundary {
       ),
       dangerous: routeResultSet[0].getIntValue(RoutesTable.columnDanger) != 0,
       stars: routeResultSet[0].getIntValue(RoutesTable.columnStars),
+      entryLocation: _extractPosition(
+        routeResultSet[0],
+        latColumnName: RoutesTable.columnEntryLatitude,
+        lonColumnName: RoutesTable.columnEntryLongitude,
+      ),
       directions: <Directions>[
         for (final ResultRow dr in directionsResultSet)
           Directions(

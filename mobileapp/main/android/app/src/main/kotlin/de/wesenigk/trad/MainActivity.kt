@@ -1,4 +1,4 @@
-package com.example.main
+package de.wesenigk.trad
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -35,7 +35,11 @@ class ApplicationWideController {
 
   final KnowledgebaseUseCases _knowledgebaseUsecases = KnowledgebaseUseCases(DependencyProvider());
 
-  final RouteDbUseCases _routeDbUseCases = RouteDbUseCases(DependencyProvider());
+  /// The use case object from the `core` ring.
+  final RouteDbUseCases _routeDbUseCases;
+
+  /// Constructor for creating a new instance.
+  ApplicationWideController() : _routeDbUseCases = DependencyProvider().provide<RouteDbUseCases>();
 
   /// The user requested a switch to the Journal domain.
   void requestSwitchToJournal() {
@@ -47,9 +51,14 @@ class ApplicationWideController {
     unawaited(_knowledgebaseUsecases.showHomePage());
   }
 
-  /// The user requested a switch to the Route DB domain.
+  /// The user requested a switch to the filterable summit list of the Route DB domain.
   void requestSwitchToRouteDb() {
     unawaited(_routeDbUseCases.showSummitListPage());
+  }
+
+  /// The user requested a switch to the nearby summits list of the Route DB domain.
+  void requestSwitchToNearbySummits() {
+    unawaited(_routeDbUseCases.showNearbySummitsPage());
   }
 
   /// The user requested a switch to the Settings domain.
@@ -89,7 +98,10 @@ class KnowledgebaseController {
 /// Controller for transmitting route DB UI messages to the core.
 class RouteDbController {
   /// The use case object from the `core` ring.
-  final RouteDbUseCases _routeDbUseCases = RouteDbUseCases(DependencyProvider());
+  final RouteDbUseCases _routeDbUseCases;
+
+  /// Constructor for creating a new instance.
+  RouteDbController() : _routeDbUseCases = DependencyProvider().provide<RouteDbUseCases>();
 
   /// The user requested updating the route database.
   void requestRouteDbUpdate() {
@@ -104,9 +116,9 @@ class RouteDbController {
   }
 
   /// The user requested to filter the summit list by [filterText].
-  void requestFilterSummitList(String filterText) {
-    _logger.debug('UI request: Filter summit list for "$filterText"');
-    unawaited(_routeDbUseCases.filterSummitList(filterText));
+  void requestFilterSummitList(String filterText, ItemDataId? filterArea) {
+    _logger.debug('UI request: Filter summit list for "$filterText" in area: $filterArea');
+    unawaited(_routeDbUseCases.filterSummitList(filterText, filterArea));
   }
 
   /// The user requested to see all details of the single summit identified by [summitDataId].
@@ -140,6 +152,12 @@ class RouteDbController {
   void requestShowSummitOnMap(ItemDataId summitDataId) {
     _logger.debug('UI request: Show summit $summitDataId on map');
     unawaited(_routeDbUseCases.showSummitOnMap(summitDataId));
+  }
+
+  /// The user requested to show the route [routeDataId] on a map.
+  void requestShowRouteOnMap(ItemDataId routeDataId) {
+    _logger.debug('UI request: Show route $routeDataId on map');
+    unawaited(_routeDbUseCases.showRouteOnMap(routeDataId));
   }
 
   /// The user requested to see all details of the single route identified by [routeDataId].

@@ -116,6 +116,17 @@ We decided to start with the recommended `provider` package because it is a well
 recommended *Flutter favourite*. Furthermore, there is no obvious advantage in using an alternative
 for now.
 
+### 1.2.3 Flutter geolocation plugin
+
+There are two popular Flutter plugins for interacting with LocationServices:
+ 1. [Geolocator](https://pub.dev/packages/geolocator)
+ 2. [location](https://pub.dev/packages/location)
+
+We decided to use `location` because it is more actively developed, while `Geolocator` seems to be
+more or less unmaintained: There were no functional commits in the last year, and the author didn't
+respond to an issue asking about the repository status for almost a year. Furthermore, `location`
+introduces less additional transitive dependencies than `Geolocator`.
+
 
 ## 1.3 Unit Testing
 

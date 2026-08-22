@@ -17,6 +17,9 @@ enum UiRoute {
   /// Route to the *summit list* screen (one of the *route database* screens).
   summitlist,
 
+  /// Route to the *nearby summits* screen (one of the *route database* screens).
+  nearbysummits,
+
   /// Route to the *summit details* screen (one of the *route database* screens) showing e.g. the
   /// list of climbing routes to a certain summit.
   summitdetails,
@@ -46,6 +49,8 @@ enum UiRoute {
         return '/journal';
       case summitlist:
         return '/routedb/summits';
+      case nearbysummits:
+        return '/routedb/nearby';
       case summitdetails:
         return '/routedb/summit';
       case routedetails:

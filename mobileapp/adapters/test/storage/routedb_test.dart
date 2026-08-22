@@ -5,6 +5,7 @@ library;
 
 import 'dart:io';
 
+import 'package:core/entities/sector.dart';
 import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -384,6 +385,35 @@ void main() {
       expect(executedQuery.tableNames, equals(<String>[DatabaseMetadataTable.tableName]));
       expect(executedQuery.columNames, equals(<String>[DatabaseMetadataTable.columnCompileTime]));
     });
+
+    /// Ensure that getAllSectors() really returns all sectors from the database (for different counts).
+    for (int sectorCount = 0; sectorCount < 4; sectorCount++) {
+      test('getAllSectors() - $sectorCount', () async {
+        _FakeRelationalDatabase fakeRdb = _FakeRelationalDatabase();
+        fakeRdb.queryResult = <ResultRow>[
+          for (int id = 0; id < sectorCount; id++)
+            ResultRow(<String, Object>{
+              AreasTable.columnId: id,
+              AreasTable.columnName: 'Sector $id',
+            }),
+        ];
+        di.registerFactory<RelationalDatabaseBoundary>(() => fakeRdb);
+
+        // Run the test case
+        RouteDbStorage storage = RouteDbStorage(di);
+        List<Sector> sectors = await storage.retrieveAllSectors();
+
+        expect(sectors.length, equals(sectorCount));
+
+        int expectedId = 0;
+        for (final Sector sector in sectors) {
+          expect(sector.id, equals(expectedId));
+          expect(sector.name, equals('Sector $expectedId'));
+          expectedId++;
+        }
+        expect(fakeRdb.executedQueries.length, equals(1));
+      });
+    }
   });
 }
 

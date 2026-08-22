@@ -7,6 +7,7 @@ import '../entities/data_source.dart';
 import '../entities/knowledgebase.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
+import '../entities/sector.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
 import '../entities/sorting/summits_filter_mode.dart';
@@ -21,24 +22,42 @@ abstract interface class PresentationBoundary {
   /// This may display some kind of "loading" or "splash" screen if appropriate.
   void initUserInterface();
 
-  /// Let the UI display/update the [routeDatabaseDate] and [dataSources] as given.
-  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources);
+  /// Notify the UI that a created at [routeDatabaseDate] from [dataSources] is now available.
+  void routeDbAvailable(DateTime routeDatabaseDate, List<DataSourceAttribution> dataSources);
+
+  /// Notify the UI that no route database is available (anymore).
+  void routeDbUnavailable();
 
   /// Notify the UI about a running route database update.
-  void routeDbUpdateTaskStarted();
+  void routeDbUpdating();
 
-  /// Notify the UI that the route database update is done.
-  void routeDbUpdateTaskDone();
+  /// Notify the UI about an error that happened while updating.
+  void routeDbUpdateError(Exception error);
 
   /// Let the UI display the list of summits in the *route db* domain.
   ///
-  /// The actual summit list data must be set separately by calling [updateSummitList()].
-  void showSummitList();
+  /// [sectors] is the list of sectors that may be selected for summit filtering. The actual summit
+  /// list data must be set separately by calling [updateSummitList()].
+  void showSummitList(List<Sector> sectors, int? selectedSectorId);
 
   /// Notify the user interface about a new (e.g. filtered or sorted) global summit list.
   ///
   /// The current display may be updated with the provided [summitList], if necessary.
   void updateSummitList(List<Summit> summitList);
+
+  /// Let the UI display the list of nearby summits in the *route db* domain.
+  ///
+  /// The actual summit list data must be set separately by calling [updateNearbySummits()].
+  void showNearbySummits();
+
+  /// Notify the user interface about a new list of summits nearby the current position.
+  ///
+  /// The current display may be updated with the provided [nearbySummits], if necessary.
+  void updateNearbySummits(List<(Summit, double)> nearbySummits);
+
+  /// Notify the UI about an error that occured while geting the current location needed to
+  /// determine the nearby summits.
+  void nearbySummitsLocationError(Exception error);
 
   /// Let the UI display details about the [selectedSummit] in the *route db* domain.
   ///

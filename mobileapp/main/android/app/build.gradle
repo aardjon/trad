@@ -1,6 +1,5 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -23,22 +22,18 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.main"
+    namespace "de.wesenigk.trad"
     compileSdk flutter.compileSdkVersion
     // Originally, the ndkVersion was taken from Flutter (i.e. use the Flutter default one):
     // ndkVersion flutter.ndkVersion
     // However, this used to be an old, incompatible version and I didn't find out how to change
     // the default NDK version in Flutter. So I just override it for this app instead.
     // Improvements are welcome!
-    ndkVersion "28.1.13356709"
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
     }
 
     sourceSets {
@@ -66,6 +61,12 @@ android {
 
 flutter {
     source '../..'
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
 }
 
 dependencies {}

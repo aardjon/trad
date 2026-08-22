@@ -8,7 +8,11 @@
 ///
 library;
 
+import 'package:core/entities/errors.dart';
+import 'package:core/entities/sector.dart';
 import 'package:crosscuttings/appmeta.dart';
+import 'package:crosscuttings/errors.dart';
+import 'package:crosscuttings/logging/logger.dart';
 import 'package:intl/intl.dart';
 
 import 'package:core/boundaries/presentation.dart';
@@ -22,8 +26,12 @@ import 'package:core/entities/sorting/summits_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:crosscuttings/di.dart';
 
+import 'boundaries/network.dart';
 import 'boundaries/ui.dart';
 import 'src/ui/rating.dart';
+
+/// Logger to be used in this library file.
+final Logger _logger = Logger('trad.adapters.presenters');
 
 /// Implementation of the application-wide presenter used by the core to interact with the user.
 class ApplicationWidePresenter implements PresentationBoundary {
@@ -46,7 +54,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
       MainMenuModel(
         appName,
         ListViewItem('Fahrtenbuch', icon: const IconDefinition(Glyph.logoJournal)),
-        ListViewItem('Wegedatenbank', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Gipfelliste', icon: const IconDefinition(Glyph.logoRouteDb)),
+        ListViewItem('Nahegelegene Gipfel', icon: const IconDefinition(Glyph.logoRouteDb)),
         ListViewItem('Kletterlexikon', icon: const IconDefinition(Glyph.logoKnowledgeBase)),
         ListViewItem('Einstellungen', icon: const IconDefinition(Glyph.logoSettings)),
         ListViewItem('Über trad', icon: const IconDefinition(Glyph.logoAppInfo)),
@@ -56,11 +65,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteDbStatus(DateTime? routeDatabaseDate, List<DataSourceAttribution> dataSources) {
-    const String noDbMessage =
-        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
-        'indem du Wegedaten herunterlädst bzw. importierst.';
-
+  void routeDbAvailable(DateTime routeDatabaseDate, List<DataSourceAttribution> dataSources) {
     final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
 
     final List<ListViewItem> dataSourceAttributions = <ListViewItem>[];
@@ -78,30 +83,86 @@ class ApplicationWidePresenter implements PresentationBoundary {
     }
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbStatus(
-      activated: routeDatabaseDate != null,
-      label: routeDatabaseDate != null ? dateFormatter.format(routeDatabaseDate) : 'Keine',
-      dataSourceAttributions: routeDatabaseDate != null ? dataSourceAttributions : <ListViewItem>[],
-      statusMessage: routeDatabaseDate != null ? null : noDbMessage,
+    ui.setStatusActivated(
+      label: dateFormatter.format(routeDatabaseDate),
+      dataSourceAttributions: dataSourceAttributions,
     );
   }
 
   @override
-  void routeDbUpdateTaskStarted() {
+  void routeDbUnavailable() {
+    const String noDbMessage =
+        'Es liegen keine Wegedaten vor weshalb die Wegedatenbank deaktiviert wurde. Aktiviere sie, '
+        'indem du Wegedaten herunterlädst bzw. importierst.';
+
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbUpdateProgress(inProgress: true);
+    ui.setStatusMissing(
+      label: 'Keine',
+      userHint: noDbMessage,
+    );
   }
 
   @override
-  void routeDbUpdateTaskDone() {
+  void routeDbUpdating() {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateRouteDbUpdateProgress(inProgress: false);
+    ui.setStatusUpdating();
   }
 
   @override
-  void showSummitList() {
+  void routeDbUpdateError(Exception error) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    SummitListModel model = SummitListModel('Gipfel', 'Gipfel suchen');
+    if (error is NetworkException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die Abfrage der Daten vom Updateserver schlug fehl. Bitte überprüfe deine Internetverbindung '
+        'und versuche es später noch einmal.',
+      );
+    } else if (error is InvalidStorageFormatException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die ausgewählte Datei enthält keine gültige Wegedatenbank. Verwende die Online-Funktion '
+        'um eine gültige Datenbank herunterzuladen.',
+      );
+    } else if (error is IncompatibleStorageException) {
+      ui.showRouteDbUpdateErrorMessage(
+        'Die ausgewählte Wegedatenbank kann mit deiner trad-Version nicht verwendet werden. Verwende am besten '
+        'immer die neueste Version von trad, und verwende die Online-Funktion um automatisch eine passende '
+        'Datenbank zu beziehen.',
+      );
+    } else {
+      ui.showRouteDbUpdateErrorMessage(
+        'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
+      );
+    }
+  }
+
+  @override
+  void showSummitList(List<Sector> sectors, int? selectedSectorId) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    List<ListViewItem> selectableSectors = <ListViewItem>[
+      ListViewItem('Alle Teilgebiete'),
+      for (final Sector sector in sectors) ListViewItem(sector.name, itemId: sector.id),
+    ];
+
+    int selectedIndex = -1;
+    for (int i = 0; i < selectableSectors.length; i++) {
+      if (selectableSectors[i].itemId == selectedSectorId) {
+        selectedIndex = i;
+        break;
+      }
+    }
+    if (selectedIndex == -1) {
+      _logger.warning('Sector item ID $selectedSectorId not found, ignoring sector filter');
+      selectedIndex = 0;
+    }
+    SummitListModel model = SummitListModel(
+      'Gipfel',
+      'Gipfel suchen',
+      'Es wurden keine zu deinem aktuellen Filter passenden Gipfel gefunden.',
+      selectedIndex,
+      searchBarSectors: <ListViewItem>[
+        ListViewItem('Alle Teilgebiete'),
+        for (final Sector sector in sectors) ListViewItem(sector.name, itemId: sector.id),
+      ],
+    );
     ui.showSummitList(model);
   }
 
@@ -116,6 +177,52 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
+  void showNearbySummits() {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    NearbySummitsPageLabels model = NearbySummitsPageLabels(
+      'Gipfel in deiner Nähe',
+      'In deiner Nähe wurden leider keine Gipfel gefunden.',
+    );
+    ui.showNearbySummits(model);
+  }
+
+  @override
+  void updateNearbySummits(List<(Summit, double)> nearbySummits) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    ui.updateNearbySummits(
+      <ListViewItem>[
+        for (final (Summit, double) summitData in nearbySummits)
+          ListViewItem(
+            summitData.$1.name,
+            subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
+            itemId: summitData.$1.id,
+          ),
+      ],
+    );
+  }
+
+  @override
+  void nearbySummitsLocationError(Exception error) {
+    ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
+    if (error is PermissionException) {
+      ui.showNearbySummitsError(
+        'Diese App darf nicht auf deinen aktuellen Standort zugreifen, weshalb die Suche nach '
+        'nahegelegenen Gipfeln nicht möglich ist. Bitte erteile trad die Berechtigung zum '
+        'Standortzugriff, um diese Funktion zu nutzen.',
+      );
+    } else if (error is ResourceUnavailable) {
+      ui.showNearbySummitsError(
+        'Die Standortdienste sind deaktiviert, weshalb die Suche nach nahegelegenen Gipfeln nicht '
+        'möglich ist. Bitte aktivere die Standortfunktion deines Gerätes und versuche es erneut.',
+      );
+    } else {
+      ui.showNearbySummitsError(
+        'Es trat ein unerwarteter Fehler auf. Wenn das häufiger passiert, wende dich gern an die Entwickler.',
+      );
+    }
+  }
+
+  @override
   void showSummitDetails(Summit selectedSummit) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     SummitDetailsModel model = SummitDetailsModel(
@@ -127,6 +234,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
       noNearbySummitsMessage:
           "Für '${selectedSummit.name}' liegen leider keine Positionsdaten "
           'vor, weshalb nicht nach nahegelegenen Gipfeln gesucht werden kann.',
+      noRoutesMessage: "Für '${selectedSummit.name}' liegen leider keine Wegeinformationen vor.",
     );
     ui.showSummitDetails(model);
   }
@@ -231,6 +339,8 @@ class ApplicationWidePresenter implements PresentationBoundary {
         for (final Directions directions in selectedRoute.directions)
           ListViewItem(directions.content, bottomLine: '(Quelle: ${directions.source})'),
       ],
+      'Zu diesem Weg gibt es bisher weder Kommentare noch eine Wegbeschreibung.',
+      canShowEntryOnMap: selectedRoute.entryLocation != null,
     );
     ui.showRouteDetails(model);
   }

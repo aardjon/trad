@@ -12,8 +12,11 @@ class MainMenuModel {
   /// List item for the journal domain.
   final ListViewItem journalItem;
 
-  /// List item for the route db domain.
-  final ListViewItem routedbItem;
+  /// List item for the (filtered) summit list
+  final ListViewItem summitListItem;
+
+  /// List item for the list of nearby summits
+  final ListViewItem nearbyListItem;
 
   /// List item for the knowledge base domain.
   final ListViewItem knowledgebaseItem;
@@ -31,7 +34,8 @@ class MainMenuModel {
   const MainMenuModel(
     this.menuHeader,
     this.journalItem,
-    this.routedbItem,
+    this.summitListItem,
+    this.nearbyListItem,
     this.knowledgebaseItem,
     this.settingsItem,
     this.aboutItem,
@@ -135,8 +139,38 @@ class SummitListModel {
   /// Help message/Hint to be displayed in the search bar.
   final String searchBarHint;
 
+  /// Message to display in case there are no matching summits.
+  final String noDataMessage;
+
+  /// Sectors that can be selected for filtering/searching summits. Must not be empty.
+  final List<ListViewItem> searchBarSectors;
+
+  /// Index of the [searchBarSectors] item that is initially selected/shown by the search bar.
+  final int searchBarInitialSectorIndex;
+
   /// Constructor for directly initializing all members.
-  SummitListModel(this.pageTitle, this.searchBarHint);
+  SummitListModel(
+    this.pageTitle,
+    this.searchBarHint,
+    this.noDataMessage,
+    this.searchBarInitialSectorIndex, {
+    this.searchBarSectors = const <ListViewItem>[],
+  }) : assert(searchBarSectors.isNotEmpty, 'searchBarSectors must not be empty');
+}
+
+/// Model that provides all static data needed to display the empty nearby summits page to the UI.
+///
+/// "Static" means, that this data does not change while the page is shown, so it can be provided
+/// once during the initial page display.
+class NearbySummitsPageLabels {
+  /// Title of the nearby summits page.
+  final String pageTitle;
+
+  /// Message to display when no summits are found in the vicinity.
+  final String noDataMessage;
+
+  /// Constructor for directly initializing all members.
+  NearbySummitsPageLabels(this.pageTitle, this.noDataMessage);
 }
 
 /// Internal ID to uniquely identify a single data item.
@@ -212,9 +246,13 @@ class SummitDetailsModel {
   final bool canShowNearbySummits;
 
   /// Message to show if there are now nearby summits, i.e. if [canShowNearbySummits] is false.
-  /// This mesag eis shown to the user, explaining why there is no data.
+  /// This message is shown to the user, explaining why there is no data.
   /// Set to an emptry String if [canShowNearbySummits] is true.
   final String noNearbySummitsMessage;
+
+  /// Message to show if there are now routes onto this summit. This message is shown to the user,
+  /// explaining why there is no data.
+  final String noRoutesMessage;
 
   /// Constructor for directly initializing all members.
   SummitDetailsModel(
@@ -224,6 +262,7 @@ class SummitDetailsModel {
     required this.canShowOnMap,
     required this.canShowNearbySummits,
     this.noNearbySummitsMessage = '',
+    this.noRoutesMessage = '',
   }) : assert(
          canShowNearbySummits || (!canShowNearbySummits && noNearbySummitsMessage.isNotEmpty),
          'Set a [noNearbySummitsMessage] if canShowNearbySummits is false.',
@@ -244,11 +283,25 @@ class RouteDetailsModel {
   /// Sub title of the route details page.
   final String pageSubTitle;
 
+  /// Flag for displaying if the routeEntry point can be shown on a map (true) or not (false, e.g.
+  /// because it lacks a geo position).
+  final bool canShowEntryOnMap;
+
   /// The directions to be displayed on the route details page.
   final List<ListViewItem> directionsItems;
 
+  /// The message to display in case there is no data to display at all.
+  final String noDataMessage;
+
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(this.routeDataId, this.pageTitle, this.pageSubTitle, this.directionsItems);
+  RouteDetailsModel(
+    this.routeDataId,
+    this.pageTitle,
+    this.pageSubTitle,
+    this.directionsItems,
+    this.noDataMessage, {
+    required this.canShowEntryOnMap,
+  });
 }
 
 /// Model that provides all static data needed to display the settings page to the UI.
@@ -353,27 +406,30 @@ abstract interface class ApplicationUiBoundary {
   /// [menuModel] are used e.g. for the main navigation menu.
   void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel);
 
-  /// Notify the UI about changed route database status.
+  /// Notify the UI that the route database is now activated.
   ///
   /// This will update the display with the given status information:
-  /// - [activated]: The activation status of the route database (true: enabled, false: disabled)
-  /// - [label]: A label for identifying the current route database (may of course be something like
-  ///   'None' if the route database is disabled)
+  /// - [label]: A label for identifying the current route database.
   /// - [dataSourceAttributions]: Information about all external data sources (and their
   ///   attributions) the current route database was built from.
-  /// - [statusMessage]: A message with more detailed information about the route database status.
-  ///   Set to `null` to not display any additional hint at all.
-  void updateRouteDbStatus({
-    required bool activated,
+  void setStatusActivated({
     required String label,
     required List<ListViewItem> dataSourceAttributions,
-    String? statusMessage,
   });
 
-  /// Notify the UI about some progress change of a running route DB update task.
+  /// Notify the UI that the route database is now missing.
   ///
-  /// Set [inProgress] to true when the update task has been started, and to false when it is done.
-  void updateRouteDbUpdateProgress({required bool inProgress});
+  /// This will update the display with the given status information:
+  /// - [label]: Text to be displayed instead of the database label (i.e. something like "None").
+  /// - [userHint]: A message with more detailed information about the route database status.
+  void setStatusMissing({required String label, required String userHint});
+
+  /// Notify the UI that the route DB is currently being updated.
+  void setStatusUpdating();
+
+  /// Notify the UI about an error message from a running routedb update task, that shall be
+  /// displayed to the user.
+  void showRouteDbUpdateErrorMessage(String message);
 
   /// Request the UI to display the *Summit List* screen based on the provided [model].
   ///
@@ -384,6 +440,20 @@ abstract interface class ApplicationUiBoundary {
   ///
   /// This will update the display with the new [summitItems] as necessary.
   void updateSummitList(List<ListViewItem> summitItems);
+
+  /// Request the UI to display the *Nearby Summits* screen based on the provided [model].
+  ///
+  /// The list data must be sent separately by calling [updateNearbySummits] afterwards.
+  void showNearbySummits(NearbySummitsPageLabels model);
+
+  /// Request the UI to display the given location-related error message within the *Nearby
+  /// Summits* context.
+  void showNearbySummitsError(String message);
+
+  /// Notify the UI about a new list of nearby summits.
+  ///
+  /// This will update the display with the new [summitItems] as necessary.
+  void updateNearbySummits(List<ListViewItem> summitItems);
 
   /// Request the UI to display the *Summit Details* screen based on the provided [model].
   ///

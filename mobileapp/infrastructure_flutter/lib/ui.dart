@@ -52,23 +52,29 @@ class ApplicationUI implements ApplicationUiBoundary {
   }
 
   @override
-  void updateRouteDbStatus({
-    required bool activated,
+  void setStatusActivated({
     required String label,
     required List<ListViewItem> dataSourceAttributions,
-    String? statusMessage,
   }) {
-    _uiState.settingsState.updateRouteDbStatus(
-      routeDbActivationStatus: activated,
+    _uiState.routeDBState.setStatusActivated(
       dbIdentifier: label,
       dataSourceAttributions: dataSourceAttributions,
-      availabilityMessage: statusMessage,
     );
   }
 
   @override
-  void updateRouteDbUpdateProgress({required bool inProgress}) {
-    _uiState.settingsState.updateRouteDbUpdateProgress(inProgress: inProgress);
+  void setStatusMissing({required String label, required String userHint}) {
+    _uiState.routeDBState.setStatusMissing(label, userHint);
+  }
+
+  @override
+  void setStatusUpdating() {
+    _uiState.routeDBState.setStatusUpdating();
+  }
+
+  @override
+  void showRouteDbUpdateErrorMessage(String message) {
+    _uiState.routeDBState.setLastUpdateErrorMessage(message);
   }
 
   @override
@@ -80,7 +86,26 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void updateSummitList(List<ListViewItem> summitItems) {
-    _uiState.summitListState.replaceSummits(summitItems, <ListViewItem>[]);
+    _uiState.summitListState.replaceData(summitItems, <ListViewItem>[]);
+  }
+
+  @override
+  void showNearbySummits(NearbySummitsPageLabels model) {
+    _logger.debug('Displaying nearby summits page');
+    _uiState.resetNotifiers();
+    _uiState.nearbySummitListNotifier.fallbackMessage = model.noDataMessage;
+    _switchToRoute(UiRoute.nearbysummits.toRouteString(), isRoot: true, routeArguments: model);
+  }
+
+  @override
+  void showNearbySummitsError(String message) {
+    _uiState.nearbySummitListNotifier.fallbackMessage = message;
+    _uiState.nearbySummitListNotifier.replaceData(<ListViewItem>[], <ListViewItem>[]);
+  }
+
+  @override
+  void updateNearbySummits(List<ListViewItem> summitItems) {
+    _uiState.nearbySummitListNotifier.replaceData(summitItems, <ListViewItem>[]);
   }
 
   @override
@@ -96,7 +121,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     List<ListViewItem> sortMenuItems,
   ) {
     _logger.debug('Updating route list data');
-    _uiState.getRouteListNotifier(contextItemId).replaceRoutes(routeItems, sortMenuItems);
+    _uiState.getRouteListNotifier(contextItemId).replaceData(routeItems, sortMenuItems);
   }
 
   @override
@@ -106,7 +131,7 @@ class ApplicationUI implements ApplicationUiBoundary {
     List<ListViewItem> contextActionItems,
   ) {
     _logger.debug('Updating contextual summit list data');
-    _uiState.getSummitListNotifier(contextItemId).replaceSummits(summitItems, contextActionItems);
+    _uiState.getSummitListNotifier(contextItemId).replaceData(summitItems, contextActionItems);
   }
 
   @override

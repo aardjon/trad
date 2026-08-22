@@ -5,10 +5,11 @@ library;
 
 import 'dart:async';
 
-import 'package:crosscuttings/di.dart';
+import 'package:crosscuttings/errors.dart';
 import 'package:crosscuttings/logging/logger.dart';
 
 import '../boundaries/ota.dart';
+import '../boundaries/positioning.dart';
 import '../boundaries/presentation.dart';
 import '../boundaries/storage/preferences.dart';
 import '../boundaries/storage/routedb.dart';
@@ -18,6 +19,7 @@ import '../entities/errors.dart';
 import '../entities/geoposition.dart';
 import '../entities/post.dart';
 import '../entities/route.dart';
+import '../entities/sector.dart';
 import '../entities/sorting/posts_filter_mode.dart';
 import '../entities/sorting/routes_filter_mode.dart';
 import '../entities/sorting/summits_filter_mode.dart';
@@ -37,6 +39,9 @@ class RouteDbUseCases {
   /// Interface to the download boundary, used for fetching database updates.
   final RouteDbDownloadBoundary _downloadBoundary;
 
+  // interface to the positioning component, used for getting the current location.
+  final PositioningBoundary _positioningBoundary;
+
   /// Interface to the storage boundary component, used for reading and writing application config
   /// settings.
   final AppPreferencesBoundary _preferencesBoundary;
@@ -47,18 +52,23 @@ class RouteDbUseCases {
   /// Maximum distance in meters up to which an object is still considered "nearby" another one.
   static const int _maxNearbyDistance = 500;
 
+  /// The ID of the sector that was previously selected for filtering the summit list. Null if no
+  /// sector filter was set.
+  int? _lastSelectedSector;
+
   /// Constructor for creating a new RouteDbUseCases instance.
-  RouteDbUseCases(DependencyProvider di)
-    : _presentationBoundary = di.provide<PresentationBoundary>(),
-      _storageBoundary = di.provide<RouteDbStorageBoundary>(),
-      _downloadBoundary = di.provide<RouteDbDownloadBoundary>(),
-      _preferencesBoundary = di.provide<AppPreferencesBoundary>(),
-      _systemEnvBoundary = di.provide<SystemEnvironmentBoundary>();
+  RouteDbUseCases({
+    required this._presentationBoundary,
+    required this._storageBoundary,
+    required this._downloadBoundary,
+    required this._preferencesBoundary,
+    required this._systemEnvBoundary,
+    required this._positioningBoundary,
+  });
 
   /// Use case: Download the most current route database via OTA and install (import) it.
   Future<void> updateRouteDatabase() async {
     _logger.debug('Running use case updateRouteDatabase()');
-    _presentationBoundary.routeDbUpdateTaskStarted();
     DateTime? dbCreationDate;
 
     if (_storageBoundary.isStarted()) {
@@ -67,7 +77,6 @@ class RouteDbUseCases {
     await _fetchAndInstallRouteDb(
       dbFileProvider: OnlineDbFileProvider(_downloadBoundary, dbCreationDate),
     );
-    _presentationBoundary.routeDbUpdateTaskDone();
     await _downloadBoundary.cleanupResources();
   }
 
@@ -84,20 +93,29 @@ class RouteDbUseCases {
   Future<void> _fetchAndInstallRouteDb({
     required DbFileProvider dbFileProvider,
   }) async {
+    _presentationBoundary.routeDbUpdating();
+
     if (_storageBoundary.isStarted()) {
       _storageBoundary.stopStorage();
-      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
     }
 
-    String? filePath = await dbFileProvider.determineLocalFileToInstall();
+    String? filePath;
+    try {
+      filePath = await dbFileProvider.determineLocalFileToInstall();
+    } on Exception catch (error, stackTrace) {
+      _logger.error('Unable to retrieve database file due to', error, stackTrace);
+      _presentationBoundary.routeDbUpdateError(error);
+    }
+
     if (filePath != null) {
       try {
         await _storageBoundary.importRouteDbFile(filePath);
-      } on Exception catch (error, stackTrace) {
-        _logger.warning('Unable to import database file due to', error, stackTrace);
-        // TODO(aardjon): Request the UI to show an error
+      } on Exception catch (error) {
+        _logger.error('Unable to import database file due to', error);
+        _presentationBoundary.routeDbUpdateError(error);
       }
     }
+    // else means: No newer or no compatible file available
 
     // TODO(aardjon): This is a code duplication with the startApplication() use case, eliminate!
     try {
@@ -105,27 +123,65 @@ class RouteDbUseCases {
       await _storageBoundary.startStorage();
       DateTime routeDbDate = await _storageBoundary.getCreationDate();
       List<DataSourceAttribution> dataSources = await _storageBoundary.getExternalDataSources();
-      _presentationBoundary.updateRouteDbStatus(routeDbDate, dataSources);
+      _presentationBoundary.routeDbAvailable(routeDbDate, dataSources);
     } on StorageStartingException {
       // No or an invalid DB may have been there before already
-      _presentationBoundary.updateRouteDbStatus(null, <DataSourceAttribution>[]);
+      _presentationBoundary.routeDbUnavailable();
     }
   }
 
-  /// Use Case: Switch to the summit list, resetting any previous filter
+  /// Use Case: Switch to the main sector list, resetting any previous name filter. The previous
+  /// sector filter stays active, though.
   Future<void> showSummitListPage() async {
     _logger.info('Running use case showSummitListPage()');
+    List<Sector> sectorList = await _storageBoundary.retrieveAllSectors();
     _presentationBoundary.updateSummitList(<Summit>[]);
-    _presentationBoundary.showSummitList();
-    List<Summit> summitList = await _storageBoundary.retrieveSummits();
+    _presentationBoundary.showSummitList(sectorList, _lastSelectedSector);
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(null, _lastSelectedSector);
     _presentationBoundary.updateSummitList(summitList);
   }
 
-  /// Use Case: Update the summit list to show only the entries matching the given filter text.
-  Future<void> filterSummitList(String filterText) async {
-    _logger.info('Running use case filterSummitList($filterText)');
-    List<Summit> summitList = await _storageBoundary.retrieveSummits(filterText);
+  /// Use Case: Update the summit list to show only the entries matching the given filter text and/or area.
+  Future<void> filterSummitList(String filterBySummitName, int? filterByAreaId) async {
+    _logger.info('Running use case filterSummitList("$filterBySummitName", $filterByAreaId)');
+    _lastSelectedSector = filterByAreaId;
+    List<Summit> summitList = await _storageBoundary.retrieveSummits(
+      filterBySummitName,
+      filterByAreaId,
+    );
     _presentationBoundary.updateSummitList(summitList);
+  }
+
+  /// Use Case: Switch to the main nearby summits list.
+  Future<void> showNearbySummitsPage() async {
+    _logger.info('Running use case showNearbySummitsPage()');
+    // Display the nearby summits page first
+    _presentationBoundary.showNearbySummits();
+
+    // Try to get the current position
+    GeoPosition currentPosition;
+    try {
+      try {
+        currentPosition = await _positioningBoundary.getCurrentPosition();
+      } on MissingPermission {
+        _logger.debug('Location permission is missing but will be requested');
+        await _positioningBoundary.requestPermissions();
+        currentPosition = await _positioningBoundary.getCurrentPosition();
+      }
+    } on Exception catch (error) {
+      _logger.error('Location not available due to', error);
+      _presentationBoundary.nearbySummitsLocationError(error);
+      return;
+    }
+    _logger.debug('Got location: ', currentPosition);
+
+    // Got a position, now find and display all summits in the vicinity
+    List<(Summit, double)> nearbySummits = await _querySortedSummitList(
+      currentPosition,
+      _maxNearbyDistance,
+      NearbySummitsSortMode.distance,
+    );
+    _presentationBoundary.updateNearbySummits(nearbySummits);
   }
 
   /// Use Case: Show detailed information about the selected summit.
@@ -226,11 +282,29 @@ class RouteDbUseCases {
     } else {
       // Normally this shouldn't happen because the UI is not supposed to allow this use case for
       // summits without a geo position. So if it does, there is another error somewhere else. For
-      // the same reason it's not necessary to show an explicit "error" use feedback - they
+      // the same reason it's not necessary to show an explicit "error" user feedback - they
       // shouldn't be able to end up here at all.
       _logger.warning(
         "Summit '${selectedSummit.name}' (${selectedSummit.id}) doesn't have a position to display "
         'on a map, ignoring.',
+      );
+    }
+  }
+
+  /// Use Case: Show/Open a certain Route on a map
+  Future<void> showRouteOnMap(int routeId) async {
+    _logger.info('Running use case showRouteOnMap($routeId)');
+    Route selectedRoute = await _storageBoundary.retrieveRoute(routeId);
+    if (selectedRoute.entryLocation != null) {
+      await _systemEnvBoundary.openExternalMapsApp(selectedRoute.entryLocation!);
+    } else {
+      // Normally this shouldn't happen because the UI is not supposed to allow this use case for
+      // routes without an entry point. So if it does, there is another error somewhere else. For
+      // the same reason it's not necessary to show an explicit "error" user feedback - they
+      // shouldn't be able to end up here at all.
+      _logger.warning(
+        "Route '${selectedRoute.routeName}' (${selectedRoute.id}) doesn't have an entry position "
+        'to display on a map, ignoring.',
       );
     }
   }
