@@ -152,7 +152,6 @@ class _SummitFilterBarState extends State<SummitFilterBar> {
             _controller.clear();
             setState(() {
               _nameFilter = '';
-              _selectedArea = null;
               widget.onFilterChanged(_nameFilter, _selectedArea);
             });
           },
