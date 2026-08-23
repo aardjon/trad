@@ -44,7 +44,7 @@ melos:
         - mkdir -p artifacts
         - rm -rf artifacts/trad_android-*
         - cd main
-        - flutter build apk --release
+        - flutter build apk --release --split-debug-info=debuginfo
         - cd ..
         - mv main/build/app/outputs/flutter-apk/app-release.apk artifacts/trad_android-develop.apk
         - git describe --exact-match --tags > /dev/null 2>&1 && mv artifacts/trad_android-develop.apk artifacts/trad_android-`grep 'version:' pubspec.yaml | cut -d' ' -f2`.apk || true
