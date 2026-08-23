@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
-from trad.application.filters.source.osm import OsmSummitDataFilter
+from trad.application.filters.source.osm.filter import OsmSummitDataFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.geotypes import GeoPosition

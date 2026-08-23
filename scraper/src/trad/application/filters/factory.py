@@ -10,7 +10,7 @@ from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
-from trad.application.filters.source.osm import OsmSummitDataFilter
+from trad.application.filters.source.osm.filter import OsmSummitDataFilter
 from trad.application.filters.source.sandsteinklettern.filter import SandsteinkletternDataFilter
 from trad.application.filters.source.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory
