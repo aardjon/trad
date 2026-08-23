@@ -5,13 +5,13 @@ library;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 
 import 'state.dart';
+import 'widgets/throbber.dart';
 
 /// Widget representing the *Settings* page.
 class SettingsPage extends StatelessWidget {
@@ -92,16 +92,7 @@ class _RouteDbActionsWidget extends StatelessWidget {
   }
 
   List<Widget> _buildRouteDbUpdateTaskWidgets(String inProgressLabel) {
-    return <Widget>[
-      const SizedBox(
-        height: 100,
-        child: LoadingIndicator(
-          indicatorType: Indicator.ballClipRotateMultiple,
-          colors: <Color>[Colors.lightGreen],
-        ),
-      ),
-      Text(inProgressLabel),
-    ];
+    return <Widget>[Throbber(fixedHeight: 100, message: inProgressLabel)];
   }
 
   List<Widget> _buildManageRouteDbWidgets(SettingsModel model, RouteDbStatusNotifier state) {

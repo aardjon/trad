@@ -8,13 +8,13 @@ import 'dart:async';
 import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import '../icons.dart';
 import '../state.dart';
 import '../widgets/carousel.dart';
 import '../widgets/centered_text.dart';
+import '../widgets/throbber.dart';
 
 /// Widget representing a single post with the post list.
 class _PostItem extends StatelessWidget {
@@ -236,9 +236,6 @@ class RouteDetailsView extends StatelessWidget {
   }
 
   Widget _showLoadingIndicator() {
-    return const LoadingIndicator(
-      indicatorType: Indicator.ballClipRotateMultiple,
-      colors: <Color>[Colors.lightGreen],
-    );
+    return const Throbber();
   }
 }
