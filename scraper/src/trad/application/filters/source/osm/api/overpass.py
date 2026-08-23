@@ -91,6 +91,10 @@ class OverpassTags(ReadOnlyPydanticModel):
 
 
 class OverpassNode(ReadOnlyPydanticModel):
+    """
+    A single OSM node object.
+    """
+
     type: Literal[OsmObjectTypes.node]
     id: int
     lat: float
@@ -99,11 +103,19 @@ class OverpassNode(ReadOnlyPydanticModel):
 
 
 class OverpassRelationMember(ReadOnlyPydanticModel):
+    """
+    Reference to a single member of an OSM relation.
+    """
+
     type: str
     ref: int
 
 
 class OverpassRelation(ReadOnlyPydanticModel):
+    """
+    A single OSM relation object.
+    """
+
     id: int
     type: Literal[OsmObjectTypes.relation]
     members: list[OverpassRelationMember]
@@ -126,16 +138,32 @@ A single item of an Overpass response's 'elements' list: Can be either a node or
 
 
 class OverpassResponse(ReadOnlyPydanticModel):
+    """
+    Overpass query response.
+    """
+
     remark: str | None = None
 
 
 class OverpassElementsResponse(OverpassResponse):
+    """
+    Overpass query response containing elements of different types.
+    """
+
     elements: list[OverpassElement]
 
 
 class OverpassNodesResponse(OverpassResponse):
+    """
+    Overpass query response containing nodes only.
+    """
+
     elements: list[OverpassNode]
 
 
 class OverpassRelationsResponse(OverpassResponse):
+    """
+    Overpass query response containing relations only.
+    """
+
     elements: list[OverpassRelation]

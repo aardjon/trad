@@ -14,4 +14,8 @@ NOMINATIM_API_ENDPOINT: Final = "https://nominatim.openstreetmap.org/search"
 
 
 class NominatimArea(ReadOnlyPydanticModel):
+    """
+    A single geographical area in the Nominatim API response.
+    """
+
     osm_id: int
