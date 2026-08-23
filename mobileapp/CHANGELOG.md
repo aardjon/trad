@@ -4,6 +4,13 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Version 0.6.1 - 2026-08-23
+
+### Fixed Bugs:
+
+ - Clearing summit name search box also resets sector filter (#60)
+
+
 ## Version 0.6.0 - 2026-08-22
 
 ### New/Improved Features:
