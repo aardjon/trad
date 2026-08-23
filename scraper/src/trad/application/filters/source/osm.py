@@ -17,14 +17,13 @@ from logging import getLogger
 from typing import Annotated, Final, Literal, override
 
 from pydantic import ValidationError
-from pydantic.config import ConfigDict
 from pydantic.fields import Field
-from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
 from trad.application.filters._base import SourceFilter
 from trad.application.filters.source.route_data_factory import RouteDataFactory
+from trad.application.filters.source.utils import ReadOnlyPydanticModel
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
@@ -47,20 +46,11 @@ class _OsmObjectTypes(StrEnum):
     """ An arbitrary collection of several other objects. """
 
 
-class _ReadOnlyPydanticModel(BaseModel):
-    """
-    Base class for Pydantic models that cannot be manipulated. This is the case for all data
-    retrieved from some remote service.
-    """
-
-    model_config = ConfigDict(frozen=True)
-
-
-class _NominatimArea(_ReadOnlyPydanticModel):
+class _NominatimArea(ReadOnlyPydanticModel):
     osm_id: int
 
 
-class _OverpassTags(_ReadOnlyPydanticModel):
+class _OverpassTags(ReadOnlyPydanticModel):
     """
     Deserialized representation of the tags of a single OSM object. Currently we are mainly
     interested in the names, but this may change in the future.
@@ -118,7 +108,7 @@ class _OverpassTags(_ReadOnlyPydanticModel):
         return [value.strip() for value in tag_value.split(";")]
 
 
-class _OverpassNode(_ReadOnlyPydanticModel):
+class _OverpassNode(ReadOnlyPydanticModel):
     type: Literal[_OsmObjectTypes.node]
     id: int
     lat: float
@@ -126,12 +116,12 @@ class _OverpassNode(_ReadOnlyPydanticModel):
     tags: _OverpassTags
 
 
-class _OverpassRelationMember(_ReadOnlyPydanticModel):
+class _OverpassRelationMember(ReadOnlyPydanticModel):
     type: str
     ref: int
 
 
-class _OverpassRelation(_ReadOnlyPydanticModel):
+class _OverpassRelation(ReadOnlyPydanticModel):
     id: int
     type: Literal[_OsmObjectTypes.relation]
     members: list[_OverpassRelationMember]
@@ -153,7 +143,7 @@ A single item of an Overpass response's 'elements' list: Can be either a node or
 """
 
 
-class _OverpassResponse(_ReadOnlyPydanticModel):
+class _OverpassResponse(ReadOnlyPydanticModel):
     remark: str | None = None
 
 
@@ -445,7 +435,7 @@ class OsmApiReceiver:
     Represents an endpoint for querying the OpenStreetMap API. Responsible for choosing the correct
     API for the requested usecase, for providing/creating all necessary options, query strings etc.
     and for parsing/validating the reponses. All methods of this class return Pydantic model objects
-    (derived from _ReadOnlyPydanticModel), never plain JSON strings.
+    (derived from ReadOnlyPydanticModel), never plain JSON strings.
     """
 
     _NOMINATIM_API_ENDPOINT: Final = "https://nominatim.openstreetmap.org/search"
