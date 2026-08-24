@@ -232,6 +232,14 @@ class Route:
     True if the route is officially marked as "dangerous", False if not.
     """
 
+    entry_position: RankedValue[GeoPosition] = field(
+        default_factory=RankedValue[GeoPosition].create_null
+    )
+    """
+    Geographical position of the route entry point (i.e. the point where one starts climbing), if
+    any. Can be a null object if no entry position is known.
+    """
+
     def fix_invalid_data(self) -> None:
         """
         Checks if the data of this Route is invalid, and tries to fix any problems if possible.
