@@ -153,15 +153,19 @@ A single item of an Overpass response's 'elements' list: Can be either a node or
 """
 
 
-class _OverpassElementsResponse(_ReadOnlyPydanticModel):
+class _OverpassResponse(_ReadOnlyPydanticModel):
+    remark: str | None = None
+
+
+class _OverpassElementsResponse(_OverpassResponse):
     elements: list[_OverpassElement]
 
 
-class _OverpassNodesResponse(_ReadOnlyPydanticModel):
+class _OverpassNodesResponse(_OverpassResponse):
     elements: list[_OverpassNode]
 
 
-class _OverpassRelationsResponse(_ReadOnlyPydanticModel):
+class _OverpassRelationsResponse(_OverpassResponse):
     elements: list[_OverpassRelation]
 
 
@@ -532,6 +536,9 @@ class OsmApiReceiver:
         except ValidationError as e:
             raise DataProcessingError("Retrieved unexpected data from Overpass") from e
 
+        if osm_response.remark:
+            _logger.warning("Remark from Overpass: %s", osm_response.remark)
+
         return osm_response.elements
 
     def retrieve_nodes_by_ids(
@@ -574,6 +581,9 @@ class OsmApiReceiver:
             osm_response = _OverpassNodesResponse.model_validate_json(json_data, strict=True)
         except ValidationError as e:
             raise DataProcessingError("Retrieved unexpected node data from Overpass") from e
+
+        if osm_response.remark:
+            _logger.warning("Remark from Overpass: %s", osm_response.remark)
 
         return osm_response.elements
 
@@ -633,6 +643,9 @@ class OsmApiReceiver:
             osm_response = _OverpassRelationsResponse.model_validate_json(json_data, strict=True)
         except ValidationError as e:
             raise DataProcessingError("Retrieved unexpected node data from Overpass") from e
+
+        if osm_response.remark:
+            _logger.warning("Remark from Overpass: %s", osm_response.remark)
 
         return osm_response.elements
 
