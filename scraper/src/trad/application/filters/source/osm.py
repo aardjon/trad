@@ -552,11 +552,11 @@ class OsmApiReceiver:
         _logger.debug("Querying %d IDs from Overpass, using filter %s", len(osm_ids), node_filter)
 
         tag_filter = "".join(f'["{t}"="{v}"]' for t, v in node_filter.items())
-        node_requests = "\n".join(f"node({nid}){tag_filter};" for nid in osm_ids)
+        nodes_request = ",".join(f"{nid}" for nid in osm_ids)
         query = self.__build_overpass_query(
             f"""
             (
-                {node_requests}
+                node(id: {nodes_request}){tag_filter};
             );
             """
         )
