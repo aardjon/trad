@@ -1,6 +1,12 @@
 # Scraper & Route Database Changelog
 
 
+## Version 0.5.1 - 2026-08-28
+
+### Fixed Bugs:
+ - Route DB creation fails because of too complex OSM query (#62)
+
+
 ## Version 0.5.0 - 2026-06-16
 
 ### New/Improved Features:
