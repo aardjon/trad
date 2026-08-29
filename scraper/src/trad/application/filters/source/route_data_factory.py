@@ -24,6 +24,7 @@ class RouteDataFactory:
         summit_sector_rank: int | None = None,
         summit_position_rank: int | None = None,
         route_grade_conflict_rank: int | None = None,
+        route_entry_position_rank: int | None = None,
     ) -> None:
         """
         Create a new data factory which uses the given rank and source information when creating
@@ -36,6 +37,7 @@ class RouteDataFactory:
         self._route_grade_conflict_rank = (
             route_grade_conflict_rank or RankedValue.create_null().rank
         )
+        self._route_entry_position_rank = route_entry_position_rank
 
     def create_summit(
         self,
@@ -69,6 +71,7 @@ class RouteDataFactory:
         grade_jump: int = NO_GRADE,
         star_count: int = 0,
         dangerous: bool = False,
+        entry_position: GeoPosition | None = None,
     ) -> Route:
         """
         Create a new `Route` instance with the given data. See there for detailled parameter
@@ -93,6 +96,10 @@ class RouteDataFactory:
             grade_jump=grade_jump,
             star_count=star_count,
             dangerous=dangerous,
+            entry_position=self._create_ranked_value(
+                entry_position,
+                self._route_entry_position_rank,
+            ),
         )
 
     def _create_ranked_value[T](self, value: T | None, rank: int | None) -> RankedValue[T]:

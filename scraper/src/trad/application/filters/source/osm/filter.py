@@ -21,8 +21,8 @@ from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
-from trad.kernel.entities.routedata import Summit
-from trad.kernel.errors import DataProcessingError, MergeConflictError
+from trad.kernel.entities.routedata import Route, Summit
+from trad.kernel.errors import DataProcessingError, IncompleteDataError, MergeConflictError
 
 _logger = getLogger(__name__)
 
@@ -35,6 +35,11 @@ class OsmSummitDataFilter(SourceFilter):
         - name
         - geographical position
         - climbing regulations
+        - routes
+
+    For routes, the following information is imported:
+        - name
+        - geographical position
 
     Using the positions from OSM has the advantage that when sending it to some OSM based map later
     on the mobile device, the point is exactly on the summit and not "somewhere near".
@@ -62,7 +67,13 @@ class OsmSummitDataFilter(SourceFilter):
         """
         super().__init__()
         self._osm_api_receiver = OsmApiReceiver(http_boundary=network_boundary)
-        self._route_data_factory = RouteDataFactory(summit_sector_rank=1, summit_position_rank=1)
+        self._route_data_factory = RouteDataFactory(
+            source_label=self._EXTERNAL_SOURCE_DESCRIPTION.label,
+            summit_sector_rank=1,
+            summit_position_rank=1,
+            route_grade_conflict_rank=5,
+            route_entry_position_rank=1,
+        )
 
     @override
     def get_name(self) -> str:
@@ -94,10 +105,20 @@ class OsmSummitDataFilter(SourceFilter):
     def __process_peak_relations(self, data_cache: _OsmDataCache, output_pipe: Pipe) -> None:
         # Create Summit objects for all relations
         summits_from_relations = self.__create_summits_from_relations(
-            data_cache, data_cache.get_peak_relations()
+            data_cache,
+            data_cache.get_peak_relations(),
         )
         # Send all created summits to the pipe
-        self.__store_summits(output_pipe, summits_from_relations)
+        osm_to_pipe_ids = self.__store_summits(output_pipe, summits_from_relations)
+
+        # Create Route objects for all relations
+        routes_of_relations = self.__create_routes_from_relation_members(
+            data_cache,
+            data_cache.get_peak_relations(),
+        )
+
+        # Send the created Routes to the pipe
+        self.__store_routes(output_pipe, routes_of_relations, osm_to_pipe_ids)
 
         _logger.debug("Processed summits from %d relations", len(data_cache.get_peak_relations()))
 
@@ -183,6 +204,31 @@ class OsmSummitDataFilter(SourceFilter):
                 ),
             )
 
+    def __create_routes_from_relation_members(
+        self,
+        data_cache: _OsmDataCache,
+        peak_relations: Collection[OverpassRelation],
+    ) -> Iterator[tuple[int, Route]]:
+        """
+        Creates (and yields) a Route object for each route node within the members of
+        peak_relations`. The paired integer is the OSM relation ID of the peak relation to which the
+        Route is assigned.
+        """
+        for relation in peak_relations:
+            route_nodes = data_cache.get_relation_member_nodes(
+                relation.id, lambda tags: tags.climbing in ("route", "route_bottom")
+            )
+            for node in route_nodes:
+                if not node.tags.name:
+                    raise IncompleteDataError(node.id, "tags.name")
+                yield (
+                    relation.id,
+                    self._route_data_factory.create_route(
+                        node.tags.name,
+                        entry_position=GeoPosition.from_decimal_degree(node.lat, node.lon),
+                    ),
+                )
+
     def __store_external_source_attribution(self, pipe: Pipe) -> None:
         pipe.add_source(self._EXTERNAL_SOURCE_DESCRIPTION)
 
@@ -200,6 +246,22 @@ class OsmSummitDataFilter(SourceFilter):
             except MergeConflictError as e:
                 _logger.warning(e)
         return osm_to_pipe_map
+
+    def __store_routes(
+        self,
+        pipe: Pipe,
+        routes: Iterable[tuple[int, Route]],
+        osm_to_pipe_id_map: dict[int, SummitInstanceId],
+    ) -> None:
+        """
+        Store all given `routes` into the given `pipe`. `osm_to_pipe_id_map` maps the OSM ID of the
+        peak relation to its corresponding pipe ID.
+        """
+        for osm_peak_id, route in routes:
+            try:
+                pipe.add_route(osm_to_pipe_id_map[osm_peak_id], route)
+            except MergeConflictError as e:
+                _logger.warning(e)
 
 
 class _OsmDataCache:

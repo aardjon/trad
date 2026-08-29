@@ -73,8 +73,13 @@ class OverpassTags(ReadOnlyPydanticModel):
 
     natural: str | None = None
     """
-    The kind of a physical object, if applicable.
+    The kind of a physical object, if applicable. Used to mark a point as peak.
     See also https://wiki.openstreetmap.org/wiki/Key:natural).
+    """
+
+    climbing: str | None = None
+    """
+    Specifies a climbing-related element.
     """
 
     def get_alternate_names(self) -> list[str]:
