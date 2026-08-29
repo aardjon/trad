@@ -18,7 +18,7 @@ from trad.application.filters.source.osm.api.overpass import (
     OverpassTags,
 )
 from trad.application.filters.source.route_data_factory import RouteDataFactory
-from trad.kernel.boundaries.pipes import Pipe
+from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.routedata import Summit
@@ -86,7 +86,9 @@ class OsmSummitDataFilter(SourceFilter):
         summits_from_nodes = self.__create_summits_from_nodes(
             data_cache, data_cache.get_peak_nodes()
         )
+        # We can ignborie the return value here because peak nodes never have any routes assigned
         self.__store_summits(output_pipe, summits_from_nodes)
+
         _logger.debug("Processed summits from %d nodes", len(data_cache.get_peak_nodes()))
 
     def __process_peak_relations(self, data_cache: _OsmDataCache, output_pipe: Pipe) -> None:
@@ -114,11 +116,10 @@ class OsmSummitDataFilter(SourceFilter):
         self,
         data_cache: _OsmDataCache,
         peak_relations: Collection[OverpassRelation],
-    ) -> Iterator[Summit]:
+    ) -> Iterator[tuple[int, Summit]]:
         """
-        Creates (and yields) a Summit object for each relation in `osm_relations`, using the peaks
-        from `osm_nodes`. The peak node elements that correspond to the processed relations are
-        removed from `osm_nodes`.
+        Creates (and yields) a Summit object for each relation in `peak_relations`. The paired
+        integer is the OSM element ID from which the Summit was created.
         """
         # Create Summit objects for all relations
         for relation in peak_relations:
@@ -147,41 +148,58 @@ class OsmSummitDataFilter(SourceFilter):
             if self.__is_forbidden_node(peak_node):
                 continue
 
-            yield self._route_data_factory.create_summit(
-                official_name=relation.tags.name,
-                alternate_names=relation.tags.get_alternate_names(),
-                position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
-                sector=data_cache.get_sector_name(relation.id),
+            yield (
+                relation.id,
+                self._route_data_factory.create_summit(
+                    official_name=relation.tags.name,
+                    alternate_names=relation.tags.get_alternate_names(),
+                    position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
+                    sector=data_cache.get_sector_name(relation.id),
+                ),
             )
 
     def __create_summits_from_nodes(
         self,
         data_cache: _OsmDataCache,
         osm_nodes: Iterable[OverpassNode],
-    ) -> Iterator[Summit]:
+    ) -> Iterator[tuple[int, Summit]]:
         """
-        Creates (and yields) a Summit object for each node in `osm_nodes`.
+        Creates (and yields) a Summit object for each node in `osm_nodes`. The paired integer is the
+        OSM element ID from which the Summit was created.
         """
         for summit_element in osm_nodes:
             if self.__is_forbidden_node(summit_element):
                 continue
 
-            yield self._route_data_factory.create_summit(
-                official_name=summit_element.tags.name,
-                alternate_names=summit_element.tags.get_alternate_names(),
-                position=GeoPosition.from_decimal_degree(summit_element.lat, summit_element.lon),
-                sector=data_cache.get_sector_name(summit_element.id),
+            yield (
+                summit_element.id,
+                self._route_data_factory.create_summit(
+                    official_name=summit_element.tags.name,
+                    alternate_names=summit_element.tags.get_alternate_names(),
+                    position=GeoPosition.from_decimal_degree(
+                        summit_element.lat, summit_element.lon
+                    ),
+                    sector=data_cache.get_sector_name(summit_element.id),
+                ),
             )
 
     def __store_external_source_attribution(self, pipe: Pipe) -> None:
         pipe.add_source(self._EXTERNAL_SOURCE_DESCRIPTION)
 
-    def __store_summits(self, pipe: Pipe, summits: Iterable[Summit]) -> None:
-        for summit in summits:
+    def __store_summits(
+        self, pipe: Pipe, summits: Iterable[tuple[int, Summit]]
+    ) -> dict[int, SummitInstanceId]:
+        """
+        Store all given `summits` into the given `pipe`. Returns a mapping of each summit's OSM
+        element ID to the assigned pipe ID. This mapping is needed to e.g. assign routes later on.
+        """
+        osm_to_pipe_map: dict[int, SummitInstanceId] = {}
+        for osm_id, summit in summits:
             try:
-                pipe.add_summit(summit)
+                osm_to_pipe_map[osm_id] = pipe.add_summit(summit)
             except MergeConflictError as e:
                 _logger.warning(e)
+        return osm_to_pipe_map
 
 
 class _OsmDataCache:
