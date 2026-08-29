@@ -103,7 +103,7 @@ class OsmSummitDataFilter(SourceFilter):
 
     def __is_forbidden_node(self, osm_node: OverpassNode) -> bool:
         """
-        Returns True if the given peak nodes may never be climbed on. This is checked by means of
+        Returns True if the given peak node may never be climbed on. This is checked by means of
         legal restrictions, i.e. the 'access' tag.
         For nodes with partial (e.g. seasonal) restrictions this method returns False because they
         can indeed be accessed legally (just not always), and thus the restriction must be evaluated
@@ -209,7 +209,7 @@ class _OsmDataCache:
 
     Unlike a usual cache, this class does not retrieve missing data as needed but gathers all data
     at once, and only on explicit request. The main goal is to limit OSM API requests to the
-    absolutely necessary minimum. That alos means, that `retrieve_all_data()` must be called first
+    absolutely necessary minimum. That also means, that `retrieve_all_data()` must be called first
     (and only once), otherwise the other methods won't return any results.
     """
 
@@ -252,6 +252,10 @@ class _OsmDataCache:
         self._relations_member_nodes = {}
 
     def retrieve_all_data(self, api_receiver: OsmApiReceiver) -> None:
+        """
+        Retrieve all necessary data from OSM. Must be called exactly once before calling any of the
+        other methods.
+        """
         # Get the OSM ID of the geographical area to query
         area_id = self.__get_area_id(api_receiver)
 
@@ -340,7 +344,7 @@ class _OsmDataCache:
         self, osm_elements: Collection[OverpassElement]
     ) -> tuple[dict[int, OverpassNode], list[OverpassRelation]]:
         """
-        Splits all nodes and relations from `osm_element` into two separate collections, because
+        Splits all nodes and relations from `osm_elements` into two separate collections, because
         they have to be handled differently. Returns a tuple of all nodes and all relations:
          - First: Dict of node IDs and OSM node elements
          - Second: List of OSM relation elements
@@ -355,7 +359,10 @@ class _OsmDataCache:
         return osm_nodes, osm_relations
 
     def __retrieve_sector_relations(
-        self, api_receiver: OsmApiReceiver, node_ids: Collection[int], relation_ids: Collection[int]
+        self,
+        api_receiver: OsmApiReceiver,
+        node_ids: Collection[int],
+        relation_ids: Collection[int],
     ) -> tuple[dict[int, str], dict[int, int]]:
         """
         Retrieves the sectors the given OSM elements belong to. The first returned value is a dict
@@ -403,9 +410,9 @@ class _OsmDataCache:
         peak_relations: Collection[OverpassRelation],
     ) -> None:
         """
-        Retrieves all peak node elements that are referenced by the relations within `osm_relations`
-        and stores them into `relation_member_nodes`. Does only one OSM request, and does not
-        re-retrieve nodes that are already there.
+        Retrieves all peak node elements that are referenced by the relations within
+        `peak_relations` and stores them into `relation_member_nodes`. Does only one OSM request,
+        and does not re-retrieve nodes that are already there.
         """
         # Get a flat set of all referenced nodes that we already have
         already_available_node_ids = {
