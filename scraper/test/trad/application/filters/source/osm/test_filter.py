@@ -141,7 +141,7 @@ class TestOsmSummitDataFilter:
                         {
                             "id": 42,
                             "type": "relation",
-                            "tags": {"name": "Mt Mock"},
+                            "tags": {"natural": "peak", "name": "Mt Mock"},
                             "members": [{"type": "node", "ref": 43}],
                         },
                     ]
@@ -169,7 +169,7 @@ class TestOsmSummitDataFilter:
                             "type": "node",
                             "lat": 13.37,
                             "lon": 47.11,
-                            "tags": {"name": "Mt Mock"},
+                            "tags": {"natural": "peak", "name": "Mt Mock"},
                         },
                     ]
                 },
@@ -249,8 +249,6 @@ class TestOsmSummitDataFilter:
         assert id_query_content.startswith("data=")
         # The query must contain the requested element type
         assert "node" in id_query_content
-        # The query must contain the necessary tag filters
-        assert '["natural"="peak"]' in id_query_content
 
     @pytest.mark.parametrize(
         ("nominatim_response"),
@@ -278,7 +276,7 @@ class TestOsmSummitDataFilter:
                                 "type": "node",
                                 "lat": 13.37,
                                 "lon": 47.11,
-                                "tags": {"name": "Mt Mock"},
+                                "tags": {"name": "Mt Mock", "natural": "peak"},
                             }
                         ]
                     },
@@ -333,7 +331,7 @@ class TestOsmSummitDataFilter:
                                 "type": "node",
                                 "lat": 13.37,
                                 "lon": 47.11,
-                                "tags": {"name": "Mt Mock"},
+                                "tags": {"name": "Mt Mock", "natural": "peak"},
                             }
                         ]
                     },
@@ -364,7 +362,7 @@ class TestOsmSummitDataFilter:
                                 "type": "node",
                                 "lat": 13.37,
                                 "lon": 47.11,
-                                "tags": {"name": "Mt Mock"},
+                                "tags": {"name": "Mt Mock", "natural": "peak"},
                             },
                         ]
                     },
@@ -401,6 +399,7 @@ class TestOsmSummitDataFilter:
                                 "id": 42,
                                 "user": "nobody",
                                 "tags": {
+                                    "natural": "peak",
                                     "name": "Mt Mock",
                                     "climbing:summit_log": "yes",
                                     "some_other_tag": "value",
@@ -440,21 +439,21 @@ class TestOsmSummitDataFilter:
                                 "type": "node",
                                 "lat": 12.34,
                                 "lon": 9.87,
-                                "tags": {"name": "Einserspitze"},
+                                "tags": {"name": "Einserspitze", "natural": "peak"},
                             },
                             {
                                 "id": 2,
                                 "type": "node",
                                 "lat": 56.78,
                                 "lon": 65.43,
-                                "tags": {"name": "Zweierturm"},
+                                "tags": {"name": "Zweierturm", "natural": "peak"},
                             },
                             {
                                 "id": 3,
                                 "type": "node",
                                 "lat": 90.00,
                                 "lon": 21.10,
-                                "tags": {"name": "Dreierwand"},
+                                "tags": {"name": "Dreierwand", "natural": "peak"},
                             },
                         ]
                     },
@@ -463,7 +462,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": "Zahlengebiet"},
+                                "tags": {"name": "Zahlengebiet", "natural": "peak"},
                                 "members": [{"type": "node", "ref": i} for i in range(1, 4)],
                             },
                         ]
@@ -504,6 +503,7 @@ class TestOsmSummitDataFilter:
                                 "lat": 13.37,
                                 "lon": 47.11,
                                 "tags": {
+                                    "natural": "peak",
                                     "name": "name",
                                     "alt_name": "alt",
                                     "official_name": "official",
@@ -547,6 +547,7 @@ class TestOsmSummitDataFilter:
                                 "lat": 13.37,
                                 "lon": 47.11,
                                 "tags": {
+                                    "natural": "peak",
                                     "name": "name",
                                     "alt_name": "alt1; alt2 ; alt3",
                                 },
@@ -558,7 +559,7 @@ class TestOsmSummitDataFilter:
                             {
                                 "id": 123,
                                 "type": "relation",
-                                "tags": {"name": _example_sector1.value},
+                                "tags": {"name": _example_sector1.value, "natural": "peak"},
                                 "members": [{"type": "node", "ref": 22}],
                             },
                         ]
@@ -632,7 +633,7 @@ class TestOsmSummitDataFilter:
             "type": "node",
             "lat": 13.37,
             "lon": 47.11,
-            "tags": {"name": "Mock Summit", "access": access_tag},
+            "tags": {"natural": "peak", "name": "Mock Summit", "access": access_tag},
         }
         json_parent_relation = {
             "id": 32,
@@ -673,6 +674,7 @@ class TestOsmSummitDataFilter:
                         "lat": 13.37,
                         "lon": 47.11,
                         "tags": {
+                            "natural": "peak",
                             "name": f"Summit{i}",
                         },
                     }

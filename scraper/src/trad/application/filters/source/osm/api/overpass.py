@@ -34,12 +34,17 @@ class OsmObjectTypes(StrEnum):
 
 class OverpassTags(ReadOnlyPydanticModel):
     """
-    Deserialized representation of the tags of a single OSM object. Currently we are mainly
-    interested in the names, but this may change in the future.
-    See the OSM wiki for tag documentation:
-     - Possible name keys: https://wiki.openstreetmap.org/wiki/Names#Name_keys
+    Deserialized representation of the tags of a single OSM object. These are only tags that may be
+    available and are used by the scraper, but of course no single object will have all of them at
+    once - that's why they all can also be None. Which tags are mandatory depends on other tags,
+    i.e. if certain tags are there with certain value, certain other tags must (or must not) be
+    there.
+    For example: A natural=peak will usually have a name, but a climbing:bolt=abseil probably won't.
 
-    Some of the most important points:
+    There are several different tags for object names, see the OSM wiki for their documentation:
+    https://wiki.openstreetmap.org/wiki/Names#Name_keys
+
+    Some of the most important points about names from this document:
      - The 'name' is the most-common, usual name, i.e. the one with the highest priority
      - 'official_name' can be used for somewhat uncommon or long offical names that are not used
        that often
@@ -47,19 +52,29 @@ class OverpassTags(ReadOnlyPydanticModel):
      - At least 'alt_name' may be a ; separated list with several names
     """
 
-    name: str
+    name: str | None = None
     """ The default and most important name to use. """
     official_name: str | None = None
     """ If the official name is not very common. """
-    alt_name: str | None = None
     loc_name: str | None = None
+    """ Local name. """
     nickname: str | None = None
+    """ Informal nickname. """
     short_name: str | None = None
+    """ Commonly-used short version (but not an abbreviation) of the name. """
+    alt_name: str | None = None
+    """ Alternative name by which the feature is known, if none of the other tags fit. """
 
     access: str | None = None
     """
     Legal access restrictions, if any (as of https://wiki.openstreetmap.org/wiki/Key:access). If
     missing, everyone is officially allowed to climb here.
+    """
+
+    natural: str | None = None
+    """
+    The kind of a physical object, if applicable.
+    See also https://wiki.openstreetmap.org/wiki/Key:natural).
     """
 
     def get_alternate_names(self) -> list[str]:
