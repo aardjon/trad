@@ -27,7 +27,7 @@ from trad.kernel.errors import DataProcessingError, IncompleteDataError, MergeCo
 _logger = getLogger(__name__)
 
 
-class OsmSummitDataFilter(SourceFilter):
+class OsmDataFilter(SourceFilter):
     """
     Filter for importing summit data from the OpenStreetMap database.
 
@@ -62,7 +62,7 @@ class OsmSummitDataFilter(SourceFilter):
 
     def __init__(self, network_boundary: HttpNetworkingBoundary) -> None:
         """
-        Create a new OsmSummitDataFilter instance that retrieves data via the given
+        Create a new OsmDataFilter instance that retrieves data via the given
         [network_boundary].
         """
         super().__init__()

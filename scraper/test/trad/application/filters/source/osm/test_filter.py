@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError, JsonData
-from trad.application.filters.source.osm.filter import OsmSummitDataFilter
+from trad.application.filters.source.osm.filter import OsmDataFilter
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.geotypes import GeoPosition
@@ -18,7 +18,7 @@ from trad.kernel.entities.routedata import Summit
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 
-class TestOsmSummitDataFilter:
+class TestOsmDataFilter:
     _expected_sector_rank: Final = 1
     """
     The expected rank of the summit.sector attribute.
@@ -37,7 +37,7 @@ class TestOsmSummitDataFilter:
         """
         Ensures the filter name to be correct.
         """
-        osm_filter = OsmSummitDataFilter(Mock(HttpNetworkingBoundary))
+        osm_filter = OsmDataFilter(Mock(HttpNetworkingBoundary))
         assert "OpenStreetMap" in osm_filter.get_name()
 
     @pytest.mark.parametrize(
@@ -71,7 +71,7 @@ class TestOsmSummitDataFilter:
         """
         mocked_network_boundary = Mock(HttpNetworkingBoundary)
         mocked_network_boundary.retrieve_json_resource.side_effect = [nominatim_response]
-        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
+        osm_filter = OsmDataFilter(mocked_network_boundary)
 
         with pytest.raises(expected_exception):
             osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
@@ -111,7 +111,7 @@ class TestOsmSummitDataFilter:
             valid_nominatim_response,
             overpass_response,
         ]
-        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
+        osm_filter = OsmDataFilter(mocked_network_boundary)
 
         with pytest.raises(expected_exception):
             osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
@@ -181,7 +181,7 @@ class TestOsmSummitDataFilter:
             retrieve_json_resource_side_effects
         )
 
-        osm_filter = OsmSummitDataFilter(mocked_network_boundary)
+        osm_filter = OsmDataFilter(mocked_network_boundary)
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=Mock(Pipe))
 
         expected_nominatim_endpoint: Final = "https://nominatim.openstreetmap.org/search"
@@ -596,7 +596,7 @@ class TestOsmSummitDataFilter:
             nominatim_response,
             *overpass_responses,
         )
-        osm_filter = OsmSummitDataFilter(fake_network_boundary)
+        osm_filter = OsmDataFilter(fake_network_boundary)
 
         output_pipe = CollectedData()
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
@@ -647,7 +647,7 @@ class TestOsmSummitDataFilter:
             overpass_area_query_response={"elements": [json_peak_node]},
             overpass_parent_relations_query_response={"elements": [json_parent_relation]},
         )
-        osm_filter = OsmSummitDataFilter(fake_network_boundary)
+        osm_filter = OsmDataFilter(fake_network_boundary)
 
         output_pipe = CollectedData()
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
@@ -692,7 +692,7 @@ class TestOsmSummitDataFilter:
                 ]
             },
         )
-        osm_filter = OsmSummitDataFilter(fake_network_boundary)
+        osm_filter = OsmDataFilter(fake_network_boundary)
 
         output_pipe = CollectedData()
         osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
