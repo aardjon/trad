@@ -149,7 +149,7 @@ class RouteDirections:
 
 
 @dataclass
-class Route:
+class Route:  # pylint: disable=too-many-instance-attributes
     """
     A single climbing route.
 
