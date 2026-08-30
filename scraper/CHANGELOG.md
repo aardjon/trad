@@ -1,6 +1,12 @@
 # Scraper & Route Database Changelog
 
 
+## Next Version
+
+### New/Improved Features:
+ - Import route entry points from OSM (#23)
+
+
 ## Version 0.5.1 - 2026-08-28
 
 ### Fixed Bugs:

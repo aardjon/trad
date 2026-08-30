@@ -10,8 +10,14 @@ from trad.application.filters.regular.merge import (
     MergeFilter,
 )
 from trad.application.pipes import CollectedData
+from trad.kernel.entities.geotypes import GeoPosition
+from trad.kernel.entities.ranked import RankedValue
 from trad.kernel.entities.routedata import Route, RouteDirections, Summit
 from trad.kernel.errors import MergeConflictError
+
+
+def _create_position(lat: int, lon: int, rank: int) -> RankedValue[GeoPosition]:
+    return RankedValue.create_valid(GeoPosition(lat, lon), rank)
 
 
 @pytest.mark.parametrize(
@@ -665,6 +671,30 @@ def test_merge_routes_equality_check(
         pytest.param(
             [
                 Route(1, "AW"),
+                Route(1, "AW", entry_position=_create_position(1000000, 2000000, 1)),
+            ],
+            Route(
+                1,
+                "AW",
+                entry_position=_create_position(1000000, 2000000, 1),
+            ),
+            id="Position: First value empty",
+        ),
+        pytest.param(
+            [
+                Route(1, "AW", entry_position=_create_position(1000000, 2000000, 1)),
+                Route(1, "AW"),
+            ],
+            Route(
+                1,
+                "AW",
+                entry_position=_create_position(1000000, 2000000, 1),
+            ),
+            id="Position: Second value empty",
+        ),
+        pytest.param(
+            [
+                Route(1, "AW"),
                 Route(1, "AW", grade_ou=1),
                 Route(1, "AW"),
             ],
@@ -712,7 +742,24 @@ def test_merge_routes_data_transfer(
     )
 
     assert len(output_routes) == 1
-    assert expected_output_route == output_routes[0]
+    output_route: Route = output_routes[0]
+
+    assert output_route.route_name == expected_output_route.route_name
+    assert output_route.conflict_rank == expected_output_route.conflict_rank
+    assert output_route.grade_af == expected_output_route.grade_af
+    assert output_route.grade_rp == expected_output_route.grade_rp
+    assert output_route.grade_ou == expected_output_route.grade_ou
+    assert output_route.grade_jump == expected_output_route.grade_jump
+    assert output_route.star_count == expected_output_route.star_count
+    assert output_route.dangerous == expected_output_route.dangerous
+    assert output_route.directions == expected_output_route.directions
+
+    assert output_route.entry_position.is_null() == output_route.entry_position.is_null()
+    assert output_route.entry_position.rank == output_route.entry_position.rank
+    if not output_route.entry_position.is_null():
+        assert output_route.entry_position.value.is_equal_to(
+            expected_output_route.entry_position.value
+        )
 
 
 @pytest.mark.parametrize(
@@ -733,6 +780,22 @@ def test_merge_routes_data_transfer(
             ],
             MergeConflictError,
             id="Conflicting star count",
+        ),
+        pytest.param(
+            [
+                Route(
+                    1,
+                    "AW",
+                    entry_position=_create_position(1000000, 2000000, 3),
+                ),
+                Route(
+                    1,
+                    "AW",
+                    entry_position=_create_position(2000000, 1000000, 3),
+                ),
+            ],
+            MergeConflictError,
+            id="Conflicting entry position",
         ),
     ],
 )

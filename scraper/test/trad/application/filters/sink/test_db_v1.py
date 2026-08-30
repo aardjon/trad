@@ -117,15 +117,17 @@ class TestDbSchemaV1Filter:
             f"{RoutesTable.COLUMN_GRADE_OU}, "
             f"{RoutesTable.COLUMN_GRADE_JUMP}, "
             f"{RoutesTable.COLUMN_STARS}, "
-            f"{RoutesTable.COLUMN_DANGER}"
+            f"{RoutesTable.COLUMN_DANGER}, "
+            f"{RoutesTable.COLUMN_ENTRY_LATITUDE}, "
+            f"{RoutesTable.COLUMN_ENTRY_LONGITUDE}"
             f") VALUES (("
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
-            f"), ?, ?, ?, ?, ?, ?, ?, ?)"
+            f"), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
         fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
-            query_parameters=["Mock Monument", "Anxiety", "", 10, 8, 9, 2, 1, True],
+            query_parameters=["Mock Monument", "Anxiety", "", 10, 8, 9, 2, 1, True, 0, 0],
         )
         self._check_database_finalization(fake_db_boundary)
 

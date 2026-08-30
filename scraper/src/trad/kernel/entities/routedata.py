@@ -74,8 +74,6 @@ class Summit:
         e.g. to display it to the user. If you need certainty about the name usage, use one of the
         specialized properties instead.
         """
-        # Note that there must always be at least one name somewhere, even though it is not ensured
-        # (yet?)
         name = self.official_name
         if not name:
             name = next(iter(self.alternate_names), None)
@@ -151,7 +149,7 @@ class RouteDirections:
 
 
 @dataclass
-class Route:
+class Route:  # pylint: disable=too-many-instance-attributes
     """
     A single climbing route.
 
@@ -230,6 +228,14 @@ class Route:
     dangerous: bool = False
     """
     True if the route is officially marked as "dangerous", False if not.
+    """
+
+    entry_position: RankedValue[GeoPosition] = field(
+        default_factory=RankedValue[GeoPosition].create_null
+    )
+    """
+    Geographical position of the route entry point (i.e. the point where one starts climbing), if
+    any. Can be a null object if no entry position is known.
     """
 
     def fix_invalid_data(self) -> None:

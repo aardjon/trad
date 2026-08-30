@@ -16,13 +16,12 @@ from logging import getLogger
 from typing import Annotated, Final, NewType
 
 from pydantic import ValidationError
-from pydantic.config import ConfigDict
 from pydantic.fields import Field
 from pydantic.functional_validators import BeforeValidator
-from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from trad.application.boundaries.http import HttpNetworkingBoundary, HttpRequestError
+from trad.application.filters.source.utils import ReadOnlyPydanticModel
 from trad.kernel.errors import DataProcessingError, DataRetrievalError
 
 _logger = getLogger(__name__)
@@ -33,23 +32,14 @@ Type for uniquely identifying a single item in the external database.
 """
 
 
-class _ReadOnlyPydanticModel(BaseModel):
-    """
-    Base class for Pydantic models that cannot be manipulated. This is the case for all data
-    retrieved from some remote service.
-    """
-
-    model_config = ConfigDict(frozen=True)
-
-
-class JsonGebiet(_ReadOnlyPydanticModel):
+class JsonGebiet(ReadOnlyPydanticModel):
     """API representation of a single area, jsongebiet.php endpoint."""
 
     gebiet_id: ApiItemIdType = Field(alias="gebiet_ID")
     gebiet: str
 
 
-class JsonSektor(_ReadOnlyPydanticModel):
+class JsonSektor(ReadOnlyPydanticModel):
     """API representation of a single sector, jsonteilgebiet.php endpoint."""
 
     sektor_id: ApiItemIdType = Field(alias="sektor_ID")
@@ -100,7 +90,7 @@ class JsonGipfelStatus(StrEnum):
     """
 
 
-class JsonGipfel(_ReadOnlyPydanticModel):
+class JsonGipfel(ReadOnlyPydanticModel):
     """API representation of a single summit, jsongipfel.php endpoint."""
 
     gipfel_id: ApiItemIdType = Field(alias="gipfel_ID")
@@ -144,7 +134,7 @@ class JsonWegStatus(StrEnum):
     """
 
 
-class JsonWeg(_ReadOnlyPydanticModel):
+class JsonWeg(ReadOnlyPydanticModel):
     """API representation of a single route, jsonwege.php endpoint."""
 
     weg_id: ApiItemIdType = Field(alias="weg_ID")
@@ -166,7 +156,7 @@ class JsonWeg(_ReadOnlyPydanticModel):
         return JsonWegStatus.UNKNOWN
 
 
-class JsonKomment(_ReadOnlyPydanticModel):
+class JsonKomment(ReadOnlyPydanticModel):
     """API representation of a single post, jsonkomment.php endpoint."""
 
     komment_id: ApiItemIdType = Field(alias="komment_ID")
@@ -182,7 +172,7 @@ class SandsteinkletternApiReceiver:
     Represents an endpoint for querying the sandsteinklettern API. Responsible for choosing the
     correct endpoint for the requested usecase, for providing/creating all necessary options, query
     strings etc. and for parsing/validating the reponses. All methods of this class return Pydantic
-    model objects (derived from _ReadOnlyPydanticModel), never plain JSON strings.
+    model objects (derived from ReadOnlyPydanticModel), never plain JSON strings.
     """
 
     _API_BASE: Final = "http://db-sandsteinklettern.gipfelbuch.de/"
