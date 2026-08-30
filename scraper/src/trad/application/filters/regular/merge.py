@@ -48,7 +48,15 @@ class MergeFilter(Filter):
                 full_route_data = _RouteRelatedData(route=route, posts=[])
                 for post in input_pipe.iter_posts_of_route(route_id):
                     full_route_data.posts.append(post)
-                route_merger.merge_entity(full_route_data)
+                try:
+                    route_merger.merge_entity(full_route_data)
+                except Exception:
+                    # We don't use .exception here on purpose, because the exception is reraised and
+                    # the traceback will be logged later.
+                    _logger.error(  # noqa: TRY400
+                        "Error while merging instances of summit %s, cancelling.", summit.name
+                    )
+                    raise
             summit_merger.merge_entity(full_summit_data)
 
         self._write_merged_data(output_pipe)
@@ -274,7 +282,6 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
 
     @staticmethod
     def _enrich_position(target: Summit, source: Summit) -> None:
-        # Merge the high grade position
         if target.position.is_null():
             target.position = source.position
         elif not source.position.is_null():
@@ -409,5 +416,20 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
                 # Conflicting data and same rank
                 raise MergeConflictError("route", source_route.route_name, "grade")
 
+        # Merge entry position
+        self._enrich_entry_position(target_route, source_route)
+
         # Add all posts from the source route to the target route
         target_entity.posts.extend(source_entity.posts)
+
+    @staticmethod
+    def _enrich_entry_position(target: Route, source: Route) -> None:
+        if target.entry_position.is_null():
+            target.entry_position = source.entry_position
+        elif not source.entry_position.is_null():
+            if source.entry_position.rank < target.entry_position.rank:
+                target.entry_position = source.entry_position
+            elif source.entry_position.rank == target.entry_position.rank and (
+                not target.entry_position.value.is_equal_to(source.entry_position.value)
+            ):
+                raise MergeConflictError("route", source.route_name, "entry_position")
