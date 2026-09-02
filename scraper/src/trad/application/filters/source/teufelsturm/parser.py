@@ -48,7 +48,7 @@ _ROUTE_DATA_RANK: Final = 2
 _route_data_factory: Final = RouteDataFactory(
     source_label=EXTERNAL_SOURCE_DESCRIPTION.label,
     summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 2,
-    route_grade_conflict_rank=_ROUTE_DATA_RANK,
+    route_rating_rank=_ROUTE_DATA_RANK,
 )
 """
 Factory for creating route data objects.

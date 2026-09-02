@@ -6,6 +6,7 @@ from typing import Final
 
 import pytest
 
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.names import NormalizedName
 from trad.kernel.entities.ranked import RankedValue
@@ -178,3 +179,39 @@ class TestSummit:
         """
         input_summit.fix_invalid_data()
         assert input_summit == expected_output_summit
+
+
+class TestRoute:
+    """
+    Unit tests for the Route class.
+    """
+
+    _data_factory = RouteDataFactory(source_label="Unit Test", route_rating_rank=3)
+
+    def test_rating_wrappers(self) -> None:
+        """
+        Ensure all properties wrapping the access to the embedded RouteRating object work as
+        expected.
+        """
+        dummy_af: Final = 9
+        dummy_rp: Final = 8
+        dummy_ou: Final = 7
+        dummy_jump: Final = 6
+        dummy_stars: Final = 2
+
+        route = self._data_factory.create_route(
+            "Dummy",
+            grade_af=dummy_af,
+            grade_rp=dummy_rp,
+            grade_ou=dummy_ou,
+            grade_jump=dummy_jump,
+            star_count=dummy_stars,
+            dangerous=True,
+        )
+
+        assert route.grade_af == dummy_af
+        assert route.grade_rp == dummy_rp
+        assert route.grade_ou == dummy_ou
+        assert route.grade_jump == dummy_jump
+        assert route.star_count == dummy_stars
+        assert route.dangerous is True

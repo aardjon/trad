@@ -20,15 +20,23 @@ from trad.application.filters.sink.db_v1.dbschema import (
     SummitNamesTable,
     SummitsTable,
 )
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Post, Route, RouteDirections, Summit
+from trad.kernel.entities.routedata import Post, Summit
 
 
 class TestDbSchemaV1Filter:
+    _data_factory = RouteDataFactory(
+        source_label="Unit Test",
+        summit_sector_rank=1,
+        summit_position_rank=3,
+        route_rating_rank=1,
+    )
+
     _example_sector = RankedValue.create_valid("Test", 1)
 
     def test_add_summit(self, tmp_path: Path) -> None:
@@ -86,10 +94,9 @@ class TestDbSchemaV1Filter:
         )
         input_pipe.add_route(
             summit_id=summit_id,
-            route=Route(
-                1,
+            route=self._data_factory.create_route(
                 route_name="Anxiety",
-                directions=[RouteDirections(directions="Don't go down!", source_label="Unit Test")],
+                directions="Don't go down!",
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,
@@ -143,8 +150,7 @@ class TestDbSchemaV1Filter:
         )
         route_id = input_pipe.add_route(
             summit_id=summit_id,
-            route=Route(
-                1,
+            route=self._data_factory.create_route(
                 route_name="Anxiety",
                 grade_rp=8,
                 grade_af=10,

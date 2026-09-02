@@ -71,7 +71,7 @@ class OsmDataFilter(SourceFilter):
             source_label=self._EXTERNAL_SOURCE_DESCRIPTION.label,
             summit_sector_rank=1,
             summit_position_rank=1,
-            route_grade_conflict_rank=5,
+            route_rating_rank=5,
             route_entry_position_rank=1,
         )
 

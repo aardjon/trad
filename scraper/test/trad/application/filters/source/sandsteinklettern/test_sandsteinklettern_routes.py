@@ -19,7 +19,7 @@ from .conftest import JsonTestData, PreparedFilterRunner
 _allowed_route_status: Final = (JsonWegStatus.ACKNOWLEDGED, JsonWegStatus.TEMP_CLOSED)
 
 
-_entity_factory = RouteDataFactory(source_label="Sandsteinklettern", route_grade_conflict_rank=3)
+_entity_factory = RouteDataFactory(source_label="Sandsteinklettern", route_rating_rank=3)
 
 
 @pytest.mark.parametrize(

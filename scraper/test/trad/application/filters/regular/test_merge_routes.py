@@ -2,7 +2,7 @@
 Unit tests for the trad.application.filters.regular.merge module merging Routes.
 """
 
-from typing import Final
+from typing import Any, Final
 
 import pytest
 
@@ -12,12 +12,21 @@ from trad.application.filters.regular.merge import (
 from trad.application.pipes import CollectedData
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Route, RouteDirections, Summit
+from trad.kernel.entities.routedata import Route, RouteDirections, RouteRating, Summit
 from trad.kernel.errors import MergeConflictError
+
+# Not using the DataFactory in this test because for merging, we often want control over the ranks
 
 
 def _create_position(lat: int, lon: int, rank: int) -> RankedValue[GeoPosition]:
     return RankedValue.create_valid(GeoPosition(lat, lon), rank)
+
+
+def _create_rating(rank: int, *args: Any, **kwargs: Any) -> RankedValue[RouteRating]:
+    return RankedValue.create_valid(
+        RouteRating(*args, **kwargs),
+        rank,
+    )
 
 
 @pytest.mark.parametrize(
@@ -25,75 +34,84 @@ def _create_position(lat: int, lon: int, rank: int) -> RankedValue[GeoPosition]:
     [
         pytest.param(
             [
-                [Route(1, "AW", star_count=1), Route(1, "Talweg")],
-                [Route(1, "AW"), Route(1, "SO-Rinne", star_count=2)],
+                [
+                    Route("AW", rating=_create_rating(1, star_count=1)),
+                    Route("Talweg"),
+                ],
+                [
+                    Route("AW"),
+                    Route("SO-Rinne", rating=_create_rating(1, star_count=2)),
+                ],
             ],
             [
-                Route(1, "AW", star_count=1),
-                Route(1, "Talweg"),
-                Route(1, "SO-Rinne", star_count=2),
+                Route("AW", rating=_create_rating(1, star_count=1)),
+                Route("Talweg"),
+                Route("SO-Rinne", rating=_create_rating(1, star_count=2)),
             ],
             id="Merge only some of many routes",
         ),
         pytest.param(
             [
-                [Route(1, "Bergweg", star_count=1), Route(1, "Talweg")],
+                [
+                    Route("Bergweg", rating=_create_rating(1, star_count=1)),
+                    Route("Talweg"),
+                ],
             ],
             [
-                Route(1, "Bergweg", star_count=1),
-                Route(1, "Talweg"),
+                Route("Bergweg", rating=_create_rating(1, star_count=1)),
+                Route("Talweg"),
             ],
             id="Don't merge different routes on the same Summit",
         ),
         pytest.param(
             [
                 [
-                    Route(1, "AW", star_count=1),
-                    Route(1, "AW", star_count=1),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
                 ],
             ],
             [
-                Route(1, "AW", star_count=1),
+                Route("AW", rating=_create_rating(1, star_count=1)),
             ],
             id="Merge equal routes on one Summit (single instance)",
         ),
         pytest.param(
             [
                 [
-                    Route(1, "AW", star_count=1),
-                    Route(1, "AW", star_count=1),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
                 ],
-                [Route(2, "AW")],
+                [Route("AW", rating=_create_rating(rank=2))],
             ],
             [
-                Route(1, "AW", star_count=1),
+                Route("AW", rating=_create_rating(1, star_count=1)),
             ],
             id="Merge equal routes on one Summit (multiple instances)",
         ),
         pytest.param(
             [
                 [
-                    Route(1, "AW", star_count=1),
-                    Route(1, "AW", star_count=1),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
                 ],
-                [Route(2, "AW")],
-                [Route(2, "AW")],
+                [Route("AW", rating=_create_rating(2))],
+                [Route("AW", rating=_create_rating(2))],
             ],
             [
-                Route(1, "AW", star_count=1),
+                Route("AW", rating=_create_rating(1, star_count=1)),
             ],
             id="Merge equal Routes on two Summits",
         ),
         pytest.param(
             [
                 [
-                    Route(1, "AW", star_count=1),
+                    Route("AW", rating=_create_rating(1, star_count=1)),
                 ],
-                [Route(2, "AW")],
-                [Route(2, "AW")],
+                [Route("AW", rating=_create_rating(2))],
+                [Route("AW", rating=_create_rating(2))],
             ],
             [
-                Route(1, "AW", star_count=1),
+                Route("AW", rating=_create_rating(1, star_count=1)),
             ],
             id="Merge multiple equal Routes from one second Summit",
         ),
@@ -137,24 +155,28 @@ def test_dont_merge_routes_of_different_summits() -> None:
     instances with different names) are not merged.
     """
     route1 = Route(
-        1,
         "AW",
-        grade_af=1,
-        grade_ou=2,
-        grade_rp=3,
-        grade_jump=0,
-        star_count=1,
-        dangerous=False,
+        rating=_create_rating(
+            1,
+            grade_af=1,
+            grade_ou=2,
+            grade_rp=3,
+            grade_jump=0,
+            star_count=1,
+            dangerous=False,
+        ),
     )
     route2 = Route(
-        1,
         "AW",
-        grade_af=1,
-        grade_ou=2,
-        grade_rp=3,
-        grade_jump=0,
-        star_count=1,
-        dangerous=False,
+        rating=_create_rating(
+            1,
+            grade_af=1,
+            grade_ou=2,
+            grade_rp=3,
+            grade_jump=0,
+            star_count=1,
+            dangerous=False,
+        ),
     )
     input_pipe = CollectedData()
     output_pipe = CollectedData()
@@ -180,138 +202,136 @@ def test_dont_merge_routes_of_different_summits() -> None:
     ("input_route1", "input_route2", "expect_merge"),
     [
         pytest.param(
-            Route(
-                1,
-                "Talweg",
-                grade_af=3,
-            ),
-            Route(1, "Bergweg", grade_af=3),
+            Route("Talweg", rating=_create_rating(1, grade_af=3)),
+            Route("Bergweg", rating=_create_rating(1, grade_af=3)),
             False,
             id="Different names (same af and rank)",
         ),
         pytest.param(
             Route(
-                1,
                 "AW",
-                grade_af=5,
+                rating=_create_rating(
+                    1,
+                    grade_af=5,
+                ),
             ),
             Route(
-                1,
                 "AW",
-                grade_af=5,
+                rating=_create_rating(
+                    1,
+                    grade_af=5,
+                ),
             ),
             True,
             id="Same name, same af, same rank",
         ),
         pytest.param(
             Route(
-                1,
                 "AW",
-                grade_af=5,
+                rating=_create_rating(
+                    1,
+                    grade_af=5,
+                ),
             ),
             Route(
-                2,
                 "AW",
-                grade_af=5,
+                rating=_create_rating(
+                    2,
+                    grade_af=5,
+                ),
             ),
             True,
             id="Same name, same af, different rank",
         ),
         pytest.param(
             Route(
-                1,
                 "AW",
-                grade_af=5,
+                rating=_create_rating(
+                    1,
+                    grade_af=5,
+                ),
             ),
             Route(
-                2,
                 "AW",
-                grade_af=6,
+                rating=_create_rating(
+                    2,
+                    grade_af=6,
+                ),
             ),
             True,
             id="Same name, different af, different rank",
         ),
         pytest.param(
             Route(
-                1,
                 "AW",
-                grade_af=5,
+                rating=_create_rating(
+                    1,
+                    grade_af=5,
+                ),
             ),
             Route(
-                1,
                 "AW",
-                grade_af=6,
+                rating=_create_rating(
+                    1,
+                    grade_af=6,
+                ),
             ),
             False,
             id="Same name, different af, same rank",
         ),
         pytest.param(
             Route(
-                1,
                 "AW",
                 directions=[RouteDirections("Example1", "Source 2")],
-                grade_af=4,
-                grade_ou=5,
-                grade_rp=6,
-                grade_jump=1,
-                star_count=2,
-                dangerous=True,
+                rating=_create_rating(
+                    1,
+                    grade_af=4,
+                    grade_ou=5,
+                    grade_rp=6,
+                    grade_jump=1,
+                    star_count=2,
+                    dangerous=True,
+                ),
             ),
             Route(
-                2,
                 "AW",
                 directions=[RouteDirections("Example2", "Source 3")],
-                grade_af=4,
-                grade_ou=3,
-                grade_rp=2,
-                grade_jump=5,
-                star_count=1,
-                dangerous=False,
+                rating=_create_rating(
+                    2,
+                    grade_af=4,
+                    grade_ou=3,
+                    grade_rp=2,
+                    grade_jump=5,
+                    star_count=1,
+                    dangerous=False,
+                ),
             ),
             True,
             id="Other data differs",
         ),
         pytest.param(
-            Route(
-                1,
-                "alter weg",
-            ),
-            Route(
-                1,
-                "Alter Weg",
-            ),
+            Route("alter weg"),
+            Route("Alter Weg"),
             True,
             id="Name Normalization: Case-insensitivity",
         ),
         pytest.param(
-            Route(
-                1,
-                "Alter Weg",
-            ),
-            Route(
-                1,
-                "Weg, Alter",
-            ),
+            Route("Alter Weg"),
+            Route("Weg, Alter"),
             True,
             id="Name Normalization: Permutation",
         ),
         pytest.param(
-            Route(
-                1,
-                "Spieglein, Spieglein?",
-            ),
-            Route(
-                1,
-                "Spieglein Spieglein",
-            ),
+            Route("Spieglein, Spieglein?"),
+            Route("Spieglein Spieglein"),
             True,
             id="Name Normalization: Punctuation",
         ),
     ]
     + [
         pytest.param(
-            Route(1, abbr),
-            Route(1, fullname),
+            Route(abbr),
+            Route(fullname),
             True,
             id=f"Name Abbreviation: {abbr}",
         )
@@ -329,8 +349,8 @@ def test_dont_merge_routes_of_different_summits() -> None:
     ]
     + [
         pytest.param(
-            Route(1, name1),
-            Route(1, name2),
+            Route(name1),
+            Route(name2),
             True,
             id=f"Umlauts: '{name1}'=='{name2}'",
         )
@@ -343,8 +363,8 @@ def test_dont_merge_routes_of_different_summits() -> None:
     ]
     + [
         pytest.param(
-            Route(1, "S-Riß"),
-            Route(1, "südriss"),
+            Route("S-Riß"),
+            Route("südriss"),
             True,
             id="Combination: 'S-Riß'=='südriss'",
         )
@@ -360,11 +380,11 @@ def test_merge_routes_equality_check(
     Ensures that testing if several Route objects are actually the same physical route works as
     expected. For this test, all given Route objects are from different Summit instances.
 
-    Whether two routes are actually "the same" is determined by their (normalized) name, the
-    "af" grade and the conflict rank.
+    Whether two routes are actually "the same" is determined by their (normalized) name, the "af"
+    grade and its rank.
     - If the names differ, they are not equal
     - For same names:
-        - If the 'af' grades are equal, they are equal regardless of their rank
+        - If the 'af' grades are equal, they are equal regardless of its rank
         - If the 'af' grades differ but the ranks are different, they are equal
     - Names are normalized before comparing, eliminating:
         - Common abbreviations ("NW")
@@ -396,10 +416,24 @@ def test_merge_routes_equality_check(
     [
         pytest.param(
             [
-                Route(2, "AW"),
+                Route("AW", rating=_create_rating(2, grade_af=9)),
                 Route(
-                    1,
                     "AW",
+                    rating=_create_rating(
+                        1,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
+                ),
+            ],
+            Route(
+                "AW",
+                rating=_create_rating(
+                    1,
                     grade_af=9,
                     grade_ou=8,
                     grade_rp=7,
@@ -407,24 +441,32 @@ def test_merge_routes_equality_check(
                     star_count=0,
                     dangerous=True,
                 ),
-            ],
-            Route(
-                1,
-                "AW",
-                grade_af=9,
-                grade_ou=8,
-                grade_rp=7,
-                grade_jump=6,
-                star_count=0,
-                dangerous=True,
             ),
-            id="Grade data missing on lower rank (lower first)",
+            id="Ratings: Missing on lower rank (lower first)",
         ),
         pytest.param(
             [
                 Route(
-                    1,
                     "AW",
+                    rating=_create_rating(
+                        1,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
+                ),
+                Route(
+                    "AW",
+                    rating=_create_rating(2, grade_af=9),
+                ),
+            ],
+            Route(
+                "AW",
+                rating=_create_rating(
+                    1,
                     grade_af=9,
                     grade_ou=8,
                     grade_rp=7,
@@ -432,25 +474,29 @@ def test_merge_routes_equality_check(
                     star_count=0,
                     dangerous=True,
                 ),
-                Route(2, "AW"),
-            ],
-            Route(
-                1,
-                "AW",
-                grade_af=9,
-                grade_ou=8,
-                grade_rp=7,
-                grade_jump=6,
-                star_count=0,
-                dangerous=True,
             ),
-            id="Grade data missing on lower rank (higher first)",
+            id="Ratings: Missing on lower rank (higher first)",
         ),
         pytest.param(
             [
                 Route(
+                    "AW",
+                    rating=_create_rating(
+                        2,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
+                ),
+                Route("AW"),
+            ],
+            Route(
+                "AW",
+                rating=_create_rating(
                     2,
-                    "AW",
                     grade_af=9,
                     grade_ou=8,
                     grade_rp=7,
@@ -458,26 +504,29 @@ def test_merge_routes_equality_check(
                     star_count=0,
                     dangerous=True,
                 ),
-                Route(1, "AW"),
-            ],
-            Route(
-                2,
-                "AW",
-                grade_af=9,
-                grade_ou=8,
-                grade_rp=7,
-                grade_jump=6,
-                star_count=0,
-                dangerous=True,
             ),
-            id="Grade data missing on higher rank (lower first)",
+            id="Ratings: Null value (second)",
         ),
         pytest.param(
             [
-                Route(1, "AW"),
+                Route("AW"),
                 Route(
+                    "AW",
+                    rating=_create_rating(
+                        2,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
+                ),
+            ],
+            Route(
+                "AW",
+                rating=_create_rating(
                     2,
-                    "AW",
                     grade_af=9,
                     grade_ou=8,
                     grade_rp=7,
@@ -485,50 +534,29 @@ def test_merge_routes_equality_check(
                     star_count=0,
                     dangerous=True,
                 ),
-            ],
-            Route(
-                2,
-                "AW",
-                grade_af=9,
-                grade_ou=8,
-                grade_rp=7,
-                grade_jump=6,
-                star_count=0,
-                dangerous=True,
             ),
-            id="Grade data missing on higher rank (higher first)",
+            id="Ratings: Null value (first)",
         ),
         pytest.param(
             [
                 Route(
-                    1,
                     "AW",
-                    grade_af=9,
-                    grade_ou=8,
-                    grade_rp=7,
-                    grade_jump=6,
-                    star_count=0,
-                    dangerous=True,
+                    rating=_create_rating(
+                        1,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
                 )
             ]
             * 2,
             Route(
-                1,
                 "AW",
-                grade_af=9,
-                grade_ou=8,
-                grade_rp=7,
-                grade_jump=6,
-                star_count=0,
-                dangerous=True,
-            ),
-            id="Equal data, same ranks",
-        ),
-        pytest.param(
-            [
-                Route(
+                rating=_create_rating(
                     1,
-                    "AW",
                     grade_af=9,
                     grade_ou=8,
                     grade_rp=7,
@@ -536,9 +564,40 @@ def test_merge_routes_equality_check(
                     star_count=0,
                     dangerous=True,
                 ),
+            ),
+            id="Ratings: Equal data, same ranks",
+        ),
+        pytest.param(
+            [
                 Route(
-                    2,
                     "AW",
+                    rating=_create_rating(
+                        1,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
+                ),
+                Route(
+                    "AW",
+                    rating=_create_rating(
+                        2,
+                        grade_af=9,
+                        grade_ou=8,
+                        grade_rp=7,
+                        grade_jump=6,
+                        star_count=0,
+                        dangerous=True,
+                    ),
+                ),
+            ],
+            Route(
+                "AW",
+                rating=_create_rating(
+                    1,
                     grade_af=9,
                     grade_ou=8,
                     grade_rp=7,
@@ -546,24 +605,40 @@ def test_merge_routes_equality_check(
                     star_count=0,
                     dangerous=True,
                 ),
-            ],
-            Route(
-                1,
-                "AW",
-                grade_af=9,
-                grade_ou=8,
-                grade_rp=7,
-                grade_jump=6,
-                star_count=0,
-                dangerous=True,
             ),
-            id="Equal data, different ranks",
+            id="Ratings: Equal data, different ranks",
         ),
         pytest.param(
             [
                 Route(
-                    1,
                     "My Route",
+                    rating=_create_rating(
+                        1,
+                        grade_jump=1,
+                        grade_af=2,
+                        grade_ou=3,
+                        grade_rp=4,
+                        dangerous=True,
+                        star_count=1,
+                    ),
+                ),
+                Route(
+                    "My Route",
+                    rating=_create_rating(
+                        2,
+                        grade_jump=4,
+                        grade_af=3,
+                        grade_ou=2,
+                        grade_rp=1,
+                        dangerous=False,
+                        star_count=2,
+                    ),
+                ),
+            ],
+            Route(
+                "My Route",
+                rating=_create_rating(
+                    1,
                     grade_jump=1,
                     grade_af=2,
                     grade_ou=3,
@@ -571,44 +646,40 @@ def test_merge_routes_equality_check(
                     dangerous=True,
                     star_count=1,
                 ),
-                Route(
-                    2,
-                    "My Route",
-                    grade_jump=4,
-                    grade_af=3,
-                    grade_ou=2,
-                    grade_rp=1,
-                    dangerous=False,
-                    star_count=2,
-                ),
-            ],
-            Route(
-                1,
-                "My Route",
-                grade_jump=1,
-                grade_af=2,
-                grade_ou=3,
-                grade_rp=4,
-                dangerous=True,
-                star_count=1,
             ),
-            id="Conflicting data, different ranks #1",
+            id="Ratings: Conflicting data, different ranks #1",
         ),
         pytest.param(
             [
                 Route(
-                    2,
                     "My Route",
-                    grade_jump=1,
-                    grade_af=2,
-                    grade_ou=3,
-                    grade_rp=4,
-                    dangerous=True,
-                    star_count=1,
+                    rating=_create_rating(
+                        2,
+                        grade_jump=1,
+                        grade_af=2,
+                        grade_ou=3,
+                        grade_rp=4,
+                        dangerous=True,
+                        star_count=1,
+                    ),
                 ),
                 Route(
+                    "My Route",
+                    rating=_create_rating(
+                        1,
+                        grade_jump=4,
+                        grade_af=3,
+                        grade_ou=2,
+                        grade_rp=1,
+                        dangerous=False,
+                        star_count=2,
+                    ),
+                ),
+            ],
+            Route(
+                "My Route",
+                rating=_create_rating(
                     1,
-                    "My Route",
                     grade_jump=4,
                     grade_af=3,
                     grade_ou=2,
@@ -616,26 +687,15 @@ def test_merge_routes_equality_check(
                     dangerous=False,
                     star_count=2,
                 ),
-            ],
-            Route(
-                1,
-                "My Route",
-                grade_jump=4,
-                grade_af=3,
-                grade_ou=2,
-                grade_rp=1,
-                dangerous=False,
-                star_count=2,
             ),
-            id="Conflicting data, different ranks #2",
+            id="Ratings: Conflicting data, different ranks #2",
         ),
         pytest.param(
             [
-                Route(1, "AW"),
-                Route(1, "AW", directions=[RouteDirections("Dummy Text", "Test")]),
+                Route("AW"),
+                Route("AW", directions=[RouteDirections("Dummy Text", "Test")]),
             ],
             Route(
-                1,
                 "AW",
                 directions=[RouteDirections("Dummy Text", "Test")],
             ),
@@ -643,23 +703,18 @@ def test_merge_routes_equality_check(
         ),
         pytest.param(
             [
-                Route(1, "AW", directions=[RouteDirections("Dummy Text", "Test")]),
-                Route(1, "AW"),
+                Route("AW", directions=[RouteDirections("Dummy Text", "Test")]),
+                Route("AW"),
             ],
-            Route(
-                1,
-                "AW",
-                directions=[RouteDirections("Dummy Text", "Test")],
-            ),
+            Route("AW", directions=[RouteDirections("Dummy Text", "Test")]),
             id="Directions: Second value empty",
         ),
         pytest.param(
             [
-                Route(1, "AW", directions=[RouteDirections("Dummy Text 1", "Source 1")]),
-                Route(1, "AW", directions=[RouteDirections("Dummy Text 2", "Source 2")]),
+                Route("AW", directions=[RouteDirections("Dummy Text 1", "Source 1")]),
+                Route("AW", directions=[RouteDirections("Dummy Text 2", "Source 2")]),
             ],
             Route(
-                1,
                 "AW",
                 directions=[
                     RouteDirections("Dummy Text 1", "Source 1"),
@@ -670,38 +725,35 @@ def test_merge_routes_equality_check(
         ),
         pytest.param(
             [
-                Route(1, "AW"),
-                Route(1, "AW", entry_position=_create_position(1000000, 2000000, 1)),
+                Route("AW"),
+                Route("AW", entry_position=_create_position(1000000, 2000000, 1)),
             ],
             Route(
-                1,
                 "AW",
                 entry_position=_create_position(1000000, 2000000, 1),
             ),
-            id="Position: First value empty",
+            id="Position: First value missing",
         ),
         pytest.param(
             [
-                Route(1, "AW", entry_position=_create_position(1000000, 2000000, 1)),
-                Route(1, "AW"),
+                Route("AW", entry_position=_create_position(1000000, 2000000, 1)),
+                Route("AW"),
             ],
-            Route(
-                1,
-                "AW",
-                entry_position=_create_position(1000000, 2000000, 1),
-            ),
-            id="Position: Second value empty",
+            Route("AW", entry_position=_create_position(1000000, 2000000, 1)),
+            id="Position: Second value missing",
         ),
         pytest.param(
             [
-                Route(1, "AW"),
-                Route(1, "AW", grade_ou=1),
-                Route(1, "AW"),
+                Route("AW"),
+                Route("AW", rating=_create_rating(1, grade_ou=1)),
+                Route("AW"),
             ],
             Route(
-                1,
                 "AW",
-                grade_ou=1,
+                rating=_create_rating(
+                    1,
+                    grade_ou=1,
+                ),
             ),
             id="More than two instances",
         ),
@@ -745,14 +797,12 @@ def test_merge_routes_data_transfer(
     output_route: Route = output_routes[0]
 
     assert output_route.route_name == expected_output_route.route_name
-    assert output_route.conflict_rank == expected_output_route.conflict_rank
-    assert output_route.grade_af == expected_output_route.grade_af
-    assert output_route.grade_rp == expected_output_route.grade_rp
-    assert output_route.grade_ou == expected_output_route.grade_ou
-    assert output_route.grade_jump == expected_output_route.grade_jump
-    assert output_route.star_count == expected_output_route.star_count
-    assert output_route.dangerous == expected_output_route.dangerous
     assert output_route.directions == expected_output_route.directions
+
+    assert output_route.rating.is_null() == output_route.rating.is_null()
+    assert output_route.rating.rank == output_route.rating.rank
+    if not output_route.rating.is_null():
+        assert output_route.rating.value == expected_output_route.rating.value
 
     assert output_route.entry_position.is_null() == output_route.entry_position.is_null()
     assert output_route.entry_position.rank == output_route.entry_position.rank
@@ -767,32 +817,24 @@ def test_merge_routes_data_transfer(
     [
         pytest.param(
             [
-                Route(1, "AW", grade_ou=4),
-                Route(1, "AW", grade_rp=2),
+                Route("AW", rating=_create_rating(1, grade_ou=4)),
+                Route("AW", rating=_create_rating(1, grade_rp=2)),
             ],
             MergeConflictError,
             id="Conflicting ou/rp grade",
         ),
         pytest.param(
             [
-                Route(1, "AW", star_count=2),
-                Route(1, "AW", star_count=1),
+                Route("AW", rating=_create_rating(1, star_count=2)),
+                Route("AW", rating=_create_rating(1, star_count=1)),
             ],
             MergeConflictError,
             id="Conflicting star count",
         ),
         pytest.param(
             [
-                Route(
-                    1,
-                    "AW",
-                    entry_position=_create_position(1000000, 2000000, 3),
-                ),
-                Route(
-                    1,
-                    "AW",
-                    entry_position=_create_position(2000000, 1000000, 3),
-                ),
+                Route("AW", entry_position=_create_position(1000000, 2000000, 3)),
+                Route("AW", entry_position=_create_position(2000000, 1000000, 3)),
             ],
             MergeConflictError,
             id="Conflicting entry position",

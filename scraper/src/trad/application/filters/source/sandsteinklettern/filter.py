@@ -115,7 +115,7 @@ class SandsteinkletternDataFilter(SourceFilter):
             source_label=self._EXTERNAL_SOURCE_DESCRIPTION.label,
             summit_sector_rank=2,
             summit_position_rank=RankedValue.WORST_PRODUCTION_QUALITY_RANK + 1,
-            route_grade_conflict_rank=self._ROUTE_DATA_RANK,
+            route_rating_rank=self._ROUTE_DATA_RANK,
         )
 
         self._summit_added = False  # Remember if at least one summit has been added (True) or not

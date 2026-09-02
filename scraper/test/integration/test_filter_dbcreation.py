@@ -19,7 +19,7 @@ from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Post, Route, RouteDirections, Summit
+from trad.kernel.entities.routedata import Post, Route, RouteDirections, RouteRating, Summit
 
 DB_FILE_NAME: Final = (
     f"routedb_v1-{datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}.sqlite"
@@ -52,10 +52,9 @@ def test_schema_v1_db_creation(tmp_path: Path) -> None:
     route_id = input_pipe.add_route(
         summit_id=summit_id,
         route=Route(
-            conflict_rank=1,
             route_name="AW",
             directions=[RouteDirections("Beschreibung", "Unit Test")],
-            grade_af=af_grade,
+            rating=RankedValue.create_valid(RouteRating(grade_af=af_grade), 1),
         ),
     )
     input_pipe.add_post(

@@ -22,7 +22,7 @@ _data_factory = RouteDataFactory(
     source_label="OpenStreetMap",
     summit_sector_rank=1,
     summit_position_rank=1,
-    route_grade_conflict_rank=5,
+    route_rating_rank=5,
     route_entry_position_rank=1,
 )
 """
@@ -465,17 +465,20 @@ class TestOsmDataFilterRoutes:
         Returns True if the given routes are equal, otherwise False.
         This compares by value, i.e. two different instances with the same values are equal.
         """
-        ret_val = (
-            route1.route_name == route2.route_name
-            and route1.conflict_rank == route2.conflict_rank
-            and route1.grade_af == route2.grade_af
-            and route1.grade_rp == route2.grade_rp
-            and route1.grade_ou == route2.grade_ou
-            and route1.grade_jump == route2.grade_jump
-            and route1.star_count == route2.star_count
-            and route1.dangerous == route2.dangerous
-            and route1.directions == route2.directions
-        )
+        ret_val = route1.route_name == route2.route_name and route1.directions == route2.directions
+
+        if ret_val:
+            if route1.rating.is_null() == route2.rating.is_null():
+                ret_val = True
+            else:
+                ret_val = (
+                    route1.grade_af == route2.grade_af
+                    and route1.grade_rp == route2.grade_rp
+                    and route1.grade_ou == route2.grade_ou
+                    and route1.grade_jump == route2.grade_jump
+                    and route1.star_count == route2.star_count
+                    and route1.dangerous == route2.dangerous
+                )
 
         if ret_val:
             if route1.entry_position.is_null() == route2.entry_position.is_null():

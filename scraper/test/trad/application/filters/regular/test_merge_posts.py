@@ -116,7 +116,7 @@ def test_merge_posts(input_posts: list[list[Post]]) -> None:
 
     for route in input_posts:
         summit_id = input_pipe.add_summit(Summit("Summit"))
-        route_id = input_pipe.add_route(summit_id, Route(1, route_name="Route"))
+        route_id = input_pipe.add_route(summit_id, Route(route_name="Route"))
         for post in route:
             input_pipe.add_post(route_id, post)
 

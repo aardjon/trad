@@ -149,16 +149,16 @@ class RouteDirections:
 
 
 @dataclass
-class Route:  # pylint: disable=too-many-instance-attributes
+class RouteRating:
     """
-    A single climbing route.
+    Combination of different aspects for rating a single climbing route.
 
-    A route is the path by which a climber reaches the top of a mountain, so it is always attached
-    to a single summit. In most cases, there are multiple routes onto each summit.
+    This class stores values like grade or danger, which are officially assigned by the SBB. It has
+    nothing to do with the community ratings that are are just opinions of single members.
 
-    Routes have several grades describing their difficulty, depending on the route characteristics
-    (e.g. does it include a jump?), the climbing style (e.g. "all free" or "redpoint") and also on
-    each other:
+    As for the grades, they are described by several difficulty values, depending on the route
+    characteristics (e.g. does it include a jump?), the climbing style (e.g. "all free" or
+    "redpoint") and also on each other:
      - A route without a jumping grade is usually climbed without having to jump
      - A route with both grades contains a single jump within its climbing parts
      - A route with only a jumping grade consists of a single jump only
@@ -168,29 +168,7 @@ class Route:  # pylint: disable=too-many-instance-attributes
     rating and without an upper bound. Each step in the corresponding scale system increases the
     value by one, so e.g. the saxon grade VIIb is stored as 8 and the UIAA grade IV is stored as 6.
     0 can be used when a certain grade doesn't apply to a route at all, e.g. when there is no jump.
-
-    Routes come with a `conflict_rank` for determining which data to use in case of several
-    conflicting values. This is a positive integer with 1 being the most important rank. If two
-    Route objects describe the same route but differ in their grades, the data with the lower 'rank'
-    value will be used.
     """
-
-    conflict_rank: int
-    """
-    Priority value for determining which route data to choose in case of conflicting values (from
-    different data sources). 1 is the most important rank.
-    """
-
-    route_name: str
-    """ The name of the route. """
-
-    directions: list[RouteDirections] = field(default_factory=list)
-    """
-    Textual descriptions of the route (potentially several of them from different sources).
-    """
-
-    grade: str = ""
-    """ String representing the grade. Deprecated, use the more fine-grained grade fields. """
 
     grade_af: int = NO_GRADE
     """
@@ -230,6 +208,32 @@ class Route:  # pylint: disable=too-many-instance-attributes
     True if the route is officially marked as "dangerous", False if not.
     """
 
+
+@dataclass
+class Route:
+    """
+    A single climbing route.
+
+    A route is the path by which a climber reaches the top of a mountain, so it is always attached
+    to a single summit. In most cases, there are multiple routes onto each summit.
+    """
+
+    route_name: str
+    """ The name of the route. """
+
+    directions: list[RouteDirections] = field(default_factory=list)
+    """
+    Textual descriptions of the route (potentially several of them from different sources).
+    """
+
+    grade: str = ""
+    """ String representing the grade. Deprecated, use the more fine-grained grade fields. """
+
+    rating: RankedValue[RouteRating] = field(default_factory=RankedValue.create_null)
+    """
+    Official rating (i.e. difficulty) of this route. Can be a null object if the rating is unknown.
+    """
+
     entry_position: RankedValue[GeoPosition] = field(
         default_factory=RankedValue[GeoPosition].create_null
     )
@@ -248,6 +252,58 @@ class Route:  # pylint: disable=too-many-instance-attributes
         """
         if not self.route_name:
             raise IncompleteDataError(self, "name")
+
+    @property
+    def grade_af(self) -> int:
+        """
+        AF style grade of this route. This simply forwards rating.value.grade_af.
+        """
+        if not self.rating.is_null():
+            return self.rating.value.grade_af
+        return NO_GRADE
+
+    @property
+    def grade_rp(self) -> int:
+        """
+        RP style grade of this route. This simply forwards rating.value.grade_rp.
+        """
+        if not self.rating.is_null():
+            return self.rating.value.grade_rp
+        return NO_GRADE
+
+    @property
+    def grade_ou(self) -> int:
+        """
+        OU style grade of this route. This simply forwards rating.value.grade_ou.
+        """
+        if not self.rating.is_null():
+            return self.rating.value.grade_ou
+        return NO_GRADE
+
+    @property
+    def grade_jump(self) -> int:
+        """
+        Jump grade of this route. This simply forwards rating.value.grade_jump.
+        """
+        if not self.rating.is_null():
+            return self.rating.value.grade_jump
+        return NO_GRADE
+
+    @property
+    def dangerous(self) -> bool:
+        """
+        Jump grade of this route. This simply forwards rating.value.dangerous.
+        """
+        return not self.rating.is_null() and self.rating.value.dangerous
+
+    @property
+    def star_count(self) -> int:
+        """
+        Star count of this route. This simply forwards rating.value.star_count.
+        """
+        if not self.rating.is_null():
+            return self.rating.value.star_count
+        return 0
 
 
 @dataclass
