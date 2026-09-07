@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "trad_scraper"
 # Attention: When incrementing the scraper version number, please also change the
 # 'APPLICATION_VERSION' constant in the kernel/appmeta.dart file (both values must always be equal)!
-version = "0.5.1"
+version = "0.6.0"
 description = "Route data scraper for the trad mobile application."
 authors = [
   {name = "Karsten Wesenigk"},
@@ -42,6 +42,7 @@ dev = [
   "pytest",
   "PyInstaller",
   "ruff",
+  "time-machine",
   "types-beautifulsoup4",
   "types-requests",
 ]
@@ -520,6 +521,9 @@ select = ["ALL"]
 ignore = [
   # Disable all flake8-annotations rules because they are checked by MyPy later on (aren't they?)
   "ANN",
+
+  # Disabled because we don't want to add a copyright notice to every single source file.
+  "CPY001",
 
   # Disable most of the pydocstyle (D) rules because we don't want to enforce too much docstring
   # content and style. We mainly want to ensure that there are docstrings at all.

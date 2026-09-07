@@ -13,7 +13,7 @@ from typing import Final, override
 from trad.kernel.boundaries.filters import Filter
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.names import NormalizedName
-from trad.kernel.entities.routedata import NO_GRADE, Post, Route, Summit
+from trad.kernel.entities.routedata import Post, Route, Summit
 from trad.kernel.errors import MergeConflictError
 
 _logger = getLogger(__name__)
@@ -48,7 +48,15 @@ class MergeFilter(Filter):
                 full_route_data = _RouteRelatedData(route=route, posts=[])
                 for post in input_pipe.iter_posts_of_route(route_id):
                     full_route_data.posts.append(post)
-                route_merger.merge_entity(full_route_data)
+                try:
+                    route_merger.merge_entity(full_route_data)
+                except Exception:
+                    # We don't use .exception here on purpose, because the exception is reraised and
+                    # the traceback will be logged later.
+                    _logger.error(  # noqa: TRY400
+                        "Error while merging instances of summit %s, cancelling.", summit.name
+                    )
+                    raise
             summit_merger.merge_entity(full_summit_data)
 
         self._write_merged_data(output_pipe)
@@ -274,7 +282,6 @@ class _SummitMerger(_EntityMerger[_SummitRelatedData]):
 
     @staticmethod
     def _enrich_position(target: Summit, source: Summit) -> None:
-        # Merge the high grade position
         if target.position.is_null():
             target.position = source.position
         elif not source.position.is_null():
@@ -308,8 +315,10 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
         return self.__normalize_name(existing_route.route_name) == self.__normalize_name(
             new_route.route_name
         ) and (
-            existing_route.grade_af == new_route.grade_af
-            or existing_route.conflict_rank != new_route.conflict_rank
+            existing_route.rating.is_null()
+            or new_route.rating.is_null()
+            or existing_route.rating.rank != new_route.rating.rank
+            or existing_route.grade_af == new_route.grade_af
         )
 
     def __normalize_name(self, object_name: str) -> str:
@@ -364,50 +373,36 @@ class _RouteMerger(_EntityMerger[_RouteRelatedData]):
         # Merge direction data
         target_route.directions.extend(source_route.directions)
 
-        # Merge grade data
-        target_grade = (
-            target_route.grade_af,
-            target_route.grade_ou,
-            target_route.grade_rp,
-            target_route.grade_jump,
-            target_route.dangerous,
-            target_route.star_count,
-        )
-        source_grade = (
-            source_route.grade_af,
-            source_route.grade_ou,
-            source_route.grade_rp,
-            source_route.grade_jump,
-            source_route.dangerous,
-            source_route.star_count,
-        )
-        missing_grade: Final = (NO_GRADE, NO_GRADE, NO_GRADE, NO_GRADE, False, 0)
+        # Merge rating data
+        self._enrich_rating(target_route, source_route)
 
-        if target_grade == missing_grade:
-            target_route.grade_af = source_route.grade_af
-            target_route.grade_ou = source_route.grade_ou
-            target_route.grade_rp = source_route.grade_rp
-            target_route.grade_jump = source_route.grade_jump
-            target_route.dangerous = source_route.dangerous
-            target_route.star_count = source_route.star_count
-            target_route.conflict_rank = source_route.conflict_rank
-        elif source_grade == target_grade:
-            # Data is equal - use the better (lower) rank if they differ
-            target_route.conflict_rank = min(target_route.conflict_rank, source_route.conflict_rank)
-        elif source_grade != missing_grade:
-            # Take the data from the object with the lower rank. If this is the target, nothing must
-            # be done to just keep the data.
-            if source_route.conflict_rank < target_route.conflict_rank:
-                target_route.grade_af = source_route.grade_af
-                target_route.grade_ou = source_route.grade_ou
-                target_route.grade_rp = source_route.grade_rp
-                target_route.grade_jump = source_route.grade_jump
-                target_route.dangerous = source_route.dangerous
-                target_route.star_count = source_route.star_count
-                target_route.conflict_rank = source_route.conflict_rank
-            elif source_route.conflict_rank == target_route.conflict_rank:
-                # Conflicting data and same rank
-                raise MergeConflictError("route", source_route.route_name, "grade")
+        # Merge entry position
+        self._enrich_entry_position(target_route, source_route)
 
         # Add all posts from the source route to the target route
         target_entity.posts.extend(source_entity.posts)
+
+    @staticmethod
+    def _enrich_rating(target: Route, source: Route) -> None:
+        if target.rating.is_null():
+            target.rating = source.rating
+        elif not source.rating.is_null():
+            if source.rating.rank < target.rating.rank:
+                target.rating = source.rating
+            elif (
+                source.rating.rank == target.rating.rank
+                and target.rating.value != source.rating.value
+            ):
+                raise MergeConflictError("route", source.route_name, "grade")
+
+    @staticmethod
+    def _enrich_entry_position(target: Route, source: Route) -> None:
+        if target.entry_position.is_null():
+            target.entry_position = source.entry_position
+        elif not source.entry_position.is_null():
+            if source.entry_position.rank < target.entry_position.rank:
+                target.entry_position = source.entry_position
+            elif source.entry_position.rank == target.entry_position.rank and (
+                not target.entry_position.value.is_equal_to(source.entry_position.value)
+            ):
+                raise MergeConflictError("route", source.route_name, "entry_position")

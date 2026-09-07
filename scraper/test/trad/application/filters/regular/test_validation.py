@@ -14,7 +14,7 @@ from trad.application.pipes import CollectedData
 from trad.kernel.boundaries.pipes import Pipe, RouteInstanceId, SummitInstanceId
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Post, Route, Summit
+from trad.kernel.entities.routedata import Post, Route, RouteRating, Summit
 from trad.kernel.errors import EntityNotFoundError, IncompleteDataError
 
 
@@ -81,7 +81,10 @@ def _compare_pipes(actual_pipe: Pipe, expected_pipe: Pipe) -> None:
 
 
 def _create_example_route(route_number: int) -> Route:
-    return Route(1, f"Route No. {route_number}", grade_af=3)
+    return Route(
+        f"Route No. {route_number}",
+        rating=RankedValue.create_valid(RouteRating(grade_af=3), 1),
+    )
 
 
 def _create_example_post(post_number: int) -> Post:
@@ -275,7 +278,7 @@ def test_invalid_post() -> None:
 
     input_pipe = _prepare_pipe(
         [Summit(official_name="Summit", sector=_create_sector("Example Sector"))],
-        [(Route(conflict_rank=0, route_name="Route"), 0)],
+        [(Route(route_name="Route"), 0)],
         [
             (
                 Post(

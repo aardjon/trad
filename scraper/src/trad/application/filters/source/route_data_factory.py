@@ -4,7 +4,7 @@ Provides functionality for easily creating route data domain objects (e.g. Summi
 
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import NO_GRADE, Route, RouteDirections, Summit
+from trad.kernel.entities.routedata import NO_GRADE, Route, RouteDirections, RouteRating, Summit
 from trad.kernel.errors import InvalidStateError
 
 
@@ -23,7 +23,8 @@ class RouteDataFactory:
         source_label: str | None = None,
         summit_sector_rank: int | None = None,
         summit_position_rank: int | None = None,
-        route_grade_conflict_rank: int | None = None,
+        route_rating_rank: int | None = None,
+        route_entry_position_rank: int | None = None,
     ) -> None:
         """
         Create a new data factory which uses the given rank and source information when creating
@@ -33,9 +34,8 @@ class RouteDataFactory:
         self._source_label = source_label
         self._summit_sector_rank = summit_sector_rank
         self._summit_position_rank = summit_position_rank
-        self._route_grade_conflict_rank = (
-            route_grade_conflict_rank or RankedValue.create_null().rank
-        )
+        self._route_rating_rank = route_rating_rank or RankedValue.create_null().rank
+        self._route_entry_position_rank = route_entry_position_rank
 
     def create_summit(
         self,
@@ -57,6 +57,29 @@ class RouteDataFactory:
             sector=self._create_ranked_value(sector, self._summit_sector_rank),
         )
 
+    def create_route_rating(  # noqa: PLR0913
+        self,
+        *,
+        grade_af: int = NO_GRADE,
+        grade_rp: int = NO_GRADE,
+        grade_ou: int = NO_GRADE,
+        grade_jump: int = NO_GRADE,
+        star_count: int = 0,
+        dangerous: bool = False,
+    ) -> RouteRating:
+        """
+        Create a new `RouteRating` instance with the given data. See there for detailled parameter
+        explanation.
+        """
+        return RouteRating(
+            grade_af=grade_af,
+            grade_rp=grade_rp,
+            grade_ou=grade_ou,
+            grade_jump=grade_jump,
+            star_count=star_count,
+            dangerous=dangerous,
+        )
+
     def create_route(  # noqa: PLR0913
         self,
         route_name: str,
@@ -69,6 +92,7 @@ class RouteDataFactory:
         grade_jump: int = NO_GRADE,
         star_count: int = 0,
         dangerous: bool = False,
+        entry_position: GeoPosition | None = None,
     ) -> Route:
         """
         Create a new `Route` instance with the given data. See there for detailled parameter
@@ -83,16 +107,24 @@ class RouteDataFactory:
         )
 
         return Route(
-            conflict_rank=self._route_grade_conflict_rank,
             route_name=route_name,
             directions=route_directions,
             grade=grade,
-            grade_af=grade_af,
-            grade_rp=grade_rp,
-            grade_ou=grade_ou,
-            grade_jump=grade_jump,
-            star_count=star_count,
-            dangerous=dangerous,
+            rating=self._create_ranked_value(
+                self.create_route_rating(
+                    grade_af=grade_af,
+                    grade_rp=grade_rp,
+                    grade_ou=grade_ou,
+                    grade_jump=grade_jump,
+                    star_count=star_count,
+                    dangerous=dangerous,
+                ),
+                self._route_rating_rank,
+            ),
+            entry_position=self._create_ranked_value(
+                entry_position,
+                self._route_entry_position_rank,
+            ),
         )
 
     def _create_ranked_value[T](self, value: T | None, rank: int | None) -> RankedValue[T]:

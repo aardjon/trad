@@ -62,6 +62,13 @@ class DbSchemaV1Filter(SinkFilter):
         area but with a different rank (e.g. regular peaks vs. 'massive').
         """
 
+    @property
+    def destination_file(self) -> Path:
+        """
+        Path to the database file being created.
+        """
+        return self.__destination_file
+
     @override
     def get_name(self) -> str:
         return "WriteDbSchemaV1"
@@ -283,6 +290,8 @@ class DbSchemaV1Filter(SinkFilter):
             RoutesTable.COLUMN_GRADE_JUMP,
             RoutesTable.COLUMN_STARS,
             RoutesTable.COLUMN_DANGER,
+            RoutesTable.COLUMN_ENTRY_LATITUDE,
+            RoutesTable.COLUMN_ENTRY_LONGITUDE,
         ]
         column_names = ", ".join(column_list)
         value_placeholders = self._get_value_placeholders(len(column_list) - 1)
@@ -290,6 +299,13 @@ class DbSchemaV1Filter(SinkFilter):
             f"INSERT INTO {RoutesTable.TABLE_NAME} ({column_names}) "
             f"VALUES (({select_summit}), {value_placeholders})"
         )
+
+        entry_position = (
+            route.entry_position.value
+            if not route.entry_position.is_null()
+            else GeoPosition(0, 0)  # (0, 0) is a special value for a missing position
+        )
+
         self.__database_boundary.execute_write(
             query=insert_statement,
             query_parameters=[
@@ -302,6 +318,8 @@ class DbSchemaV1Filter(SinkFilter):
                 route.grade_jump,
                 route.star_count,
                 route.dangerous,
+                entry_position.latitude_int,
+                entry_position.longitude_int,
             ],
         )
         row_ids = self.__database_boundary.execute_read(
@@ -378,7 +396,7 @@ class DbSchemaV1Filter(SinkFilter):
                 route_name,
                 post.user_name,
                 post.comment,
-                post.post_date.isoformat(),
+                post.post_date.astimezone(datetime.UTC).isoformat(),
                 post.rating,
                 post.source_label,
             ],

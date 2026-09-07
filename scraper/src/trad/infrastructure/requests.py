@@ -1,10 +1,6 @@
 """
 Implementation of a generic HTTP networking component.
 """
-# Disable the "no-member" pylint message in this file because it causes too many false positives for
-# the dynamic attributes and imports of the 'requests' library. The basic/static cases are still
-# checked by Mypy, so it's not turned off completely.
-# pylint: disable=no-member
 
 from collections.abc import Callable
 from functools import partial

@@ -10,7 +10,7 @@ from trad.application.boundaries.http import HttpNetworkingBoundary
 from trad.application.filters.regular.merge import MergeFilter
 from trad.application.filters.regular.validation import DataValidationFilter
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
-from trad.application.filters.source.osm import OsmSummitDataFilter
+from trad.application.filters.source.osm.filter import OsmDataFilter
 from trad.application.filters.source.sandsteinklettern.filter import SandsteinkletternDataFilter
 from trad.application.filters.source.teufelsturm import TeufelsturmDataFilter
 from trad.kernel.boundaries.filters import Filter, FilterFactory
@@ -30,7 +30,7 @@ class AllFiltersFactory(FilterFactory):
         Create a new FilterFactory with the given [dependency_provider].
         """
         self._filter_classes: Final[dict[type[Filter], Callable[[], Filter]]] = {
-            OsmSummitDataFilter: lambda: OsmSummitDataFilter(
+            OsmDataFilter: lambda: OsmDataFilter(
                 dependency_provider.provide(HttpNetworkingBoundary)
             ),
             TeufelsturmDataFilter: lambda: TeufelsturmDataFilter(
@@ -49,7 +49,7 @@ class AllFiltersFactory(FilterFactory):
         """ Mapping of all concrete Filter classes and their creation function. """
 
         self._stages: Final[list[list[type[Filter]]]] = [
-            [OsmSummitDataFilter, SandsteinkletternDataFilter, TeufelsturmDataFilter],
+            [OsmDataFilter, SandsteinkletternDataFilter, TeufelsturmDataFilter],
             [MergeFilter],
             [DataValidationFilter],
             [DbSchemaV1Filter],

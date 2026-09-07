@@ -2,9 +2,14 @@
 Unit tests for the `trad.application.filters.sink.db_v1` module.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
+from sqlite3 import connect
 from unittest.mock import Mock, call
+from zoneinfo import ZoneInfo
+
+import pytest
+from time_machine import TimeMachineFixture
 
 from trad.application.boundaries.database import (
     DataRow,
@@ -14,21 +19,31 @@ from trad.application.boundaries.database import (
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.filters.sink.db_v1.dbschema import (
     AreasTable,
+    DatabaseMetadataTable,
     ExternalDataSourcesTable,
     PostsTable,
     RoutesTable,
     SummitNamesTable,
     SummitsTable,
 )
+from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.application.pipes import CollectedData
+from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.ranked import RankedValue
-from trad.kernel.entities.routedata import Post, Route, RouteDirections, Summit
+from trad.kernel.entities.routedata import Post, Summit
 
 
 class TestDbSchemaV1Filter:
+    _data_factory = RouteDataFactory(
+        source_label="Unit Test",
+        summit_sector_rank=1,
+        summit_position_rank=3,
+        route_rating_rank=1,
+    )
+
     _example_sector = RankedValue.create_valid("Test", 1)
 
     def test_add_summit(self, tmp_path: Path) -> None:
@@ -86,10 +101,9 @@ class TestDbSchemaV1Filter:
         )
         input_pipe.add_route(
             summit_id=summit_id,
-            route=Route(
-                1,
+            route=self._data_factory.create_route(
                 route_name="Anxiety",
-                directions=[RouteDirections(directions="Don't go down!", source_label="Unit Test")],
+                directions="Don't go down!",
                 grade_rp=8,
                 grade_af=10,
                 grade_ou=9,
@@ -117,15 +131,17 @@ class TestDbSchemaV1Filter:
             f"{RoutesTable.COLUMN_GRADE_OU}, "
             f"{RoutesTable.COLUMN_GRADE_JUMP}, "
             f"{RoutesTable.COLUMN_STARS}, "
-            f"{RoutesTable.COLUMN_DANGER}"
+            f"{RoutesTable.COLUMN_DANGER}, "
+            f"{RoutesTable.COLUMN_ENTRY_LATITUDE}, "
+            f"{RoutesTable.COLUMN_ENTRY_LONGITUDE}"
             f") VALUES (("
             f"SELECT {SummitNamesTable.COLUMN_SUMMIT_ID} FROM {SummitNamesTable.TABLE_NAME} "
             f"WHERE {SummitNamesTable.COLUMN_NAME}=? AND {SummitNamesTable.COLUMN_USAGE}=0 LIMIT 1"
-            f"), ?, ?, ?, ?, ?, ?, ?, ?)"
+            f"), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
         fake_db_boundary.execute_write.assert_any_call(
             query=expected_sql_statement,
-            query_parameters=["Mock Monument", "Anxiety", "", 10, 8, 9, 2, 1, True],
+            query_parameters=["Mock Monument", "Anxiety", "", 10, 8, 9, 2, 1, True, 0, 0],
         )
         self._check_database_finalization(fake_db_boundary)
 
@@ -141,8 +157,7 @@ class TestDbSchemaV1Filter:
         )
         route_id = input_pipe.add_route(
             summit_id=summit_id,
-            route=Route(
-                1,
+            route=self._data_factory.create_route(
                 route_name="Anxiety",
                 grade_rp=8,
                 grade_af=10,
@@ -156,7 +171,7 @@ class TestDbSchemaV1Filter:
             route_id=route_id,
             post=Post(
                 user_name="John Doe",
-                post_date=datetime.fromisoformat("2023-12-24T13:14:00+01:00"),
+                post_date=datetime.fromisoformat("2023-12-24T12:14:00+00:00"),
                 comment="This is a great test!",
                 rating=2,
                 source_label="Testing",
@@ -198,7 +213,7 @@ class TestDbSchemaV1Filter:
                 "Anxiety",
                 "John Doe",
                 "This is a great test!",
-                "2023-12-24T13:14:00+01:00",
+                "2023-12-24T12:14:00+00:00",
                 2,
                 "Testing",
             ],
@@ -217,3 +232,103 @@ class TestDbSchemaV1Filter:
             any_order=False,
         )
         fake_db_boundary.disconnect.assert_called_once()
+
+    @pytest.mark.parametrize(
+        ("post_date", "expected_timestamp"),
+        [
+            pytest.param(
+                datetime(2026, 9, 3, 18, 51, 29, tzinfo=UTC),
+                "2026-09-03T18:51:29+00:00",
+                id="UTC",
+            ),
+            pytest.param(
+                datetime(2026, 9, 3, 18, 51, 29, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-09-03T16:51:29+00:00",
+                id="CEST",
+            ),
+            pytest.param(
+                datetime(2026, 12, 3, 18, 51, 29, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-12-03T17:51:29+00:00",
+                id="CET",
+            ),
+        ],
+    )
+    def test_post_datetimes_utc(
+        self,
+        post_date: datetime,
+        expected_timestamp: str,
+        tmp_path: Path,
+    ) -> None:
+        """
+        Ensures that the post timestamps are correctly written into the database as UTC.
+        """
+        input_pipe = CollectedData()
+        input_pipe.add_source(ExternalSource("Test", "http://", "Someone"))
+        summit_id = input_pipe.add_summit(
+            self._data_factory.create_summit(
+                "My Summit",
+                sector="My Area",
+            )
+        )
+        route_id = input_pipe.add_route(summit_id, self._data_factory.create_route("My Route"))
+        input_pipe.add_post(
+            route_id,
+            Post(
+                post_date=post_date,
+                user_name="Me",
+                comment="My Comment",
+                rating=0,
+                source_label="Test",
+            ),
+        )
+
+        test_db = Sqlite3Database()
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=test_db)
+        db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
+
+        connection = connect(db_writer.destination_file)
+        post_data = list(
+            connection.execute(f"SELECT {PostsTable.COLUMN_POST_DATE} FROM {PostsTable.TABLE_NAME}")
+        )
+        assert post_data[0][0] == expected_timestamp
+
+    @pytest.mark.parametrize(
+        ("compile_time", "expected_timestamp"),
+        [
+            pytest.param(
+                datetime(2026, 9, 3, 0, 1, 42, tzinfo=UTC),
+                "2026-09-03T00:01:42+00:00",
+                id="UTC",
+            ),
+            pytest.param(
+                datetime(2026, 11, 3, 0, 1, 42, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-11-02T23:01:42+00:00",
+                id="CET",
+            ),
+            pytest.param(
+                datetime(2026, 8, 3, 0, 1, 42, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-08-02T22:01:42+00:00",
+                id="CEST",
+            ),
+        ],
+    )
+    def test_db_creation_timestamp_utc(
+        self,
+        compile_time: datetime,
+        expected_timestamp: str,
+        time_machine: TimeMachineFixture,
+        tmp_path: Path,
+    ) -> None:
+        """Ensures that the DB compile time date is correctly stored as UTC."""
+        time_machine.move_to(compile_time)
+        test_db = Sqlite3Database()
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=test_db)
+        db_writer.execute_filter(input_pipe=CollectedData(), output_pipe=Mock(Pipe))
+
+        connection = connect(db_writer.destination_file)
+        db_meta_data = list(
+            connection.execute(
+                f"SELECT {DatabaseMetadataTable.COLUMN_COMPILE_TIME} FROM {DatabaseMetadataTable.TABLE_NAME}"
+            )
+        )
+        assert db_meta_data[0][0] == expected_timestamp
