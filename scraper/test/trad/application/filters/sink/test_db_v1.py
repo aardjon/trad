@@ -2,9 +2,13 @@
 Unit tests for the `trad.application.filters.sink.db_v1` module.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
+from sqlite3 import connect
 from unittest.mock import Mock, call
+from zoneinfo import ZoneInfo
+
+import pytest
 
 from trad.application.boundaries.database import (
     DataRow,
@@ -22,6 +26,7 @@ from trad.application.filters.sink.db_v1.dbschema import (
 )
 from trad.application.filters.source.route_data_factory import RouteDataFactory
 from trad.application.pipes import CollectedData
+from trad.infrastructure.sqlite3db import Sqlite3Database
 from trad.kernel.boundaries.pipes import Pipe
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
@@ -164,7 +169,7 @@ class TestDbSchemaV1Filter:
             route_id=route_id,
             post=Post(
                 user_name="John Doe",
-                post_date=datetime.fromisoformat("2023-12-24T13:14:00+01:00"),
+                post_date=datetime.fromisoformat("2023-12-24T12:14:00+00:00"),
                 comment="This is a great test!",
                 rating=2,
                 source_label="Testing",
@@ -206,7 +211,7 @@ class TestDbSchemaV1Filter:
                 "Anxiety",
                 "John Doe",
                 "This is a great test!",
-                "2023-12-24T13:14:00+01:00",
+                "2023-12-24T12:14:00+00:00",
                 2,
                 "Testing",
             ],
@@ -225,3 +230,62 @@ class TestDbSchemaV1Filter:
             any_order=False,
         )
         fake_db_boundary.disconnect.assert_called_once()
+
+    @pytest.mark.parametrize(
+        ("post_date", "expected_timestamp"),
+        [
+            pytest.param(
+                datetime(2026, 9, 3, 18, 51, 29, tzinfo=UTC),
+                "2026-09-03T18:51:29+00:00",
+                id="UTC",
+            ),
+            pytest.param(
+                datetime(2026, 9, 3, 18, 51, 29, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-09-03T16:51:29+00:00",
+                id="CEST",
+            ),
+            pytest.param(
+                datetime(2026, 12, 3, 18, 51, 29, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-12-03T17:51:29+00:00",
+                id="CET",
+            ),
+        ],
+    )
+    def test_post_datetimes_utc(
+        self,
+        post_date: datetime,
+        expected_timestamp: str,
+        tmp_path: Path,
+    ) -> None:
+        """
+        Ensures that the post timestamps are correctly written into the database as UTC.
+        """
+        input_pipe = CollectedData()
+        input_pipe.add_source(ExternalSource("Test", "http://", "Someone"))
+        summit_id = input_pipe.add_summit(
+            self._data_factory.create_summit(
+                "My Summit",
+                sector="My Area",
+            )
+        )
+        route_id = input_pipe.add_route(summit_id, self._data_factory.create_route("My Route"))
+        input_pipe.add_post(
+            route_id,
+            Post(
+                post_date=post_date,
+                user_name="Me",
+                comment="My Comment",
+                rating=0,
+                source_label="Test",
+            ),
+        )
+
+        test_db = Sqlite3Database()
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=test_db)
+        db_writer.execute_filter(input_pipe=input_pipe, output_pipe=Mock(Pipe))
+
+        connection = connect(db_writer.destination_file)
+        post_data = list(
+            connection.execute(f"SELECT {PostsTable.COLUMN_POST_DATE} FROM {PostsTable.TABLE_NAME}")
+        )
+        assert post_data[0][0] == expected_timestamp

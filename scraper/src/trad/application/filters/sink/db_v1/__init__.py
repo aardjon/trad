@@ -62,6 +62,13 @@ class DbSchemaV1Filter(SinkFilter):
         area but with a different rank (e.g. regular peaks vs. 'massive').
         """
 
+    @property
+    def destination_file(self) -> Path:
+        """
+        Path to the database file being created.
+        """
+        return self.__destination_file
+
     @override
     def get_name(self) -> str:
         return "WriteDbSchemaV1"
@@ -389,7 +396,7 @@ class DbSchemaV1Filter(SinkFilter):
                 route_name,
                 post.user_name,
                 post.comment,
-                post.post_date.isoformat(),
+                post.post_date.astimezone(datetime.UTC).isoformat(),
                 post.rating,
                 post.source_label,
             ],
