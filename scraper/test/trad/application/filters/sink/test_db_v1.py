@@ -9,6 +9,7 @@ from unittest.mock import Mock, call
 from zoneinfo import ZoneInfo
 
 import pytest
+from time_machine import TimeMachineFixture
 
 from trad.application.boundaries.database import (
     DataRow,
@@ -18,6 +19,7 @@ from trad.application.boundaries.database import (
 from trad.application.filters.sink.db_v1 import DbSchemaV1Filter
 from trad.application.filters.sink.db_v1.dbschema import (
     AreasTable,
+    DatabaseMetadataTable,
     ExternalDataSourcesTable,
     PostsTable,
     RoutesTable,
@@ -289,3 +291,44 @@ class TestDbSchemaV1Filter:
             connection.execute(f"SELECT {PostsTable.COLUMN_POST_DATE} FROM {PostsTable.TABLE_NAME}")
         )
         assert post_data[0][0] == expected_timestamp
+
+    @pytest.mark.parametrize(
+        ("compile_time", "expected_timestamp"),
+        [
+            pytest.param(
+                datetime(2026, 9, 3, 0, 1, 42, tzinfo=UTC),
+                "2026-09-03T00:01:42+00:00",
+                id="UTC",
+            ),
+            pytest.param(
+                datetime(2026, 11, 3, 0, 1, 42, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-11-02T23:01:42+00:00",
+                id="CET",
+            ),
+            pytest.param(
+                datetime(2026, 8, 3, 0, 1, 42, tzinfo=ZoneInfo("Europe/Berlin")),
+                "2026-08-02T22:01:42+00:00",
+                id="CEST",
+            ),
+        ],
+    )
+    def test_db_creation_timestamp_utc(
+        self,
+        compile_time: datetime,
+        expected_timestamp: str,
+        time_machine: TimeMachineFixture,
+        tmp_path: Path,
+    ) -> None:
+        """Ensures that the DB compile time date is correctly stored as UTC."""
+        time_machine.move_to(compile_time)
+        test_db = Sqlite3Database()
+        db_writer = DbSchemaV1Filter(output_directory=tmp_path, database_boundary=test_db)
+        db_writer.execute_filter(input_pipe=CollectedData(), output_pipe=Mock(Pipe))
+
+        connection = connect(db_writer.destination_file)
+        db_meta_data = list(
+            connection.execute(
+                f"SELECT {DatabaseMetadataTable.COLUMN_COMPILE_TIME} FROM {DatabaseMetadataTable.TABLE_NAME}"
+            )
+        )
+        assert db_meta_data[0][0] == expected_timestamp
