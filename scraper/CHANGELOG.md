@@ -1,10 +1,11 @@
 # Scraper & Route Database Changelog
 
 
-## Next Version
+## Version 0.6.0 - 2026-09-07
 
 ### New/Improved Features:
  - Import route entry points from OSM (#23)
+ - Store post timestamps as UTC (#38)
 
 
 ## Version 0.5.1 - 2026-08-28
