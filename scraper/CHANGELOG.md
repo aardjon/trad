@@ -5,6 +5,8 @@
 
 ### New/Improved Features:
  - Import route entry points from OSM (#23)
+
+### Fixed Bugs:
  - Store post timestamps as UTC (#38)
 
 
