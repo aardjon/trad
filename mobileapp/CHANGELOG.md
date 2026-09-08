@@ -4,6 +4,13 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Next Version
+
+### Fixed Bugs:
+
+ - Dates and times are displayed in the wrong time zone (#38)
+
+
 ## Version 0.6.1 - 2026-08-23
 
 ### Fixed Bugs:

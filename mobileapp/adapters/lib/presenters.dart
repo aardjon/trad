@@ -84,7 +84,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     ui.setStatusActivated(
-      label: dateFormatter.format(routeDatabaseDate),
+      label: dateFormatter.format(routeDatabaseDate.toLocal()),
       dataSourceAttributions: dataSourceAttributions,
     );
   }
@@ -351,7 +351,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
     List<ListViewItem> postItems = <ListViewItem>[];
     for (final Post post in postList) {
       DateFormat formatter = DateFormat('dd.MM.yyyy HH:mm');
-      String formattedDate = formatter.format(post.postDate);
+      String formattedDate = formatter.format(post.postDate.toLocal());
 
       postItems.add(
         ListViewItem(
