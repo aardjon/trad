@@ -463,6 +463,18 @@ void main() {
       (Difficulty(jump: 3, af: 8, ou: 10, rp: 9), 0, false, '3/VIIb (VIIIa) RP VIIc'),
       (Difficulty(af: 5, ou: 7, rp: 4), 1, true, '! * V (VIIa) RP IV'),
     ]);
+    // No grades at all
+    testParams.add((
+      Difficulty(
+        jump: Difficulty.noGrade,
+        af: Difficulty.noGrade,
+        ou: Difficulty.noGrade,
+        rp: Difficulty.noGrade,
+      ),
+      0,
+      false,
+      '(unbekannt)',
+    ));
 
     for (final (Difficulty, int, bool, String) params in testParams) {
       Difficulty grade = params.$1;

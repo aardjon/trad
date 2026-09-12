@@ -9,6 +9,7 @@ mobile app, and development stuff (e.g. refactorings) may not be included.
 ### Fixed Bugs:
 
  - Dates and times are displayed in the wrong time zone (#38)
+ - Some routes do not have a known grade (#52)
 
 
 ## Version 0.6.1 - 2026-08-23

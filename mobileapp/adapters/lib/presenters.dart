@@ -471,6 +471,9 @@ class SaxonGradeLabelCreator {
       labels.add('RP ${_climbingGradeToString(route.grade.rp)}');
     }
 
+    if (labels.isEmpty) {
+      return '(unbekannt)';
+    }
     return labels.join(' ');
   }
 

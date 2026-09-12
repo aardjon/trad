@@ -10,10 +10,11 @@ void main() {
   /// Unit tests for the Difficulty class.
   group('Difficulty() tests', () {
     /// Ensure the correct behaviour in case all constructor parameters are 0.
+    /// (This is a valid use case, so it must not throw!)
     test('all-zero', () {
       expect(() {
         Difficulty(af: 0, rp: 0, ou: 0, jump: 0);
-      }, throwsA(isA<AssertionError>()));
+      }, isNot(throwsA(isA<AssertionError>())));
     });
 
     /// Ensure the correct behaviour for a negative constructor parameter.

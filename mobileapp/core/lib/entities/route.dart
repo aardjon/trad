@@ -84,10 +84,6 @@ class Difficulty {
   /// Constructor for directly initializing all members.
   Difficulty({this.af = noGrade, this.ou = noGrade, this.rp = noGrade, this.jump = noGrade})
     : assert(
-        !(af == noGrade && ou == noGrade && rp == noGrade && jump == noGrade),
-        'At least one grade must be set',
-      ),
-      assert(
         (af >= noGrade && ou >= noGrade && rp >= noGrade && jump >= noGrade),
         'Grade values must not be negative',
       );
