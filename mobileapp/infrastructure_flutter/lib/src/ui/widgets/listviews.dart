@@ -10,10 +10,10 @@ import 'package:adapters/boundaries/ui.dart';
 import 'package:adapters/controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 
 import '../state.dart';
 import 'centered_text.dart';
+import 'throbber.dart';
 
 /// Reusable widget for displaying a list of summits provided by a [DeferableOptionalDataListNotifier].
 class SummitListView extends StatelessWidget {
@@ -91,10 +91,7 @@ class DeferableOptionalDataListView extends StatelessWidget {
   }
 
   Widget _buildLoadingIndicator() {
-    return const LoadingIndicator(
-      indicatorType: Indicator.ballClipRotateMultiple,
-      colors: <Color>[Colors.lightGreen],
-    );
+    return const Throbber();
   }
 
   Widget _buildListView(DeferableOptionalDataListNotifier notifier, BuildContext context) {

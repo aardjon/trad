@@ -4,6 +4,14 @@ This change log file is mainly there for end users, that's why it contains only 
 mobile app, and development stuff (e.g. refactorings) may not be included.
 
 
+## Version 0.6.2 - 2026-09-13
+
+### Fixed Bugs:
+
+ - Dates and times are displayed in the wrong time zone (#38)
+ - Some routes do not have a known grade (#52)
+
+
 ## Version 0.6.1 - 2026-08-23
 
 ### Fixed Bugs:
