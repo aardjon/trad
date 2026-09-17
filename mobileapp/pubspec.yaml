@@ -14,12 +14,12 @@ workspace:
   - main
 
 environment:
-  sdk: ^3.12.2
+  sdk: ^3.13.3
 
 dev_dependencies:
   cobertura: ^1.0.5
   melos: ^7.3.0
-  very_good_analysis: ^10.0.0
+  very_good_analysis: ^11.0.0
 
 melos:
   scripts:
