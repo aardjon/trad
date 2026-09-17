@@ -13,7 +13,7 @@ class LocationAdapter implements PositioningBoundary {
   final LocationBoundary _locationImpl;
 
   /// Constructor for directly initialzing all members.
-  LocationAdapter(this._locationImpl);
+  new(this._locationImpl);
 
   @override
   Future<void> requestPermissions() {

@@ -13,7 +13,7 @@ class CenteredText extends StatelessWidget {
   final String _message;
 
   /// Constructor for directly initializing all members.
-  const CenteredText(this._message, {super.key});
+  const new(this._message, {super.key});
 
   @override
   Widget build(BuildContext context) {

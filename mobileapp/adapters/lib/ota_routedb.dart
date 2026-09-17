@@ -40,7 +40,7 @@ class RouteDbOnlineUpdater implements RouteDbDownloadBoundary {
   static final Uri _otaApiEndpoint = _otaBaseUrl.resolve('apiv1.php');
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
-  RouteDbOnlineUpdater(DependencyProvider dependencyProvider)
+  new(DependencyProvider dependencyProvider)
     : _networkBoundary = dependencyProvider.provide<HttpNetworkingBoundary>(),
       _pathProvider = dependencyProvider.provide<PathProviderBoundary>(),
       _fsBoundary = dependencyProvider.provide<FileSystemBoundary>();
@@ -118,7 +118,7 @@ class RouteDbMetadataJson {
   final DateTime creationDate;
 
   /// Constructor for directly initializing all members.
-  RouteDbMetadataJson({
+  new({
     required this.downloadUrl,
     required this.schemaVersionMajor,
     required this.schemaVersionMinor,
@@ -127,7 +127,7 @@ class RouteDbMetadataJson {
 
   /// Creates and returns a new RouteDbMetadataJson instance from the given [jsonData] map. Raises
   /// FormatException if the JSON doesn't contain the expected data or cannot be parsed at all.
-  factory RouteDbMetadataJson.fromJson(Map<String, dynamic> jsonData) {
+  factory fromJson(Map<String, dynamic> jsonData) {
     String url = _readJsonValue<String>(jsonData, 'downloadUrl');
     int majorVersion = _readJsonValue<int>(jsonData, 'schemaVersionMajor');
     int minorVersion = _readJsonValue<int>(jsonData, 'schemaVersionMinor');

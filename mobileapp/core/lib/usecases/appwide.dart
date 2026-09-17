@@ -37,7 +37,7 @@ class ApplicationWideUseCases {
   /// Constructor.
   ///
   /// Expects a reference to the (fully configured) [DependencyProvider] to initialize all members.
-  ApplicationWideUseCases(DependencyProvider di)
+  new(DependencyProvider di)
     : _presentationBoundary = di.provide<PresentationBoundary>(),
       _routeDbBoundary = di.provide<RouteDbStorageBoundary>(),
       _preferencesBoundary = di.provide<AppPreferencesBoundary>(),

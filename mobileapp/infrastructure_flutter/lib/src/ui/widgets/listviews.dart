@@ -21,7 +21,7 @@ class SummitListView extends StatelessWidget {
   final DeferableOptionalDataListNotifier _dataNotifier;
 
   /// Constructor for directly initializing all members.
-  const SummitListView(this._dataNotifier, {super.key});
+  const new(this._dataNotifier, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class DeferableOptionalDataListView extends StatelessWidget {
   final Widget Function(DeferableOptionalDataListNotifier, int) _listItemBuilder;
 
   /// Constructor for directly initializing all members.
-  const DeferableOptionalDataListView(this._dataNotifier, this._listItemBuilder, {super.key});
+  const new(this._dataNotifier, this._listItemBuilder, {super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -26,17 +26,17 @@ import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:core/usecases/routedb.dart';
 
-class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary {}
+class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary;
 
-class RouteDbDownloadBoundaryMock extends Mock implements RouteDbDownloadBoundary {}
+class RouteDbDownloadBoundaryMock extends Mock implements RouteDbDownloadBoundary;
 
-class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
+class PresentationBoundaryMock extends Mock implements PresentationBoundary;
 
-class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
+class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary;
 
-class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
+class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary;
 
-class PositioningBoundaryMock extends Mock implements PositioningBoundary {}
+class PositioningBoundaryMock extends Mock implements PositioningBoundary;
 
 /// Unit tests for the core.usecases.routedb.RouteDbUseCases component.
 void main() {
@@ -961,7 +961,7 @@ class _FakeStorageBoundary extends Fake implements RouteDbStorageBoundary {
 
   /// Constructor for creating a fake storage which pretends to have been created at
   /// [_dbCreationDate] and has the initial state of [_isStarted].
-  _FakeStorageBoundary(this._dbCreationDate, {required this._isStarted});
+  new(this._dbCreationDate, {required this._isStarted});
 
   @override
   Future<void> startStorage() async {
@@ -1012,7 +1012,7 @@ class _FakeRouteDbDownloadBoundary extends Fake implements RouteDbDownloadBounda
   /// The list of candidates to be returned from getAvailableUpdateCandidates().
   final Map<RouteDatabaseId, RouteDbUpdateCandidate> _updateCandidates;
 
-  _FakeRouteDbDownloadBoundary(List<RouteDbUpdateCandidate> updateCandidates)
+  new(List<RouteDbUpdateCandidate> updateCandidates)
     : _updateCandidates = <RouteDatabaseId, RouteDbUpdateCandidate>{
         for (RouteDbUpdateCandidate c in updateCandidates) c.identifier: c,
       };
@@ -1034,7 +1034,7 @@ class _FakeRouteDbDownloadBoundary extends Fake implements RouteDbDownloadBounda
 class _GeoPositionMatcher extends Matcher {
   final GeoPosition expectedPosition;
 
-  _GeoPositionMatcher(this.expectedPosition);
+  new(this.expectedPosition);
 
   @override
   Description describe(Description description) {

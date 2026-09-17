@@ -23,7 +23,7 @@ class PathProviderBoundaryMock extends Mock implements PathProviderBoundary {
 
   final FileSystemBoundary _fsBoundary;
 
-  PathProviderBoundaryMock(FileSystemBoundary fsBoundary) : _fsBoundary = fsBoundary {
+  new(FileSystemBoundary fsBoundary) : _fsBoundary = fsBoundary {
     _fsBoundary.getDirectory(appDataDir).createSync(recursive: true);
   }
 
@@ -52,7 +52,7 @@ class FileSystemBoundaryMock extends Mock implements FileSystemBoundary {
   }
 }
 
-class RelationalDatabaseBoundaryMock extends Mock implements RelationalDatabaseBoundary {}
+class RelationalDatabaseBoundaryMock extends Mock implements RelationalDatabaseBoundary;
 
 /// Unit tests for the adapters.storage.routedb.RouteDbStorage class.
 void main() {

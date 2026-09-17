@@ -107,7 +107,7 @@ enum TechnicalGrade {
   /// Jump grade 7
   jump7('7');
 
-  const TechnicalGrade(this.caption);
+  new(this.caption);
 
   /// Caption of the technical grade
   final String caption;

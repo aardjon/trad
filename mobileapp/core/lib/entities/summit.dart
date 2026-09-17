@@ -26,7 +26,7 @@ class Summit {
   final GeoPosition? position;
 
   /// Constructor for directly initializing all members.
-  Summit(this.id, this.name, this.sector, [this.position]);
+  new(this.id, this.name, this.sector, [this.position]);
 
   @override
   String toString() {

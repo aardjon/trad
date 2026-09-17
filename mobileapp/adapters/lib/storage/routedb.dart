@@ -42,7 +42,7 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   final RelationalDatabaseBoundary _repository;
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
-  RouteDbStorage(DependencyProvider dependencyProvider)
+  new(DependencyProvider dependencyProvider)
     : _pathProviderBoundary = dependencyProvider.provide<PathProviderBoundary>(),
       _fileSystemBoundary = dependencyProvider.provide<FileSystemBoundary>(),
       _repository = dependencyProvider.provide<RelationalDatabaseBoundary>();

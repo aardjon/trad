@@ -27,7 +27,7 @@ class DataSourceAttribution {
   String? license;
 
   /// Constructor for directly initializing all members.
-  DataSourceAttribution({
+  new({
     required this.id,
     required this.label,
     required this.url,

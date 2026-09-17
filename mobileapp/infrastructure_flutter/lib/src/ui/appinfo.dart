@@ -19,7 +19,7 @@ class AppInfoPage extends StatelessWidget {
   final RouteDbStatusNotifier _settingsState;
 
   /// Constructor for directly initializing all members.
-  const AppInfoPage(this._appDrawer, this._settingsState, {super.key});
+  const new(this._appDrawer, this._settingsState, {super.key});
 
   Widget _buildAppVersionLabel(BuildContext context, AppInfoModel model) {
     return Padding(

@@ -25,7 +25,7 @@ class SettingsPage extends StatelessWidget {
   final RouteDbStatusNotifier _routeDbState;
 
   /// Constructor for directly initializing all members.
-  const SettingsPage(this._appDrawer, this._title, this._routeDbState, {super.key});
+  const new(this._appDrawer, this._title, this._routeDbState, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class _RouteDbActionsWidget extends StatelessWidget {
   final RouteDbController _routeDbController;
 
   /// Constructor for directly initializing all members.
-  _RouteDbActionsWidget({required this._settingsModel, required this._routeDbState})
+  new({required this._settingsModel, required this._routeDbState})
     : _routeDbController = RouteDbController();
 
   @override

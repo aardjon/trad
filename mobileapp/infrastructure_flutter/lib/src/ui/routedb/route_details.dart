@@ -24,7 +24,7 @@ class _PostItem extends StatelessWidget {
   /// Factory for creating icon widgets.
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
-  const _PostItem({required this.post});
+  const new({required this.post});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class _DirectionsItem extends StatelessWidget {
   final ListViewItem _dataItem;
 
   /// Constructor for directly initializing all members.
-  const _DirectionsItem(this._dataItem);
+  const new(this._dataItem);
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +88,7 @@ class _RoutePropertiesView extends StatelessWidget {
   final RouteDetailsModel model;
 
   /// Constructor for directly initializing all members.
-  const _RoutePropertiesView(this.model);
+  const new(this.model);
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class RouteDetailsView extends StatelessWidget {
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
   /// Constructor for directly initializing all members.
-  const RouteDetailsView(this._appDrawer, this._postListState, {super.key});
+  const new(this._appDrawer, this._postListState, {super.key});
 
   @override
   Widget build(BuildContext context) {

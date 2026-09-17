@@ -57,9 +57,5 @@ class RouteDbUpdateCandidate {
   CompatibilityMode compatibilityMode;
 
   /// Constructor for directly initializing all members.
-  RouteDbUpdateCandidate({
-    required this.identifier,
-    required this.creationDate,
-    required this.compatibilityMode,
-  });
+  new({required this.identifier, required this.creationDate, required this.compatibilityMode});
 }

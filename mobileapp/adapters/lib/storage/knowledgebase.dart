@@ -22,7 +22,7 @@ class KnowledgebaseStorage implements KnowledgebaseStorageBoundary {
   final AssetRepositoryBoundary _repository;
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
-  KnowledgebaseStorage(DependencyProvider dependencyProvider)
+  new(DependencyProvider dependencyProvider)
     : _repository = dependencyProvider.provide<AssetRepositoryBoundary>();
 
   @override

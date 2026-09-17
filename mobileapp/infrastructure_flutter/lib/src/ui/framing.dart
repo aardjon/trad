@@ -41,7 +41,7 @@ class MainWidget extends StatelessWidget {
   final ApplicationWideController _controller;
 
   /// Constructor for directly initializing all members.
-  const MainWidget(
+  const new(
     this._appName,
     this._splashMessage,
     this._menuModel,
@@ -124,7 +124,7 @@ class _SplashPage extends StatelessWidget {
   /// The message to be shown.
   final String _message;
 
-  const _SplashPage(this._message);
+  const new(this._message);
 
   @override
   Widget build(BuildContext context) {

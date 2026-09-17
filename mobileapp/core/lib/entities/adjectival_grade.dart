@@ -20,7 +20,7 @@ enum AdjectivalGrade {
   /// Cannot be properly secured.
   e4('E4');
 
-  const AdjectivalGrade(this.caption);
+  new(this.caption);
 
   /// Caption of the technical grade
   final String caption;

@@ -164,4 +164,4 @@ void main() {
   });
 }
 
-class _HttpClientMock extends Mock implements http.Client {}
+class _HttpClientMock extends Mock implements http.Client;

@@ -20,7 +20,7 @@ class NearbySummitsPage extends StatelessWidget {
   final DeferableOptionalDataListNotifier _summitListNotifier;
 
   /// Constructor for directly initializing all members.
-  const NearbySummitsPage(this._appDrawer, this._summitListNotifier, {super.key});
+  const new(this._appDrawer, this._summitListNotifier, {super.key});
 
   @override
   Widget build(BuildContext context) {

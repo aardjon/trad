@@ -19,7 +19,7 @@ class TradDrawer extends StatelessWidget {
   final ApplicationWideController _controller;
 
   /// Constructor for directly initializing all members.
-  const TradDrawer(this._model, this._settingsState, this._controller, {super.key});
+  const new(this._model, this._settingsState, this._controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

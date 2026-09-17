@@ -57,7 +57,7 @@ class RouteDbUseCases {
   int? _lastSelectedSector;
 
   /// Constructor for creating a new RouteDbUseCases instance.
-  RouteDbUseCases({
+  new({
     required this._presentationBoundary,
     required this._storageBoundary,
     required this._downloadBoundary,
@@ -349,7 +349,7 @@ class LocalDbFileProvider implements DbFileProvider {
   final String _filePath;
 
   /// Constructor for directly initializing all members.
-  LocalDbFileProvider(this._filePath);
+  new(this._filePath);
 
   @override
   Future<String?> determineLocalFileToInstall() async {
@@ -367,7 +367,7 @@ class OnlineDbFileProvider implements DbFileProvider {
   final DateTime? _currentDbCreationDate;
 
   /// Constructor for directly initializing all members.
-  OnlineDbFileProvider(this._downloadBoundary, this._currentDbCreationDate);
+  new(this._downloadBoundary, this._currentDbCreationDate);
 
   @override
   Future<String?> determineLocalFileToInstall() async {
@@ -385,7 +385,7 @@ class OnlineDbFileProvider implements DbFileProvider {
     }
 
     _logger.info("Chose database '$chosenUpdateId' out of ${availableDatabases.length} candidates");
-    return _downloadBoundary.downloadRouteDatabase(chosenUpdateId);
+    return await _downloadBoundary.downloadRouteDatabase(chosenUpdateId);
   }
 
   Future<RouteDatabaseId?> _chooseUpdateId(List<RouteDbUpdateCandidate> availableDatabases) async {

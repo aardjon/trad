@@ -12,9 +12,9 @@ import 'package:core/entities/knowledgebase.dart';
 import 'package:core/usecases/knowledgebase.dart';
 import 'package:crosscuttings/di.dart';
 
-class KnowledgebaseStorageBoundaryMock extends Mock implements KnowledgebaseStorageBoundary {}
+class KnowledgebaseStorageBoundaryMock extends Mock implements KnowledgebaseStorageBoundary;
 
-class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
+class PresentationBoundaryMock extends Mock implements PresentationBoundary;
 
 /// Unit tests for the core.usecases.knowledgebase component.
 void main() {

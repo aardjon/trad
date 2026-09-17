@@ -29,7 +29,7 @@ class Version {
   static const int _minorNumberLimit = 1000;
 
   /// Constructor for directly initializing all members.
-  Version(this.major, this.minor) {
+  new(this.major, this.minor) {
     if (major < 0) {
       throw ArgumentError.value(major, 'Major version parts must not be negative values');
     }

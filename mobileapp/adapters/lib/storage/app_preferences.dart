@@ -20,7 +20,7 @@ class PreferencesStorage implements AppPreferencesBoundary {
   final KeyValueStoreBoundary _repository;
 
   /// Constructor for using the given [dependencyProvider] to obtain dependencies from other rings.
-  PreferencesStorage(DependencyProvider dependencyProvider)
+  new(DependencyProvider dependencyProvider)
     : _repository = dependencyProvider.provide<KeyValueStoreBoundary>();
 
   @override

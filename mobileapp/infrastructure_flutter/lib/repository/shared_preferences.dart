@@ -19,37 +19,37 @@ class SharedPreferencesRepository implements KeyValueStoreBoundary {
   }
 
   @override
-  Future<bool> setInt({required String key, required int value}) async {
+  Future<bool> setInt({required String key, required int value}) {
     _checkInitializedState();
     return _preferences!.setInt(key, value);
   }
 
   @override
-  Future<bool> setBool({required String key, required bool value}) async {
+  Future<bool> setBool({required String key, required bool value}) {
     _checkInitializedState();
     return _preferences!.setBool(key, value);
   }
 
   @override
-  Future<bool> setDouble({required String key, required double value}) async {
+  Future<bool> setDouble({required String key, required double value}) {
     _checkInitializedState();
     return _preferences!.setDouble(key, value);
   }
 
   @override
-  Future<bool> setString({required String key, required String value}) async {
+  Future<bool> setString({required String key, required String value}) {
     _checkInitializedState();
     return _preferences!.setString(key, value);
   }
 
   @override
-  Future<bool> setStringList({required String key, required List<String> value}) async {
+  Future<bool> setStringList({required String key, required List<String> value}) {
     _checkInitializedState();
     return _preferences!.setStringList(key, value);
   }
 
   @override
-  Future<bool> setEnum({required String key, required Enum value}) async {
+  Future<bool> setEnum({required String key, required Enum value}) {
     _checkInitializedState();
     return _preferences!.setString(key, _enumToString(value));
   }

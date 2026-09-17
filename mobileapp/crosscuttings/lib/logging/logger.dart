@@ -36,7 +36,7 @@ class Logger {
   /// the module the `Logger` instance is created in, using single dots as delimeters (e.g.
   /// `trad.core.usecases.journal`). This makes it easy to filter for messages from a certain system
   /// part later on.
-  Logger(String channelName) : _wrapper = LoggerWrapper(channelName);
+  new(String channelName) : _wrapper = LoggerWrapper(channelName);
 
   /// Logs a [message] on the `LogLevel.fatal` level.
   void fatal(Object? message, [Object? error, StackTrace? stackTrace]) {
@@ -87,12 +87,12 @@ class LogConfiguration {
   final LogConfigWrapper _wrapper = LogConfigWrapper();
 
   /// Returns the global [LogConfiguration] instance.
-  factory LogConfiguration() {
+  factory() {
     return LogConfiguration._singletonInstance;
   }
 
   /// Private constructor for initially creating a [LogConfiguration] instance.
-  LogConfiguration._instantiate();
+  new _instantiate();
 
   /// Returns the currently configured log level.
   LogLevel get globalLevel => _globalLevel;

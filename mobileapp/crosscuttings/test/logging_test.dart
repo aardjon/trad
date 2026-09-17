@@ -257,4 +257,4 @@ void main() {
 
 /// A new LogDestination without a corresponding handler implementation.
 /// Used for testing some error behaviour.
-class _UnknownLogDestination extends LogDestination {}
+class _UnknownLogDestination extends LogDestination;

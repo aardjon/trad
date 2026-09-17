@@ -10,7 +10,7 @@ import 'package:adapters/boundaries/ui.dart';
 /// Factory creating Widgets for displaying [IconDefinition]s.
 class IconWidgetFactory {
   /// Const default constructor (to improve performance).
-  const IconWidgetFactory();
+  const new();
 
   /// Create and return a widget that displays the given [iconDefinition].
   Widget getIconWidget(IconDefinition? iconDefinition) {

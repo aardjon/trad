@@ -15,7 +15,7 @@ import 'package:crosscuttings/errors.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class FakeApplicationUi extends Mock implements ApplicationUiBoundary {}
+class FakeApplicationUi extends Mock implements ApplicationUiBoundary;
 
 class FakeUi extends Fake implements ApplicationUiBoundary {
   String dbLabel = '';

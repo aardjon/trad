@@ -21,7 +21,7 @@ class KnowledgebaseView extends StatelessWidget {
   final KnowledgebaseController _controller;
 
   /// Constructor for directly initializing all members.
-  KnowledgebaseView(this._appDrawer, {super.key}) : _controller = KnowledgebaseController();
+  new(this._appDrawer, {super.key}) : _controller = KnowledgebaseController();
 
   @override
   Widget build(BuildContext context) {

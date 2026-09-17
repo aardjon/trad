@@ -6,8 +6,6 @@
 ///
 library;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -175,20 +173,18 @@ class ApplicationUI implements ApplicationUiBoundary {
     if (!_uiState.isInitializing()) {
       NavigatorState state = _uiState.getNavigatorKey().currentState!;
       if (isRoot) {
-        unawaited(
-          state.pushNamedAndRemoveUntil(
-            routeString,
-            (Route<dynamic> route) => false,
-            arguments: routeArguments,
-          ),
+        state.pushNamedAndRemoveUntil(
+          routeString,
+          (Route<dynamic> route) => false,
+          arguments: routeArguments,
         );
       } else {
-        unawaited(state.pushNamed(routeString, arguments: routeArguments));
+        state.pushNamed(routeString, arguments: routeArguments);
       }
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         NavigatorState state = _uiState.getNavigatorKey().currentState!;
-        unawaited(state.pushReplacementNamed(routeString, arguments: routeArguments));
+        state.pushReplacementNamed(routeString, arguments: routeArguments);
       });
     }
   }

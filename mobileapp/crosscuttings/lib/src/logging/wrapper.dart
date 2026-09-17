@@ -22,7 +22,7 @@ class LoggerWrapper {
   final loglib.Logger _realLogger;
 
   /// Creates a new Logger instance for the provided channel name.
-  LoggerWrapper(String channelName) : _realLogger = loglib.Logger(channelName);
+  new(String channelName) : _realLogger = loglib.Logger(channelName);
 
   /// Logs a message with level `LogLevel.fatal` on this logger.
   void fatal(Object? message, [Object? error, StackTrace? stackTrace]) {

@@ -24,5 +24,5 @@ class Post {
   int rating;
 
   /// Constructor for directly initializing all members.
-  Post(this.userName, this.postDate, this.comment, this.source, this.rating);
+  new(this.userName, this.postDate, this.comment, this.source, this.rating);
 }

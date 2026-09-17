@@ -38,7 +38,6 @@ linter:
     no_self_assignments: true
     no_wildcard_variable_uses: true
     omit_local_variable_types: false
-    one_member_abstracts: false
     prefer_final_locals: false
     prefer_foreach: true
     prefer_double_quotes: false

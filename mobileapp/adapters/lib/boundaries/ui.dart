@@ -31,7 +31,7 @@ class MainMenuModel {
   final String applicationVersionLabel;
 
   /// Constructor for directly initializing all members.
-  const MainMenuModel(
+  const new(
     this.menuHeader,
     this.journalItem,
     this.summitListItem,
@@ -113,7 +113,7 @@ class IconDefinition {
   final ColorHint colorHint;
 
   /// Constructor for directly initializing all members.
-  const IconDefinition(this.glyph, [this.colorHint = ColorHint.unspecified]);
+  const new(this.glyph, [this.colorHint = ColorHint.unspecified]);
 }
 
 /// Model that provides all data needed to display a single knowledge base document to the UI.
@@ -125,7 +125,7 @@ class KnowledgebaseModel {
   final String documentContent;
 
   /// Constructor for directly initializing all members.
-  KnowledgebaseModel(this.documentTitle, this.documentContent);
+  new(this.documentTitle, this.documentContent);
 }
 
 /// Model that provides all static data needed to display the empty summit list page to the UI.
@@ -149,7 +149,7 @@ class SummitListModel {
   final int searchBarInitialSectorIndex;
 
   /// Constructor for directly initializing all members.
-  SummitListModel(
+  new(
     this.pageTitle,
     this.searchBarHint,
     this.noDataMessage,
@@ -170,7 +170,7 @@ class NearbySummitsPageLabels {
   final String noDataMessage;
 
   /// Constructor for directly initializing all members.
-  NearbySummitsPageLabels(this.pageTitle, this.noDataMessage);
+  new(this.pageTitle, this.noDataMessage);
 }
 
 /// Internal ID to uniquely identify a single data item.
@@ -212,7 +212,7 @@ class ListViewItem {
   ItemDataId? itemId;
 
   /// Constructor for directly initializing all members.
-  ListViewItem(
+  new(
     this.mainTitle, {
     this.subTitle,
     this.icon,
@@ -255,7 +255,7 @@ class SummitDetailsModel {
   final String noRoutesMessage;
 
   /// Constructor for directly initializing all members.
-  SummitDetailsModel(
+  new(
     this.summitDataId,
     this.pageTitle,
     this.pageSubTitle, {
@@ -294,7 +294,7 @@ class RouteDetailsModel {
   final String noDataMessage;
 
   /// Constructor for directly initializing all members.
-  RouteDetailsModel(
+  new(
     this.routeDataId,
     this.pageTitle,
     this.pageSubTitle,
@@ -332,7 +332,7 @@ class SettingsModel {
   final String routeDbUpdateInProgressLabel;
 
   /// Constructor for directly initializing all members.
-  SettingsModel({
+  new({
     required this.pageTitle,
     required this.routeDbSectionTitle,
     required this.routeDbIdLabel,
@@ -380,7 +380,7 @@ class AppInfoModel {
   final List<String> supportLabels;
 
   /// Constructor for directly initializing all members.
-  AppInfoModel({
+  new({
     required this.pageTitle,
     required this.versionLabel,
     required this.copyrightAttributionLabels,

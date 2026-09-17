@@ -44,7 +44,7 @@ class JournalEntry {
   final String? note;
 
   /// Constructor for directly initializing all members.
-  const JournalEntry(
+  const new(
     this.identifier,
     this.date,
     this.area,

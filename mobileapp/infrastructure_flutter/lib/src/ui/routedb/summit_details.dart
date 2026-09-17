@@ -22,7 +22,7 @@ class SummitDetailsView extends StatefulWidget {
   final GuiState guiState;
 
   /// Constructor for directly initializing all members.
-  const SummitDetailsView(this.appDrawer, this.guiState, {super.key});
+  const new(this.appDrawer, this.guiState, {super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -113,7 +113,7 @@ class SummitRoutesContextMenu extends StatelessWidget {
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
   /// Constructor for directly initializing all members.
-  const SummitRoutesContextMenu(this._model, this._state, {super.key});
+  const new(this._model, this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +155,7 @@ class _TabFactory {
   final SummitDetailsView _pageWidget;
   final SummitDetailsModel _pageModel;
 
-  _TabFactory(this._pageWidget, this._pageModel);
+  new(this._pageWidget, this._pageModel);
 
   /// Return the number of available tabs.
   static int getTabCount() {
@@ -223,7 +223,7 @@ class RoutesListView extends StatelessWidget {
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
   /// Constructor for directly initializing all members.
-  const RoutesListView(this._state, {super.key});
+  const new(this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +260,7 @@ class NearbySummitsContextMenu extends StatelessWidget {
   final SummitDetailsModel _pageModel;
 
   /// Constructor for directly initializing all members.
-  const NearbySummitsContextMenu(this._pageModel, this._state, {super.key});
+  const new(this._pageModel, this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {

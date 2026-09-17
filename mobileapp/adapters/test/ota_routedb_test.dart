@@ -259,7 +259,7 @@ void main() {
 
 class _FakePathProvider extends Fake implements PathProviderBoundary {
   @override
-  Future<Directory> getTempDir() async {
+  Future<Directory> getTempDir() {
     return Directory.systemTemp.createTemp('test_ota_routedb');
   }
 }
@@ -285,7 +285,7 @@ class _FakeNetwork extends Fake implements HttpNetworkingBoundary {
 
   List<Uri> requestedUrls = <Uri>[];
 
-  _FakeNetwork(this._jsonResponse, this._binaryResponse);
+  new(this._jsonResponse, this._binaryResponse);
 
   @override
   Future<String> retrieveJsonResource(Uri url) async {

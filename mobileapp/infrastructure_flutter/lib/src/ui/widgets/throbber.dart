@@ -21,7 +21,7 @@ class Throbber extends StatelessWidget {
   final double? fixedHeight;
 
   /// Constructor for directly initializing all members.
-  const Throbber({this.message, this.fixedHeight, super.key});
+  const new({this.message, this.fixedHeight, super.key});
 
   @override
   Widget build(BuildContext context) {

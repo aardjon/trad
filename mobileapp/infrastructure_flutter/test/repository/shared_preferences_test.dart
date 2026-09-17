@@ -127,22 +127,22 @@ void main() {
       SharedPreferencesRepository repository = SharedPreferencesRepository();
       await repository.initialize();
 
-      expect(() async {
+      expect(() {
         return repository.getBool('string_key');
       }, throwsA(isA<TypeError>()));
-      expect(() async {
+      expect(() {
         return repository.getInt('bool_key');
       }, throwsA(isA<TypeError>()));
-      expect(() async {
+      expect(() {
         return repository.getDouble('int_key');
       }, throwsA(isA<TypeError>()));
-      expect(() async {
+      expect(() {
         return repository.getString('double_key');
       }, throwsA(isA<TypeError>()));
-      expect(() async {
+      expect(() {
         return repository.getStringList('string_key');
       }, throwsA(isA<TypeError>()));
-      expect(() async {
+      expect(() {
         return repository.getEnum<DummyEnum1>('bool_key', DummyEnum1.values);
       }, throwsA(isA<TypeError>()));
 
