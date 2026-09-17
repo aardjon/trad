@@ -4,6 +4,7 @@
 library;
 
 import 'package:crosscuttings/errors.dart';
+
 import '../entities/geoposition.dart';
 
 /// Interface providing the current location (as in geographical position).

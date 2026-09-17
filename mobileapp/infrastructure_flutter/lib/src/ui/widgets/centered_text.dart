@@ -21,10 +21,7 @@ class CenteredText extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(_message),
-          ),
+          child: Padding(padding: const EdgeInsets.all(20), child: Text(_message)),
         ),
       ],
     );

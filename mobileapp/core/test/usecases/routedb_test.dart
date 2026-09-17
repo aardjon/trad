@@ -106,9 +106,8 @@ void main() {
 
       // Make sure the UI has been notified about a DB update
       verify(presentationBoundaryMock.routeDbUpdating);
-      verify(
-        () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
-      ).called(1);
+      verify(() => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions))
+          .called(1);
     });
 
     /// Simple happy-path test of the whole updateRouteDatabase() use case: A new database file must
@@ -116,12 +115,7 @@ void main() {
     test('updateRouteDatabase() use case', () async {
       final DateTime fakeCreationDate = DateTime(2023, 12, 25);
       final List<DataSourceAttribution> fakeAttributions = <DataSourceAttribution>[
-        DataSourceAttribution(
-          id: 1,
-          label: 'Test',
-          url: '[some url]',
-          attribution: '[some name]',
-        ),
+        DataSourceAttribution(id: 1, label: 'Test', url: '[some url]', attribution: '[some name]'),
       ];
 
       when(storageBoundaryMock.isStarted).thenReturn(false);
@@ -165,9 +159,8 @@ void main() {
 
       // Make sure the UI has been notified about the DB update process
       verify(presentationBoundaryMock.routeDbUpdating).called(1);
-      verify(
-        () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
-      ).called(1);
+      verify(() => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions))
+          .called(1);
     });
 
     // Tests for downloading database updates.
@@ -211,10 +204,7 @@ void main() {
               null,
               <(CompatibilityMode, DateTime)>[
                 (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 2)),
-                (
-                  CompatibilityMode.exactMatch,
-                  DateTime(2025, 1, 2),
-                ),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 2)),
               ],
               1,
             ),
@@ -325,9 +315,7 @@ void main() {
               ),
             );
           }
-          _FakeRouteDbDownloadBoundary fakeDownloader = _FakeRouteDbDownloadBoundary(
-            candidates,
-          );
+          _FakeRouteDbDownloadBoundary fakeDownloader = _FakeRouteDbDownloadBoundary(candidates);
 
           final DateTime dbCreationDate = params.$1 ?? DateTime(2000, 1, 1);
           final bool storageInitiallyStarted = params.$1 != null;
@@ -455,10 +443,7 @@ void main() {
         verify(storageBoundaryMock.startStorage).called(1);
         // Make sure the UI gets the storage state update and the creation date
         verify(
-          () => presentationBoundaryMock.routeDbAvailable(
-            dummyCreationDate,
-            dummyAttributions,
-          ),
+          () => presentationBoundaryMock.routeDbAvailable(dummyCreationDate, dummyAttributions),
         ).called(1);
       });
 
@@ -832,9 +817,8 @@ void main() {
       // summit ID and sort criterion
       verify(() => storageBoundaryMock.retrieveRoutesOfSummit(summit.id, sortCriterion)).called(1);
       // Make sure the retrieved route list and the correct sort criterion are sent to the UI
-      verify(
-        () => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion),
-      ).called(1);
+      verify(() => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion))
+          .called(1);
     });
 
     /// Ensures the correct behaviour of the sortRouteList() method:
@@ -845,9 +829,8 @@ void main() {
     ///  - The sorted route list provided by the storage must be sent to the UI (updateRouteList())
     test('sortRouteList() use case', () async {
       // Setup the storage mocks
-      when(
-        () => preferencesBoundaryMock.setInitialRoutesSortCriterion(any()),
-      ).thenAnswer((_) async {});
+      when(() => preferencesBoundaryMock.setInitialRoutesSortCriterion(any()))
+          .thenAnswer((_) async {});
       when(() => storageBoundaryMock.retrieveRoutesOfSummit(any(), any())).thenAnswer((_) async {
         return routeList;
       });
@@ -869,9 +852,8 @@ void main() {
       // summit ID and sort criterion
       verify(() => storageBoundaryMock.retrieveRoutesOfSummit(summit.id, sortCriterion)).called(1);
       // Make sure the retrieved route list and the correct sort criterion are sent to the UI
-      verify(
-        () => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion),
-      ).called(1);
+      verify(() => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion))
+          .called(1);
     });
   });
 
@@ -938,9 +920,8 @@ void main() {
     ///  - The sorted post list provided by the storage must be sent to the UI (updateRouteList())
     test('sortPostList() use case', () async {
       // Setup the storage mocks
-      when(
-        () => preferencesBoundaryMock.setInitialPostsSortCriterion(any()),
-      ).thenAnswer((_) async {});
+      when(() => preferencesBoundaryMock.setInitialPostsSortCriterion(any()))
+          .thenAnswer((_) async {});
       when(() => storageBoundaryMock.retrievePostsOfRoute(any(), any())).thenAnswer((_) async {
         return postList;
       });

@@ -71,16 +71,11 @@ class _DirectionsItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          _dataItem.mainTitle,
-        ),
+        Text(_dataItem.mainTitle),
         const SizedBox(height: 5),
         Text(
           _dataItem.bottomLine!,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w300,
-          ),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
         ),
       ],
     );
@@ -102,11 +97,9 @@ class _RoutePropertiesView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          WidgetCarousel(
-            <Widget>[
-              for (final ListViewItem item in model.directionsItems) _DirectionsItem(item),
-            ],
-          ),
+          WidgetCarousel(<Widget>[
+            for (final ListViewItem item in model.directionsItems) _DirectionsItem(item),
+          ]),
           const Divider(),
         ],
       ),

@@ -36,15 +36,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel) {
-    runApp(
-      MainWidget(
-        appName,
-        splashString,
-        menuModel,
-        ApplicationWideController(),
-        _uiState,
-      ),
-    );
+    runApp(MainWidget(appName, splashString, menuModel, ApplicationWideController(), _uiState));
     // Set the UI state to initialized after the first event frame is done.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _uiState.setInitialized();
@@ -149,10 +141,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void switchToJournal() {
     _uiState.resetNotifiers();
-    _switchToRoute(
-      UiRoute.journal.toRouteString(),
-      isRoot: true,
-    );
+    _switchToRoute(UiRoute.journal.toRouteString(), isRoot: true);
   }
 
   @override
@@ -194,22 +183,12 @@ class ApplicationUI implements ApplicationUiBoundary {
           ),
         );
       } else {
-        unawaited(
-          state.pushNamed(
-            routeString,
-            arguments: routeArguments,
-          ),
-        );
+        unawaited(state.pushNamed(routeString, arguments: routeArguments));
       }
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         NavigatorState state = _uiState.getNavigatorKey().currentState!;
-        unawaited(
-          state.pushReplacementNamed(
-            routeString,
-            arguments: routeArguments,
-          ),
-        );
+        unawaited(state.pushReplacementNamed(routeString, arguments: routeArguments));
       });
     }
   }

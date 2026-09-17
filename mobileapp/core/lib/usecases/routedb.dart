@@ -83,16 +83,12 @@ class RouteDbUseCases {
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
     _logger.debug('Running use case importRouteDbFile()');
-    await _fetchAndInstallRouteDb(
-      dbFileProvider: LocalDbFileProvider(filePath),
-    );
+    await _fetchAndInstallRouteDb(dbFileProvider: LocalDbFileProvider(filePath));
   }
 
   /// Fetch and install a new route db file. The actual work is delegated to to the given
   /// [dbFileProvider].
-  Future<void> _fetchAndInstallRouteDb({
-    required DbFileProvider dbFileProvider,
-  }) async {
+  Future<void> _fetchAndInstallRouteDb({required DbFileProvider dbFileProvider}) async {
     _presentationBoundary.routeDbUpdating();
 
     if (_storageBoundary.isStarted()) {

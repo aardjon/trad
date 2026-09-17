@@ -231,10 +231,10 @@ class RouteDbStorage implements RouteDbStorageBoundary {
   @override
   Future<List<Sector>> retrieveAllSectors() async {
     // Configure the query
-    Query query = Query.table(
-      AreasTable.tableName,
-      <String>[AreasTable.columnId, AreasTable.columnName],
-    );
+    Query query = Query.table(AreasTable.tableName, <String>[
+      AreasTable.columnId,
+      AreasTable.columnName,
+    ]);
 
     query.orderByColumns = <String>[AreasTable.columnName];
 
@@ -533,17 +533,9 @@ class RouteDbStorage implements RouteDbStorageBoundary {
     List<ResultRow> routeResultSet = await _repository.executeQuery(routeQuery);
 
     Query directionsQuery = Query.join(
-      <String>[
-        RouteDirectionsTable.tableName,
-        ExternalDataSourcesTable.tableName,
-      ],
-      <String>[
-        '${RouteDirectionsTable.columnSourceId}=${ExternalDataSourcesTable.columnId}',
-      ],
-      <String>[
-        RouteDirectionsTable.columnDirections,
-        ExternalDataSourcesTable.columnLabel,
-      ],
+      <String>[RouteDirectionsTable.tableName, ExternalDataSourcesTable.tableName],
+      <String>['${RouteDirectionsTable.columnSourceId}=${ExternalDataSourcesTable.columnId}'],
+      <String>[RouteDirectionsTable.columnDirections, ExternalDataSourcesTable.columnLabel],
     );
     directionsQuery.setWhereCondition('${RouteDirectionsTable.columnRouteId} = ?', <Object?>[
       routeDataId,

@@ -167,10 +167,7 @@ class _SummitFilterBarState extends State<SummitFilterBar> {
   Widget _sectorSelectionWidget(BuildContext context) {
     final List<DropdownMenuEntry<int?>> entries = List<DropdownMenuEntry<int?>>.from(
       widget.sectorFilterItems.map<DropdownMenuEntry<int?>>(
-        (ListViewItem item) => DropdownMenuEntry<int?>(
-          label: item.mainTitle,
-          value: item.itemId,
-        ),
+        (ListViewItem item) => DropdownMenuEntry<int?>(label: item.mainTitle, value: item.itemId),
       ),
     );
 

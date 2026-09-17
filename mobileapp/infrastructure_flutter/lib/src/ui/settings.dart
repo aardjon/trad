@@ -67,14 +67,8 @@ class _RouteDbActionsWidget extends StatelessWidget {
             List<Widget> widgetList = <Widget>[
               Text(
                 _settingsModel.routeDbSectionTitle,
-                style:
-                    DefaultTextStyle.of(
-                      context,
-                    ).style.apply(
-                      fontSizeFactor: 1.2,
-                      heightFactor: 1.5,
-                      fontWeightDelta: 2,
-                    ),
+                style: DefaultTextStyle.of(context).style
+                    .apply(fontSizeFactor: 1.2, heightFactor: 1.5, fontWeightDelta: 2),
               ),
             ];
             if (state.isRouteDbUpdateInProgress()) {

@@ -90,9 +90,7 @@ class MainWidget extends StatelessWidget {
           );
         },
         UiRoute.knowledgebase.toRouteString(): (BuildContext context) {
-          return KnowledgebaseView(
-            TradDrawer(_menuModel, _guiState.routeDBState, _controller),
-          );
+          return KnowledgebaseView(TradDrawer(_menuModel, _guiState.routeDBState, _controller));
         },
         UiRoute.settings.toRouteString(): (BuildContext context) {
           return SettingsPage(

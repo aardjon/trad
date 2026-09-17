@@ -152,9 +152,8 @@ void main() {
         final _SqliteApiMock sqliteMock = _SqliteApiMock();
         final _DatabaseMock sqliteDbMock = _DatabaseMock();
         when(() => sqliteMock.open(any(), mode: any(named: 'mode'))).thenReturn(sqliteDbMock);
-        when(
-          () => sqliteDbMock.select(any(), any()),
-        ).thenReturn(ResultSet(<String>[], <String>[], <List<Object?>>[]));
+        when(() => sqliteDbMock.select(any(), any()))
+            .thenReturn(ResultSet(<String>[], <String>[], <List<Object?>>[]));
         Sqlite3Database database = Sqlite3Database(extLibApi: sqliteMock);
         database.connect(dummySqliteFilePath);
 

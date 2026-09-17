@@ -244,18 +244,8 @@ void main() {
                 ),
               ],
               <ListViewItem>[
-                ListViewItem(
-                  'Source 1',
-                  subTitle: 'Author 1 (EUPL)',
-                  content: '[url1]',
-                  itemId: 1,
-                ),
-                ListViewItem(
-                  'Source 2',
-                  subTitle: 'Author 2',
-                  content: '[url2]',
-                  itemId: 2,
-                ),
+                ListViewItem('Source 1', subTitle: 'Author 1 (EUPL)', content: '[url1]', itemId: 1),
+                ListViewItem('Source 2', subTitle: 'Author 2', content: '[url2]', itemId: 2),
               ],
             ),
           ];
@@ -358,11 +348,7 @@ void main() {
       Matcher routeModelMatcher = isA<RouteDetailsModel>()
           .having((RouteDetailsModel m) => m.routeDataId, 'dataID', selectedRoute.id)
           .having((RouteDetailsModel m) => m.pageTitle, 'pageTitle', selectedRoute.routeName)
-          .having(
-            (RouteDetailsModel m) => m.pageSubTitle,
-            'pageSubTitle',
-            'V',
-          );
+          .having((RouteDetailsModel m) => m.pageSubTitle, 'pageSubTitle', 'V');
       verify(() => fakeUi.showRouteDetails(any(that: routeModelMatcher))).called(1);
     });
   });
@@ -383,9 +369,8 @@ void main() {
       test('${exception.runtimeType}', () {
         ApplicationWidePresenter presenter = ApplicationWidePresenter();
         presenter.nearbySummitsLocationError(exception);
-        verify(
-          () => fakeUi.showNearbySummitsError(any(that: contains(expectedSubString))),
-        ).called(1);
+        verify(() => fakeUi.showNearbySummitsError(any(that: contains(expectedSubString))))
+            .called(1);
       });
     }
   });

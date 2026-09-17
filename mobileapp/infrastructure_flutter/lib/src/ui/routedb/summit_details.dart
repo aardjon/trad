@@ -22,11 +22,7 @@ class SummitDetailsView extends StatefulWidget {
   final GuiState guiState;
 
   /// Constructor for directly initializing all members.
-  const SummitDetailsView(
-    this.appDrawer,
-    this.guiState, {
-    super.key,
-  });
+  const SummitDetailsView(this.appDrawer, this.guiState, {super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -52,20 +48,13 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
 
     return Scaffold(
       appBar: _buildAppBar(model, tabFactory, context),
-      body: TabBarView(
-        controller: _tabController,
-        children: tabFactory.getContentWidgets(),
-      ),
+      body: TabBarView(controller: _tabController, children: tabFactory.getContentWidgets()),
       drawer: widget.appDrawer,
       drawerEnableOpenDragGesture: false,
     );
   }
 
-  AppBar _buildAppBar(
-    SummitDetailsModel model,
-    _TabFactory tabFactory,
-    BuildContext context,
-  ) {
+  AppBar _buildAppBar(SummitDetailsModel model, _TabFactory tabFactory, BuildContext context) {
     return AppBar(
       title: Column(
         children: <Widget>[
@@ -105,10 +94,7 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
 
   void _showContextMenu(Widget contextMenu, BuildContext context) {
     unawaited(
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) => contextMenu,
-      ),
+      showModalBottomSheet(context: context, builder: (BuildContext context) => contextMenu),
     );
   }
 
@@ -131,10 +117,7 @@ class SummitRoutesContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: _createContextMenuitems(context),
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: _createContextMenuitems(context));
   }
 
   List<Widget> _createContextMenuitems(BuildContext context) {
@@ -206,9 +189,7 @@ class _TabFactory {
 
     return <Widget>[
       RoutesListView(routeListNotifier),
-      SummitListView(
-        _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
-      ),
+      SummitListView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId)),
     ];
   }
 
@@ -283,10 +264,7 @@ class NearbySummitsContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: _createContextMenuitems(context),
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: _createContextMenuitems(context));
   }
 
   List<Widget> _createContextMenuitems(BuildContext context) {

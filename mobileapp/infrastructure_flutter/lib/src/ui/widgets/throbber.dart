@@ -31,10 +31,7 @@ class Throbber extends StatelessWidget {
     );
     List<Widget> widgets = <Widget>[
       if (fixedHeight != null)
-        SizedBox(
-          height: fixedHeight,
-          child: loadingIndicator,
-        )
+        SizedBox(height: fixedHeight, child: loadingIndicator)
       else
         loadingIndicator,
     ];

@@ -96,10 +96,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
         'indem du Wegedaten herunterlädst bzw. importierst.';
 
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.setStatusMissing(
-      label: 'Keine',
-      userHint: noDbMessage,
-    );
+    ui.setStatusMissing(label: 'Keine', userHint: noDbMessage);
   }
 
   @override
@@ -189,16 +186,14 @@ class ApplicationWidePresenter implements PresentationBoundary {
   @override
   void updateNearbySummits(List<(Summit, double)> nearbySummits) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateNearbySummits(
-      <ListViewItem>[
-        for (final (Summit, double) summitData in nearbySummits)
-          ListViewItem(
-            summitData.$1.name,
-            subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
-            itemId: summitData.$1.id,
-          ),
-      ],
-    );
+    ui.updateNearbySummits(<ListViewItem>[
+      for (final (Summit, double) summitData in nearbySummits)
+        ListViewItem(
+          summitData.$1.name,
+          subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
+          itemId: summitData.$1.id,
+        ),
+    ]);
   }
 
   @override
@@ -240,11 +235,7 @@ class ApplicationWidePresenter implements PresentationBoundary {
   }
 
   @override
-  void updateRouteList(
-    int contextKey,
-    List<Route> routeList,
-    RoutesFilterMode usedSortCriterion,
-  ) {
+  void updateRouteList(int contextKey, List<Route> routeList, RoutesFilterMode usedSortCriterion) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
     List<ListViewItem> routeItems = <ListViewItem>[];
     for (final Route route in routeList) {
@@ -269,18 +260,14 @@ class ApplicationWidePresenter implements PresentationBoundary {
     NearbySummitsSortMode usedSortCriterion,
   ) {
     ApplicationUiBoundary ui = _dependencyProvider.provide<ApplicationUiBoundary>();
-    ui.updateContextualSummitList(
-      contextKey,
-      <ListViewItem>[
-        for (final (Summit, double) summitData in nearbySummits)
-          ListViewItem(
-            summitData.$1.name,
-            subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
-            itemId: summitData.$1.id,
-          ),
-      ],
-      _createSummitListSortCriterionItems(usedSortCriterion),
-    );
+    ui.updateContextualSummitList(contextKey, <ListViewItem>[
+      for (final (Summit, double) summitData in nearbySummits)
+        ListViewItem(
+          summitData.$1.name,
+          subTitle: '${summitData.$2.round().toStringAsFixed(0)} m',
+          itemId: summitData.$1.id,
+        ),
+    ], _createSummitListSortCriterionItems(usedSortCriterion));
   }
 
   List<ListViewItem> _createSummitListSortCriterionItems(NearbySummitsSortMode usedSortCriterion) {

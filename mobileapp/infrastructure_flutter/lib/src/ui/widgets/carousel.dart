@@ -53,10 +53,7 @@ class _WidgetCarouselState extends State<WidgetCarousel> {
           ),
 
           Expanded(
-            child: IndexedStack(
-              index: currentWidgetIndex,
-              children: widget.items,
-            ),
+            child: IndexedStack(index: currentWidgetIndex, children: widget.items),
           ),
 
           IconButton(

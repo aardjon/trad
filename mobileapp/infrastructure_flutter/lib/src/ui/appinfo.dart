@@ -24,10 +24,7 @@ class AppInfoPage extends StatelessWidget {
   Widget _buildAppVersionLabel(BuildContext context, AppInfoModel model) {
     return Padding(
       padding: const EdgeInsets.only(top: 15, bottom: 5),
-      child: Text(
-        model.versionLabel,
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
+      child: Text(model.versionLabel, style: Theme.of(context).textTheme.titleLarge),
     );
   }
 
@@ -39,10 +36,7 @@ class AppInfoPage extends StatelessWidget {
     }
     widgets.add(const SizedBox(height: 5));
     widgets.add(
-      ElevatedButton(
-        onPressed: _onShowHomepageClicked,
-        child: Text(model.websiteButtonLabel),
-      ),
+      ElevatedButton(onPressed: _onShowHomepageClicked, child: Text(model.websiteButtonLabel)),
     );
     return widgets;
   }
@@ -79,10 +73,7 @@ class AppInfoPage extends StatelessWidget {
     return <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 15, bottom: 5),
-        child: Text(
-          model.routeDataHeader,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        child: Text(model.routeDataHeader, style: Theme.of(context).textTheme.titleLarge),
       ),
       ChangeNotifierProvider<RouteDbStatusNotifier>.value(
         value: _settingsState,
@@ -121,10 +112,7 @@ class AppInfoPage extends StatelessWidget {
     List<Widget> widgets = <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 15, bottom: 5),
-        child: Text(
-          model.supportHeader,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        child: Text(model.supportHeader, style: Theme.of(context).textTheme.titleLarge),
       ),
     ];
     for (final String line in model.supportLabels) {
