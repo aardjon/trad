@@ -3,6 +3,7 @@ Unit tests for the 'trad.application.filters.source.osm.filter' module (and ther
 'trad.application.filters.source.osm' package).
 """
 
+import logging
 from typing import Final
 from unittest.mock import Mock
 
@@ -441,6 +442,56 @@ class TestOsmDataFilterSummits:
 
         imported_summits = [s for _id, s in output_pipe.iter_summits()]
         assert not imported_summits
+
+    def test_relation_without_peak(self, caplog: pytest.LogCaptureFixture) -> None:
+        """
+        Ensure that the filter correctly processes crag relations that do not contain any peak node
+        at all:
+         - The filter shall create a Summit object without a position
+         - The Filter shall log a warning containing the summit name
+        """
+        caplog.set_level(logging.WARNING)
+        fake_network_boundary = FakeNetwork(
+            nominatim_response=[{"osm_id": 1337}],
+            overpass_area_query_response={
+                "elements": [
+                    {
+                        "id": 42,
+                        "type": "relation",
+                        "tags": {"name": "Mt Mock"},
+                        "members": [],
+                    },
+                ]
+            },
+            overpass_parent_relations_query_response={
+                "elements": [
+                    {
+                        "id": 123,
+                        "type": "relation",
+                        "tags": {"name": self._example_sector1.value},
+                        "members": [{"type": "node", "ref": 42}],
+                    },
+                ]
+            },
+        )
+        osm_filter = OsmDataFilter(fake_network_boundary)
+
+        output_pipe = CollectedData()
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
+
+        imported_summits = [s for _id, s in output_pipe.iter_summits()]
+        # Ensure the summit is created
+        assert len(imported_summits) == 1
+        assert self._summits_equal(
+            imported_summits[0],
+            Summit(
+                official_name="Mt Mock",
+                position=RankedValue.create_null(),
+                sector=self._example_sector1,
+            ),
+        )
+        # Ensure the filter logs a message with the summit name
+        assert "No peak node can be found for relation 'Mt Mock'." in caplog.text
 
     @staticmethod
     def _summits_equal(summit1: Summit, summit2: Summit) -> bool:

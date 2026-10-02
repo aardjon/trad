@@ -1,5 +1,10 @@
 # Scraper & Route Database Changelog
 
+## Next Version
+
+### Fixed Bugs:
+ - OSM filter fails for crag relations without a peak node (#64)
+
 
 ## Version 0.6.0 - 2026-09-07
 
