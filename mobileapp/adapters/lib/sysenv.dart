@@ -26,7 +26,7 @@ class SystemEnvironment implements SystemEnvironmentBoundary {
 
   /// Constructor for using the dependency provider given as [di] to obtain dependencies from other
   /// rings.
-  SystemEnvironment(DependencyProvider di)
+  new(DependencyProvider di)
     : _pathProviderBoundary = di.provide<PathProviderBoundary>(),
       _externalAppsBoundary = di.provide<ExternalAppsBoundary>();
 

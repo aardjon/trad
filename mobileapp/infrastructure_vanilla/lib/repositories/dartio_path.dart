@@ -29,7 +29,7 @@ class DartIoFileSystem implements FileSystemBoundary {
   /// For unit testing different platform behaviour, an alternative `path` context can be injected
   /// by providing it as [pathContext]. In normal/productive cases always use the default parameter
   /// value (which uses the current platform's context).
-  DartIoFileSystem({Context? pathContext}) : _context = pathContext ?? context;
+  new({Context? pathContext}) : _context = pathContext ?? context;
 
   @override
   File getFile(String filePath) {

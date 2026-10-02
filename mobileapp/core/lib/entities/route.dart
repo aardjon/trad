@@ -39,7 +39,7 @@ class Route {
   double? routeRating;
 
   /// Constructor for directly initializing all members.
-  Route({
+  new({
     required this.id,
     required this.routeName,
     required this.grade,
@@ -82,7 +82,7 @@ class Difficulty {
   int rp;
 
   /// Constructor for directly initializing all members.
-  Difficulty({this.af = noGrade, this.ou = noGrade, this.rp = noGrade, this.jump = noGrade})
+  new({this.af = noGrade, this.ou = noGrade, this.rp = noGrade, this.jump = noGrade})
     : assert(
         (af >= noGrade && ou >= noGrade && rp >= noGrade && jump >= noGrade),
         'Grade values must not be negative',
@@ -116,5 +116,5 @@ class Directions {
   String source;
 
   /// Constructor for directly initializing all members.
-  Directions(this.content, this.source);
+  new(this.content, this.source);
 }

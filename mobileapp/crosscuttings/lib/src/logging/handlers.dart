@@ -55,7 +55,7 @@ class FileLogHandler extends LogHandler {
   final File _logFile;
 
   /// Constructor for directly initializing all members.
-  FileLogHandler(String logFilePath) : _logFile = File(logFilePath);
+  new(String logFilePath) : _logFile = File(logFilePath);
 
   @override
   void _writeMessage(String message) {
@@ -79,7 +79,7 @@ class MemoryLogHandler extends LogHandler {
   /// Constructor for directly initializing all members.
   ///
   /// All log messages will be appended to the provided list.
-  MemoryLogHandler(this._loggedMessages);
+  new(this._loggedMessages);
 
   @override
   void _writeMessage(String message) {

@@ -13,7 +13,7 @@ class CenteredText extends StatelessWidget {
   final String _message;
 
   /// Constructor for directly initializing all members.
-  const CenteredText(this._message, {super.key});
+  const new(this._message, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +21,7 @@ class CenteredText extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(_message),
-          ),
+          child: Padding(padding: const EdgeInsets.all(20), child: Text(_message)),
         ),
       ],
     );

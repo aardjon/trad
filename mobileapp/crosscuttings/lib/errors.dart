@@ -10,7 +10,7 @@ class PermissionException implements Exception {
   final String permissionName;
 
   /// Constructor for directly initializing all members.
-  PermissionException(this.permissionName);
+  new(this.permissionName);
 
   @override
   String toString() {
@@ -24,7 +24,7 @@ class PermissionException implements Exception {
 /// idea display a short explanation to the user, ask for granting the permission and try again.
 class MissingPermission extends PermissionException {
   /// Constructor for directly initializing all members.
-  MissingPermission(super.permissionName);
+  new(super.permissionName);
 
   @override
   String toString() {
@@ -38,7 +38,7 @@ class MissingPermission extends PermissionException {
 /// something is not possible, though.
 class PermissionDenied extends PermissionException {
   /// Constructor for directly initializing all members.
-  PermissionDenied(super.permissionName);
+  new(super.permissionName);
 
   @override
   String toString() {
@@ -54,7 +54,7 @@ class ResourceUnavailable implements Exception {
   final String resourceName;
 
   /// Constructor for directly initializing all members.
-  ResourceUnavailable(this.resourceName);
+  new(this.resourceName);
 
   @override
   String toString() {

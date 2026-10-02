@@ -39,7 +39,7 @@ class ApplicationWideController {
   final RouteDbUseCases _routeDbUseCases;
 
   /// Constructor for creating a new instance.
-  ApplicationWideController() : _routeDbUseCases = DependencyProvider().provide<RouteDbUseCases>();
+  new() : _routeDbUseCases = DependencyProvider().provide<RouteDbUseCases>();
 
   /// The user requested a switch to the Journal domain.
   void requestSwitchToJournal() {
@@ -101,7 +101,7 @@ class RouteDbController {
   final RouteDbUseCases _routeDbUseCases;
 
   /// Constructor for creating a new instance.
-  RouteDbController() : _routeDbUseCases = DependencyProvider().provide<RouteDbUseCases>();
+  new() : _routeDbUseCases = DependencyProvider().provide<RouteDbUseCases>();
 
   /// The user requested updating the route database.
   void requestRouteDbUpdate() {

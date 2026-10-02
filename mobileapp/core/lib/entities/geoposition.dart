@@ -27,7 +27,7 @@ class GeoPosition {
   /// Constructor for directly initializing all members.
   ///
   /// Raises if the given values exceed the allowed value range.
-  GeoPosition(this.latitude, this.longitude)
+  new(this.latitude, this.longitude)
     : assert(latitude >= -90.0 && latitude <= 90.0, 'Latitude value must be within [-90.0, 90.0]'),
       assert(
         longitude >= -180.0 && longitude <= 180.0,

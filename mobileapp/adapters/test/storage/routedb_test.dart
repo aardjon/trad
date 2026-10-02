@@ -23,7 +23,7 @@ class PathProviderBoundaryMock extends Mock implements PathProviderBoundary {
 
   final FileSystemBoundary _fsBoundary;
 
-  PathProviderBoundaryMock(FileSystemBoundary fsBoundary) : _fsBoundary = fsBoundary {
+  new(FileSystemBoundary fsBoundary) : _fsBoundary = fsBoundary {
     _fsBoundary.getDirectory(appDataDir).createSync(recursive: true);
   }
 
@@ -52,7 +52,7 @@ class FileSystemBoundaryMock extends Mock implements FileSystemBoundary {
   }
 }
 
-class RelationalDatabaseBoundaryMock extends Mock implements RelationalDatabaseBoundary {}
+class RelationalDatabaseBoundaryMock extends Mock implements RelationalDatabaseBoundary;
 
 /// Unit tests for the adapters.storage.routedb.RouteDbStorage class.
 void main() {
@@ -146,9 +146,8 @@ void main() {
     /// (e.g. file not found, permission error, not an SQLite file etc.): An
     /// InaccessibleStorageException shall be thrown.
     test('unable to open DB file', () async {
-      when(
-        () => rdbMock.connect(any(), readOnly: any(named: 'readOnly')),
-      ).thenThrow(const PathAccessException('Fake permission failure', OSError()));
+      when(() => rdbMock.connect(any(), readOnly: any(named: 'readOnly')))
+          .thenThrow(const PathAccessException('Fake permission failure', OSError()));
 
       RouteDbStorage storage = RouteDbStorage(di);
       expect(() async {
@@ -313,9 +312,8 @@ void main() {
     /// Ensures the correct behaviour in case the file to import exists but cannot be read
     test('source file not readable', () async {
       when(rdbMock.isConnected).thenReturn(false); // The storage is STOPPED
-      when(
-        () => rdbMock.connect(any(), readOnly: any(named: 'readOnly')),
-      ).thenThrow(const PathAccessException('Fake permission failure', OSError()));
+      when(() => rdbMock.connect(any(), readOnly: any(named: 'readOnly')))
+          .thenThrow(const PathAccessException('Fake permission failure', OSError()));
       // Create the database file to import
       String filePathToImport = '${userDownloadDir.path}trad-routedb-4711.sqlite';
 

@@ -6,8 +6,6 @@
 ///
 library;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -36,15 +34,7 @@ class ApplicationUI implements ApplicationUiBoundary {
 
   @override
   void initializeUserInterface(String appName, String splashString, MainMenuModel menuModel) {
-    runApp(
-      MainWidget(
-        appName,
-        splashString,
-        menuModel,
-        ApplicationWideController(),
-        _uiState,
-      ),
-    );
+    runApp(MainWidget(appName, splashString, menuModel, ApplicationWideController(), _uiState));
     // Set the UI state to initialized after the first event frame is done.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _uiState.setInitialized();
@@ -149,10 +139,7 @@ class ApplicationUI implements ApplicationUiBoundary {
   @override
   void switchToJournal() {
     _uiState.resetNotifiers();
-    _switchToRoute(
-      UiRoute.journal.toRouteString(),
-      isRoot: true,
-    );
+    _switchToRoute(UiRoute.journal.toRouteString(), isRoot: true);
   }
 
   @override
@@ -186,30 +173,18 @@ class ApplicationUI implements ApplicationUiBoundary {
     if (!_uiState.isInitializing()) {
       NavigatorState state = _uiState.getNavigatorKey().currentState!;
       if (isRoot) {
-        unawaited(
-          state.pushNamedAndRemoveUntil(
-            routeString,
-            (Route<dynamic> route) => false,
-            arguments: routeArguments,
-          ),
+        state.pushNamedAndRemoveUntil(
+          routeString,
+          (Route<dynamic> route) => false,
+          arguments: routeArguments,
         );
       } else {
-        unawaited(
-          state.pushNamed(
-            routeString,
-            arguments: routeArguments,
-          ),
-        );
+        state.pushNamed(routeString, arguments: routeArguments);
       }
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         NavigatorState state = _uiState.getNavigatorKey().currentState!;
-        unawaited(
-          state.pushReplacementNamed(
-            routeString,
-            arguments: routeArguments,
-          ),
-        );
+        state.pushReplacementNamed(routeString, arguments: routeArguments);
       });
     }
   }

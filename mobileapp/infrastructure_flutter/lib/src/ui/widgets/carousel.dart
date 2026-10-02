@@ -20,7 +20,7 @@ class WidgetCarousel extends StatefulWidget {
 
   /// Constructor for creating a new carousel widget. The first parameter takes all child widgets
   /// that can be displayed by this carousel. The provided widget list must not be empty.
-  WidgetCarousel(this._items, {super.key})
+  new(this._items, {super.key})
     : assert(_items.isNotEmpty, 'Carousel items list must not be empty.');
 
   /// Returns all child widgets that can be displayed by this carousel.
@@ -53,10 +53,7 @@ class _WidgetCarouselState extends State<WidgetCarousel> {
           ),
 
           Expanded(
-            child: IndexedStack(
-              index: currentWidgetIndex,
-              children: widget.items,
-            ),
+            child: IndexedStack(index: currentWidgetIndex, children: widget.items),
           ),
 
           IconButton(

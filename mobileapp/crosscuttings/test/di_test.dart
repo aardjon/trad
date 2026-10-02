@@ -7,20 +7,18 @@ import 'package:test/test.dart';
 
 import 'package:crosscuttings/di.dart';
 
-abstract interface class ExampleInterface1 {}
+abstract interface class ExampleInterface1;
 
-abstract interface class ExampleInterface2 {}
+abstract interface class ExampleInterface2;
 
-class ExampleImpl implements ExampleInterface1 {}
+class ExampleImpl implements ExampleInterface1;
 
 /// Unit tests for the crosscuttings.di.DependencyProvider class.
 void main() {
   group('crosscuttings.di', () {
     final DependencyProvider di = DependencyProvider();
 
-    tearDown(() async {
-      return di.shutdown();
-    });
+    tearDown(di.shutdown);
 
     /// Ensure the correct behaviour of the provide() method:
     ///  - Return the registered implementation, if any

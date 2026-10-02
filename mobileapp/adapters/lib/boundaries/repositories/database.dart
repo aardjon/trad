@@ -95,7 +95,7 @@ class Query {
   /// The name of the table and the names of all columns to request must be specified by [tableName]
   /// and [_columnNames]. The column names specified here are used to retrieve the resulting values
   /// from [ResultRow] objects after the query has run.
-  Query.table(String tableName, this._columnNames)
+  new table(String tableName, this._columnNames)
     : _tableNames = <String>[tableName],
       _joinConditions = null,
       assert(_columnNames.isNotEmpty, 'At least one column to retrieve must be defined');
@@ -109,7 +109,7 @@ class Query {
   /// The names of all columns to request must be specified by [_columnNames]. The column names
   /// specified here are used to retrieve the resulting values from [ResultRow] objects after the
   /// query has run.
-  Query.join(this._tableNames, List<String> joinConditions, this._columnNames)
+  new join(this._tableNames, List<String> joinConditions, this._columnNames)
     : assert(_tableNames.length > 1, 'Joining requires at least two table names.'),
       assert(
         joinConditions.length == _tableNames.length - 1,
@@ -187,7 +187,7 @@ class ResultRow {
   }
 
   /// Initializes a new result row from raw data.
-  ResultRow(this._resultData);
+  new(this._resultData);
 
   /// Returns the value of the given [columnName] if the column exists in the result set.
   ///

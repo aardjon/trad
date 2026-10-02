@@ -8,7 +8,7 @@ import '../../boundaries/ui.dart';
 /// Factory for creating IconDefinition instances representing different ratings.
 class RatingIconFactory {
   /// Const default constructor (to improve performance).
-  const RatingIconFactory();
+  const new();
 
   /// Mapping of glyphs to rating values.
   static const Map<int, Glyph> _glyphMapping = <int, Glyph>{

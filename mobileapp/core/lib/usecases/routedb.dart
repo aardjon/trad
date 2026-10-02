@@ -57,7 +57,7 @@ class RouteDbUseCases {
   int? _lastSelectedSector;
 
   /// Constructor for creating a new RouteDbUseCases instance.
-  RouteDbUseCases({
+  new({
     required this._presentationBoundary,
     required this._storageBoundary,
     required this._downloadBoundary,
@@ -83,16 +83,12 @@ class RouteDbUseCases {
   /// Use Case: Import the file given by [filePath] into the route db, replacing all previous data.
   Future<void> importRouteDbFile(String filePath) async {
     _logger.debug('Running use case importRouteDbFile()');
-    await _fetchAndInstallRouteDb(
-      dbFileProvider: LocalDbFileProvider(filePath),
-    );
+    await _fetchAndInstallRouteDb(dbFileProvider: LocalDbFileProvider(filePath));
   }
 
   /// Fetch and install a new route db file. The actual work is delegated to to the given
   /// [dbFileProvider].
-  Future<void> _fetchAndInstallRouteDb({
-    required DbFileProvider dbFileProvider,
-  }) async {
+  Future<void> _fetchAndInstallRouteDb({required DbFileProvider dbFileProvider}) async {
     _presentationBoundary.routeDbUpdating();
 
     if (_storageBoundary.isStarted()) {
@@ -353,7 +349,7 @@ class LocalDbFileProvider implements DbFileProvider {
   final String _filePath;
 
   /// Constructor for directly initializing all members.
-  LocalDbFileProvider(this._filePath);
+  new(this._filePath);
 
   @override
   Future<String?> determineLocalFileToInstall() async {
@@ -371,7 +367,7 @@ class OnlineDbFileProvider implements DbFileProvider {
   final DateTime? _currentDbCreationDate;
 
   /// Constructor for directly initializing all members.
-  OnlineDbFileProvider(this._downloadBoundary, this._currentDbCreationDate);
+  new(this._downloadBoundary, this._currentDbCreationDate);
 
   @override
   Future<String?> determineLocalFileToInstall() async {
@@ -389,7 +385,7 @@ class OnlineDbFileProvider implements DbFileProvider {
     }
 
     _logger.info("Chose database '$chosenUpdateId' out of ${availableDatabases.length} candidates");
-    return _downloadBoundary.downloadRouteDatabase(chosenUpdateId);
+    return await _downloadBoundary.downloadRouteDatabase(chosenUpdateId);
   }
 
   Future<RouteDatabaseId?> _chooseUpdateId(List<RouteDbUpdateCandidate> availableDatabases) async {

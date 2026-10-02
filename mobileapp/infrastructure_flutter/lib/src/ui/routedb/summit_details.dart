@@ -22,11 +22,7 @@ class SummitDetailsView extends StatefulWidget {
   final GuiState guiState;
 
   /// Constructor for directly initializing all members.
-  const SummitDetailsView(
-    this.appDrawer,
-    this.guiState, {
-    super.key,
-  });
+  const new(this.appDrawer, this.guiState, {super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -52,20 +48,13 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
 
     return Scaffold(
       appBar: _buildAppBar(model, tabFactory, context),
-      body: TabBarView(
-        controller: _tabController,
-        children: tabFactory.getContentWidgets(),
-      ),
+      body: TabBarView(controller: _tabController, children: tabFactory.getContentWidgets()),
       drawer: widget.appDrawer,
       drawerEnableOpenDragGesture: false,
     );
   }
 
-  AppBar _buildAppBar(
-    SummitDetailsModel model,
-    _TabFactory tabFactory,
-    BuildContext context,
-  ) {
+  AppBar _buildAppBar(SummitDetailsModel model, _TabFactory tabFactory, BuildContext context) {
     return AppBar(
       title: Column(
         children: <Widget>[
@@ -105,10 +94,7 @@ class _SummitDetailsViewState extends State<SummitDetailsView> with SingleTicker
 
   void _showContextMenu(Widget contextMenu, BuildContext context) {
     unawaited(
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) => contextMenu,
-      ),
+      showModalBottomSheet(context: context, builder: (BuildContext context) => contextMenu),
     );
   }
 
@@ -127,14 +113,11 @@ class SummitRoutesContextMenu extends StatelessWidget {
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
   /// Constructor for directly initializing all members.
-  const SummitRoutesContextMenu(this._model, this._state, {super.key});
+  const new(this._model, this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: _createContextMenuitems(context),
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: _createContextMenuitems(context));
   }
 
   List<Widget> _createContextMenuitems(BuildContext context) {
@@ -172,7 +155,7 @@ class _TabFactory {
   final SummitDetailsView _pageWidget;
   final SummitDetailsModel _pageModel;
 
-  _TabFactory(this._pageWidget, this._pageModel);
+  new(this._pageWidget, this._pageModel);
 
   /// Return the number of available tabs.
   static int getTabCount() {
@@ -206,9 +189,7 @@ class _TabFactory {
 
     return <Widget>[
       RoutesListView(routeListNotifier),
-      SummitListView(
-        _pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId),
-      ),
+      SummitListView(_pageWidget.guiState.getSummitListNotifier(_pageModel.summitDataId)),
     ];
   }
 
@@ -242,7 +223,7 @@ class RoutesListView extends StatelessWidget {
   static const IconWidgetFactory _iconFactory = IconWidgetFactory();
 
   /// Constructor for directly initializing all members.
-  const RoutesListView(this._state, {super.key});
+  const new(this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -279,14 +260,11 @@ class NearbySummitsContextMenu extends StatelessWidget {
   final SummitDetailsModel _pageModel;
 
   /// Constructor for directly initializing all members.
-  const NearbySummitsContextMenu(this._pageModel, this._state, {super.key});
+  const new(this._pageModel, this._state, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: _createContextMenuitems(context),
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: _createContextMenuitems(context));
   }
 
   List<Widget> _createContextMenuitems(BuildContext context) {

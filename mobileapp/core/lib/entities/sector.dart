@@ -15,5 +15,5 @@ class Sector {
   final String name;
 
   /// Constructor for directly initializing all members.
-  const Sector(this.id, this.name);
+  const new(this.id, this.name);
 }

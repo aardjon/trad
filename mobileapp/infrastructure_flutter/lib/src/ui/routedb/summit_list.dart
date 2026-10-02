@@ -19,7 +19,7 @@ class SummitListPage extends StatelessWidget {
   final DeferableOptionalDataListNotifier _summitListState;
 
   /// Constructor for directly initializing all members.
-  const SummitListPage(this._appDrawer, this._summitListState, {super.key});
+  const new(this._appDrawer, this._summitListState, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +83,7 @@ class SummitFilterBar extends StatefulWidget {
   final void Function(String nameFilter, ItemDataId? sectorFilter) onFilterChanged;
 
   /// Constructor for directly initializing all members.
-  const SummitFilterBar({
+  const new({
     required this.nameFilterHint,
     required this.sectorFilterItems,
     required this.initialSelectedIndex,
@@ -167,10 +167,7 @@ class _SummitFilterBarState extends State<SummitFilterBar> {
   Widget _sectorSelectionWidget(BuildContext context) {
     final List<DropdownMenuEntry<int?>> entries = List<DropdownMenuEntry<int?>>.from(
       widget.sectorFilterItems.map<DropdownMenuEntry<int?>>(
-        (ListViewItem item) => DropdownMenuEntry<int?>(
-          label: item.mainTitle,
-          value: item.itemId,
-        ),
+        (ListViewItem item) => DropdownMenuEntry<int?>(label: item.mainTitle, value: item.itemId),
       ),
     );
 

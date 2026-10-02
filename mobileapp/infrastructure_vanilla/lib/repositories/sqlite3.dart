@@ -32,7 +32,7 @@ class Sqlite3Database implements RelationalDatabaseBoundary {
   ///
   /// For easier unit testing, a mocked sqlite3 library can be injected by providing it as
   /// [extLibApi]. In normal/productive cases always use the default parameter value.
-  Sqlite3Database({Sqlite3? extLibApi}) : _extLibApi = extLibApi ?? sqlite3;
+  new({Sqlite3? extLibApi}) : _extLibApi = extLibApi ?? sqlite3;
 
   @override
   void connect(String connectionString, {bool readOnly = false}) {

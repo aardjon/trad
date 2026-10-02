@@ -24,7 +24,7 @@ class KnowledgebaseUseCases {
   final KnowledgebaseStorageBoundary _storageBoundary;
 
   /// Constructor for creating a new KnowledgebaseUseCases instance.
-  KnowledgebaseUseCases(DependencyProvider di)
+  new(DependencyProvider di)
     : _presentationBoundary = di.provide<PresentationBoundary>(),
       _storageBoundary = di.provide<KnowledgebaseStorageBoundary>();
 

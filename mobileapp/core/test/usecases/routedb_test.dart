@@ -26,17 +26,17 @@ import 'package:core/entities/sorting/routes_filter_mode.dart';
 import 'package:core/entities/summit.dart';
 import 'package:core/usecases/routedb.dart';
 
-class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary {}
+class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary;
 
-class RouteDbDownloadBoundaryMock extends Mock implements RouteDbDownloadBoundary {}
+class RouteDbDownloadBoundaryMock extends Mock implements RouteDbDownloadBoundary;
 
-class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
+class PresentationBoundaryMock extends Mock implements PresentationBoundary;
 
-class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
+class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary;
 
-class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
+class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary;
 
-class PositioningBoundaryMock extends Mock implements PositioningBoundary {}
+class PositioningBoundaryMock extends Mock implements PositioningBoundary;
 
 /// Unit tests for the core.usecases.routedb.RouteDbUseCases component.
 void main() {
@@ -106,9 +106,8 @@ void main() {
 
       // Make sure the UI has been notified about a DB update
       verify(presentationBoundaryMock.routeDbUpdating);
-      verify(
-        () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
-      ).called(1);
+      verify(() => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions))
+          .called(1);
     });
 
     /// Simple happy-path test of the whole updateRouteDatabase() use case: A new database file must
@@ -116,12 +115,7 @@ void main() {
     test('updateRouteDatabase() use case', () async {
       final DateTime fakeCreationDate = DateTime(2023, 12, 25);
       final List<DataSourceAttribution> fakeAttributions = <DataSourceAttribution>[
-        DataSourceAttribution(
-          id: 1,
-          label: 'Test',
-          url: '[some url]',
-          attribution: '[some name]',
-        ),
+        DataSourceAttribution(id: 1, label: 'Test', url: '[some url]', attribution: '[some name]'),
       ];
 
       when(storageBoundaryMock.isStarted).thenReturn(false);
@@ -165,9 +159,8 @@ void main() {
 
       // Make sure the UI has been notified about the DB update process
       verify(presentationBoundaryMock.routeDbUpdating).called(1);
-      verify(
-        () => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions),
-      ).called(1);
+      verify(() => presentationBoundaryMock.routeDbAvailable(fakeCreationDate, fakeAttributions))
+          .called(1);
     });
 
     // Tests for downloading database updates.
@@ -211,10 +204,7 @@ void main() {
               null,
               <(CompatibilityMode, DateTime)>[
                 (CompatibilityMode.backwardCompatible, DateTime(2025, 1, 2)),
-                (
-                  CompatibilityMode.exactMatch,
-                  DateTime(2025, 1, 2),
-                ),
+                (CompatibilityMode.exactMatch, DateTime(2025, 1, 2)),
               ],
               1,
             ),
@@ -325,9 +315,7 @@ void main() {
               ),
             );
           }
-          _FakeRouteDbDownloadBoundary fakeDownloader = _FakeRouteDbDownloadBoundary(
-            candidates,
-          );
+          _FakeRouteDbDownloadBoundary fakeDownloader = _FakeRouteDbDownloadBoundary(candidates);
 
           final DateTime dbCreationDate = params.$1 ?? DateTime(2000, 1, 1);
           final bool storageInitiallyStarted = params.$1 != null;
@@ -455,10 +443,7 @@ void main() {
         verify(storageBoundaryMock.startStorage).called(1);
         // Make sure the UI gets the storage state update and the creation date
         verify(
-          () => presentationBoundaryMock.routeDbAvailable(
-            dummyCreationDate,
-            dummyAttributions,
-          ),
+          () => presentationBoundaryMock.routeDbAvailable(dummyCreationDate, dummyAttributions),
         ).called(1);
       });
 
@@ -832,9 +817,8 @@ void main() {
       // summit ID and sort criterion
       verify(() => storageBoundaryMock.retrieveRoutesOfSummit(summit.id, sortCriterion)).called(1);
       // Make sure the retrieved route list and the correct sort criterion are sent to the UI
-      verify(
-        () => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion),
-      ).called(1);
+      verify(() => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion))
+          .called(1);
     });
 
     /// Ensures the correct behaviour of the sortRouteList() method:
@@ -845,9 +829,8 @@ void main() {
     ///  - The sorted route list provided by the storage must be sent to the UI (updateRouteList())
     test('sortRouteList() use case', () async {
       // Setup the storage mocks
-      when(
-        () => preferencesBoundaryMock.setInitialRoutesSortCriterion(any()),
-      ).thenAnswer((_) async {});
+      when(() => preferencesBoundaryMock.setInitialRoutesSortCriterion(any()))
+          .thenAnswer((_) async {});
       when(() => storageBoundaryMock.retrieveRoutesOfSummit(any(), any())).thenAnswer((_) async {
         return routeList;
       });
@@ -869,9 +852,8 @@ void main() {
       // summit ID and sort criterion
       verify(() => storageBoundaryMock.retrieveRoutesOfSummit(summit.id, sortCriterion)).called(1);
       // Make sure the retrieved route list and the correct sort criterion are sent to the UI
-      verify(
-        () => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion),
-      ).called(1);
+      verify(() => presentationBoundaryMock.updateRouteList(summit.id, routeList, sortCriterion))
+          .called(1);
     });
   });
 
@@ -938,9 +920,8 @@ void main() {
     ///  - The sorted post list provided by the storage must be sent to the UI (updateRouteList())
     test('sortPostList() use case', () async {
       // Setup the storage mocks
-      when(
-        () => preferencesBoundaryMock.setInitialPostsSortCriterion(any()),
-      ).thenAnswer((_) async {});
+      when(() => preferencesBoundaryMock.setInitialPostsSortCriterion(any()))
+          .thenAnswer((_) async {});
       when(() => storageBoundaryMock.retrievePostsOfRoute(any(), any())).thenAnswer((_) async {
         return postList;
       });
@@ -980,7 +961,7 @@ class _FakeStorageBoundary extends Fake implements RouteDbStorageBoundary {
 
   /// Constructor for creating a fake storage which pretends to have been created at
   /// [_dbCreationDate] and has the initial state of [_isStarted].
-  _FakeStorageBoundary(this._dbCreationDate, {required this._isStarted});
+  new(this._dbCreationDate, {required this._isStarted});
 
   @override
   Future<void> startStorage() async {
@@ -1031,7 +1012,7 @@ class _FakeRouteDbDownloadBoundary extends Fake implements RouteDbDownloadBounda
   /// The list of candidates to be returned from getAvailableUpdateCandidates().
   final Map<RouteDatabaseId, RouteDbUpdateCandidate> _updateCandidates;
 
-  _FakeRouteDbDownloadBoundary(List<RouteDbUpdateCandidate> updateCandidates)
+  new(List<RouteDbUpdateCandidate> updateCandidates)
     : _updateCandidates = <RouteDatabaseId, RouteDbUpdateCandidate>{
         for (RouteDbUpdateCandidate c in updateCandidates) c.identifier: c,
       };
@@ -1053,7 +1034,7 @@ class _FakeRouteDbDownloadBoundary extends Fake implements RouteDbDownloadBounda
 class _GeoPositionMatcher extends Matcher {
   final GeoPosition expectedPosition;
 
-  _GeoPositionMatcher(this.expectedPosition);
+  new(this.expectedPosition);
 
   @override
   Description describe(Description description) {

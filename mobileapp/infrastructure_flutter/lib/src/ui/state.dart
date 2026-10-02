@@ -301,10 +301,7 @@ class DataListNotifier extends ChangeNotifier {
   /// Replaces the current data and action items with the new ones defined by [data] and [actions].
   ///
   /// All listeners are notified so that e.g. views can be updated.
-  void replaceData(
-    List<ListViewItem> data,
-    List<ListViewItem> actions,
-  ) {
+  void replaceData(List<ListViewItem> data, List<ListViewItem> actions) {
     _data = data;
     _actionItems = actions;
     notifyListeners();

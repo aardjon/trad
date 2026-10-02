@@ -4,6 +4,7 @@
 library;
 
 import 'dart:typed_data';
+
 import 'package:http/http.dart' as http;
 
 import 'package:adapters/boundaries/network.dart';
@@ -25,7 +26,7 @@ class HttpNetworkRequests implements HttpNetworkingBoundary {
   /// Constructor for creating a new HttpNetworkRequests component. The [client] parameter allows
   /// easy mocking of the underlying client implementation e.g. for unit testing, but is not meant
   /// to be used in regular production code.
-  HttpNetworkRequests({http.Client? client}) : _httpClient = client ?? http.Client();
+  new({http.Client? client}) : _httpClient = client ?? http.Client();
 
   @override
   Future<String> retrieveJsonResource(Uri url) async {

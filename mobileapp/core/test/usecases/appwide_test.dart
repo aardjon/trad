@@ -13,13 +13,13 @@ import 'package:crosscuttings/di.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary {}
+class RouteDbStorageBoundaryMock extends Mock implements RouteDbStorageBoundary;
 
-class PresentationBoundaryMock extends Mock implements PresentationBoundary {}
+class PresentationBoundaryMock extends Mock implements PresentationBoundary;
 
-class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary {}
+class AppPreferencesBoundaryMock extends Mock implements AppPreferencesBoundary;
 
-class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary {}
+class SystemEnvironmentBoundaryMock extends Mock implements SystemEnvironmentBoundary;
 
 /// Unit tests for the core.usecases.appwide.ApplicationWideUseCases component.
 void main() {

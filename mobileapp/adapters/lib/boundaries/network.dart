@@ -36,7 +36,7 @@ abstract interface class HttpNetworkingBoundary {
 }
 
 /// General base class for all exception that may be raised by network requests.
-class NetworkException implements Exception {}
+class NetworkException implements Exception;
 
 /// Raised in case of an error during a (HTTP) network request. This usually means that the
 /// connection failed, timed out or the remote side did something unexpected - it may work when
@@ -46,7 +46,7 @@ class ConnectionException extends NetworkException {
   final String errorMessage;
 
   /// Constructor for directly initializing all members.
-  ConnectionException(this.errorMessage);
+  new(this.errorMessage);
 
   @override
   String toString() {
@@ -64,7 +64,7 @@ class HttpRequestException extends NetworkException {
   final String statusReason;
 
   /// Constructor for directly initializing all members.
-  HttpRequestException(this.statusCode, this.statusReason);
+  new(this.statusCode, this.statusReason);
 
   @override
   String toString() {
@@ -82,10 +82,7 @@ class UnexpectedContentTypeException extends NetworkException {
   final String actualContentType;
 
   /// Constructor for directly initializing all members.
-  UnexpectedContentTypeException({
-    required this.expectedContentType,
-    required this.actualContentType,
-  });
+  new({required this.expectedContentType, required this.actualContentType});
 
   @override
   String toString() {

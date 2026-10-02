@@ -10,9 +10,9 @@ import 'package:test/test.dart';
 import 'package:adapters/boundaries/repositories/database.dart';
 import 'package:infrastructure_vanilla/repositories/sqlite3.dart';
 
-class _SqliteApiMock extends Mock implements Sqlite3 {}
+class _SqliteApiMock extends Mock implements Sqlite3;
 
-class _DatabaseMock extends Mock implements Database {}
+class _DatabaseMock extends Mock implements Database;
 
 /// Parameters for a single `executeQuery` test case:
 /// $1: Factory creating the Query object for the test case
@@ -152,9 +152,8 @@ void main() {
         final _SqliteApiMock sqliteMock = _SqliteApiMock();
         final _DatabaseMock sqliteDbMock = _DatabaseMock();
         when(() => sqliteMock.open(any(), mode: any(named: 'mode'))).thenReturn(sqliteDbMock);
-        when(
-          () => sqliteDbMock.select(any(), any()),
-        ).thenReturn(ResultSet(<String>[], <String>[], <List<Object?>>[]));
+        when(() => sqliteDbMock.select(any(), any()))
+            .thenReturn(ResultSet(<String>[], <String>[], <List<Object?>>[]));
         Sqlite3Database database = Sqlite3Database(extLibApi: sqliteMock);
         database.connect(dummySqliteFilePath);
 

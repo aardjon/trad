@@ -12,7 +12,7 @@ import 'package:crosscuttings/di.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class KeyValueStoreBoundaryMock extends Mock implements KeyValueStoreBoundary {}
+class KeyValueStoreBoundaryMock extends Mock implements KeyValueStoreBoundary;
 
 /// Unit tests for the adapters.storage.app_preferences.PreferencesStorage class.
 void main() {

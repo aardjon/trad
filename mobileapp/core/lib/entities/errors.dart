@@ -10,7 +10,7 @@ class StorageStartingException implements Exception {
   final String connectionString;
 
   /// Constructor for directly initializing all members.
-  StorageStartingException(this.connectionString);
+  new(this.connectionString);
 
   @override
   String toString() {
@@ -29,7 +29,7 @@ class InaccessibleStorageException extends StorageStartingException {
   final Exception accessError;
 
   /// Constructor for directly initializing all members.
-  InaccessibleStorageException(super.connectionString, this.accessError);
+  new(super.connectionString, this.accessError);
 
   @override
   String toString() {
@@ -46,7 +46,7 @@ class InvalidStorageFormatException extends StorageStartingException {
   final String message;
 
   /// Constructor for directly initializing all members.
-  InvalidStorageFormatException(super.connectionString, this.message);
+  new(super.connectionString, this.message);
 
   @override
   String toString() {
@@ -66,7 +66,7 @@ class IncompatibleStorageException extends StorageStartingException {
   final Object requiredVersion;
 
   /// Constructor for directly initializing all members.
-  IncompatibleStorageException(super.connectionString, this.storageVersion, this.requiredVersion);
+  new(super.connectionString, this.storageVersion, this.requiredVersion);
 
   @override
   String toString() {

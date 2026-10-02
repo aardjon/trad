@@ -44,14 +44,14 @@ enum LogLevel {
 /// A [LogDestination] configures the final sink all messages (from all `Logger`s) are finally
 /// written into (e.g. a file or console). This is only about the configuration, it does not
 /// actually handle any output.
-abstract class LogDestination {}
+abstract class LogDestination;
 
 /// A (noop) destination for absorbing all messages and never logging anything.
 ///
 /// Can be used as default or to definitely disable all logging. However, to disable logging it is
 /// usually better to set the log level to `LogLevel.off` because this will avoid some overhead like
 /// message string creation and propagation and therefore improve performance.
-class BlackholeLogDestination extends LogDestination {}
+class BlackholeLogDestination extends LogDestination;
 
 /// A destination for keeping all logged messaged in memory.
 ///
@@ -62,7 +62,7 @@ class MemoryLogDestination extends LogDestination {
 }
 
 /// A destination for sending all messages to stdout.
-class ConsoleLogDestination extends LogDestination {}
+class ConsoleLogDestination extends LogDestination;
 
 /// A destination for writing all messages to a single, endlessly growing file.
 ///
@@ -72,5 +72,5 @@ class FileLogDestination extends LogDestination {
   String logFilePath;
 
   /// Creates a new instance for writing into the provided [logFilePath] file.
-  FileLogDestination(this.logFilePath);
+  new(this.logFilePath);
 }

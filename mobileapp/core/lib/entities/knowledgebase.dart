@@ -25,5 +25,5 @@ class KnowledgebaseDocument {
   final String content;
 
   /// Constructor for directly initializing all members.
-  KnowledgebaseDocument(this.identifier, this.title, this.content);
+  new(this.identifier, this.title, this.content);
 }
