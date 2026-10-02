@@ -10,9 +10,9 @@ annotated-types==0.8.0
     # via
     #   -c app-requirements.txt
     #   pydantic
-ast-serialize==0.8.0
+ast-serialize==0.11.2
     # via mypy
-astroid==4.0.4
+astroid==4.3.3
     # via
     #   pylint
     #   pylint-restricted-imports
@@ -25,11 +25,11 @@ certifi==2026.7.22
     # via
     #   -c app-requirements.txt
     #   requests
-charset-normalizer==3.5.1
+charset-normalizer==3.5.2
     # via
     #   -c app-requirements.txt
     #   requests
-coverage==7.15.4
+coverage==7.16.2
     # via trad_scraper (pyproject.toml)
 dill==0.4.1
     # via pylint
@@ -39,7 +39,7 @@ html5lib==1.1
     # via
     #   -c app-requirements.txt
     #   pandas
-idna==3.19
+idna==3.20
     # via
     #   -c app-requirements.txt
     #   requests
@@ -47,17 +47,17 @@ iniconfig==2.3.0
     # via pytest
 invoke==3.0.3
     # via trad_scraper (pyproject.toml)
-isort==8.0.1
+isort==9.0.2
     # via pylint
 jinja2==3.1.6
     # via dinja-tool
-librt==0.15.0
+librt==0.16.0
     # via mypy
 lidipy==0.3.2
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-lxml==6.1.2
+lxml==6.1.3
     # via
     #   -c app-requirements.txt
     #   pandas
@@ -65,10 +65,12 @@ markupsafe==3.0.3
     # via jinja2
 mccabe==0.7.0
     # via pylint
-mypy==2.3.1
+mypy==2.4.0
     # via trad_scraper (pyproject.toml)
 mypy-extensions==1.1.0
-    # via mypy
+    # via
+    #   isort
+    #   mypy
 numpy==2.3.5
     # via
     #   -c app-requirements.txt
@@ -84,40 +86,42 @@ pandas==2.3.3
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-pandas-stubs==3.0.5.260730
+pandas-stubs==3.0.5.260914
     # via trad_scraper (pyproject.toml)
 pathspec==1.1.1
     # via mypy
-platformdirs==4.11.3
+platformdirs==4.12.2
     # via pylint
 pluggy==1.6.0
     # via pytest
-pydantic==2.13.4
+pydantic==2.13.5
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-pydantic-core==2.46.4
+pydantic-core==2.46.5
     # via
     #   -c app-requirements.txt
     #   pydantic
 pydbml==1.2.1
     # via dinja-tool
-pyinstaller==6.22.2
+pygments==2.21.0
+    # via pytest
+pyinstaller==6.22.3
     # via trad_scraper (pyproject.toml)
-pyinstaller-hooks-contrib==2026.6
+pyinstaller-hooks-contrib==2026.8
     # via pyinstaller
-pylint==4.0.7
+pylint==4.1.1
     # via
     #   pylint-pytest
     #   pylint-restricted-imports
     #   trad_scraper (pyproject.toml)
-pylint-pytest==1.1.8
+pylint-pytest==1.1.9.post1
     # via trad_scraper (pyproject.toml)
 pylint-restricted-imports==0.2.2
     # via trad_scraper (pyproject.toml)
-pyparsing==3.3.2
+pyparsing==3.3.3
     # via pydbml
-pytest==8.2.0
+pytest==9.1.1
     # via
     #   pylint-pytest
     #   trad_scraper (pyproject.toml)
@@ -125,7 +129,7 @@ python-dateutil==2.9.0.post0
     # via
     #   -c app-requirements.txt
     #   pandas
-pytz==2026.3.post1
+pytz==2026.4
     # via
     #   -c app-requirements.txt
     #   pandas
@@ -133,18 +137,18 @@ requests==2.34.2
     # via
     #   -c app-requirements.txt
     #   trad_scraper (pyproject.toml)
-ruff==0.16.4
+ruff==0.16.10
     # via trad_scraper (pyproject.toml)
 six==1.17.0
     # via
     #   -c app-requirements.txt
     #   html5lib
     #   python-dateutil
-soupsieve==2.9.2
+soupsieve==2.10
     # via
     #   -c app-requirements.txt
     #   beautifulsoup4
-time-machine==3.5.0
+time-machine==3.5.1
     # via trad_scraper (pyproject.toml)
 tomlkit==0.15.1
     # via pylint
@@ -152,9 +156,9 @@ types-beautifulsoup4==4.12.0.20250516
     # via trad_scraper (pyproject.toml)
 types-html5lib==1.1.11.20260518
     # via types-beautifulsoup4
-types-requests==2.33.0.20260712
+types-requests==2.33.0.20260906
     # via trad_scraper (pyproject.toml)
-types-webencodings==0.6.0.20260821
+types-webencodings==0.6.0.20260907
     # via types-html5lib
 typing-extensions==4.16.0
     # via
@@ -168,11 +172,11 @@ typing-inspection==0.4.4
     # via
     #   -c app-requirements.txt
     #   pydantic
-tzdata==2026.3
+tzdata==2026.4
     # via
     #   -c app-requirements.txt
     #   pandas
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   -c app-requirements.txt
     #   requests
