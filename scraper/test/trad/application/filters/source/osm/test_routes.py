@@ -3,6 +3,7 @@ Unit tests for the 'trad.application.filters.source.osm.filter' module (and ther
 'trad.application.filters.source.osm' package).
 """
 
+import logging
 from _collections_abc import Mapping
 from typing import Final
 from unittest.mock import Mock
@@ -459,6 +460,128 @@ class TestOsmDataFilterRoutes:
                     strict=True,
                 )
             )
+
+    def test_ignore_routes_with_same_name(self, caplog: pytest.LogCaptureFixture) -> None:
+        """
+        Ensure that from several routes with the same name on a single peak relation, only one is
+        taken into account. On different peaks, however, route with the same name are okay. Also,
+        in such a case a warning must be logged.
+        """
+        caplog.set_level(logging.WARNING)
+
+        # Define two summit with one/two routes, all them of name "AW"
+        summit1_route_data: Final = [
+            {
+                "id": 1,
+                "type": "node",
+                "lat": 13.53738,
+                "lon": 50.82512,
+                "tags": {
+                    "climbing": "route",
+                    "name": "AW",
+                },
+            },
+        ]
+
+        summit2_route_data: Final = [
+            {
+                "id": 1,
+                "type": "node",
+                "lat": 13.3826541,
+                "lon": 50.7427859,
+                "tags": {
+                    "climbing": "route",
+                    "name": "AW",
+                },
+            },
+            {
+                "id": 2,
+                "type": "node",
+                "lat": 13.3826542,
+                "lon": 50.7427858,
+                "tags": {
+                    "climbing": "route",
+                    "name": "AW",
+                },
+            },
+        ]
+
+        # Create all Overpass responses
+        peak_elements_query_response: Final = {
+            "elements": [
+                {
+                    "id": 1001,
+                    "type": "relation",
+                    "tags": {"name": "Summit 1"},
+                    "members": [
+                        {"type": "node", "ref": 7001},  # peak node 1
+                        *[{"type": "node", "ref": m["id"]} for m in summit1_route_data],
+                    ],
+                },
+                {
+                    "id": 1002,
+                    "type": "relation",
+                    "tags": {"name": "Summit 2"},
+                    "members": [
+                        {"type": "node", "ref": 7002},  # peak node 2
+                        *[{"type": "node", "ref": m["id"]} for m in summit2_route_data],
+                    ],
+                },
+            ]
+        }
+
+        relation_members_query_response: Final = {
+            "elements": [
+                *summit1_route_data,
+                {
+                    "id": 7001,
+                    "type": "node",
+                    "lat": 13.5372854,
+                    "lon": 50.8254129,
+                    "tags": {
+                        "natural": "peak",
+                        "name": "Summit 1",
+                    },
+                },
+                *summit2_route_data,
+                {
+                    "id": 7002,
+                    "type": "node",
+                    "lat": 13.3826541,
+                    "lon": 50.7427859,
+                    "tags": {
+                        "natural": "peak",
+                        "name": "Summit 2",
+                    },
+                },
+            ]
+        }
+
+        fake_network_boundary = FakeNetwork(
+            self._NOMINATIM_RESPONSE,
+            peak_elements_query_response,
+            self._OVERPASS_SECTOR_RESPONSE,
+            relation_members_query_response,
+        )
+        osm_filter = OsmDataFilter(fake_network_boundary)
+
+        output_pipe = CollectedData()
+        osm_filter.execute_filter(input_pipe=Mock(Pipe), output_pipe=output_pipe)
+
+        expected_summit_count = 2
+        expected_routes_per_summit = 1
+
+        summits = list(output_pipe.iter_summits())
+        assert len(summits) == expected_summit_count
+        # Make sure there is exactly one route returned for each summit
+        for summit_id, _ in summits:
+            routes = list(output_pipe.iter_routes_of_summit(summit_id))
+            assert len(routes) == expected_routes_per_summit
+            assert routes[0][1].route_name == "AW"
+
+        # Make sure the warning has been logged
+        assert "Relation Summit 2 contains route AW multiple times" in caplog.text
+        assert "Summit 1" not in caplog.text
 
     def _routes_equal(self, route1: Route, route2: Route) -> bool:
         """

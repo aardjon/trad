@@ -1,10 +1,18 @@
 # Scraper & Route Database Changelog
 
+## Version 0.6.1 - 2026-10-04
+
+### Fixed Bugs:
+ - OSM filter fails for crag relations without a peak node (#64)
+ - Route position conflict when merging OSM routes (#65)
+
 
 ## Version 0.6.0 - 2026-09-07
 
 ### New/Improved Features:
  - Import route entry points from OSM (#23)
+
+### Fixed Bugs:
  - Store post timestamps as UTC (#38)
 
 

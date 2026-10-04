@@ -22,7 +22,7 @@ from trad.kernel.boundaries.pipes import Pipe, SummitInstanceId
 from trad.kernel.entities.datasources import ExternalSource
 from trad.kernel.entities.geotypes import GeoPosition
 from trad.kernel.entities.routedata import Route, Summit
-from trad.kernel.errors import DataProcessingError, IncompleteDataError, MergeConflictError
+from trad.kernel.errors import IncompleteDataError, MergeConflictError
 
 _logger = getLogger(__name__)
 
@@ -151,30 +151,35 @@ class OsmDataFilter(SourceFilter):
 
             if not found_peak_nodes:
                 # The relation doesn't reference a "peak" node. This means we cannot get a position
-                # for it, which is bad.
-                raise DataProcessingError(
-                    f"No peak node can be loaded for relation '{relation.tags.name}'. Does it "
-                    "contain one at all?",
-                )
-            if len(found_peak_nodes) > 1:
-                # Not sure what this means, maybe we have to choose the correct one in the future?
-                # For now, just log a warning to find some examples.
+                # for it.
                 _logger.warning(
-                    "Summit relation '%s' has multiple peak nodes (%d), using only the first one.",
+                    "No peak node can be found for relation '%s'. Does it contain one at all?",
                     relation.tags.name,
-                    len(found_peak_nodes),
                 )
-            peak_node = found_peak_nodes[0]
+                peak_position = None
+            else:
+                if len(found_peak_nodes) > 1:
+                    # Not sure what this means, maybe we have to choose the correct one in the
+                    # future? For now, just log a warning to find some examples.
+                    _logger.warning(
+                        "Summit relation '%s' has multiple peak nodes (%d), using only the first "
+                        "one.",
+                        relation.tags.name,
+                        len(found_peak_nodes),
+                    )
+                peak_node = found_peak_nodes[0]
 
-            if self.__is_forbidden_node(peak_node):
-                continue
+                if self.__is_forbidden_node(peak_node):
+                    continue
+
+                peak_position = GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon)
 
             yield (
                 relation.id,
                 self._route_data_factory.create_summit(
                     official_name=relation.tags.name,
                     alternate_names=relation.tags.get_alternate_names(),
-                    position=GeoPosition.from_decimal_degree(peak_node.lat, peak_node.lon),
+                    position=peak_position,
                     sector=data_cache.get_sector_name(relation.id),
                 ),
             )
@@ -218,9 +223,25 @@ class OsmDataFilter(SourceFilter):
             route_nodes = data_cache.get_relation_member_nodes(
                 relation.id, lambda tags: tags.climbing in ("route", "route_bottom")
             )
+
+            # Make sure each route (by name) is created only once. This is a workaround to avoid
+            # some special cases in OSM data until there is an accepted solution for routes with
+            # multiple grades. We may want to remove the workaround in the future, because there are
+            # indeed a few routes with identical names per summit.
+            seen_routes: set[str] = set()
             for node in route_nodes:
                 if not node.tags.name:
                     raise IncompleteDataError(node.id, "tags.name")
+
+                if node.tags.name in seen_routes:
+                    _logger.warning(
+                        "Relation %s contains route %s multiple times, using only the first one!",
+                        relation.tags.name,
+                        node.tags.name,
+                    )
+                    continue
+                seen_routes.add(node.tags.name)
+
                 yield (
                     relation.id,
                     self._route_data_factory.create_route(
