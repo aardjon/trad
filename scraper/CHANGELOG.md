@@ -4,6 +4,7 @@
 
 ### Fixed Bugs:
  - OSM filter fails for crag relations without a peak node (#64)
+ - Route position conflict when merging OSM routes (#65)
 
 
 ## Version 0.6.0 - 2026-09-07

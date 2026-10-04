@@ -223,9 +223,25 @@ class OsmDataFilter(SourceFilter):
             route_nodes = data_cache.get_relation_member_nodes(
                 relation.id, lambda tags: tags.climbing in ("route", "route_bottom")
             )
+
+            # Make sure each route (by name) is created only once. This is a workaround to avoid
+            # some special cases in OSM data until there is an accepted solution for routes with
+            # multiple grades. We may want to remove the workaround in the future, because there are
+            # indeed a few routes with identical names per summit.
+            seen_routes: set[str] = set()
             for node in route_nodes:
                 if not node.tags.name:
                     raise IncompleteDataError(node.id, "tags.name")
+
+                if node.tags.name in seen_routes:
+                    _logger.warning(
+                        "Relation %s contains route %s multiple times, using only the first one!",
+                        relation.tags.name,
+                        node.tags.name,
+                    )
+                    continue
+                seen_routes.add(node.tags.name)
+
                 yield (
                     relation.id,
                     self._route_data_factory.create_route(
